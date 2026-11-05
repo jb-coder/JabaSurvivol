@@ -136,7 +136,7 @@ The `pr-policy` workflow validates:
 4. Create the builder and reviewer identities.
 5. Configure rulesets and required checks.
 6. Add secrets and variables.
-7. Create labels.
+7. Create labels with `pwsh tools/bootstrap/Initialize-GitHub.ps1 -Owner <owner> -Repository JabaSurvivol`.
 8. Enable Dependabot and secret scanning.
 9. Set `UNITY_CI_ENABLED=true` after Unity is configured.
 10. Set `DEPLOY_ENABLED=true` after Oracle is configured.
