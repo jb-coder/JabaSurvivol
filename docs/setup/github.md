@@ -128,6 +128,14 @@ The `pr-policy` workflow validates:
 - `do-not-merge` absence.
 - English-only metadata when detectable.
 
+## Push the local repository
+
+```powershell
+git remote add origin https://github.com/<owner>/JabaSurvivol.git
+git push -u origin main
+git push -u origin develop
+```
+
 ## Bootstrap checklist
 
 1. Create the repository.
