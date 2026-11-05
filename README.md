@@ -72,7 +72,7 @@ Unity setup instructions are in `docs/setup/unity.md`.
 - `docs/standards/`: English-only, commits, PRs, autonomy, security, localization.
 - `docs/game-design/`: core loop, economy, skills.
 - `docs/architecture/adr/`: architecture decisions.
-- `docs/setup/`: GitHub, Unity, Oracle.
+- `docs/setup/`: GitHub, GitHub Project, Unity, Oracle.
 - `docs/agents/`: autonomy policy, review checklist, incident runbook, kill switch.
 
 ## License

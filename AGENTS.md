@@ -119,6 +119,16 @@ Every change enters through a pull request. No exceptions for documentation, CI,
 - The reviewer agent must approve before merge. The reviewer can request changes and block the PR.
 - Auto-merge is enabled only after the reviewer approves and all required checks pass.
 
+## Project tracking
+
+- Project: `JabaSurvivol Roadmap` at https://github.com/users/jb-coder/projects/1
+- Every issue and pull request is added to the project by `project-automation`.
+- `tools/agent/sync-project-item.ps1` maps labels, state, milestone, and review state to project fields.
+- Use `tools/bootstrap/Initialize-GitHubProject.ps1` to repair fields, milestones, views, and item synchronization.
+- Required project fields: Status, Priority, Area, Size, Phase, Sprint, Target.
+- Keep labels `priority:*`, `area:*`, `size:*`, and `status:ready` current so automation remains accurate.
+- `PROJECT_TOKEN` is a GitHub Actions secret with project scope. Never print or commit it.
+
 ## Autonomous review
 
 - The repository owner account `jb-coder` is the builder. It creates branches and PRs.
