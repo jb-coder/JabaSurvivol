@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   guardrails:
+    name: agent-guardrails
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository

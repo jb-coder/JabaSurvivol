@@ -13,6 +13,7 @@ permissions:
 
 jobs:
   policy:
+    name: pr-policy
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
