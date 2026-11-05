@@ -40,10 +40,10 @@ Every change enters through a pull request. No direct pushes to `main` or `devel
 ## Required checks
 
 - `pr-policy`
-- `backend-ci`
-- `unity-tests` when Unity files change
-- `android-build` when Unity files change
+- `agent-guardrails`
 - `security`
+
+Path-specific checks such as `backend-ci`, `unity-tests`, and `android-build` run when their paths change but are not required by the current ruleset until a summary gate exists.
 
 
 ## Merge
