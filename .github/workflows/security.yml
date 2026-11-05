@@ -48,3 +48,11 @@ jobs:
       - name: Audit packages
         continue-on-error: true
         run: dotnet list JabaSurvivol.slnx package --vulnerable --include-transitive
+
+  security:
+    name: security
+    needs: [codeql, dependency-audit]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Security checks completed
+        run: echo "Security checks completed."

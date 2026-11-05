@@ -3,15 +3,21 @@ param(
     [string[]] $GhArguments
 )
 
-$token = $env:JABA_REVIEWER_TOKEN
-if ([string]::IsNullOrWhiteSpace($token)) {
-    Write-Error "JABA_REVIEWER_TOKEN is not set. Configure the reviewer token before running GitHub operations."
-    exit 1
-}
-
 if ($GhArguments.Count -eq 0) {
     Write-Error "No gh arguments were provided."
     exit 1
+}
+
+$token = $env:JABA_REVIEWER_TOKEN
+if ([string]::IsNullOrWhiteSpace($token)) {
+    $tokenOutput = & (Join-Path $PSScriptRoot "gh-app-token.ps1")
+    $token = ($tokenOutput | Select-Object -Last 1)
+    if ([string]::IsNullOrWhiteSpace($token)) {
+        Write-Error "Unable to obtain a reviewer token. Configure the reviewer GitHub App or set JABA_REVIEWER_TOKEN."
+        exit 1
+    }
+
+    $token = $token.Trim()
 }
 
 $previousToken = $env:GH_TOKEN

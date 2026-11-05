@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   guardrails:
+    name: agent-guardrails
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -33,8 +34,9 @@ jobs:
         shell: pwsh
         run: |
           $range = "${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
-          $text = git log $range --format=%B
-          pwsh -NoProfile -File tools/agent/check-forbidden-attribution.ps1 -Text $text
+          $commitTextPath = Join-Path $env:RUNNER_TEMP "commit-messages.txt"
+          (git log $range --format=%B) -join "`n" | Set-Content -LiteralPath $commitTextPath -NoNewline
+          pwsh -NoProfile -File tools/agent/check-forbidden-attribution.ps1 -Paths $commitTextPath
           if ($LASTEXITCODE -ne 0) {
             exit 1
           }
@@ -45,8 +47,9 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          $text = "$env:PR_TITLE`n$env:PR_BODY"
-          pwsh -NoProfile -File tools/agent/check-forbidden-attribution.ps1 -Text $text
+          $pullRequestTextPath = Join-Path $env:RUNNER_TEMP "pull-request.txt"
+          "$env:PR_TITLE`n$env:PR_BODY" | Set-Content -LiteralPath $pullRequestTextPath -NoNewline
+          pwsh -NoProfile -File tools/agent/check-forbidden-attribution.ps1 -Paths $pullRequestTextPath
           if ($LASTEXITCODE -ne 0) {
             exit 1
           }

@@ -16,35 +16,37 @@
 - `hotfix/*`: production fixes.
 - `backmerge/*`: sync `main` back to `develop`.
 
-## Bot identities
+## Identities
 
-Create two GitHub Apps or dedicated bot accounts:
+- **Builder:** the repository owner account `jb-coder`. It creates branches and PRs, enables auto-merge, and merges. It uses the current `gh` authentication, or `JABA_BUILDER_TOKEN` when provided.
+- **Reviewer:** the GitHub App `jaba-survivol-reviewer-jb`. It is not a user account. It approves or requests changes and manages `agent:approved` and `agent:changes-requested`.
+- **Deployer:** optional short-lived OIDC credentials for Oracle and GHCR.
 
-### `jaba-builder`
+The builder must not approve its own PR. The reviewer app must not edit code.
 
-- Contents: read and write.
-- Pull requests: read and write.
-- Issues: read and write.
-- Actions: read and write.
-- Checks: read.
+The reviewer app is created and installed with:
 
-### `jaba-reviewer`
+```powershell
+pwsh tools/bootstrap/New-GitHubReviewerApp.ps1
+```
 
-- Contents: read.
-- Pull requests: read and write.
-- Issues: read and write.
-- Checks: read and write.
+Its local credentials are stored outside the repository at:
 
-The builder creates branches and PRs, enables auto-merge, and merges. The reviewer approves or requests changes. The builder must not approve its own PR.
+```text
+%USERPROFILE%\.config\jaba-survivol\github-app
+```
 
-Optional: `jaba-deployer` with short-lived OIDC credentials for Oracle and GHCR.
+See `docs/setup/github-app.md`.
 
 ### Local agent tokens
 
-Store the fine-grained tokens outside the repository and expose them as environment variables:
+The builder wrapper falls back to the current `gh` login when `JABA_BUILDER_TOKEN` is not set. The reviewer wrapper mints a short-lived installation token from the GitHub App credentials.
 
 ```powershell
+# Optional least-privilege builder token.
 $env:JABA_BUILDER_TOKEN = "<builder token>"
+
+# Optional override; otherwise the reviewer wrapper uses the GitHub App.
 $env:JABA_REVIEWER_TOKEN = "<reviewer token>"
 ```
 
@@ -53,6 +55,7 @@ Use the wrappers for all GitHub writes:
 ```powershell
 pwsh tools/agent/gh-builder.ps1 pr create --repo jb-coder/JabaSurvivol --base develop --head feature/JAB-1-unity-bootstrap
 pwsh tools/agent/gh-reviewer.ps1 pr review 1 --repo jb-coder/JabaSurvivol --approve
+pwsh tools/agent/gh-reviewer.ps1 pr edit 1 --repo jb-coder/JabaSurvivol --add-label agent:approved
 ```
 
 The wrappers set `GH_TOKEN` and `GH_HOST` only for the duration of the command. They never print the token.
@@ -62,8 +65,8 @@ The wrappers set `GH_TOKEN` and `GH_HOST` only for the duration of the command. 
 ### `main`
 
 - Require a pull request.
-- Require approval from `jaba-reviewer`.
-- Require status checks: `pr-policy`, `backend-ci`, `security`.
+- Require status checks: `pr-policy`, `agent-guardrails`, `security`.
+- `pr-policy` enforces an approval from the reviewer app on the current head commit and the `agent:approved` label.
 - Require conversation resolution.
 - Block force pushes.
 - Block deletions.
@@ -72,11 +75,12 @@ The wrappers set `GH_TOKEN` and `GH_HOST` only for the duration of the command. 
 ### `develop`
 
 - Require a pull request.
-- Require approval from `jaba-reviewer`.
-- Require status checks: `pr-policy`, `backend-ci`.
+- Require status checks: `pr-policy`, `agent-guardrails`, `security`.
+- `pr-policy` enforces an approval from the reviewer app on the current head commit and the `agent:approved` label.
 - Require conversation resolution.
 - Block force pushes.
 - Block deletions.
+- Do not allow bypass.
 
 ### Tags
 
@@ -132,7 +136,7 @@ Create:
 - `priority:P0`, `priority:P1`, `priority:P2`, `priority:P3`
 - `status:needs-review`, `status:in-review`, `status:changes-requested`, `status:approved`
 - `agent:approved`, `agent:changes-requested`, `agent:blocked`, `agent:paused`
-- `needs-playtest`, `blocked`, `do-not-merge`
+- `needs-human`, `needs-playtest`, `blocked`, `do-not-merge`
 
 ## Branch policy check
 
@@ -149,7 +153,7 @@ The `pr-policy` workflow validates:
 ## Push the local repository
 
 ```powershell
-git remote add origin https://github.com/<owner>/JabaSurvivol.git
+git remote add origin https://github.com/jb-coder/JabaSurvivol.git
 git push -u origin main
 git push -u origin develop
 ```
@@ -159,10 +163,11 @@ git push -u origin develop
 1. Create the repository.
 2. Push the initial commit.
 3. Create `develop`.
-4. Create the builder and reviewer identities.
+4. Create the reviewer GitHub App with `pwsh tools/bootstrap/New-GitHubReviewerApp.ps1`.
 5. Configure rulesets and required checks.
 6. Add secrets and variables.
-7. Create labels with `pwsh tools/bootstrap/Initialize-GitHub.ps1 -Owner <owner> -Repository JabaSurvivol`.
+7. Create labels with `pwsh tools/bootstrap/Initialize-GitHub.ps1 -Owner jb-coder -Repository JabaSurvivol`.
 8. Enable Dependabot and secret scanning.
 9. Set `UNITY_CI_ENABLED=true` after Unity is configured.
 10. Set `DEPLOY_ENABLED=true` after Oracle is configured.
+11. Set `AGENT_DRY_RUN=false` after the first successful review cycle.
