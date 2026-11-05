@@ -7,7 +7,7 @@
 | Supplies | Kills, headshots, rounds, elites, boss, challenges | Weapons, weapon upgrades, armor | No |
 | XP | Kills, rounds, challenges, boss | Character levels | No |
 | Skill points | Character levels | Skill tree | No |
-| Núcleos | Real money, battle pass, events | Cosmetics, battle pass, slots | No |
+| Cores | Real money, battle pass, events | Cosmetics, battle pass, slots | No |
 | Rounds reached | Survival | Nothing; it is a record | Not applicable |
 
 ## Income
@@ -62,7 +62,7 @@ After each round, the player chooses one of three:
 
 ## Premium currency
 
-- Núcleos are implemented last.
+- Cores are implemented last.
 - Cosmetic-only by default.
 - Server-authoritative wallet.
 - No loot boxes.

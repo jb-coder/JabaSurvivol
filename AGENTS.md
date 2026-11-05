@@ -13,14 +13,14 @@ JabaSurvivol is a 2D top-down, round-based zombie survival game for Android phon
 - One playable character for the MVP.
 - Character level cap: 30.
 - Skill points: 1 per level, plus 1 extra at levels 5, 10, 15, 20, 25, and 30. Total: 35.
-- Respect is free between runs during the MVP.
+- Respec is free between runs during the MVP.
 - Skill points are allocated only in the armory, pause menu, or round-end screen.
 - Survival active skill: Turret.
 - Synergies are delivered after the core loop is stable.
 - All progression is persistent. Death only resets the current run: health, round, position, and enemies.
-- Never remove Puntos de Suministros, XP, character level, skill points, allocated skills, weapon unlocks, weapon upgrades, or armor unlocks on death.
+- Never remove Supplies, XP, character level, skill points, allocated skills, weapon unlocks, weapon upgrades, or armor unlocks on death.
 - Ammo and armor repairs are free or drop-based. Do not consume persistent currency on consumables.
-- Premium currency (Núcleos) is implemented last and is cosmetic-only unless a future ADR explicitly changes this.
+- Premium currency (Cores) is implemented last and is cosmetic-only unless a future ADR explicitly changes this.
 - No loot boxes, randomized paid rewards, or pay-to-win mechanics.
 - Localization is the final phase before monetization. English is the only locale until then.
 
