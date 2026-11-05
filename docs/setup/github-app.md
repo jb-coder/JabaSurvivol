@@ -84,4 +84,6 @@ The reviewer agent posts a review and manages labels:
 - `agent:approved` when the review passes.
 - `agent:changes-requested` when it fails.
 
-The `pr-policy` check requires an approval from the reviewer app on the current head commit, requires `agent:approved`, and rejects `agent:changes-requested`. The repository rulesets require all required checks before merge.
+The reviewer creates a per-commit `reviewer-approval` check run through `tools/agent/gh-reviewer-approval.ps1`. A new push invalidates the check until the reviewer approves the new head commit.
+
+The `pr-policy` check rejects `agent:changes-requested` and validates repository policy. The repository rulesets require all required checks, including `reviewer-approval`, before merge. The `agent:approved` label is a visibility signal.

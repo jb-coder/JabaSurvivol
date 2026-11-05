@@ -1,11 +1,9 @@
 param(
     [Parameter(Mandatory = $true)]
-    [int] $PullRequest,
-
-    [string] $ReviewerLogin = "jaba-survivol-reviewer-jb"
+    [int] $PullRequest
 )
 
-$prJson = gh pr view $PullRequest --json title,body,labels,baseRefName,headRefName,url,reviews,headRefOid
+$prJson = gh pr view $PullRequest --json title,body,labels,baseRefName,headRefName,url
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Unable to read pull request $PullRequest."
     exit 1
@@ -30,22 +28,8 @@ if ($labels -contains 'do-not-merge') {
     $failures += "The do-not-merge label is present."
 }
 
-if ($labels -notcontains 'agent:approved') {
-    $failures += "The agent:approved label is missing."
-}
-
 if ($labels -contains 'agent:changes-requested') {
     $failures += "The agent:changes-requested label is present."
-}
-
-$currentApproval = @($pr.reviews | Where-Object {
-    $_.author.login -eq $ReviewerLogin -and
-    $_.state -eq 'APPROVED' -and
-    $_.commit.oid -eq $pr.headRefOid
-})
-
-if ($currentApproval.Count -eq 0) {
-    $failures += "The reviewer app must approve the current head commit."
 }
 
 if ($base -eq 'develop') {
