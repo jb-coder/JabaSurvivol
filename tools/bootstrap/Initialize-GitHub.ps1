@@ -35,6 +35,7 @@ $labels = @(
     @{ Name = 'agent:changes-requested'; Color = 'D93F0B'; Description = 'Reviewer requested changes' },
     @{ Name = 'agent:blocked'; Color = 'B60205'; Description = 'Blocked after repeated review failures' },
     @{ Name = 'agent:paused'; Color = '5319E7'; Description = 'Paused by automation policy' },
+    @{ Name = 'needs-human'; Color = 'B60205'; Description = 'Requires human action for accounts, billing, legal, or identity' },
     @{ Name = 'needs-playtest'; Color = 'FBCA04'; Description = 'Needs playtest evidence' },
     @{ Name = 'blocked'; Color = 'B60205'; Description = 'Blocked by a dependency' },
     @{ Name = 'do-not-merge'; Color = 'B60205'; Description = 'Merge is forbidden' }
