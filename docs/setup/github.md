@@ -39,6 +39,24 @@ The builder creates branches and PRs, enables auto-merge, and merges. The review
 
 Optional: `jaba-deployer` with short-lived OIDC credentials for Oracle and GHCR.
 
+### Local agent tokens
+
+Store the fine-grained tokens outside the repository and expose them as environment variables:
+
+```powershell
+$env:JABA_BUILDER_TOKEN = "<builder token>"
+$env:JABA_REVIEWER_TOKEN = "<reviewer token>"
+```
+
+Use the wrappers for all GitHub writes:
+
+```powershell
+pwsh tools/agent/gh-builder.ps1 pr create --repo jb-coder/JabaSurvivol --base develop --head feature/JAB-1-unity-bootstrap
+pwsh tools/agent/gh-reviewer.ps1 pr review 1 --repo jb-coder/JabaSurvivol --approve
+```
+
+The wrappers set `GH_TOKEN` and `GH_HOST` only for the duration of the command. They never print the token.
+
 ## Rulesets
 
 ### `main`

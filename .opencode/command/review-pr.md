@@ -5,7 +5,7 @@ agent: pr-reviewer
 
 Review pull request $ARGUMENTS.
 
-Read `AGENTS.md` and `docs/agents/review-checklist.md`. Inspect the diff, linked issue, acceptance criteria, tests, build evidence, security, performance, English-only policy, and no-attribution policy.
+Use `pwsh tools/agent/gh-reviewer.ps1` for GitHub operations. Read `AGENTS.md` and `docs/agents/review-checklist.md`. Inspect the diff, linked issue, acceptance criteria, tests, build evidence, security, performance, English-only policy, and no-attribution policy.
 
 Post a review with a clear verdict:
 

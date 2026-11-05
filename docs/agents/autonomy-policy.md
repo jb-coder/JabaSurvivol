@@ -27,6 +27,13 @@ Agents own the full development loop: plan, implement, test, review, merge, buil
 - The security reviewer never edits code.
 - The deployer does not change application code.
 
+## Credentials
+
+- Builder operations use `pwsh tools/agent/gh-builder.ps1` with `JABA_BUILDER_TOKEN`.
+- Reviewer operations use `pwsh tools/agent/gh-reviewer.ps1` with `JABA_REVIEWER_TOKEN`.
+- Never use plain `gh` for writes.
+- Never print, commit, or log tokens.
+
 ## Autonomy loop
 
 1. Pick an issue from `Ready`.

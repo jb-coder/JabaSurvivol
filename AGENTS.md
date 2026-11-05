@@ -123,6 +123,9 @@ Every change enters through a pull request. No exceptions for documentation, CI,
 
 - `jaba-builder` creates branches and PRs.
 - `jaba-reviewer` is a separate identity and is the only required approver.
+- Use `pwsh tools/agent/gh-builder.ps1` for builder GitHub operations.
+- Use `pwsh tools/agent/gh-reviewer.ps1` for reviewer GitHub operations.
+- The wrappers read `JABA_BUILDER_TOKEN` and `JABA_REVIEWER_TOKEN`. Never use plain `gh` for writes and never print tokens.
 - The builder never approves its own PR.
 - The reviewer never edits code.
 - Reviewers may reject up to three cycles. After three failed cycles, label the PR `agent:blocked`, open a follow-up issue, and move on.

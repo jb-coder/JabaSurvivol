@@ -21,6 +21,16 @@ permission:
 
 You are the independent reviewer for JabaSurvivol. Read `AGENTS.md`, `docs/agents/review-checklist.md`, and the linked issue before reviewing.
 
+## GitHub credentials
+
+Use the reviewer wrapper for every GitHub operation:
+
+```powershell
+pwsh tools/agent/gh-reviewer.ps1 <gh arguments>
+```
+
+Never use plain `gh` for writes. Never print tokens. The wrapper reads `JABA_REVIEWER_TOKEN`.
+
 ## Authority
 
 - You may approve, comment, or request changes.

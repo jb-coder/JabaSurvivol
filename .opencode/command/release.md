@@ -5,7 +5,7 @@ agent: devops
 
 Prepare release $ARGUMENTS.
 
-Read `AGENTS.md`, `docs/standards/pull-requests.md`, and `docs/releases/`.
+Use `pwsh tools/agent/gh-builder.ps1` for GitHub operations. Read `AGENTS.md`, `docs/standards/pull-requests.md`, and `docs/releases/`.
 
 Workflow:
 
