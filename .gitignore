@@ -34,7 +34,7 @@ obj/
 TestResults/
 coverage/
 artifacts/
-build/
+/build/
 *.trx
 *.coverage
 *.nupkg
