@@ -1,0 +1,128 @@
+using System;
+using JabaSurvivol.Core;
+using UnityEngine;
+
+namespace JabaSurvivol.Gameplay
+{
+    /// <summary>
+    /// Pooled projectiles with deterministic distance-based collision against a
+    /// single target.
+    /// </summary>
+    public sealed class BulletPool
+    {
+        private readonly GameObject[] _objects;
+        private readonly Vector2[] _positions;
+        private readonly Vector2[] _directions;
+        private readonly float[] _lifetimes;
+
+        public BulletPool(Transform parent, int size = GameBalance.BulletPoolSize)
+        {
+            _objects = new GameObject[size];
+            _positions = new Vector2[size];
+            _directions = new Vector2[size];
+            _lifetimes = new float[size];
+
+            for (var i = 0; i < size; i++)
+            {
+                var bullet = new GameObject($"Bullet {i}");
+                bullet.transform.SetParent(parent, false);
+                bullet.transform.localScale = new Vector3(0.24f, 0.24f, 1f);
+                var renderer = bullet.AddComponent<SpriteRenderer>();
+                renderer.sprite = SpriteFactory.Circle;
+                renderer.color = new Color(1f, 0.87f, 0.35f);
+                renderer.sortingOrder = 30;
+                bullet.SetActive(false);
+                _objects[i] = bullet;
+            }
+        }
+
+        public int ActiveCount { get; private set; }
+
+        public void Spawn(Vector2 position, Vector2 direction)
+        {
+            for (var i = 0; i < _objects.Length; i++)
+            {
+                if (_objects[i].activeSelf)
+                {
+                    continue;
+                }
+
+                _positions[i] = position;
+                _directions[i] = direction.sqrMagnitude > 0f ? direction.normalized : Vector2.right;
+                _lifetimes[i] = GameBalance.BulletLifetime;
+                _objects[i].transform.position = position;
+                _objects[i].SetActive(true);
+                ActiveCount++;
+                return;
+            }
+        }
+
+        /// <summary>
+        /// Moves active bullets and consumes at most one hit per frame.
+        /// </summary>
+        public bool UpdateAndCheck(
+            float deltaTime,
+            bool hasTarget,
+            Vector2 targetPosition,
+            float targetRadius,
+            Action onHit)
+        {
+            var hit = false;
+
+            for (var i = 0; i < _objects.Length; i++)
+            {
+                if (!_objects[i].activeSelf)
+                {
+                    continue;
+                }
+
+                _lifetimes[i] -= deltaTime;
+                if (_lifetimes[i] <= 0f)
+                {
+                    Deactivate(i);
+                    continue;
+                }
+
+                _positions[i] += _directions[i] * (GameBalance.BulletSpeed * deltaTime);
+                _objects[i].transform.position = _positions[i];
+
+                if (!hit && hasTarget && CombatMath.CirclesOverlap(
+                        _positions[i].x,
+                        _positions[i].y,
+                        0.1f,
+                        targetPosition.x,
+                        targetPosition.y,
+                        targetRadius))
+                {
+                    Deactivate(i);
+                    hit = true;
+                    onHit?.Invoke();
+                }
+            }
+
+            return hit;
+        }
+
+        public void Clear()
+        {
+            for (var i = 0; i < _objects.Length; i++)
+            {
+                if (_objects[i].activeSelf)
+                {
+                    Deactivate(i);
+                }
+            }
+        }
+
+        private void Deactivate(int index)
+        {
+            if (!_objects[index].activeSelf)
+            {
+                return;
+            }
+
+            _objects[index].SetActive(false);
+            ActiveCount = Mathf.Max(0, ActiveCount - 1);
+        }
+    }
+}

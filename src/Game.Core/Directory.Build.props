@@ -1,0 +1,9 @@
+<Project>
+  <!-- Keep .NET build output outside the UPM package so Unity does not import
+       the compiled assembly as a plugin while also compiling the source. -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..'))" />
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)..\..\artifacts\obj\Game.Core\</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(MSBuildThisFileDirectory)..\..\artifacts\bin\Game.Core\</BaseOutputPath>
+  </PropertyGroup>
+</Project>

@@ -15,3 +15,8 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Game design documentation for the core loop, persistent economy, and skill tree.
 - GitHub CI, PR policy, issue forms, and release automation scaffolding.
 - GitHub Project `JabaSurvivol Roadmap` with fields, milestones, views, and automated item synchronization.
+- Unity 6.3 Universal 2D project with URP 2D rendering, landscape configuration, and Android, Windows IL2CPP, and WebGL build targets.
+- Local UPM package `com.jabasurvivol.core` backed by the shared `src/Game.Core` source.
+- Walking skeleton: main menu, twin-stick touch controls, keyboard and mouse fallback, movement, shooting, zombie, health, supplies, XP, rounds, pause, game over, restart, and safe-area-aware phone and tablet layouts.
+- Atomic local profile persistence with versioned validation and corrupted-save recovery.
+- EditMode and PlayMode tests plus Android ARM64 and emulator build automation.
