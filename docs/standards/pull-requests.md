@@ -1,0 +1,54 @@
+# Pull Request Standards
+
+## Branch flow
+
+| Branch | From | PR to | Merge |
+|---|---|---|---|
+| `feature/*` | `develop` | `develop` | Squash |
+| `bugfix/*` | `develop` | `develop` or `release/*` | Squash |
+| `chore/*` | `develop` | `develop` | Squash |
+| `docs/*` | `develop` | `develop` | Squash |
+| `test/*` | `develop` | `develop` | Squash |
+| `release/*` | `develop` | `main` | Merge commit |
+| `hotfix/*` | `main` | `main` | Merge commit |
+| `backmerge/*` | `main` | `develop` | Merge commit |
+
+Every change enters through a pull request. No direct pushes to `main` or `develop`.
+
+## PR requirements
+
+- Conventional Commits title.
+- Linked issue.
+- Completed PR template.
+- Small scope: one feature, bug, or chore.
+- Verification evidence: commands, results, and artifacts.
+- Android APK for Android-visible changes.
+- Screenshots or video for visual changes.
+- Migration note for save or database changes.
+- No secrets, keystores, credentials, or build output.
+- English-only content.
+- No AI attribution.
+
+## Review
+
+- `pr-reviewer` is the required reviewer.
+- The reviewer may approve, comment, or request changes.
+- The builder addresses blocking feedback and re-requests review.
+- After three failed cycles, the PR is labelled `agent:blocked` and a follow-up issue is opened.
+- Auto-merge is enabled only after approval and all required checks pass.
+
+## Required checks
+
+- `pr-policy`
+- `backend-ci`
+- `unity-tests` when Unity files change
+- `android-build` when Unity files change
+- `security`
+
+
+## Merge
+
+- Squash merge for feature, bugfix, chore, docs, and test branches.
+- Merge commit for release, hotfix, and backmerge branches.
+- Delete the head branch after merge.
+- Tags are created only on `main`.

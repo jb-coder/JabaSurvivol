@@ -1,0 +1,19 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.6.4">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Services\Game.Api\Game.Api.csproj" />
+    <ProjectReference Include="..\Services\Identity.Api\Identity.Api.csproj" />
+    <ProjectReference Include="..\Services\Telemetry.Worker\Telemetry.Worker.csproj" />
+    <ProjectReference Include="..\Gateway\Bff\Bff.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AspireUseCliBundle>true</AspireUseCliBundle>
+    <UserSecretsId>14e596df-748d-48a4-9fa1-d664580afa94</UserSecretsId>
+  </PropertyGroup>
+
+</Project>

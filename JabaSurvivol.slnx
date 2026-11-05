@@ -1,0 +1,34 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AppHost/AppHost.csproj" />
+    <Project Path="src/ServiceDefaults/ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/src/Game.Core/">
+    <Project Path="src/Game.Core/JabaSurvivol.Core.csproj" />
+  </Folder>
+  <Folder Name="/src/Gateway/">
+    <Project Path="src/Gateway/Bff/Bff.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/">
+    <Project Path="src/Services/Game.Api/Game.Api.csproj" />
+    <Project Path="src/Services/Identity.Api/Identity.Api.csproj" />
+    <Project Path="src/Services/Telemetry.Worker/Telemetry.Worker.csproj" />
+  </Folder>
+  <Folder Name="/src/Shared/" />
+  <Folder Name="/src/Shared/Contracts/">
+    <Project Path="src/Shared/Contracts/JabaSurvivol.Contracts.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/ArchitectureTests/">
+    <Project Path="tests/ArchitectureTests/JabaSurvivol.ArchitectureTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Game.Core.Tests/">
+    <Project Path="tests/Game.Core.Tests/JabaSurvivol.Core.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/IntegrationTests/">
+    <Project Path="tests/IntegrationTests/JabaSurvivol.IntegrationTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/SmokeTests/">
+    <Project Path="tests/SmokeTests/JabaSurvivol.SmokeTests.csproj" />
+  </Folder>
+</Solution>

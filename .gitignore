@@ -1,0 +1,84 @@
+# ---------------------------------------------------------------------------
+# Unity
+# ---------------------------------------------------------------------------
+/unity/**/[Ll]ibrary/
+/unity/**/[Tt]emp/
+/unity/**/[Oo]bj/
+/unity/**/[Bb]uild/
+/unity/**/[Bb]uilds/
+/unity/**/[Ll]ogs/
+/unity/**/[Uu]ser[Ss]ettings/
+/unity/**/[Mm]emoryCaptures/
+/unity/**/[Rr]ecordings/
+/unity/**/*.csproj
+/unity/**/*.sln
+/unity/**/*.user
+/unity/**/*.pidb
+/unity/**/*.booproj
+/unity/**/*.svd
+/unity/**/*.pdb
+/unity/**/*.mdb
+/unity/**/*.opendb
+/unity/**/*.VC.db
+/unity/**/sysinfo.txt
+/unity/**/*.apk
+/unity/**/*.aab
+/unity/**/*.unitypackage
+/unity/**/*.app
+
+# ---------------------------------------------------------------------------
+# .NET and build output
+# ---------------------------------------------------------------------------
+bin/
+obj/
+TestResults/
+coverage/
+artifacts/
+build/
+*.trx
+*.coverage
+*.nupkg
+*.snupkg
+*.apk
+*.aab
+
+# Generated Unity build metadata
+/unity/JabaSurvivol/Assets/_Project/Scripts/Generated/BuildInfo.g.cs
+
+# ---------------------------------------------------------------------------
+# IDEs
+# ---------------------------------------------------------------------------
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ---------------------------------------------------------------------------
+# OS
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ---------------------------------------------------------------------------
+# Secrets and local configuration
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+deploy/secrets/*
+!deploy/secrets/README.md
+*.keystore
+*.jks
+*.p12
+*.pfx
+secrets.json
+
+# ---------------------------------------------------------------------------
+# Local agent state
+# ---------------------------------------------------------------------------
+.opencode/cache/
+.opencode/state/

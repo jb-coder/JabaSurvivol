@@ -1,0 +1,56 @@
+name: Engineering Task
+description: Track a scoped engineering task.
+title: "chore: "
+labels:
+  - "type:chore"
+  - "status:needs-review"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use English. Tasks should be small enough for a short-lived branch and a focused pull request.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What needs to be done?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Concrete, verifiable outcomes.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Unity
+        - .NET
+        - CI and infrastructure
+        - Documentation
+        - Agents
+    validations:
+      required: true
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      options:
+        - S - under half a day
+        - M - one day
+        - L - needs splitting
+    validations:
+      required: true
+  - type: checkboxes
+    id: policy
+    attributes:
+      label: Policy
+      options:
+        - label: This task is in English.
+          required: true
+        - label: This task can be delivered through a pull request.
+          required: true

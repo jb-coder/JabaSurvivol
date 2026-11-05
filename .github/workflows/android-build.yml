@@ -1,0 +1,50 @@
+name: android-build
+
+on:
+  pull_request:
+    paths:
+      - "unity/**"
+      - ".github/workflows/android-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: ${{ vars.UNITY_CI_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: unity/JabaSurvivol/Library
+          key: unity-library-${{ hashFiles('unity/JabaSurvivol/Packages/packages-lock.json') }}
+          restore-keys: |
+            unity-library-
+
+      - name: Build Android APK
+        uses: game-ci/unity-builder@v6
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: unity/JabaSurvivol
+          unityVersion: 6000.3.28f1
+          targetPlatform: Android
+          androidExportType: androidPackage
+          androidTargetSdkVersion: 36
+          androidMinSdkVersion: 26
+
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jabasurvivol-android
+          path: build/Android
+          if-no-files-found: error

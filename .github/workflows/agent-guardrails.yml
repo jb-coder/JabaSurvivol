@@ -1,0 +1,61 @@
+name: agent-guardrails
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  guardrails:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check commit message style
+        shell: pwsh
+        run: |
+          $range = "${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
+          $messages = git log $range --format=%s
+          foreach ($message in $messages) {
+            pwsh -NoProfile -File tools/agent/check-commit-style.ps1 -Message $message
+            if ($LASTEXITCODE -ne 0) {
+              exit 1
+            }
+          }
+
+      - name: Check forbidden attribution in commits
+        shell: pwsh
+        run: |
+          $range = "${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
+          $text = git log $range --format=%B
+          pwsh -NoProfile -File tools/agent/check-forbidden-attribution.ps1 -Text $text
+          if ($LASTEXITCODE -ne 0) {
+            exit 1
+          }
+
+      - name: Check forbidden attribution in pull request
+        shell: pwsh
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          $text = "$env:PR_TITLE`n$env:PR_BODY"
+          pwsh -NoProfile -File tools/agent/check-forbidden-attribution.ps1 -Text $text
+          if ($LASTEXITCODE -ne 0) {
+            exit 1
+          }
+
+      - name: Report autonomous mode
+        shell: pwsh
+        env:
+          AGENT_PAUSED: ${{ vars.AGENT_PAUSED }}
+          AGENT_DRY_RUN: ${{ vars.AGENT_DRY_RUN }}
+        run: |
+          Write-Output "AGENT_PAUSED=$env:AGENT_PAUSED"
+          Write-Output "AGENT_DRY_RUN=$env:AGENT_DRY_RUN"

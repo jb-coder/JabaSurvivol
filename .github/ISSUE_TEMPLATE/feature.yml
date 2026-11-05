@@ -1,0 +1,66 @@
+name: Feature Request
+description: Propose a feature for JabaSurvivol.
+title: "feat: "
+labels:
+  - "type:feature"
+  - "status:needs-review"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use English. Keep scope small and aligned with the current roadmap.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What player or project problem does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Describe the smallest useful solution.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List concrete, testable criteria.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Unity gameplay
+        - Unity UI
+        - Economy and progression
+        - Backend and API
+        - Android and performance
+        - CI and infrastructure
+        - Documentation
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0
+        - P1
+        - P2
+        - P3
+    validations:
+      required: true
+  - type: checkboxes
+    id: policy
+    attributes:
+      label: Policy
+      options:
+        - label: This request is in English.
+          required: true
+        - label: This request does not propose pay-to-win, loot boxes, or premature monetization.
+          required: true

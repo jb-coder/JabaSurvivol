@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-Telemetry.Worker-648922ef-efe3-41af-989e-ab3d59d09063</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Game.Core\JabaSurvivol.Core.csproj" />
+    <ProjectReference Include="..\..\Shared\Contracts\JabaSurvivol.Contracts.csproj" />
+    <ProjectReference Include="..\..\ServiceDefaults\ServiceDefaults.csproj" />
+  </ItemGroup>
+</Project>

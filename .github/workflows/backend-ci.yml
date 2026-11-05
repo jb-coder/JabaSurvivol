@@ -1,0 +1,55 @@
+name: backend-ci
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "JabaSurvivol.slnx"
+      - "global.json"
+      - "Directory.Build.props"
+      - "Directory.Packages.props"
+      - ".editorconfig"
+      - ".github/workflows/backend-ci.yml"
+  push:
+    branches: [develop, main]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "JabaSurvivol.slnx"
+      - "global.json"
+      - "Directory.Build.props"
+      - "Directory.Packages.props"
+      - ".editorconfig"
+      - ".github/workflows/backend-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore JabaSurvivol.slnx
+
+      - name: Verify formatting
+        run: dotnet format JabaSurvivol.slnx --verify-no-changes --no-restore
+
+      - name: Build
+        run: dotnet build JabaSurvivol.slnx -c Release --no-restore
+
+      - name: Test
+        run: dotnet test JabaSurvivol.slnx -c Release --no-build --no-restore
+
+      - name: Audit NuGet packages
+        continue-on-error: true
+        run: dotnet list JabaSurvivol.slnx package --vulnerable --include-transitive

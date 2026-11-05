@@ -1,0 +1,42 @@
+name: unity-tests
+
+on:
+  pull_request:
+    paths:
+      - "unity/**"
+      - ".github/workflows/unity-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  test:
+    if: ${{ vars.UNITY_CI_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: unity/JabaSurvivol/Library
+          key: unity-library-${{ hashFiles('unity/JabaSurvivol/Packages/packages-lock.json') }}
+          restore-keys: |
+            unity-library-
+
+      - name: Run Unity tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: unity/JabaSurvivol
+          unityVersion: 6000.3.28f1
+          testMode: all
+          githubToken: ${{ secrets.GITHUB_TOKEN }}

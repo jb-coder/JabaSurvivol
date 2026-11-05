@@ -1,0 +1,76 @@
+name: Bug Report
+description: Report a defect with reproduction steps and evidence.
+title: "fix: "
+labels:
+  - "type:bug"
+  - "status:needs-review"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use English. Include enough evidence to reproduce the defect.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What is wrong?
+    validations:
+      required: true
+  - type: input
+    id: build
+    attributes:
+      label: Build version
+      description: Version, commit, and tag.
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device or emulator
+      description: Phone or tablet model, Android version, and screen size.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Exact steps.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - P0 - Crash or data loss
+        - P1 - Core feature broken
+        - P2 - Minor feature issue
+        - P3 - Polish
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Attach logcat, screenshots, or video links.
+  - type: checkboxes
+    id: policy
+    attributes:
+      label: Policy
+      options:
+        - label: This report is in English.
+          required: true
+        - label: This report contains no secrets or credentials.
+          required: true
