@@ -56,9 +56,21 @@ if ($null -ne $existingItem) {
     $itemId = $existingItem.id
 }
 else {
-    $added = gh project item-add $ProjectNumber --owner $Owner --url $ItemUrl --format json | ConvertFrom-Json
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Unable to add $ItemUrl to project $ProjectNumber."
+    $added = $null
+    for ($attempt = 1; $attempt -le 3; $attempt++) {
+        $addedJson = gh project item-add $ProjectNumber --owner $Owner --url $ItemUrl --format json
+        if ($LASTEXITCODE -eq 0) {
+            $added = $addedJson | ConvertFrom-Json
+            break
+        }
+
+        if ($attempt -lt 3) {
+            Start-Sleep -Seconds 5
+        }
+    }
+
+    if ($null -eq $added) {
+        Write-Error "Unable to add $ItemUrl to project $ProjectNumber after retries."
         exit 1
     }
 
