@@ -9,8 +9,10 @@ Use `pwsh tools/agent/gh-reviewer.ps1` for GitHub operations. Read `AGENTS.md` a
 
 Post a review with a clear verdict:
 
-- `APPROVE`: add `agent:approved` and remove `agent:changes-requested`.
+- `APPROVE`: use `gh-reviewer.ps1 pr review --approve`, add `agent:approved` with `gh-reviewer.ps1 api`, and remove `agent:changes-requested`.
 - `COMMENT`: non-blocking suggestions only.
-- `REQUEST_CHANGES`: add `agent:changes-requested`, remove `agent:approved`, and list exact required changes.
+- `REQUEST_CHANGES`: add `agent:changes-requested` with `gh-reviewer.ps1 api`, remove `agent:approved`, and list exact required changes.
+
+Do not use `gh pr edit` for labels; use the REST label endpoints documented in the reviewer agent prompt.
 
 Never edit code, commit, push, or merge. Do not mention AI, assistants, or generation tools. Do not claim manual human testing.

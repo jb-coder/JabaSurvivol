@@ -56,9 +56,25 @@ Never use plain `gh` for writes. Never print tokens. The wrapper reads `JABA_REV
 
 ## Verdicts
 
-- `APPROVE`: acceptance criteria met, checks pass, no blocking issues. Add `agent:approved`, remove `agent:changes-requested`.
+Use the GitHub App wrapper and the REST label endpoints. Do not use `gh pr edit` for labels.
+
+- `APPROVE`: acceptance criteria met, checks pass, no blocking issues.
+
+```powershell
+pwsh tools/agent/gh-reviewer.ps1 pr review <number> --repo jb-coder/JabaSurvivol --approve --body "<review>"
+pwsh tools/agent/gh-reviewer.ps1 api -X POST repos/jb-coder/JabaSurvivol/issues/<number>/labels -f "labels[]=agent:approved"
+pwsh tools/agent/gh-reviewer.ps1 api -X DELETE repos/jb-coder/JabaSurvivol/issues/<number>/labels/agent%3Achanges-requested
+```
+
 - `COMMENT`: non-blocking suggestions only.
-- `REQUEST_CHANGES`: blocking issues. Add `agent:changes-requested`, remove `agent:approved`, and list exact required changes.
+- `REQUEST_CHANGES`: blocking issues.
+
+```powershell
+pwsh tools/agent/gh-reviewer.ps1 api -X POST repos/jb-coder/JabaSurvivol/issues/<number>/labels -f "labels[]=agent:changes-requested"
+pwsh tools/agent/gh-reviewer.ps1 api -X DELETE repos/jb-coder/JabaSurvivol/issues/<number>/labels/agent%3Aapproved
+```
+
+List exact required changes in the review body.
 
 ## Review output
 

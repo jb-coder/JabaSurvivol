@@ -131,7 +131,8 @@ Every change enters through a pull request. No exceptions for documentation, CI,
 - The reviewer never edits code.
 - Reviewers may reject up to three cycles. After three failed cycles, label the PR `agent:blocked`, open a follow-up issue, and move on.
 - The reviewer checks acceptance criteria, architecture, tests, security, performance, English-only, and attribution policy.
-- Required checks: `pr-policy`, `backend-ci`, `unity-tests`, `android-build`, `security`.
+- Required checks: `pr-policy`, `agent-guardrails`, `security`.
+- Path-specific checks such as `backend-ci`, `unity-tests`, and `android-build` run when their paths change but are not required by the current ruleset until a summary gate exists.
 - The reviewer must not merge code it authored.
 
 ## Autonomy guardrails

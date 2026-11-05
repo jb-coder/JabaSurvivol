@@ -55,7 +55,8 @@ Use the wrappers for all GitHub writes:
 ```powershell
 pwsh tools/agent/gh-builder.ps1 pr create --repo jb-coder/JabaSurvivol --base develop --head feature/JAB-1-unity-bootstrap
 pwsh tools/agent/gh-reviewer.ps1 pr review 1 --repo jb-coder/JabaSurvivol --approve
-pwsh tools/agent/gh-reviewer.ps1 pr edit 1 --repo jb-coder/JabaSurvivol --add-label agent:approved
+pwsh tools/agent/gh-reviewer.ps1 api -X POST repos/jb-coder/JabaSurvivol/issues/1/labels -f "labels[]=agent:approved"
+pwsh tools/agent/gh-reviewer.ps1 api -X DELETE repos/jb-coder/JabaSurvivol/issues/1/labels/agent%3Achanges-requested
 ```
 
 The wrappers set `GH_TOKEN` and `GH_HOST` only for the duration of the command. They never print the token.
