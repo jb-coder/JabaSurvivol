@@ -3,6 +3,8 @@ name: pr-policy
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened, labeled, unlabeled]
+  pull_request_review:
+    types: [submitted, dismissed]
 
 permissions:
   contents: read

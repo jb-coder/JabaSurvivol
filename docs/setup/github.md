@@ -65,8 +65,8 @@ The wrappers set `GH_TOKEN` and `GH_HOST` only for the duration of the command. 
 ### `main`
 
 - Require a pull request.
-- Require 1 approval from the reviewer app.
 - Require status checks: `pr-policy`, `agent-guardrails`, `security`.
+- `pr-policy` enforces an approval from the reviewer app on the current head commit and the `agent:approved` label.
 - Require conversation resolution.
 - Block force pushes.
 - Block deletions.
@@ -75,8 +75,8 @@ The wrappers set `GH_TOKEN` and `GH_HOST` only for the duration of the command. 
 ### `develop`
 
 - Require a pull request.
-- Require 1 approval from the reviewer app.
 - Require status checks: `pr-policy`, `agent-guardrails`, `security`.
+- `pr-policy` enforces an approval from the reviewer app on the current head commit and the `agent:approved` label.
 - Require conversation resolution.
 - Block force pushes.
 - Block deletions.
