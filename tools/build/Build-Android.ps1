@@ -9,11 +9,18 @@ if (-not [string]::IsNullOrWhiteSpace($UnityPath)) {
     $candidatePaths += $UnityPath
 }
 else {
-    $hubRoot = "C:\Program Files\Unity\Hub\Editor"
-    if (Test-Path -LiteralPath $hubRoot) {
-        $candidatePaths += Get-ChildItem -LiteralPath $hubRoot -Directory |
-            Sort-Object Name -Descending |
-            ForEach-Object { Join-Path $_.FullName "Editor\Unity.exe" }
+    $hubRoots = @(
+        "C:\Program Files\Unity\Hub\Editor",
+        "C:\dev\personal\Unity\Hub\Editor",
+        (Join-Path $env:LOCALAPPDATA "Unity\Hub\Editor")
+    )
+
+    foreach ($hubRoot in $hubRoots) {
+        if (Test-Path -LiteralPath $hubRoot) {
+            $candidatePaths += Get-ChildItem -LiteralPath $hubRoot -Directory |
+                Sort-Object Name -Descending |
+                ForEach-Object { Join-Path $_.FullName "Editor\Unity.exe" }
+        }
     }
 }
 

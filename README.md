@@ -4,7 +4,7 @@ JabaSurvivol is a 2D top-down, round-based zombie survival game for Android phon
 
 ## Status
 
-Repository bootstrap is complete. The .NET solution, Aspire AppHost, service skeletons, agent definitions, standards, and automation are in place. The Unity project is created in the next phase after Unity 6.3 LTS is installed.
+Repository bootstrap is complete. The .NET solution, Aspire AppHost, service skeletons, agent definitions, standards, and automation are in place. Unity Hub and Unity 6.3.28f1 are installed with Android, Windows IL2CPP, and WebGL build support. The Unity project itself is created in the next phase.
 
 ## Product rules
 

@@ -2,7 +2,21 @@
 
 ## Current state
 
-Unity is not installed on the development machine yet. The repository contains the project folder and bootstrap scripts, but the Unity project itself must be created with Unity Hub.
+Unity Hub and Unity `6000.3.28f1` are installed with Android, Windows IL2CPP, and WebGL build support at:
+
+```text
+C:\dev\personal\Unity\Hub\Editor\6000.3.28f1
+```
+
+The Unity project itself still needs to be created with Unity Hub using the Universal 2D template. A Unity account and Personal license activation are required before opening or building projects.
+
+Activate the license once:
+
+1. Open Unity Hub.
+2. Sign in with a Unity account.
+3. Open Preferences > Licenses.
+4. Add a free Personal license.
+5. Retry project creation.
 
 ## Required versions
 
