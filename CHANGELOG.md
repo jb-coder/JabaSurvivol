@@ -14,3 +14,4 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Repository standards for English-only content, commits, pull requests, autonomy, security, localization, and asset provenance.
 - Game design documentation for the core loop, persistent economy, and skill tree.
 - GitHub CI, PR policy, issue forms, and release automation scaffolding.
+- GitHub Project `JabaSurvivol Roadmap` with fields, milestones, views, and automated item synchronization.

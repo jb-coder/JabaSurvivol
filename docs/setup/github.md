@@ -120,6 +120,7 @@ The wrappers set `GH_TOKEN` and `GH_HOST` only for the duration of the command. 
 - `UNITY_LICENSE` or `UNITY_SERIAL`
 - `UNITY_EMAIL`
 - `UNITY_PASSWORD`
+- `PROJECT_TOKEN`
 - `ORACLE_SSH_KEY`
 - `ORACLE_HOST`
 - `ORACLE_USER`
@@ -128,7 +129,48 @@ The wrappers set `GH_TOKEN` and `GH_HOST` only for the duration of the command. 
 - `GRAFANA_TOKEN`
 - `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` (later)
 
+`PROJECT_TOKEN` is used by `project-automation` to add issues and pull requests to the Project and synchronize fields. It must have the `project` scope. Store it only as a GitHub Actions secret and rotate it when the GitHub CLI login changes.
+
 Never commit secrets.
+
+## Project automation
+
+The project is `JabaSurvivol Roadmap`:
+
+```text
+https://github.com/users/jb-coder/projects/1
+```
+
+Set up or repair the project with:
+
+```powershell
+pwsh tools/bootstrap/Initialize-GitHubProject.ps1
+```
+
+The script creates or reuses the project, links the repository, creates fields, milestones, views, and syncs all open issues and pull requests.
+
+The `project-automation` workflow synchronizes item fields on issue, pull request, and review events using `tools/agent/sync-project-item.ps1`.
+
+Fields:
+
+- Status: Backlog, Ready, In Progress, In Review, Changes Requested, In QA, Done, Blocked.
+- Priority: P0-P3.
+- Area: Game, API, CI, Infra, Docs.
+- Size: S, M, L.
+- Phase: Walking Skeleton through Release.
+- Sprint: two-week iterations.
+- Target: milestone due date.
+
+Views:
+
+- All Work.
+- Backlog.
+- Delivery Board.
+- Roadmap.
+- Pull Requests.
+- My Work.
+
+GitHub does not expose creation of built-in Project workflows through the public API, so the repository uses the `project-automation` workflow for status and field synchronization. Additional built-in workflows can be enabled from the Project UI if desired.
 
 ## Labels
 
@@ -171,6 +213,8 @@ git push -u origin develop
 6. Add secrets and variables.
 7. Create labels with `pwsh tools/bootstrap/Initialize-GitHub.ps1 -Owner jb-coder -Repository JabaSurvivol`.
 8. Enable Dependabot and secret scanning.
-9. Set `UNITY_CI_ENABLED=true` after Unity is configured.
-10. Set `DEPLOY_ENABLED=true` after Oracle is configured.
-11. Set `AGENT_DRY_RUN=false` after the first successful review cycle.
+9. Run `pwsh tools/bootstrap/Initialize-GitHubProject.ps1`.
+10. Add the `PROJECT_TOKEN` secret with `project` scope.
+11. Set `UNITY_CI_ENABLED=true` after Unity is configured.
+12. Set `DEPLOY_ENABLED=true` after Oracle is configured.
+13. Set `AGENT_DRY_RUN=false` after the first successful review cycle.
