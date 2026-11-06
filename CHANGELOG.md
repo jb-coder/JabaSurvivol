@@ -11,6 +11,7 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Deterministic round lifecycle in `Game.Core` with round start, active, cleared, and failed phases, per-round spawn budgets, and round-scaled zombie health, speed, and damage.
 - HUD round counter with enemies remaining and the persistent highest round record.
 - Deterministic round reward options for supplies, XP, ammo crates, and armor plates, with persistent and run-only application rules.
+- Safe-area-aware round-end reward selection panel with three touch cards, keyboard shortcuts, saved selection, and automatic next-round start.
 
 ### Changed
 
