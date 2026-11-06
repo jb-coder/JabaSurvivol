@@ -154,6 +154,18 @@ public sealed class WeaponCatalogTests
     }
 
     [Fact]
+    public void Armory_purchase_rejects_an_unknown_weapon()
+    {
+        var profile = new Profile();
+        profile.AddSupplies(100);
+
+        var result = ArmoryService.PurchaseWeapon(profile, (WeaponId)99);
+
+        Assert.Equal(ArmoryPurchaseResult.UnknownWeapon, result);
+        Assert.Equal(100, profile.Supplies);
+    }
+
+    [Fact]
     public void Catalog_rejects_unknown_weapons()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => WeaponCatalog.Get((WeaponId)99));

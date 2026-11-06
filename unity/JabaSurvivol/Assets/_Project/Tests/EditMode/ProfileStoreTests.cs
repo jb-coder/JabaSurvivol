@@ -76,6 +76,22 @@ namespace JabaSurvivol.Tests.EditMode
         }
 
         [Test]
+        public void Load_adds_the_pistol_to_a_legacy_save_without_weapon_fields()
+        {
+            Directory.CreateDirectory(_directory);
+            File.WriteAllText(
+                _path,
+                "{\"SchemaVersion\":1,\"Supplies\":123,\"Level\":4,\"Xp\":10,\"SkillPoints\":3}");
+            var store = new ProfileStore(_path);
+
+            var loaded = store.Load();
+
+            Assert.That(loaded.Supplies, Is.EqualTo(123));
+            Assert.That(loaded.HasWeapon(WeaponId.Pistol), Is.True);
+            Assert.That(loaded.EquippedWeapon, Is.EqualTo(WeaponId.Pistol));
+        }
+
+        [Test]
         public void Load_returns_defaults_when_file_is_missing()
         {
             var store = new ProfileStore(_path);

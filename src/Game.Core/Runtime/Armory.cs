@@ -37,7 +37,7 @@ namespace JabaSurvivol.Core
             }
 
             var cost = WeaponCatalog.Get(weaponId).UnlockCost;
-            if (!profile.SpendSupplies(cost))
+            if (cost > 0 && !profile.SpendSupplies(cost))
             {
                 return ArmoryPurchaseResult.InsufficientSupplies;
             }

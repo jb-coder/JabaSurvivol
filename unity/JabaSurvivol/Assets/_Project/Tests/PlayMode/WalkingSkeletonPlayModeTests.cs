@@ -354,6 +354,57 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(session.ActiveBullets, Is.GreaterThanOrEqualTo(shotgun.PelletCount));
         }
 
+        [UnityTest]
+        public IEnumerator Armory_from_pause_restores_the_hud()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.StartRun();
+            session.PauseGame();
+            yield return null;
+
+            session.ShowArmory();
+            yield return null;
+            Assert.That(session.ArmoryVisible, Is.True);
+            Assert.That(session.HudVisible, Is.False);
+
+            session.CloseArmory();
+            yield return null;
+            Assert.That(session.ArmoryVisible, Is.False);
+            Assert.That(session.State, Is.EqualTo(GameSessionState.Paused));
+            Assert.That(session.HudVisible, Is.True);
+
+            session.ResumeGame();
+            yield return null;
+            Assert.That(session.State, Is.EqualTo(GameSessionState.Playing));
+            Assert.That(session.HudVisible, Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator Single_pellet_weapon_applies_configured_spread()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddSupplies(WeaponCatalog.Get(WeaponId.Smg).UnlockCost);
+            session.TryPurchaseWeapon(WeaponId.Smg);
+            session.TryEquipWeapon(WeaponId.Smg);
+            session.StartRun();
+            yield return null;
+
+            session.FireForTests();
+            yield return null;
+
+            var smg = WeaponCatalog.Get(WeaponId.Smg);
+            var angle = Mathf.Atan2(session.LastShotDirectionForTests.y, session.LastShotDirectionForTests.x) *
+                        Mathf.Rad2Deg;
+            Assert.That(Mathf.Abs(angle), Is.LessThanOrEqualTo((smg.SpreadDegrees * 0.5f) + 0.01f));
+            Assert.That(Mathf.Abs(angle), Is.GreaterThan(0.01f));
+            Assert.That(session.EquippedWeaponStats.FireInterval, Is.EqualTo(smg.FireInterval));
+            Assert.That(session.EquippedWeaponStats.Range, Is.EqualTo(smg.Range));
+        }
+
         private static GameBootstrap CreateBootstrap()
         {
             var gameObject = new GameObject("Test Bootstrap");

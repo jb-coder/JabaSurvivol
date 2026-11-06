@@ -187,6 +187,8 @@ namespace JabaSurvivol.Gameplay
 
         public bool ArmoryVisible => _armoryPanel != null && _armoryPanel.activeSelf;
 
+        public bool HudVisible => _hud != null && _hud.activeSelf;
+
         public void ShowArmory(Profile profile)
         {
             _mainMenu.SetActive(false);

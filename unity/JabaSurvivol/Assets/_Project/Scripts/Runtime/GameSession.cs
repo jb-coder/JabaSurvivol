@@ -42,6 +42,7 @@ namespace JabaSurvivol.Gameplay
         private int _runXpEarned;
         private WeaponStats _weapon;
         private GameSessionState _armoryReturnState;
+        private int _spreadSequence;
 
         public Profile Profile => _profile;
 
@@ -55,7 +56,11 @@ namespace JabaSurvivol.Gameplay
 
         public bool ArmoryVisible => _ui != null && _ui.ArmoryVisible;
 
+        public bool HudVisible => _ui != null && _ui.HudVisible;
+
         public float LastBulletDamageForTests { get; private set; }
+
+        public Vector2 LastShotDirectionForTests { get; private set; }
 
         public bool PlayerActive => _playerObject != null && _playerObject.activeSelf;
 
@@ -288,23 +293,36 @@ namespace JabaSurvivol.Gameplay
 
             if (_weapon.PelletCount <= 1)
             {
-                _bullets.Spawn(origin, _aimDirection, _weapon.ProjectileSpeed, lifetime, _weapon.Damage);
+                var direction = Rotate(_aimDirection, NextSpreadAngle(_weapon.SpreadDegrees));
+                LastShotDirectionForTests = direction;
+                _bullets.Spawn(origin, direction, _weapon.ProjectileSpeed, lifetime, _weapon.Damage);
                 return;
             }
 
             for (var i = 0; i < _weapon.PelletCount; i++)
             {
-                var step = _weapon.PelletCount == 1
-                    ? 0.5f
-                    : (float)i / (_weapon.PelletCount - 1);
+                var step = (float)i / (_weapon.PelletCount - 1);
                 var angle = (-_weapon.SpreadDegrees * 0.5f) + (_weapon.SpreadDegrees * step);
-                _bullets.Spawn(
-                    origin,
-                    Rotate(_aimDirection, angle),
-                    _weapon.ProjectileSpeed,
-                    lifetime,
-                    _weapon.Damage);
+                var direction = Rotate(_aimDirection, angle);
+                if (i == 0)
+                {
+                    LastShotDirectionForTests = direction;
+                }
+
+                _bullets.Spawn(origin, direction, _weapon.ProjectileSpeed, lifetime, _weapon.Damage);
             }
+        }
+
+        private float NextSpreadAngle(float spreadDegrees)
+        {
+            if (spreadDegrees <= 0f)
+            {
+                return 0f;
+            }
+
+            _spreadSequence = (_spreadSequence + 1) % 97;
+            var normalized = _spreadSequence / 97f;
+            return (normalized - 0.5f) * spreadDegrees;
         }
 
         private static Vector2 Rotate(Vector2 direction, float degrees)
@@ -394,6 +412,7 @@ namespace JabaSurvivol.Gameplay
             _runXpEarned = 0;
             _roundClearPending = false;
             _roundRewardOptions = null;
+            _spreadSequence = 0;
             _state = GameSessionState.Playing;
 
             _playerObject.SetActive(true);
@@ -487,6 +506,7 @@ namespace JabaSurvivol.Gameplay
             _ui.HideArmory();
             if (_armoryReturnState == GameSessionState.Paused && _state == GameSessionState.Paused)
             {
+                _ui.ShowHud();
                 _ui.ShowPaused(true);
                 return;
             }
