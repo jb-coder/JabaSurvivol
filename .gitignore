@@ -12,6 +12,9 @@
 /unity/**/[Rr]ecordings/
 /unity/**/*.csproj
 /unity/**/*.sln
+/unity/**/*.slnx
+/unity/**/*.vsconfig
+/unity/**/.utmp/
 /unity/**/*.user
 /unity/**/*.pidb
 /unity/**/*.booproj

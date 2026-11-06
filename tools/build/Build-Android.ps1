@@ -38,6 +38,7 @@ if (-not (Test-Path -LiteralPath (Join-Path $ProjectPath "ProjectSettings/Projec
     exit 1
 }
 
+$OutputPath = [System.IO.Path]::GetFullPath($OutputPath)
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $OutputPath) | Out-Null
 
 & $unity -batchmode -quit -projectPath $ProjectPath -buildTarget Android -executeMethod JabaSurvivol.Editor.BuildScript.BuildAndroid -logFile - -buildOutput $OutputPath
