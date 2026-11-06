@@ -38,6 +38,11 @@ namespace JabaSurvivol.Core
         public WeaponId EquippedWeapon = WeaponId.Pistol;
 
         /// <summary>
+        /// Permanent weapon upgrade tiers. Additive to schema version 1.
+        /// </summary>
+        public List<WeaponUpgrade> WeaponUpgrades = new List<WeaponUpgrade>();
+
+        /// <summary>
         /// XP needed to advance from <paramref name="level"/> to the next level.
         /// Returns zero at the level cap.
         /// </summary>
@@ -134,6 +139,69 @@ namespace JabaSurvivol.Core
             return true;
         }
 
+        public int GetWeaponUpgradeTier(WeaponId weaponId, WeaponUpgradeStat stat)
+        {
+            if (!WeaponCatalog.IsDefined(weaponId) || !WeaponUpgradeCatalog.IsDefined(stat))
+            {
+                return 0;
+            }
+
+            var maxTier = WeaponUpgradeCatalog.Get(weaponId, stat).MaxTier;
+            var tier = 0;
+            if (WeaponUpgrades != null)
+            {
+                for (var i = 0; i < WeaponUpgrades.Count; i++)
+                {
+                    var upgrade = WeaponUpgrades[i];
+                    if (upgrade != null &&
+                        upgrade.WeaponId == weaponId &&
+                        upgrade.Stat == stat)
+                    {
+                        tier = Math.Max(tier, upgrade.Tier);
+                    }
+                }
+            }
+
+            return Math.Clamp(tier, 0, maxTier);
+        }
+
+        /// <summary>
+        /// Sets one permanent upgrade tier. Returns false when the weapon is
+        /// invalid, locked, or the stat is unknown.
+        /// </summary>
+        public bool SetWeaponUpgradeTier(WeaponId weaponId, WeaponUpgradeStat stat, int tier)
+        {
+            if (!WeaponCatalog.IsDefined(weaponId) ||
+                !WeaponUpgradeCatalog.IsDefined(stat) ||
+                !HasWeapon(weaponId))
+            {
+                return false;
+            }
+
+            var maxTier = WeaponUpgradeCatalog.Get(weaponId, stat).MaxTier;
+            var clampedTier = Math.Clamp(tier, 0, maxTier);
+            if (WeaponUpgrades == null)
+            {
+                WeaponUpgrades = new List<WeaponUpgrade>();
+            }
+
+            for (var i = WeaponUpgrades.Count - 1; i >= 0; i--)
+            {
+                var upgrade = WeaponUpgrades[i];
+                if (upgrade != null && upgrade.WeaponId == weaponId && upgrade.Stat == stat)
+                {
+                    WeaponUpgrades.RemoveAt(i);
+                }
+            }
+
+            if (clampedTier > 0)
+            {
+                WeaponUpgrades.Add(new WeaponUpgrade(weaponId, stat, clampedTier));
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Adds XP and returns the number of levels gained.
         /// </summary>
@@ -217,6 +285,47 @@ namespace JabaSurvivol.Core
             BestKills = Math.Max(0, BestKills);
             ClampSkillPoints();
             ValidateWeapons();
+            ValidateWeaponUpgrades();
+        }
+
+        private void ValidateWeaponUpgrades()
+        {
+            if (WeaponUpgrades == null)
+            {
+                WeaponUpgrades = new List<WeaponUpgrade>();
+            }
+
+            for (var i = WeaponUpgrades.Count - 1; i >= 0; i--)
+            {
+                var upgrade = WeaponUpgrades[i];
+                if (upgrade == null ||
+                    !WeaponCatalog.IsDefined(upgrade.WeaponId) ||
+                    !WeaponUpgradeCatalog.IsDefined(upgrade.Stat) ||
+                    !HasWeapon(upgrade.WeaponId) ||
+                    upgrade.Tier <= 0)
+                {
+                    WeaponUpgrades.RemoveAt(i);
+                    continue;
+                }
+
+                var maxTier = WeaponUpgradeCatalog.Get(upgrade.WeaponId, upgrade.Stat).MaxTier;
+                upgrade.Tier = Math.Min(upgrade.Tier, maxTier);
+
+                for (var j = 0; j < i; j++)
+                {
+                    var earlier = WeaponUpgrades[j];
+                    if (earlier == null ||
+                        earlier.WeaponId != upgrade.WeaponId ||
+                        earlier.Stat != upgrade.Stat)
+                    {
+                        continue;
+                    }
+
+                    earlier.Tier = Math.Max(earlier.Tier, upgrade.Tier);
+                    WeaponUpgrades.RemoveAt(i);
+                    break;
+                }
+            }
         }
 
         private void ValidateWeapons()

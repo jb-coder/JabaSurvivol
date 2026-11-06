@@ -116,7 +116,7 @@ namespace JabaSurvivol.Gameplay
 
             _profile = _store.Load();
             _profile.Validate();
-            _weapon = WeaponCatalog.GetStats(_profile.EquippedWeapon);
+            _weapon = WeaponUpgradeService.GetEffectiveStats(_profile, _profile.EquippedWeapon);
 
             CreateActors();
 
@@ -130,6 +130,7 @@ namespace JabaSurvivol.Gameplay
                 index => SelectRoundReward(index),
                 ShowArmory,
                 HandleArmoryAction,
+                HandleArmoryUpgrade,
                 CloseArmory);
 
             _state = GameSessionState.MainMenu;
@@ -407,7 +408,7 @@ namespace JabaSurvivol.Gameplay
         public void StartRun()
         {
             _run = new RunState(GameBalance.PlayerMaxHealth, 1, Environment.TickCount);
-            _weapon = WeaponCatalog.GetStats(_profile.EquippedWeapon);
+            _weapon = WeaponUpgradeService.GetEffectiveStats(_profile, _profile.EquippedWeapon);
             _runSuppliesEarned = 0;
             _runXpEarned = 0;
             _roundClearPending = false;
@@ -548,6 +549,45 @@ namespace JabaSurvivol.Gameplay
             _ui.RefreshArmory(_profile);
         }
 
+        private void HandleArmoryUpgrade(WeaponUpgradeStat stat)
+        {
+            var result = TryPurchaseWeaponUpgrade(stat);
+            if (result == WeaponUpgradePurchaseResult.Purchased)
+            {
+                _ui.SetArmoryStatus(
+                    Localization.Format(
+                        "armory.upgrade.purchased",
+                        Localization.WeaponUpgradeStatName(stat),
+                        _profile.GetWeaponUpgradeTier(_profile.EquippedWeapon, stat)));
+            }
+            else if (result == WeaponUpgradePurchaseResult.InsufficientSupplies)
+            {
+                _ui.SetArmoryStatus(Localization.Get("armory.insufficient"));
+            }
+            else if (result == WeaponUpgradePurchaseResult.MaxTier)
+            {
+                _ui.SetArmoryStatus(Localization.Get("armory.upgrade.maxed"));
+            }
+
+            _ui.RefreshArmory(_profile);
+        }
+
+        /// <summary>
+        /// Purchases the next permanent tier for the equipped weapon and
+        /// refreshes the effective combat stats.
+        /// </summary>
+        public WeaponUpgradePurchaseResult TryPurchaseWeaponUpgrade(WeaponUpgradeStat stat)
+        {
+            var result = WeaponUpgradeService.TryPurchase(_profile, _profile.EquippedWeapon, stat);
+            if (result == WeaponUpgradePurchaseResult.Purchased)
+            {
+                _weapon = WeaponUpgradeService.GetEffectiveStats(_profile, _profile.EquippedWeapon);
+                _store.Save(_profile);
+            }
+
+            return result;
+        }
+
         /// <summary>
         /// Purchases a weapon and persists the unlock. Returns the atomic
         /// purchase result so callers can surface insufficient supplies.
@@ -573,7 +613,7 @@ namespace JabaSurvivol.Gameplay
                 return false;
             }
 
-            _weapon = WeaponCatalog.GetStats(weaponId);
+            _weapon = WeaponUpgradeService.GetEffectiveStats(_profile, weaponId);
             _store.Save(_profile);
             return true;
         }

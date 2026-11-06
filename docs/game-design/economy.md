@@ -45,12 +45,18 @@ The armory is available from the main menu and the pause menu. It spends
 persistent supplies to unlock weapons and equips owned weapons. Unlocks and the
 equipped weapon are stored in the profile and survive death.
 
-Weapon upgrades use supplies and are permanent. Suggested tiers:
+Weapon upgrades use supplies and are permanent. Each weapon has five tiers for
+each stat:
 
-- Damage.
-- Fire rate.
-- Magazine size.
-- Reload speed.
+- Damage: +10% base damage per tier.
+- Fire rate: +8% shots per second per tier.
+- Magazine size: +15% base capacity per tier.
+- Reload speed: +10% reload speed per tier.
+
+Costs are data-driven per weapon and stat and grow with each tier. The armory
+shows the current tier, the next cost, and the next effect for the equipped
+weapon. Max-tier purchases are rejected without spending supplies. Upgrades are
+stored in the profile and survive death.
 
 ## Armor
 

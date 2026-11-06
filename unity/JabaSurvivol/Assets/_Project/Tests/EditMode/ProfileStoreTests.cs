@@ -76,6 +76,22 @@ namespace JabaSurvivol.Tests.EditMode
         }
 
         [Test]
+        public void Save_and_load_round_trips_weapon_upgrades()
+        {
+            var store = new ProfileStore(_path);
+            var profile = new Profile();
+            profile.AddSupplies(1000);
+            WeaponUpgradeService.TryPurchase(profile, WeaponId.Pistol, WeaponUpgradeStat.Damage);
+            WeaponUpgradeService.TryPurchase(profile, WeaponId.Pistol, WeaponUpgradeStat.Damage);
+
+            store.Save(profile);
+            var loaded = store.Load();
+
+            Assert.That(loaded.GetWeaponUpgradeTier(WeaponId.Pistol, WeaponUpgradeStat.Damage), Is.EqualTo(2));
+            Assert.That(loaded.Supplies, Is.EqualTo(850));
+        }
+
+        [Test]
         public void Load_adds_the_pistol_to_a_legacy_save_without_weapon_fields()
         {
             Directory.CreateDirectory(_directory);

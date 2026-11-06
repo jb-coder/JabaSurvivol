@@ -12,6 +12,9 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Persistent weapon unlocks and equipped weapon in the profile, with the pistol always available and infinite reserve.
 - Armory panel accessible from the main menu and pause menu with supply purchases, equip actions, and touch-friendly weapon rows.
 - Combat now uses the equipped weapon's damage, fire interval, range, projectile speed, pellet count, and spread.
+- Permanent weapon upgrade tiers for damage, fire rate, magazine size, and reload speed, with five tiers per stat, per-weapon costs, and effective stat aggregation.
+- Armory upgrade section showing the equipped weapon's current tier, next cost, next effect, and max-tier state, with atomic purchases.
+- Profile persistence for weapon upgrades that survives death and remains compatible with schema version 1 saves.
 
 ## [0.2.0] - 2026-11-06
 

@@ -30,9 +30,11 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _roundEndSummary;
         private readonly Text _armorySuppliesText;
         private readonly Text _armoryStatusText;
+        private readonly Text _armoryUpgradeTitle;
         private readonly Button[] _rewardButtons;
         private readonly Text[] _rewardLabels;
         private readonly ArmoryRow[] _armoryRows;
+        private readonly ArmoryUpgradeRow[] _armoryUpgradeRows;
         private readonly Image _healthFill;
         private readonly RectTransform _moveBase;
         private readonly RectTransform _aimBase;
@@ -60,6 +62,7 @@ namespace JabaSurvivol.Gameplay
             System.Action<int> onRewardSelected,
             System.Action onArmory,
             System.Action<WeaponId> onArmoryAction,
+            System.Action<WeaponUpgradeStat> onArmoryUpgrade,
             System.Action onArmoryClose)
         {
             var canvasObject = UiFactory.CreateCanvas("JabaSurvivol UI", parent);
@@ -82,9 +85,12 @@ namespace JabaSurvivol.Gameplay
                 out _rewardLabels);
             _armoryPanel = BuildArmoryPanel(
                 onArmoryAction,
+                onArmoryUpgrade,
                 onArmoryClose,
                 out _armoryRows,
+                out _armoryUpgradeRows,
                 out _armorySuppliesText,
+                out _armoryUpgradeTitle,
                 out _armoryStatusText);
 
             _progressText = FindText(_mainMenu, "Progress");
@@ -224,7 +230,10 @@ namespace JabaSurvivol.Gameplay
                 row.Name.color = equipped
                     ? new Color(0.45f, 0.95f, 0.7f)
                     : new Color(0.86f, 0.92f, 1f);
-                row.Info.text = FormatWeaponStats(definition.Stats);
+                var stats = owned
+                    ? WeaponUpgradeService.GetEffectiveStats(profile, row.WeaponId)
+                    : definition.Stats;
+                row.Info.text = FormatWeaponStats(stats);
 
                 if (!owned)
                 {
@@ -242,6 +251,37 @@ namespace JabaSurvivol.Gameplay
                     row.Button.interactable = true;
                 }
             }
+
+            _armoryUpgradeTitle.text = Localization.Format(
+                "armory.upgrade.title",
+                Localization.WeaponName(profile.EquippedWeapon));
+
+            for (var i = 0; i < _armoryUpgradeRows.Length; i++)
+            {
+                var row = _armoryUpgradeRows[i];
+                var track = WeaponUpgradeCatalog.Get(profile.EquippedWeapon, row.Stat);
+                var tier = profile.GetWeaponUpgradeTier(profile.EquippedWeapon, row.Stat);
+                row.Label.text = FormatUpgradeCard(track, tier);
+                row.Button.interactable = tier < track.MaxTier;
+            }
+        }
+
+        private static string FormatUpgradeCard(WeaponUpgradeTrack track, int tier)
+        {
+            var statName = Localization.WeaponUpgradeStatName(track.Stat);
+            if (tier >= track.MaxTier)
+            {
+                return Localization.Format("armory.upgrade.max", statName, track.MaxTier);
+            }
+
+            var percent = (track.EffectPerTier * 100f).ToString("0.#", CultureInfo.InvariantCulture);
+            return Localization.Format(
+                "armory.upgrade.card",
+                statName,
+                tier,
+                track.MaxTier,
+                track.GetCost(tier + 1),
+                percent);
         }
 
         public void SetArmoryStatus(string status)
@@ -559,9 +599,12 @@ namespace JabaSurvivol.Gameplay
 
         private GameObject BuildArmoryPanel(
             System.Action<WeaponId> onAction,
+            System.Action<WeaponUpgradeStat> onUpgrade,
             System.Action onClose,
             out ArmoryRow[] rows,
+            out ArmoryUpgradeRow[] upgradeRows,
             out Text supplies,
+            out Text upgradeTitle,
             out Text status)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Armory Panel", new Color(0.008f, 0.014f, 0.024f, 0.99f));
@@ -589,42 +632,42 @@ namespace JabaSurvivol.Gameplay
                     new Color(0.05f, 0.08f, 0.12f, 0.95f));
                 UiFactory.Place(
                     rowImage.rectTransform,
-                    new Vector2(0.5f, 0.78f - (i * 0.145f)),
+                    new Vector2(0.5f, 0.82f - (i * 0.105f)),
                     new Vector2(0.5f, 0.5f),
                     Vector2.zero,
-                    new Vector2(1660f, 116f));
+                    new Vector2(1660f, 84f));
 
                 var name = UiFactory.CreateText(
                     rowImage.transform,
                     "Name",
                     string.Empty,
-                    30,
+                    26,
                     TextAnchor.MiddleLeft,
                     Color.white);
                 name.fontStyle = FontStyle.Bold;
-                UiFactory.Place(name.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(28f, 0f), new Vector2(300f, 100f));
+                UiFactory.Place(name.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(28f, 0f), new Vector2(280f, 78f));
 
                 var info = UiFactory.CreateText(
                     rowImage.transform,
                     "Info",
                     string.Empty,
-                    22,
+                    20,
                     TextAnchor.MiddleLeft,
                     new Color(0.72f, 0.8f, 0.9f));
-                UiFactory.Place(info.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(330f, 0f), new Vector2(900f, 100f));
+                UiFactory.Place(info.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(310f, 0f), new Vector2(920f, 78f));
 
                 var button = UiFactory.CreateButton(
                     rowImage.transform,
                     "Action",
                     string.Empty,
-                    28,
+                    26,
                     () => onAction?.Invoke(weapon.Id));
                 UiFactory.Place(
                     button.GetComponent<RectTransform>(),
                     new Vector2(1f, 0.5f),
                     new Vector2(1f, 0.5f),
-                    new Vector2(-24f, 0f),
-                    new Vector2(360f, 88f));
+                    new Vector2(-20f, 0f),
+                    new Vector2(300f, 66f));
 
                 rows[i] = new ArmoryRow
                 {
@@ -636,14 +679,61 @@ namespace JabaSurvivol.Gameplay
                 };
             }
 
+            upgradeTitle = UiFactory.CreateText(
+                root.transform,
+                "Upgrade Title",
+                string.Empty,
+                28,
+                TextAnchor.MiddleCenter,
+                new Color(0.4f, 0.9f, 1f));
+            UiFactory.Place(
+                upgradeTitle.rectTransform,
+                new Vector2(0.5f, 0.31f),
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                new Vector2(1400f, 40f));
+
+            var upgradeStats = new[]
+            {
+                WeaponUpgradeStat.Damage,
+                WeaponUpgradeStat.FireRate,
+                WeaponUpgradeStat.MagazineSize,
+                WeaponUpgradeStat.ReloadSpeed
+            };
+            var upgradeAnchors = new[] { 0.14f, 0.38f, 0.62f, 0.86f };
+            upgradeRows = new ArmoryUpgradeRow[upgradeStats.Length];
+            for (var i = 0; i < upgradeStats.Length; i++)
+            {
+                var stat = upgradeStats[i];
+                var button = UiFactory.CreateButton(
+                    root.transform,
+                    $"Upgrade {stat}",
+                    string.Empty,
+                    22,
+                    () => onUpgrade?.Invoke(stat));
+                UiFactory.Place(
+                    button.GetComponent<RectTransform>(),
+                    new Vector2(upgradeAnchors[i], 0.18f),
+                    new Vector2(0.5f, 0.5f),
+                    Vector2.zero,
+                    new Vector2(400f, 145f));
+
+                upgradeRows[i] = new ArmoryUpgradeRow
+                {
+                    Stat = stat,
+                    Button = button,
+                    Label = button.GetComponentInChildren<Text>()
+                };
+            }
+
             status = UiFactory.CreateText(
                 root.transform,
                 "Status",
                 string.Empty,
-                26,
+                24,
                 TextAnchor.MiddleCenter,
                 new Color(1f, 0.75f, 0.42f));
-            UiFactory.Place(status.rectTransform, new Vector2(0.5f, 0.06f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1400f, 44f));
+            UiFactory.Place(status.rectTransform, new Vector2(0.5f, 0.045f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1400f, 40f));
 
             root.SetActive(false);
             return root;
@@ -656,6 +746,13 @@ namespace JabaSurvivol.Gameplay
             public Text Label;
             public Text Name;
             public Text Info;
+        }
+
+        private sealed class ArmoryUpgradeRow
+        {
+            public WeaponUpgradeStat Stat;
+            public Button Button;
+            public Text Label;
         }
 
         private static Text FindText(GameObject root, string name)
