@@ -12,6 +12,7 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - HUD round counter with enemies remaining and the persistent highest round record.
 - Deterministic round reward options for supplies, XP, ammo crates, and armor plates, with persistent and run-only application rules.
 - Safe-area-aware round-end reward selection panel with three touch cards, keyboard shortcuts, saved selection, and automatic next-round start.
+- Headless deterministic balance simulation for rounds 1 to 10 with pacing, economy growth, and outlier reporting.
 
 ### Changed
 
