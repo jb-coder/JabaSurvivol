@@ -6,6 +6,8 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-06
+
 ### Added
 
 - Deterministic round lifecycle in `Game.Core` with round start, active, cleared, and failed phases, per-round spawn budgets, and round-scaled zombie health, speed, and damage.
@@ -17,6 +19,7 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 ### Changed
 
 - `GameSession` now uses the round model instead of a fixed kill count; clearing a round pauses for the reward flow before the next round starts.
+- Android version bumped to `0.2.0` with version code `2`.
 
 ## [0.1.0] - 2026-11-06
 
