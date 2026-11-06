@@ -58,6 +58,40 @@ namespace JabaSurvivol.Tests.EditMode
         }
 
         [Test]
+        public void Save_and_load_round_trips_weapon_unlocks_and_equipped_weapon()
+        {
+            var store = new ProfileStore(_path);
+            var profile = new Profile();
+            profile.AddSupplies(700);
+
+            Assert.That(ArmoryService.PurchaseWeapon(profile, WeaponId.Smg), Is.EqualTo(ArmoryPurchaseResult.Purchased));
+            Assert.That(ArmoryService.EquipWeapon(profile, WeaponId.Smg), Is.True);
+
+            store.Save(profile);
+            var loaded = store.Load();
+
+            Assert.That(loaded.HasWeapon(WeaponId.Smg), Is.True);
+            Assert.That(loaded.EquippedWeapon, Is.EqualTo(WeaponId.Smg));
+            Assert.That(loaded.Supplies, Is.EqualTo(200));
+        }
+
+        [Test]
+        public void Load_adds_the_pistol_to_a_legacy_save_without_weapon_fields()
+        {
+            Directory.CreateDirectory(_directory);
+            File.WriteAllText(
+                _path,
+                "{\"SchemaVersion\":1,\"Supplies\":123,\"Level\":4,\"Xp\":10,\"SkillPoints\":3}");
+            var store = new ProfileStore(_path);
+
+            var loaded = store.Load();
+
+            Assert.That(loaded.Supplies, Is.EqualTo(123));
+            Assert.That(loaded.HasWeapon(WeaponId.Pistol), Is.True);
+            Assert.That(loaded.EquippedWeapon, Is.EqualTo(WeaponId.Pistol));
+        }
+
+        [Test]
         public void Load_returns_defaults_when_file_is_missing()
         {
             var store = new ProfileStore(_path);

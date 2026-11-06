@@ -40,12 +40,27 @@ namespace JabaSurvivol.Gameplay
         private RoundRewardOption[] _roundRewardOptions;
         private int _runSuppliesEarned;
         private int _runXpEarned;
+        private WeaponStats _weapon;
+        private GameSessionState _armoryReturnState;
+        private int _spreadSequence;
 
         public Profile Profile => _profile;
 
         public RunState Run => _run;
 
         public GameSessionState State => _state;
+
+        public WeaponId EquippedWeapon => _profile?.EquippedWeapon ?? WeaponId.Pistol;
+
+        public WeaponStats EquippedWeaponStats => _weapon;
+
+        public bool ArmoryVisible => _ui != null && _ui.ArmoryVisible;
+
+        public bool HudVisible => _ui != null && _ui.HudVisible;
+
+        public float LastBulletDamageForTests { get; private set; }
+
+        public Vector2 LastShotDirectionForTests { get; private set; }
 
         public bool PlayerActive => _playerObject != null && _playerObject.activeSelf;
 
@@ -101,6 +116,7 @@ namespace JabaSurvivol.Gameplay
 
             _profile = _store.Load();
             _profile.Validate();
+            _weapon = WeaponCatalog.GetStats(_profile.EquippedWeapon);
 
             CreateActors();
 
@@ -111,7 +127,10 @@ namespace JabaSurvivol.Gameplay
                 ReturnToMenu,
                 PauseGame,
                 ResumeGame,
-                index => SelectRoundReward(index));
+                index => SelectRoundReward(index),
+                ShowArmory,
+                HandleArmoryAction,
+                CloseArmory);
 
             _state = GameSessionState.MainMenu;
             _ui.ShowMainMenu(_profile);
@@ -128,6 +147,17 @@ namespace JabaSurvivol.Gameplay
 
             var playerPosition = (Vector2)_playerObject.transform.position;
             var frame = _input.Read(playerPosition);
+
+            if (_ui.ArmoryVisible)
+            {
+                if (frame.PausePressed)
+                {
+                    CloseArmory();
+                }
+
+                _ui.SetSticks(default, default);
+                return;
+            }
 
             if (frame.PausePressed && !_roundClearPending)
             {
@@ -194,14 +224,18 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
-            var hit = _bullets.UpdateAndCheck(
+            var damage = _bullets.UpdateAndCheck(
                 deltaTime,
                 _zombieActive,
                 _zombieObject.transform.position,
-                GameBalance.ZombieRadius,
-                OnBulletHitZombie);
+                GameBalance.ZombieRadius);
 
-            if (hit && _state != GameSessionState.Playing)
+            if (damage > 0f)
+            {
+                OnBulletHitZombie(damage);
+            }
+
+            if (_state != GameSessionState.Playing)
             {
                 return;
             }
@@ -251,9 +285,66 @@ namespace JabaSurvivol.Gameplay
 
         private void Fire()
         {
-            _fireCooldown = GameBalance.PistolFireInterval;
+            _fireCooldown = _weapon.FireInterval;
+            LastBulletDamageForTests = _weapon.Damage;
+
             var origin = (Vector2)_playerObject.transform.position + (_aimDirection * 0.55f);
-            _bullets.Spawn(origin, _aimDirection);
+            var lifetime = _weapon.Range / _weapon.ProjectileSpeed;
+
+            if (_weapon.PelletCount <= 1)
+            {
+                var direction = Rotate(_aimDirection, NextSpreadAngle(_weapon.SpreadDegrees));
+                LastShotDirectionForTests = direction;
+                _bullets.Spawn(origin, direction, _weapon.ProjectileSpeed, lifetime, _weapon.Damage);
+                return;
+            }
+
+            for (var i = 0; i < _weapon.PelletCount; i++)
+            {
+                var step = (float)i / (_weapon.PelletCount - 1);
+                var angle = (-_weapon.SpreadDegrees * 0.5f) + (_weapon.SpreadDegrees * step);
+                var direction = Rotate(_aimDirection, angle);
+                if (i == 0)
+                {
+                    LastShotDirectionForTests = direction;
+                }
+
+                _bullets.Spawn(origin, direction, _weapon.ProjectileSpeed, lifetime, _weapon.Damage);
+            }
+        }
+
+        private float NextSpreadAngle(float spreadDegrees)
+        {
+            if (spreadDegrees <= 0f)
+            {
+                return 0f;
+            }
+
+            _spreadSequence = (_spreadSequence + 1) % 97;
+            var normalized = _spreadSequence / 97f;
+            return (normalized - 0.5f) * spreadDegrees;
+        }
+
+        private static Vector2 Rotate(Vector2 direction, float degrees)
+        {
+            var radians = degrees * Mathf.Deg2Rad;
+            var cos = Mathf.Cos(radians);
+            var sin = Mathf.Sin(radians);
+            return new Vector2(
+                (direction.x * cos) - (direction.y * sin),
+                (direction.x * sin) + (direction.y * cos));
+        }
+
+        /// <summary>
+        /// Test hook that fires the equipped weapon without waiting for the
+        /// fire cooldown.
+        /// </summary>
+        public void FireForTests()
+        {
+            if (_state == GameSessionState.Playing && _playerObject != null && _playerObject.activeSelf)
+            {
+                Fire();
+            }
         }
 
         private void UpdateZombie(float deltaTime)
@@ -316,10 +407,12 @@ namespace JabaSurvivol.Gameplay
         public void StartRun()
         {
             _run = new RunState(GameBalance.PlayerMaxHealth, 1, Environment.TickCount);
+            _weapon = WeaponCatalog.GetStats(_profile.EquippedWeapon);
             _runSuppliesEarned = 0;
             _runXpEarned = 0;
             _roundClearPending = false;
             _roundRewardOptions = null;
+            _spreadSequence = 0;
             _state = GameSessionState.Playing;
 
             _playerObject.SetActive(true);
@@ -388,6 +481,103 @@ namespace JabaSurvivol.Gameplay
             _ui.ShowMainMenu(_profile);
         }
 
+        /// <summary>
+        /// Opens the armory from the main menu or the pause menu.
+        /// </summary>
+        public void ShowArmory()
+        {
+            if (_ui == null || (_state != GameSessionState.MainMenu && _state != GameSessionState.Paused))
+            {
+                return;
+            }
+
+            _armoryReturnState = _state;
+            _ui.ShowArmory(_profile);
+            _ui.SetSticks(default, default);
+        }
+
+        public void CloseArmory()
+        {
+            if (_ui == null || !_ui.ArmoryVisible)
+            {
+                return;
+            }
+
+            _ui.HideArmory();
+            if (_armoryReturnState == GameSessionState.Paused && _state == GameSessionState.Paused)
+            {
+                _ui.ShowHud();
+                _ui.ShowPaused(true);
+                return;
+            }
+
+            _state = GameSessionState.MainMenu;
+            _ui.ShowMainMenu(_profile);
+        }
+
+        private void HandleArmoryAction(WeaponId weaponId)
+        {
+            if (_profile.HasWeapon(weaponId))
+            {
+                if (TryEquipWeapon(weaponId))
+                {
+                    _ui.SetArmoryStatus(
+                        Localization.Format("armory.equipped.status", Localization.WeaponName(weaponId)));
+                }
+            }
+            else
+            {
+                var result = TryPurchaseWeapon(weaponId);
+                if (result == ArmoryPurchaseResult.Purchased)
+                {
+                    TryEquipWeapon(weaponId);
+                    _ui.SetArmoryStatus(
+                        Localization.Format("armory.purchased", Localization.WeaponName(weaponId)));
+                }
+                else if (result == ArmoryPurchaseResult.InsufficientSupplies)
+                {
+                    _ui.SetArmoryStatus(Localization.Get("armory.insufficient"));
+                }
+                else if (result == ArmoryPurchaseResult.AlreadyOwned && TryEquipWeapon(weaponId))
+                {
+                    _ui.SetArmoryStatus(
+                        Localization.Format("armory.equipped.status", Localization.WeaponName(weaponId)));
+                }
+            }
+
+            _ui.RefreshArmory(_profile);
+        }
+
+        /// <summary>
+        /// Purchases a weapon and persists the unlock. Returns the atomic
+        /// purchase result so callers can surface insufficient supplies.
+        /// </summary>
+        public ArmoryPurchaseResult TryPurchaseWeapon(WeaponId weaponId)
+        {
+            var result = ArmoryService.PurchaseWeapon(_profile, weaponId);
+            if (result == ArmoryPurchaseResult.Purchased)
+            {
+                _store.Save(_profile);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Equips an owned weapon and persists the choice.
+        /// </summary>
+        public bool TryEquipWeapon(WeaponId weaponId)
+        {
+            if (!ArmoryService.EquipWeapon(_profile, weaponId))
+            {
+                return false;
+            }
+
+            _weapon = WeaponCatalog.GetStats(weaponId);
+            _store.Save(_profile);
+            return true;
+        }
+
         public void ApplyDamage(float amount)
         {
             if (_state != GameSessionState.Playing || _run == null)
@@ -429,14 +619,14 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
-        private void OnBulletHitZombie()
+        private void OnBulletHitZombie(float damage)
         {
             if (!_zombieActive || _zombie == null)
             {
                 return;
             }
 
-            if (_zombie.ApplyDamage(GameBalance.PistolDamage))
+            if (_zombie.ApplyDamage(damage))
             {
                 OnZombieKilled();
             }

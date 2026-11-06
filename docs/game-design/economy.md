@@ -36,6 +36,15 @@ All values are data-driven and subject to simulation.
 | Rifle | 1,200 | Accurate mid-range damage |
 | LMG | 2,000 | Sustained suppression |
 
+`Game.Core` owns the data-driven catalog in `WeaponCatalog`. It is the single
+source of truth for damage, fire rate, magazine size, reload time, range,
+projectile speed, reserve ammunition, pellet count, spread, and unlock cost.
+The pistol always starts unlocked and has infinite reserve.
+
+The armory is available from the main menu and the pause menu. It spends
+persistent supplies to unlock weapons and equips owned weapons. Unlocks and the
+equipped weapon are stored in the profile and survive death.
+
 Weapon upgrades use supplies and are permanent. Suggested tiers:
 
 - Damage.
