@@ -33,8 +33,8 @@ if ($labels -contains 'agent:changes-requested') {
 }
 
 if ($base -eq 'develop') {
-    if ($head -notmatch '^(feature|bugfix|chore|docs|test|refactor)/') {
-        $failures += "Pull requests to develop must come from feature, bugfix, chore, docs, test, or refactor branches."
+    if ($head -notmatch '^(feature|bugfix|chore|docs|test|refactor|backmerge)/') {
+        $failures += "Pull requests to develop must come from feature, bugfix, chore, docs, test, refactor, or backmerge branches."
     }
 }
 elseif ($base -eq 'main') {
