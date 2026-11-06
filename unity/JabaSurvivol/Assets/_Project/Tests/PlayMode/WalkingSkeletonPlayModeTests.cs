@@ -146,19 +146,21 @@ namespace JabaSurvivol.Tests.PlayMode
 
             Assert.That(session.RoundPhase, Is.EqualTo(RoundPhase.Cleared));
             Assert.That(session.RoundClearPending, Is.True);
+            Assert.That(session.RoundEndVisible, Is.True);
             Assert.That(session.PendingRewardCount, Is.EqualTo(GameBalance.RoundRewardOptionCount));
 
             var suppliesAfterClear = session.Profile.Supplies;
             var xpAfterClear = session.Profile.Xp;
-            var reward = session.PendingRewardAt(0);
+            var reward = session.PendingRewardAt(1);
 
-            session.ContinueAfterRoundClear();
+            Assert.That(session.SelectRoundReward(1), Is.True);
             yield return null;
 
             var expectedSupplies = suppliesAfterClear + (reward.Type == RoundRewardType.Supplies ? reward.Amount : 0);
             var expectedXp = xpAfterClear + (reward.Type == RoundRewardType.Xp ? reward.Amount : 0);
 
             Assert.That(session.State, Is.EqualTo(GameSessionState.Playing));
+            Assert.That(session.RoundEndVisible, Is.False);
             Assert.That(session.Run.Round, Is.EqualTo(2));
             Assert.That(session.EnemiesRemaining, Is.EqualTo(session.SpawnBudget));
             Assert.That(session.RoundPhase, Is.EqualTo(RoundPhase.Active));
@@ -202,8 +204,10 @@ namespace JabaSurvivol.Tests.PlayMode
             }
 
             Assert.That(rewardIndex, Is.GreaterThanOrEqualTo(0));
+            Assert.That(session.RoundEndVisible, Is.True);
             Assert.That(session.SelectRoundReward(rewardIndex), Is.True);
             yield return null;
+            Assert.That(session.RoundEndVisible, Is.False);
 
             var supplies = session.Profile.Supplies;
             var xp = session.Profile.Xp;
