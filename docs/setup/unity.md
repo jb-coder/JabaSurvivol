@@ -76,16 +76,17 @@ Rules:
 ## Tests
 
 ```powershell
+$repoRoot = (Resolve-Path ".").Path
 $unity = "C:\dev\personal\Unity\Hub\Editor\6000.3.28f1\Editor\Unity.exe"
-New-Item -ItemType Directory -Force artifacts/unity | Out-Null
+New-Item -ItemType Directory -Force "$repoRoot/artifacts/unity" | Out-Null
 
 & $unity -batchmode -projectPath unity/JabaSurvivol `
   -runTests -testPlatform editmode `
-  -testResults artifacts/unity/editmode.xml
+  -testResults "$repoRoot/artifacts/unity/editmode.xml"
 
 & $unity -batchmode -projectPath unity/JabaSurvivol `
   -runTests -testPlatform playmode `
-  -testResults artifacts/unity/playmode.xml
+  -testResults "$repoRoot/artifacts/unity/playmode.xml"
 ```
 
 Unity test runs exit with code 0 when every test passes.
@@ -101,11 +102,12 @@ pwsh tools/build/Build-Android.ps1 -OutputPath artifacts/android/JabaSurvivol.ap
 Build an additional x86_64 + ARM64 APK for emulator smoke tests:
 
 ```powershell
+$repoRoot = (Resolve-Path ".").Path
 $unity = "C:\dev\personal\Unity\Hub\Editor\6000.3.28f1\Editor\Unity.exe"
 & $unity -batchmode -quit -projectPath unity/JabaSurvivol `
   -buildTarget Android `
   -executeMethod JabaSurvivol.Editor.BuildScript.BuildAndroidEmulator `
-  -buildOutput artifacts/android/JabaSurvivol-emulator.apk
+  -buildOutput "$repoRoot/artifacts/android/JabaSurvivol-emulator.apk"
 ```
 
 Manual build settings:
@@ -120,8 +122,9 @@ Manual build settings:
 Install and smoke test:
 
 ```powershell
+$repoRoot = (Resolve-Path ".").Path
 $adb = "C:\Program Files (x86)\Android\android-sdk\platform-tools\adb.exe"
-& $adb install -r artifacts/android/JabaSurvivol-emulator.apk
+& $adb install -r "$repoRoot/artifacts/android/JabaSurvivol-emulator.apk"
 & $adb logcat -c
 & $adb shell am start -n com.jabasurvivol.game/com.unity3d.player.UnityPlayerActivity
 & $adb logcat -d -v threadtime | Select-String "FATAL EXCEPTION|AndroidRuntime"

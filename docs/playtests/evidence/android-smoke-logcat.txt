@@ -1,0 +1,100 @@
+# Android Emulator Smoke Logcat
+
+- Date: 2026-11-06
+- Emulator: Android 15 (API 35), x86_64 Google Play system image
+- Device profile: Pixel 6, 1080 x 2400 at 420 dpi (display override 2560 x 1600 at 320 dpi)
+- APK: artifacts/android/JabaSurvivol-emulator.apk
+- APK SHA-256: 98D5EDED72DA65C4232CB38EB8812076997CD06603D3FC833ED080CDB72954AC
+- Activity: com.jabasurvivol.game/com.unity3d.player.UnityPlayerActivity
+- Result: topResumedActivity after cold start
+- Fatal search: no FATAL EXCEPTION, AndroidRuntime crash, NullReferenceException, or Exception matches in the app process log
+- Command: adb logcat -d --pid=<app pid> -v threadtime
+
+## App process log
+
+--------- beginning of main
+11-06 08:37:22.101  4034  4034 I basurvivol.game: Using CollectorTypeCMC GC.
+11-06 08:37:22.105  4034  4034 W basurvivol.game: Unexpected CPU variant for x86: x86_64.
+11-06 08:37:22.105  4034  4034 W basurvivol.game: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, default
+11-06 08:37:22.110  4034  4034 E basurvivol.game: Not starting debugger since process cannot load the jdwp agent.
+11-06 08:37:22.120  4034  4034 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+11-06 08:37:22.467  4034  4034 D nativeloader: Configuring clns-7 for other apk /data/app/~~1zK2YQ_QwoI6yC9mrVCo8A==/com.jabasurvivol.game-w1nqLWIhevXCUTJH8vwFEA==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~1zK2YQ_QwoI6yC9mrVCo8A==/com.jabasurvivol.game-w1nqLWIhevXCUTJH8vwFEA==/lib/x86_64:/data/app/~~1zK2YQ_QwoI6yC9mrVCo8A==/com.jabasurvivol.game-w1nqLWIhevXCUTJH8vwFEA==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.jabasurvivol.game
+11-06 08:37:22.570  4034  4034 V GraphicsEnvironment: Currently set values for:
+11-06 08:37:22.570  4034  4034 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+11-06 08:37:22.570  4034  4034 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+11-06 08:37:22.570  4034  4034 V GraphicsEnvironment: Global.Settings values are invalid: number of packages: 0, number of values: 0
+11-06 08:37:22.571  4034  4034 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+11-06 08:37:23.378  4034  4034 D nativeloader: Load /data/app/~~1zK2YQ_QwoI6yC9mrVCo8A==/com.jabasurvivol.game-w1nqLWIhevXCUTJH8vwFEA==/lib/x86_64/libmain.so using ns clns-7 from class loader (caller=/data/app/~~1zK2YQ_QwoI6yC9mrVCo8A==/com.jabasurvivol.game-w1nqLWIhevXCUTJH8vwFEA==/base.apk): ok
+11-06 08:37:23.641  4034  4034 I IL2CPP  : JNI_OnLoad
+11-06 08:37:23.641  4034  4034 V Unity   : Context Type: ActivityOrService
+11-06 08:37:23.667  4034  4034 W WindowOnBackDispatcher: OnBackInvokedCallback is not enabled for the application.
+11-06 08:37:23.667  4034  4034 W WindowOnBackDispatcher: Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+11-06 08:37:24.102  4034  4034 I Gralloc4: mapper 4.x is not supported
+11-06 08:37:24.795  4034  4056 I Unity   : MemoryManager: Using 'Dynamic Heap' Allocator.
+11-06 08:37:24.857  4034  4096 W InteractionJankMonitor: Initializing without READ_DEVICE_CONFIG permission. enabled=false, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=com.jabasurvivol.game
+11-06 08:37:25.317  4034  4056 I Unity   : SystemInfo CPU = x86-64 SSE3 SSE4.1 SSE4.2, Cores = 4, Memory = 1972mb
+11-06 08:37:25.318  4034  4056 I Unity   : ApplicationInfo 'com.jabasurvivol.game', Version '0.1.0', Min API Level '26', Target API Level '36'
+11-06 08:37:25.318  4034  4056 I Unity   : Built from '6000.3/respin/6000.3.28f1-21f78c3e21d1' branch, Version '6000.3.28f1 (8f082d2fe476)', Build type 'Release', Scripting Backend 'il2cpp', CPU 'x86_64', Stripping 'Enabled'
+11-06 08:37:25.318  4034  4056 I Unity   : Device Model 'Google sdk_gphone64_x86_64', OS 'Android OS 15 (API 35)'
+11-06 08:37:26.246  4034  4056 I Unity   : Company Name: JabaSurvivol
+11-06 08:37:26.246  4034  4056 I Unity   : Product Name: JabaSurvivol
+11-06 08:37:26.371  4034  4056 E platform: Failed to open rendernode: No such file or directory
+11-06 08:37:26.399  4034  4056 D vulkan  : searching for layers in '/data/app/~~1zK2YQ_QwoI6yC9mrVCo8A==/com.jabasurvivol.game-w1nqLWIhevXCUTJH8vwFEA==/lib/x86_64'
+11-06 08:37:26.399  4034  4056 D vulkan  : searching for layers in '/data/app/~~1zK2YQ_QwoI6yC9mrVCo8A==/com.jabasurvivol.game-w1nqLWIhevXCUTJH8vwFEA==/base.apk!/lib/x86_64'
+11-06 08:37:26.478  4034  4056 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+11-06 08:37:26.478  4034  4056 I EGL_emulation: Opening libGLESv2_emulation.so
+11-06 08:37:26.489  4034  4056 E EGL_emulation: eglCreateContext: EGL_BAD_CONFIG: no ES 3.2 support
+11-06 08:37:26.489  4034  4056 E EGL_emulation: tid 4056: eglCreateContext(1830): error 0x3005 (EGL_BAD_CONFIG)
+11-06 08:37:26.489  4034  4056 E EGL_emulation: eglCreateContext: EGL_BAD_CONFIG: no ES 3.1 support
+11-06 08:37:26.489  4034  4056 E EGL_emulation: tid 4056: eglCreateContext(1824): error 0x3005 (EGL_BAD_CONFIG)
+11-06 08:37:26.490  4034  4056 E EGL_emulation: [getAttribValue] Bad attribute idx
+11-06 08:37:26.490  4034  4056 E EGL_emulation: tid 4056: eglGetConfigAttrib(1249): error 0x3004 (EGL_BAD_ATTRIBUTE)
+11-06 08:37:26.642  4034  4056 D nativeloader: Load liblibswappywrapper.so using ns clns-7 from class loader (caller=/data/app/~~1zK2YQ_QwoI6yC9mrVCo8A==/com.jabasurvivol.game-w1nqLWIhevXCUTJH8vwFEA==/base.apk): dlopen failed: library "liblibswappywrapper.so" not found
+11-06 08:37:26.694  4034  4056 D nativeloader: Load /data/app/~~1zK2YQ_QwoI6yC9mrVCo8A==/com.jabasurvivol.game-w1nqLWIhevXCUTJH8vwFEA==/lib/x86_64/libswappywrapper.so using ns clns-7 from class loader (caller=/data/app/~~1zK2YQ_QwoI6yC9mrVCo8A==/com.jabasurvivol.game-w1nqLWIhevXCUTJH8vwFEA==/base.apk): ok
+11-06 08:37:26.695  4034  4056 I SwappyWrapper: SwappyWrapperInit() succeeded. Build: Fri Nov  6 09:21:59 2026
+11-06 08:37:26.746  4034  4153 D AChoreographer: Attaching thread to JVM for AChoreographer
+11-06 08:37:26.802  4034  4154 I SwappyDisplayManager: Starting looper thread
+11-06 08:37:27.027  4034  4056 I AAudio  : AAudioStreamBuilder_openStream() called ----------------------------------------
+11-06 08:37:27.027  4034  4056 I AudioStreamBuilder: rate   =  24000, channels  = 2, channelMask = 0x80000003, format   = 5, sharing = SH, dir = OUTPUT
+11-06 08:37:27.027  4034  4056 I AudioStreamBuilder: device =      0, sessionId = 0, perfMode = 12, callback: ON with frames = 512
+11-06 08:37:27.027  4034  4056 I AudioStreamBuilder: usage  =      0, contentType = 0, inputPreset = 0, allowedCapturePolicy = 0
+11-06 08:37:27.027  4034  4056 I AudioStreamBuilder: privacy sensitive = false, opPackageName = (null), attributionTag = (null)
+11-06 08:37:27.034  4034  4056 D AudioStreamBuilder: build() MMAP not used because sessionId specified.
+11-06 08:37:27.034  4034  4056 D basurvivol.game: PlayerBase::PlayerBase()
+11-06 08:37:27.036  4034  4056 D AudioStreamTrack: open(), request notificationFrames = 0, frameCount = 8192
+11-06 08:37:27.109  4034  4056 D AudioStreamTrack: open() flags changed from 0x00000004 to 0x00000000
+11-06 08:37:27.109  4034  4056 D AudioStreamTrack: open() perfMode changed from 12 to 10
+11-06 08:37:27.109  4034  4056 D AAudioStream: setState(s#1) from 0 to 2
+11-06 08:37:27.126  4034  4056 I AAudio  : AAudioStreamBuilder_openStream() returns 0 = AAUDIO_OK for s#1 ----------------
+11-06 08:37:27.129  4034  4056 D AAudio  : AAudioStream_requestStart(s#1) called --------------
+11-06 08:37:27.131  4034  4056 D AAudioStream: setState(s#1) from 2 to 3
+11-06 08:37:27.181  4034  4056 D AAudio  : AAudioStream_requestStart(s#1) returned 0 ---------
+11-06 08:37:27.182  4034  4043 D AudioStreamLegacy: onAudioDeviceUpdate(deviceId = 2)
+11-06 08:37:27.239  4034  4159 D AAudioStream: setState(s#1) from 3 to 4
+11-06 08:37:28.214  4034  4056 V MediaRouter: Selecting route: RouteInfo{ name=Phone, description=null, status=null, category=RouteCategory{ name=System types=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO  groupable=false }, supportedTypes=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO , presentationDisplay=null }
+11-06 08:37:28.216  4034  4056 I MediaRouter: Skip setBluetoothA2dpOn(): types=8388615, isPlaybackActive()=true, BT route=null
+11-06 08:37:30.414  4034  4149 D EGL_emulation: app_time_stats: avg=71.31ms min=45.07ms max=173.58ms count=16
+11-06 08:37:30.510  4034  4056 I IL2CPP  : Locale en-US
+11-06 08:37:32.691  4034  4149 D EGL_emulation: app_time_stats: avg=758.50ms min=55.70ms max=1675.38ms count=3
+11-06 08:37:33.743  4034  4149 D EGL_emulation: app_time_stats: avg=87.62ms min=75.04ms max=103.21ms count=12
+11-06 08:37:34.806  4034  4149 D EGL_emulation: app_time_stats: avg=75.84ms min=71.88ms max=80.33ms count=14
+11-06 08:37:35.809  4034  4149 D EGL_emulation: app_time_stats: avg=76.94ms min=71.16ms max=82.62ms count=13
+11-06 08:37:36.849  4034  4149 D EGL_emulation: app_time_stats: avg=79.82ms min=75.24ms max=89.63ms count=13
+11-06 08:37:37.879  4034  4149 D EGL_emulation: app_time_stats: avg=79.13ms min=73.33ms max=84.60ms count=13
+11-06 08:37:38.920  4034  4149 D EGL_emulation: app_time_stats: avg=79.93ms min=73.31ms max=92.10ms count=13
+11-06 08:37:39.986  4034  4149 D EGL_emulation: app_time_stats: avg=88.66ms min=80.39ms max=104.69ms count=12
+11-06 08:37:41.040  4034  4149 D EGL_emulation: app_time_stats: avg=87.25ms min=80.05ms max=98.32ms count=12
+11-06 08:37:42.080  4034  4149 D EGL_emulation: app_time_stats: avg=86.48ms min=78.67ms max=95.69ms count=12
+11-06 08:37:43.106  4034  4149 D EGL_emulation: app_time_stats: avg=85.33ms min=78.08ms max=97.57ms count=12
+11-06 08:37:44.145  4034  4149 D EGL_emulation: app_time_stats: avg=79.66ms min=75.31ms max=88.66ms count=13
+11-06 08:37:45.218  4034  4149 D EGL_emulation: app_time_stats: avg=82.41ms min=77.61ms max=94.68ms count=13
+11-06 08:37:46.301  4034  4149 D EGL_emulation: app_time_stats: avg=83.05ms min=73.83ms max=91.87ms count=13
+11-06 08:37:47.398  4034  4149 D EGL_emulation: app_time_stats: avg=99.48ms min=91.60ms max=117.88ms count=11
+11-06 08:37:48.470  4034  4149 D EGL_emulation: app_time_stats: avg=118.95ms min=105.81ms max=131.60ms count=9
+11-06 08:37:49.547  4034  4149 D EGL_emulation: app_time_stats: avg=107.43ms min=97.30ms max=121.26ms count=10
+11-06 08:37:50.585  4034  4149 D EGL_emulation: app_time_stats: avg=103.56ms min=97.85ms max=110.36ms count=10
+11-06 08:37:51.595  4034  4149 D EGL_emulation: app_time_stats: avg=100.71ms min=94.46ms max=106.78ms count=10
+11-06 08:37:52.623  4034  4149 D EGL_emulation: app_time_stats: avg=113.41ms min=100.91ms max=135.96ms count=9
+11-06 08:37:53.662  4034  4149 D EGL_emulation: app_time_stats: avg=115.22ms min=105.81ms max=124.28ms count=9
+11-06 08:37:54.673  4034  4149 D EGL_emulation: app_time_stats: avg=126.23ms min=115.98ms max=134.35ms count=8
+11-06 08:37:55.679  4034  4149 D EGL_emulation: app_time_stats: avg=111.54ms min=100.18ms max=116.63ms count=9

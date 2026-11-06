@@ -50,8 +50,16 @@ namespace JabaSurvivol.Gameplay
             }
             catch (Exception exception)
             {
-                Debug.LogWarning($"Profile load failed and was reset: {exception.Message}");
+                Debug.LogWarning($"Profile load failed: {exception.Message}");
+                var recovered = TryLoadBackup();
                 BackupCorruptFile();
+
+                if (recovered != null)
+                {
+                    RestoreMainFromBackup();
+                    return recovered;
+                }
+
                 return new Profile();
             }
         }
@@ -89,12 +97,29 @@ namespace JabaSurvivol.Gameplay
             catch (Exception exception)
             {
                 Debug.LogWarning($"Atomic profile save fallback used: {exception.Message}");
-                if (File.Exists(_path))
+                if (File.Exists(backupPath))
                 {
-                    File.Delete(_path);
+                    File.Delete(backupPath);
                 }
 
-                File.Move(temporaryPath, _path);
+                if (File.Exists(_path))
+                {
+                    File.Move(_path, backupPath);
+                }
+
+                try
+                {
+                    File.Move(temporaryPath, _path);
+                }
+                catch
+                {
+                    if (!File.Exists(_path) && File.Exists(backupPath))
+                    {
+                        File.Move(backupPath, _path);
+                    }
+
+                    throw;
+                }
             }
             finally
             {
@@ -102,6 +127,48 @@ namespace JabaSurvivol.Gameplay
                 {
                     File.Delete(temporaryPath);
                 }
+            }
+        }
+
+        private Profile TryLoadBackup()
+        {
+            var backupPath = _path + ".bak";
+            if (!File.Exists(backupPath))
+            {
+                return null;
+            }
+
+            try
+            {
+                var profile = JsonUtility.FromJson<Profile>(File.ReadAllText(backupPath));
+                if (profile == null)
+                {
+                    return null;
+                }
+
+                profile.Validate();
+                return profile;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"Profile backup load failed: {exception.Message}");
+                return null;
+            }
+        }
+
+        private void RestoreMainFromBackup()
+        {
+            try
+            {
+                var backupPath = _path + ".bak";
+                if (File.Exists(backupPath))
+                {
+                    File.Copy(backupPath, _path, true);
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"Profile backup restore failed: {exception.Message}");
             }
         }
 

@@ -32,7 +32,8 @@ namespace JabaSurvivol.Editor
         [MenuItem("JabaSurvivol/Recreate Main Scene")]
         public static void RecreateMainScene()
         {
-            ConfigureScene();
+            CreateMainScene();
+            ConfigureBuildSettings();
             AssetDatabase.SaveAssets();
             Debug.Log("JabaSurvivol main scene recreated.");
         }
@@ -75,6 +76,16 @@ namespace JabaSurvivol.Editor
 
         private static void ConfigureScene()
         {
+            if (!File.Exists(MainScenePath))
+            {
+                CreateMainScene();
+            }
+
+            ConfigureBuildSettings();
+        }
+
+        private static void CreateMainScene()
+        {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var bootstrap = new GameObject("GameBootstrap");
             bootstrap.AddComponent<JabaSurvivol.Gameplay.GameBootstrap>();
@@ -89,7 +100,10 @@ namespace JabaSurvivol.Editor
             {
                 throw new InvalidOperationException($"Could not save main scene at {MainScenePath}.");
             }
+        }
 
+        private static void ConfigureBuildSettings()
+        {
             EditorBuildSettings.scenes = new[]
             {
                 new EditorBuildSettingsScene(MainScenePath, true)

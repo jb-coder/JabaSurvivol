@@ -29,6 +29,14 @@ namespace JabaSurvivol.Gameplay
         private readonly RectTransform _aimKnob;
         private readonly Image _moveBaseImage;
         private readonly Image _aimBaseImage;
+        private static readonly Color HealthLow = new(0.9f, 0.2f, 0.22f);
+        private static readonly Color HealthHigh = new(0.3f, 0.92f, 0.42f);
+        private int _lastHealth = int.MinValue;
+        private int _lastMaxHealth = int.MinValue;
+        private int _lastRound = int.MinValue;
+        private int _lastKills = int.MinValue;
+        private int _lastSupplies = int.MinValue;
+        private int _lastLevel = int.MinValue;
 
         public GameUi(
             Transform parent,
@@ -74,18 +82,52 @@ namespace JabaSurvivol.Gameplay
             _hud.SetActive(true);
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(false);
+            _lastHealth = int.MinValue;
+            _lastMaxHealth = int.MinValue;
+            _lastRound = int.MinValue;
+            _lastKills = int.MinValue;
+            _lastSupplies = int.MinValue;
+            _lastLevel = int.MinValue;
         }
 
         public void UpdateHud(PlayerState player, int round, int kills, Profile profile)
         {
-            var healthFraction = player.MaxHealth <= 0f ? 0f : Mathf.Clamp01(player.Health / player.MaxHealth);
-            _healthFill.fillAmount = healthFraction;
-            _healthFill.color = Color.Lerp(new Color(0.9f, 0.2f, 0.22f), new Color(0.3f, 0.92f, 0.42f), healthFraction);
-            _healthText.text = Localization.Format("hud.health", Mathf.CeilToInt(player.Health), Mathf.CeilToInt(player.MaxHealth));
-            _roundText.text = Localization.Format("hud.round", round);
-            _killsText.text = Localization.Format("hud.kills", kills);
-            _suppliesText.text = Localization.Format("hud.supplies", profile.Supplies);
-            _levelText.text = Localization.Format("hud.level", profile.Level);
+            var health = Mathf.CeilToInt(player.Health);
+            var maxHealth = Mathf.CeilToInt(player.MaxHealth);
+
+            if (health != _lastHealth || maxHealth != _lastMaxHealth)
+            {
+                _lastHealth = health;
+                _lastMaxHealth = maxHealth;
+                var healthFraction = maxHealth <= 0 ? 0f : Mathf.Clamp01((float)health / maxHealth);
+                _healthFill.fillAmount = healthFraction;
+                _healthFill.color = Color.Lerp(HealthLow, HealthHigh, healthFraction);
+                _healthText.text = Localization.Format("hud.health", health, maxHealth);
+            }
+
+            if (round != _lastRound)
+            {
+                _lastRound = round;
+                _roundText.text = Localization.Format("hud.round", round);
+            }
+
+            if (kills != _lastKills)
+            {
+                _lastKills = kills;
+                _killsText.text = Localization.Format("hud.kills", kills);
+            }
+
+            if (profile.Supplies != _lastSupplies)
+            {
+                _lastSupplies = profile.Supplies;
+                _suppliesText.text = Localization.Format("hud.supplies", profile.Supplies);
+            }
+
+            if (profile.Level != _lastLevel)
+            {
+                _lastLevel = profile.Level;
+                _levelText.text = Localization.Format("hud.level", profile.Level);
+            }
         }
 
         public void ShowPaused(bool visible)
