@@ -258,6 +258,102 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(session.State, Is.EqualTo(GameSessionState.Playing));
         }
 
+        [UnityTest]
+        public IEnumerator Armory_purchases_equips_and_persists_a_weapon()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddSupplies(WeaponCatalog.Get(WeaponId.Smg).UnlockCost);
+            session.SaveNow();
+
+            session.ShowArmory();
+            yield return null;
+
+            Assert.That(session.ArmoryVisible, Is.True);
+            Assert.That(session.TryPurchaseWeapon(WeaponId.Smg), Is.EqualTo(ArmoryPurchaseResult.Purchased));
+            Assert.That(session.Profile.HasWeapon(WeaponId.Smg), Is.True);
+            Assert.That(session.Profile.Supplies, Is.EqualTo(0));
+            Assert.That(session.TryEquipWeapon(WeaponId.Smg), Is.True);
+            Assert.That(session.EquippedWeapon, Is.EqualTo(WeaponId.Smg));
+
+            session.CloseArmory();
+            yield return null;
+            Assert.That(session.ArmoryVisible, Is.False);
+            session.SaveNow();
+
+            UnityEngine.Object.DestroyImmediate(_bootstrap.gameObject);
+            _bootstrap = null;
+            yield return null;
+
+            _bootstrap = CreateBootstrap();
+            yield return null;
+
+            Assert.That(_bootstrap.Session.Profile.HasWeapon(WeaponId.Smg), Is.True);
+            Assert.That(_bootstrap.Session.Profile.EquippedWeapon, Is.EqualTo(WeaponId.Smg));
+        }
+
+        [UnityTest]
+        public IEnumerator Armory_rejects_a_purchase_without_supplies()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddSupplies(WeaponCatalog.Get(WeaponId.Smg).UnlockCost - 1);
+            session.SaveNow();
+            session.ShowArmory();
+            yield return null;
+
+            Assert.That(
+                session.TryPurchaseWeapon(WeaponId.Smg),
+                Is.EqualTo(ArmoryPurchaseResult.InsufficientSupplies));
+            Assert.That(session.Profile.HasWeapon(WeaponId.Smg), Is.False);
+            Assert.That(
+                session.Profile.Supplies,
+                Is.EqualTo(WeaponCatalog.Get(WeaponId.Smg).UnlockCost - 1));
+        }
+
+        [UnityTest]
+        public IEnumerator Purchased_weapon_survives_death()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddSupplies(WeaponCatalog.Get(WeaponId.Rifle).UnlockCost);
+            session.TryPurchaseWeapon(WeaponId.Rifle);
+            session.TryEquipWeapon(WeaponId.Rifle);
+            session.StartRun();
+            yield return null;
+
+            session.ApplyDamage(GameBalance.PlayerMaxHealth * 2f);
+            yield return null;
+
+            Assert.That(session.State, Is.EqualTo(GameSessionState.GameOver));
+            Assert.That(session.Profile.HasWeapon(WeaponId.Rifle), Is.True);
+            Assert.That(session.Profile.EquippedWeapon, Is.EqualTo(WeaponId.Rifle));
+        }
+
+        [UnityTest]
+        public IEnumerator Equipped_weapon_stats_drive_combat()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddSupplies(WeaponCatalog.Get(WeaponId.Shotgun).UnlockCost);
+            session.TryPurchaseWeapon(WeaponId.Shotgun);
+            session.TryEquipWeapon(WeaponId.Shotgun);
+            session.StartRun();
+            yield return null;
+
+            session.FireForTests();
+            yield return null;
+
+            var shotgun = WeaponCatalog.Get(WeaponId.Shotgun);
+            Assert.That(session.LastBulletDamageForTests, Is.EqualTo(shotgun.Damage));
+            Assert.That(session.LastBulletDamageForTests, Is.Not.EqualTo(GameBalance.PistolDamage));
+            Assert.That(session.ActiveBullets, Is.GreaterThanOrEqualTo(shotgun.PelletCount));
+        }
+
         private static GameBootstrap CreateBootstrap()
         {
             var gameObject = new GameObject("Test Bootstrap");

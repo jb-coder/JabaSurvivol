@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace JabaSurvivol.Core
 {
@@ -23,6 +24,18 @@ namespace JabaSurvivol.Core
         public int TotalKills;
         public int TotalRuns;
         public int BestKills;
+
+        /// <summary>
+        /// Permanently unlocked weapons. The pistol is always available and is
+        /// restored by <see cref="Validate"/> for older saves.
+        /// </summary>
+        public List<WeaponId> UnlockedWeapons = new List<WeaponId> { WeaponId.Pistol };
+
+        /// <summary>
+        /// Permanently equipped weapon. Combat reads this value at run start
+        /// and after an armory equip action.
+        /// </summary>
+        public WeaponId EquippedWeapon = WeaponId.Pistol;
 
         /// <summary>
         /// XP needed to advance from <paramref name="level"/> to the next level.
@@ -77,6 +90,47 @@ namespace JabaSurvivol.Core
             }
 
             Supplies -= amount;
+            return true;
+        }
+
+        public bool HasWeapon(WeaponId weaponId)
+        {
+            return weaponId == WeaponId.Pistol ||
+                   (UnlockedWeapons != null && UnlockedWeapons.Contains(weaponId));
+        }
+
+        /// <summary>
+        /// Adds a weapon to the permanent unlock list. Returns true only when
+        /// the weapon was newly unlocked.
+        /// </summary>
+        public bool UnlockWeapon(WeaponId weaponId)
+        {
+            if (!WeaponCatalog.IsDefined(weaponId) || HasWeapon(weaponId))
+            {
+                return false;
+            }
+
+            if (UnlockedWeapons == null)
+            {
+                UnlockedWeapons = new List<WeaponId>();
+            }
+
+            UnlockedWeapons.Add(weaponId);
+            return true;
+        }
+
+        /// <summary>
+        /// Equips a permanently unlocked weapon. Returns false for locked or
+        /// invalid weapons.
+        /// </summary>
+        public bool EquipWeapon(WeaponId weaponId)
+        {
+            if (!WeaponCatalog.IsDefined(weaponId) || !HasWeapon(weaponId))
+            {
+                return false;
+            }
+
+            EquippedWeapon = weaponId;
             return true;
         }
 
@@ -162,6 +216,44 @@ namespace JabaSurvivol.Core
             TotalRuns = Math.Max(0, TotalRuns);
             BestKills = Math.Max(0, BestKills);
             ClampSkillPoints();
+            ValidateWeapons();
+        }
+
+        private void ValidateWeapons()
+        {
+            if (UnlockedWeapons == null)
+            {
+                UnlockedWeapons = new List<WeaponId>();
+            }
+
+            for (var i = UnlockedWeapons.Count - 1; i >= 0; i--)
+            {
+                var weaponId = UnlockedWeapons[i];
+                if (!WeaponCatalog.IsDefined(weaponId))
+                {
+                    UnlockedWeapons.RemoveAt(i);
+                    continue;
+                }
+
+                for (var j = 0; j < i; j++)
+                {
+                    if (UnlockedWeapons[j] == weaponId)
+                    {
+                        UnlockedWeapons.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
+
+            if (!UnlockedWeapons.Contains(WeaponId.Pistol))
+            {
+                UnlockedWeapons.Insert(0, WeaponId.Pistol);
+            }
+
+            if (!WeaponCatalog.IsDefined(EquippedWeapon) || !HasWeapon(EquippedWeapon))
+            {
+                EquippedWeapon = WeaponId.Pistol;
+            }
         }
 
         private void ClampSkillPoints()

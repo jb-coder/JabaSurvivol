@@ -1,4 +1,5 @@
 using JabaSurvivol.Core;
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,6 +17,7 @@ namespace JabaSurvivol.Gameplay
         private readonly GameObject _pausePanel;
         private readonly GameObject _gameOverPanel;
         private readonly GameObject _roundEndPanel;
+        private readonly GameObject _armoryPanel;
         private readonly Text _progressText;
         private readonly Text _healthText;
         private readonly Text _roundText;
@@ -26,8 +28,11 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _gameOverSummary;
         private readonly Text _roundEndTitle;
         private readonly Text _roundEndSummary;
+        private readonly Text _armorySuppliesText;
+        private readonly Text _armoryStatusText;
         private readonly Button[] _rewardButtons;
         private readonly Text[] _rewardLabels;
+        private readonly ArmoryRow[] _armoryRows;
         private readonly Image _healthFill;
         private readonly RectTransform _moveBase;
         private readonly RectTransform _aimBase;
@@ -52,7 +57,10 @@ namespace JabaSurvivol.Gameplay
             System.Action onMenu,
             System.Action onPause,
             System.Action onResume,
-            System.Action<int> onRewardSelected)
+            System.Action<int> onRewardSelected,
+            System.Action onArmory,
+            System.Action<WeaponId> onArmoryAction,
+            System.Action onArmoryClose)
         {
             var canvasObject = UiFactory.CreateCanvas("JabaSurvivol UI", parent);
 
@@ -62,9 +70,9 @@ namespace JabaSurvivol.Gameplay
             UiFactory.Stretch(_safeArea);
             safeAreaObject.AddComponent<SafeAreaFitter>();
 
-            _mainMenu = BuildMainMenu(onStart);
+            _mainMenu = BuildMainMenu(onStart, onArmory);
             _hud = BuildHud(onPause, out _healthText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
-            _pausePanel = BuildPausePanel(onResume, onMenu);
+            _pausePanel = BuildPausePanel(onResume, onMenu, onArmory);
             _gameOverPanel = BuildGameOverPanel(onRestart, onMenu, out _gameOverSummary);
             _roundEndPanel = BuildRoundEndPanel(
                 onRewardSelected,
@@ -72,6 +80,12 @@ namespace JabaSurvivol.Gameplay
                 out _roundEndSummary,
                 out _rewardButtons,
                 out _rewardLabels);
+            _armoryPanel = BuildArmoryPanel(
+                onArmoryAction,
+                onArmoryClose,
+                out _armoryRows,
+                out _armorySuppliesText,
+                out _armoryStatusText);
 
             _progressText = FindText(_mainMenu, "Progress");
             ShowMainMenu(new Profile());
@@ -84,6 +98,7 @@ namespace JabaSurvivol.Gameplay
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(false);
             HideRoundEnd();
+            HideArmory();
             _progressText.text = Localization.Format(
                 "menu.progress",
                 profile.Supplies,
@@ -97,6 +112,7 @@ namespace JabaSurvivol.Gameplay
             _hud.SetActive(true);
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(false);
+            HideArmory();
             _lastHealth = int.MinValue;
             _lastMaxHealth = int.MinValue;
             _lastRound = int.MinValue;
@@ -165,7 +181,84 @@ namespace JabaSurvivol.Gameplay
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(true);
             HideRoundEnd();
+            HideArmory();
             _gameOverSummary.text = Localization.Format("gameover.summary", round, kills, suppliesEarned);
+        }
+
+        public bool ArmoryVisible => _armoryPanel != null && _armoryPanel.activeSelf;
+
+        public void ShowArmory(Profile profile)
+        {
+            _mainMenu.SetActive(false);
+            _hud.SetActive(false);
+            _pausePanel.SetActive(false);
+            _gameOverPanel.SetActive(false);
+            HideRoundEnd();
+            _armoryPanel.SetActive(true);
+            RefreshArmory(profile);
+            SetArmoryStatus(string.Empty);
+        }
+
+        public void HideArmory()
+        {
+            if (_armoryPanel != null)
+            {
+                _armoryPanel.SetActive(false);
+            }
+        }
+
+        public void RefreshArmory(Profile profile)
+        {
+            _armorySuppliesText.text = Localization.Format("armory.supplies", profile.Supplies);
+
+            for (var i = 0; i < _armoryRows.Length; i++)
+            {
+                var row = _armoryRows[i];
+                var owned = profile.HasWeapon(row.WeaponId);
+                var equipped = profile.EquippedWeapon == row.WeaponId;
+                var definition = WeaponCatalog.Get(row.WeaponId);
+
+                row.Name.text = Localization.WeaponName(row.WeaponId);
+                row.Name.color = equipped
+                    ? new Color(0.45f, 0.95f, 0.7f)
+                    : new Color(0.86f, 0.92f, 1f);
+                row.Info.text = FormatWeaponStats(definition.Stats);
+
+                if (!owned)
+                {
+                    row.Label.text = Localization.Format("armory.buy", definition.UnlockCost);
+                    row.Button.interactable = true;
+                }
+                else if (equipped)
+                {
+                    row.Label.text = Localization.Get("armory.equipped");
+                    row.Button.interactable = false;
+                }
+                else
+                {
+                    row.Label.text = Localization.Get("armory.equip");
+                    row.Button.interactable = true;
+                }
+            }
+        }
+
+        public void SetArmoryStatus(string status)
+        {
+            _armoryStatusText.text = status;
+        }
+
+        public static string FormatWeaponStats(WeaponStats stats)
+        {
+            var reserve = stats.HasInfiniteReserve
+                ? Localization.Get("armory.reserve.infinite")
+                : stats.ReserveAmmo.ToString(CultureInfo.InvariantCulture);
+            return Localization.Format(
+                "armory.stats",
+                stats.Damage.ToString("0.#", CultureInfo.InvariantCulture),
+                stats.ShotsPerSecond.ToString("0.0", CultureInfo.InvariantCulture),
+                stats.MagazineSize,
+                stats.Range.ToString("0.#", CultureInfo.InvariantCulture),
+                reserve);
         }
 
         public bool RoundEndVisible => _roundEndPanel != null && _roundEndPanel.activeSelf;
@@ -257,7 +350,7 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
-        private GameObject BuildMainMenu(System.Action onStart)
+        private GameObject BuildMainMenu(System.Action onStart, System.Action onArmory)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Main Menu", new Color(0.012f, 0.018f, 0.03f, 0.98f));
             var root = panel.gameObject;
@@ -273,10 +366,13 @@ namespace JabaSurvivol.Gameplay
             UiFactory.Place(progress.rectTransform, new Vector2(0.5f, 0.57f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(1300f, 50f));
 
             var start = UiFactory.CreateButton(root.transform, "Start", Localization.Get("menu.start"), 38, onStart);
-            UiFactory.Place(start.GetComponent<RectTransform>(), new Vector2(0.5f, 0.4f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 112f));
+            UiFactory.Place(start.GetComponent<RectTransform>(), new Vector2(0.5f, 0.4f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 100f));
+
+            var armory = UiFactory.CreateButton(root.transform, "Armory", Localization.Get("menu.armory"), 34, onArmory);
+            UiFactory.Place(armory.GetComponent<RectTransform>(), new Vector2(0.5f, 0.29f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 88f));
 
             var controls = UiFactory.CreateText(root.transform, "Controls", Localization.Get("menu.controls"), 24, TextAnchor.MiddleCenter, new Color(0.55f, 0.62f, 0.72f));
-            UiFactory.Place(controls.rectTransform, new Vector2(0.5f, 0.2f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300f, 50f));
+            UiFactory.Place(controls.rectTransform, new Vector2(0.5f, 0.17f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300f, 50f));
 
             return root;
         }
@@ -370,20 +466,23 @@ namespace JabaSurvivol.Gameplay
             return baseImage;
         }
 
-        private GameObject BuildPausePanel(System.Action onResume, System.Action onMenu)
+        private GameObject BuildPausePanel(System.Action onResume, System.Action onMenu, System.Action onArmory)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Pause Panel", new Color(0.01f, 0.02f, 0.03f, 0.9f));
             var root = panel.gameObject;
 
             var title = UiFactory.CreateText(root.transform, "Title", Localization.Get("pause.title"), 64, TextAnchor.MiddleCenter, new Color(0.5f, 0.95f, 1f));
             title.fontStyle = FontStyle.Bold;
-            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.66f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900f, 100f));
+            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.68f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900f, 100f));
 
             var resume = UiFactory.CreateButton(root.transform, "Resume", Localization.Get("pause.resume"), 34, onResume);
-            UiFactory.Place(resume.GetComponent<RectTransform>(), new Vector2(0.5f, 0.45f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 100f));
+            UiFactory.Place(resume.GetComponent<RectTransform>(), new Vector2(0.5f, 0.48f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 92f));
+
+            var armory = UiFactory.CreateButton(root.transform, "Armory", Localization.Get("pause.armory"), 30, onArmory);
+            UiFactory.Place(armory.GetComponent<RectTransform>(), new Vector2(0.5f, 0.35f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 82f));
 
             var menu = UiFactory.CreateButton(root.transform, "Menu", Localization.Get("pause.menu"), 30, onMenu);
-            UiFactory.Place(menu.GetComponent<RectTransform>(), new Vector2(0.5f, 0.32f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 88f));
+            UiFactory.Place(menu.GetComponent<RectTransform>(), new Vector2(0.5f, 0.22f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 82f));
 
             return root;
         }
@@ -454,6 +553,107 @@ namespace JabaSurvivol.Gameplay
 
             root.SetActive(false);
             return root;
+        }
+
+        private GameObject BuildArmoryPanel(
+            System.Action<WeaponId> onAction,
+            System.Action onClose,
+            out ArmoryRow[] rows,
+            out Text supplies,
+            out Text status)
+        {
+            var panel = UiFactory.CreatePanel(_safeArea, "Armory Panel", new Color(0.008f, 0.014f, 0.024f, 0.99f));
+            var root = panel.gameObject;
+
+            var title = UiFactory.CreateText(root.transform, "Title", Localization.Get("armory.title"), 64, TextAnchor.MiddleCenter, new Color(0.4f, 0.95f, 1f));
+            title.fontStyle = FontStyle.Bold;
+            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.95f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(700f, 72f));
+
+            supplies = UiFactory.CreateText(root.transform, "Supplies", string.Empty, 30, TextAnchor.MiddleLeft, new Color(0.55f, 0.95f, 0.75f));
+            UiFactory.Place(supplies.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(40f, -28f), new Vector2(620f, 52f));
+
+            var close = UiFactory.CreateButton(root.transform, "Close", Localization.Get("armory.close"), 28, onClose);
+            UiFactory.Place(close.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-30f, -24f), new Vector2(220f, 76f));
+
+            var weapons = WeaponCatalog.All;
+            rows = new ArmoryRow[weapons.Count];
+            for (var i = 0; i < weapons.Count; i++)
+            {
+                var weapon = weapons[i];
+                var rowImage = UiFactory.CreateImage(
+                    root.transform,
+                    $"Weapon {weapon.Id}",
+                    SpriteFactory.Square,
+                    new Color(0.05f, 0.08f, 0.12f, 0.95f));
+                UiFactory.Place(
+                    rowImage.rectTransform,
+                    new Vector2(0.5f, 0.78f - (i * 0.145f)),
+                    new Vector2(0.5f, 0.5f),
+                    Vector2.zero,
+                    new Vector2(1660f, 116f));
+
+                var name = UiFactory.CreateText(
+                    rowImage.transform,
+                    "Name",
+                    string.Empty,
+                    30,
+                    TextAnchor.MiddleLeft,
+                    Color.white);
+                name.fontStyle = FontStyle.Bold;
+                UiFactory.Place(name.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(28f, 0f), new Vector2(300f, 100f));
+
+                var info = UiFactory.CreateText(
+                    rowImage.transform,
+                    "Info",
+                    string.Empty,
+                    22,
+                    TextAnchor.MiddleLeft,
+                    new Color(0.72f, 0.8f, 0.9f));
+                UiFactory.Place(info.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(330f, 0f), new Vector2(900f, 100f));
+
+                var button = UiFactory.CreateButton(
+                    rowImage.transform,
+                    "Action",
+                    string.Empty,
+                    28,
+                    () => onAction?.Invoke(weapon.Id));
+                UiFactory.Place(
+                    button.GetComponent<RectTransform>(),
+                    new Vector2(1f, 0.5f),
+                    new Vector2(1f, 0.5f),
+                    new Vector2(-24f, 0f),
+                    new Vector2(360f, 88f));
+
+                rows[i] = new ArmoryRow
+                {
+                    WeaponId = weapon.Id,
+                    Button = button,
+                    Label = button.GetComponentInChildren<Text>(),
+                    Name = name,
+                    Info = info
+                };
+            }
+
+            status = UiFactory.CreateText(
+                root.transform,
+                "Status",
+                string.Empty,
+                26,
+                TextAnchor.MiddleCenter,
+                new Color(1f, 0.75f, 0.42f));
+            UiFactory.Place(status.rectTransform, new Vector2(0.5f, 0.06f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1400f, 44f));
+
+            root.SetActive(false);
+            return root;
+        }
+
+        private sealed class ArmoryRow
+        {
+            public WeaponId WeaponId;
+            public Button Button;
+            public Text Label;
+            public Text Name;
+            public Text Info;
         }
 
         private static Text FindText(GameObject root, string name)

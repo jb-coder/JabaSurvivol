@@ -6,6 +6,13 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+### Added
+
+- Data-driven weapon catalog in `Game.Core` for the pistol, SMG, shotgun, rifle, and LMG, including damage, fire rate, magazine size, reload time, range, reserve ammunition, and unlock cost.
+- Persistent weapon unlocks and equipped weapon in the profile, with the pistol always available and infinite reserve.
+- Armory panel accessible from the main menu and pause menu with supply purchases, equip actions, and touch-friendly weapon rows.
+- Combat now uses the equipped weapon's damage, fire interval, range, projectile speed, pellet count, and spread.
+
 ## [0.2.0] - 2026-11-06
 
 ### Added
