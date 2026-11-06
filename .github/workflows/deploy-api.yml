@@ -14,10 +14,10 @@ jobs:
     environment: production
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
 
@@ -34,7 +34,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Game API
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: src/Services/Game.Api/Dockerfile
@@ -42,7 +42,7 @@ jobs:
           tags: ghcr.io/${{ github.repository }}/game-api:${{ github.sha }}
 
       - name: Build and push Identity API
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: src/Services/Identity.Api/Dockerfile
@@ -50,7 +50,7 @@ jobs:
           tags: ghcr.io/${{ github.repository }}/identity-api:${{ github.sha }}
 
       - name: Build and push Telemetry Worker
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: src/Services/Telemetry.Worker/Dockerfile
@@ -58,7 +58,7 @@ jobs:
           tags: ghcr.io/${{ github.repository }}/telemetry-worker:${{ github.sha }}
 
       - name: Build and push BFF
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: src/Gateway/Bff/Dockerfile

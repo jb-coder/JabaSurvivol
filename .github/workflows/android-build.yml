@@ -16,12 +16,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           lfs: true
 
       - name: Cache Unity Library
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: unity/JabaSurvivol/Library
           key: unity-library-${{ hashFiles('unity/JabaSurvivol/Packages/packages-lock.json') }}
@@ -43,7 +43,7 @@ jobs:
           androidMinSdkVersion: 26
 
       - name: Upload Android artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: jabasurvivol-android
           path: build/Android
