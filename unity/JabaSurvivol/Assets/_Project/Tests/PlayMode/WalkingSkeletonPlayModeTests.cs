@@ -124,6 +124,42 @@ namespace JabaSurvivol.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator Full_round_clear_advances_round_and_keeps_progress()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.StartRun();
+            var budget = session.SpawnBudget;
+
+            for (var i = 0; i < budget; i++)
+            {
+                session.DamageZombieForTests(100000f);
+                yield return null;
+
+                if (i < budget - 1)
+                {
+                    session.SpawnZombieForTests();
+                    yield return null;
+                }
+            }
+
+            Assert.That(session.RoundPhase, Is.EqualTo(RoundPhase.Cleared));
+            Assert.That(session.RoundClearPending, Is.True);
+            var suppliesAfterClear = session.Profile.Supplies;
+
+            session.ContinueAfterRoundClear();
+            yield return null;
+
+            Assert.That(session.State, Is.EqualTo(GameSessionState.Playing));
+            Assert.That(session.Run.Round, Is.EqualTo(2));
+            Assert.That(session.EnemiesRemaining, Is.EqualTo(session.SpawnBudget));
+            Assert.That(session.RoundPhase, Is.EqualTo(RoundPhase.Active));
+            Assert.That(session.Profile.Supplies, Is.EqualTo(suppliesAfterClear));
+            Assert.That(File.Exists(_path), Is.True);
+        }
+
+        [UnityTest]
         public IEnumerator Scripted_fire_spawns_bullets()
         {
             _bootstrap = CreateBootstrap();

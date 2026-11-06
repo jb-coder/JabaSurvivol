@@ -18,10 +18,12 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _progressText;
         private readonly Text _healthText;
         private readonly Text _roundText;
+        private readonly Text _enemiesText;
         private readonly Text _killsText;
         private readonly Text _suppliesText;
         private readonly Text _levelText;
         private readonly Text _gameOverSummary;
+        private readonly Text _roundClearText;
         private readonly Image _healthFill;
         private readonly RectTransform _moveBase;
         private readonly RectTransform _aimBase;
@@ -34,6 +36,7 @@ namespace JabaSurvivol.Gameplay
         private int _lastHealth = int.MinValue;
         private int _lastMaxHealth = int.MinValue;
         private int _lastRound = int.MinValue;
+        private int _lastEnemies = int.MinValue;
         private int _lastKills = int.MinValue;
         private int _lastSupplies = int.MinValue;
         private int _lastLevel = int.MinValue;
@@ -55,7 +58,7 @@ namespace JabaSurvivol.Gameplay
             safeAreaObject.AddComponent<SafeAreaFitter>();
 
             _mainMenu = BuildMainMenu(onStart);
-            _hud = BuildHud(onPause, out _healthText, out _healthFill, out _roundText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
+            _hud = BuildHud(onPause, out _healthText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _roundClearText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
             _pausePanel = BuildPausePanel(onResume, onMenu);
             _gameOverPanel = BuildGameOverPanel(onRestart, onMenu, out _gameOverSummary);
 
@@ -69,6 +72,7 @@ namespace JabaSurvivol.Gameplay
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(false);
+            HideRoundCleared();
             _progressText.text = Localization.Format(
                 "menu.progress",
                 profile.Supplies,
@@ -85,12 +89,14 @@ namespace JabaSurvivol.Gameplay
             _lastHealth = int.MinValue;
             _lastMaxHealth = int.MinValue;
             _lastRound = int.MinValue;
+            _lastEnemies = int.MinValue;
             _lastKills = int.MinValue;
             _lastSupplies = int.MinValue;
             _lastLevel = int.MinValue;
+            HideRoundCleared();
         }
 
-        public void UpdateHud(PlayerState player, int round, int kills, Profile profile)
+        public void UpdateHud(PlayerState player, int round, int enemiesRemaining, int kills, Profile profile)
         {
             var health = Mathf.CeilToInt(player.Health);
             var maxHealth = Mathf.CeilToInt(player.MaxHealth);
@@ -108,7 +114,13 @@ namespace JabaSurvivol.Gameplay
             if (round != _lastRound)
             {
                 _lastRound = round;
-                _roundText.text = Localization.Format("hud.round", round);
+                _roundText.text = Localization.Format("hud.round", round, GameBalance.MaxRound);
+            }
+
+            if (enemiesRemaining != _lastEnemies)
+            {
+                _lastEnemies = enemiesRemaining;
+                _enemiesText.text = Localization.Format("hud.enemies", enemiesRemaining);
             }
 
             if (kills != _lastKills)
@@ -141,7 +153,19 @@ namespace JabaSurvivol.Gameplay
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(true);
+            HideRoundCleared();
             _gameOverSummary.text = Localization.Format("gameover.summary", round, kills, suppliesEarned);
+        }
+
+        public void ShowRoundCleared(int round)
+        {
+            _roundClearText.text = Localization.Format("round.clear", round);
+            _roundClearText.gameObject.SetActive(true);
+        }
+
+        public void HideRoundCleared()
+        {
+            _roundClearText.gameObject.SetActive(false);
         }
 
         public void SetSticks(StickState move, StickState aim)
@@ -217,9 +241,11 @@ namespace JabaSurvivol.Gameplay
             out Text healthText,
             out Image healthFill,
             out Text roundText,
+            out Text enemiesText,
             out Text killsText,
             out Text suppliesText,
             out Text levelText,
+            out Text roundClearText,
             out RectTransform moveBase,
             out RectTransform moveKnob,
             out RectTransform aimBase,
@@ -250,8 +276,16 @@ namespace JabaSurvivol.Gameplay
             roundText.fontStyle = FontStyle.Bold;
             UiFactory.Place(roundText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -26f), new Vector2(420f, 60f));
 
+            enemiesText = UiFactory.CreateText(root.transform, "Enemies", string.Empty, 24, TextAnchor.MiddleCenter, new Color(0.95f, 0.72f, 0.42f));
+            UiFactory.Place(enemiesText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -74f), new Vector2(420f, 40f));
+
             killsText = UiFactory.CreateText(root.transform, "Kills", string.Empty, 22, TextAnchor.MiddleCenter, new Color(0.6f, 0.68f, 0.78f));
-            UiFactory.Place(killsText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -84f), new Vector2(420f, 40f));
+            UiFactory.Place(killsText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -112f), new Vector2(420f, 40f));
+
+            roundClearText = UiFactory.CreateText(root.transform, "Round Clear", string.Empty, 40, TextAnchor.MiddleCenter, new Color(0.4f, 0.95f, 1f));
+            roundClearText.fontStyle = FontStyle.Bold;
+            UiFactory.Place(roundClearText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 40f), new Vector2(1100f, 70f));
+            roundClearText.gameObject.SetActive(false);
 
             suppliesText = UiFactory.CreateText(root.transform, "Supplies", string.Empty, 28, TextAnchor.MiddleRight, new Color(0.55f, 0.95f, 0.75f));
             UiFactory.Place(suppliesText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-150f, -30f), new Vector2(420f, 44f));

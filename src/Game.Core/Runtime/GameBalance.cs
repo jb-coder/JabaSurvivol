@@ -31,7 +31,17 @@ namespace JabaSurvivol.Core
         public const int XpPerKill = 10;
         public const int SuppliesPerRoundClear = 100;
         public const int XpPerRoundClear = 50;
-        public const int KillsPerRound = 5;
+
+        public const int MaxRound = 10;
+        public const int RoundSpawnBudgetBase = 4;
+        public const int RoundSpawnBudgetPerRound = 2;
+        public const float RoundZombieHealthGrowth = 0.18f;
+        public const float RoundZombieSpeedGrowth = 0.04f;
+        public const float RoundZombieSpeedCapMultiplier = 1.35f;
+        public const float RoundZombieDamageGrowth = 0.12f;
+        public const int EliteRoundInterval = 5;
+        public const int BossRound = 10;
+        public const float RoundClearPauseSeconds = 0.75f;
 
         public const float StickDeadZone = 0.16f;
         public const float AimStickDeadZone = 0.2f;

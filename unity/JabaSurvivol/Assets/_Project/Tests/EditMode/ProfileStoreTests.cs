@@ -46,6 +46,18 @@ namespace JabaSurvivol.Tests.EditMode
         }
 
         [Test]
+        public void Save_and_load_round_trips_the_highest_round()
+        {
+            var store = new ProfileStore(_path);
+            var profile = new Profile { HighestRound = 7 };
+
+            store.Save(profile);
+            var loaded = store.Load();
+
+            Assert.That(loaded.HighestRound, Is.EqualTo(7));
+        }
+
+        [Test]
         public void Load_returns_defaults_when_file_is_missing()
         {
             var store = new ProfileStore(_path);
