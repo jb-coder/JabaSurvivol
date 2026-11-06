@@ -6,6 +6,8 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-06
+
 ### Added
 
 - Initial repository structure for Unity, .NET, infrastructure, documentation, and agents.
@@ -20,3 +22,15 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Walking skeleton: main menu, twin-stick touch controls, keyboard and mouse fallback, movement, shooting, zombie, health, supplies, XP, rounds, pause, game over, restart, and safe-area-aware phone and tablet layouts.
 - Atomic local profile persistence with versioned validation and corrupted-save recovery.
 - EditMode and PlayMode tests plus Android ARM64 and emulator build automation.
+
+### Changed
+
+- GitHub Actions dependencies updated to their current major versions.
+- .NET package group updated to the validated dependency set.
+- Dependabot now targets `develop` and uses a Conventional Commits prefix.
+
+### Fixed
+
+- HUD text and fill updates now avoid per-frame string formatting.
+- Profile saves preserve the previous file as a backup and recover from a corrupt main file.
+- Project configuration no longer recreates the committed scene on every build.
