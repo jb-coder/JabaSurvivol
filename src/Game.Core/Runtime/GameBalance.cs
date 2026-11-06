@@ -49,7 +49,7 @@ namespace JabaSurvivol.Core
         public const int RoundRewardXpBase = 30;
         public const int RoundRewardXpPerRound = 15;
         public const int AmmoCrateAmount = 24;
-        public const int ArmorPlateAmount = 1;
+        public const int ArmorPlateAmount = 10;
 
         public const float StickDeadZone = 0.16f;
         public const float AimStickDeadZone = 0.2f;

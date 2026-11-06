@@ -36,16 +36,23 @@ namespace JabaSurvivol.Core
     {
         private readonly RoundState _round;
 
-        public RunState(float maxHealth, int startingRound = 1, int seed = 0)
+        public RunState(float maxHealth, int startingRound = 1, int seed = 0, int maxArmor = 0)
         {
             if (startingRound < 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(startingRound));
             }
 
+            if (maxArmor < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maxArmor));
+            }
+
             Player = new PlayerState(maxHealth);
             StartingRound = startingRound;
             Seed = seed;
+            MaxArmor = maxArmor;
+            Armor = maxArmor;
             _round = new RoundState(startingRound);
             _round.Start();
         }
@@ -78,9 +85,15 @@ namespace JabaSurvivol.Core
 
         /// <summary>
         /// Run-only armor. It is never stored in the profile and resets on
-        /// death or restart.
+        /// death or restart. It absorbs damage before health.
         /// </summary>
         public int Armor { get; private set; }
+
+        /// <summary>
+        /// Maximum armor condition for this run, derived from the equipped
+        /// armor tier. Zero means no armor is equipped.
+        /// </summary>
+        public int MaxArmor { get; }
 
         /// <summary>
         /// Registers a kill and returns the reward. Persistent progression is
@@ -137,7 +150,9 @@ namespace JabaSurvivol.Core
         }
 
         /// <summary>
-        /// Adds run-only armor for the current run.
+        /// Adds free, drop-based armor condition. When armor is equipped the
+        /// repair is capped at the maximum condition; with no armor equipped
+        /// the plates provide temporary run armor.
         /// </summary>
         public int AddArmor(int amount)
         {
@@ -146,12 +161,16 @@ namespace JabaSurvivol.Core
                 return 0;
             }
 
-            Armor = SafeAdd(Armor, amount);
-            return amount;
+            var applied = MaxArmor > 0
+                ? Math.Min(amount, Math.Max(0, MaxArmor - Armor))
+                : amount;
+            Armor = SafeAdd(Armor, applied);
+            return applied;
         }
 
         /// <summary>
-        /// Applies damage to the player and returns true when the run ends.
+        /// Applies damage to the player, absorbing it with armor first, and
+        /// returns true when the run ends.
         /// </summary>
         public bool DamagePlayer(float amount)
         {
@@ -160,7 +179,19 @@ namespace JabaSurvivol.Core
                 return true;
             }
 
-            Player.ApplyDamage(amount);
+            var remaining = Math.Max(0f, amount);
+            if (remaining > 0f && Armor > 0)
+            {
+                var absorbed = Math.Min((float)Armor, remaining);
+                Armor = Math.Max(0, Armor - (int)Math.Ceiling(absorbed));
+                remaining -= absorbed;
+            }
+
+            if (remaining > 0f)
+            {
+                Player.ApplyDamage(remaining);
+            }
+
             if (!Player.IsAlive)
             {
                 IsGameOver = true;
@@ -178,7 +209,7 @@ namespace JabaSurvivol.Core
             Player.Reset();
             Kills = 0;
             Ammo = 0;
-            Armor = 0;
+            Armor = MaxArmor;
             IsGameOver = false;
             _round.Reset(StartingRound);
             _round.Start();

@@ -54,6 +54,12 @@ namespace JabaSurvivol.Gameplay
 
         public WeaponStats EquippedWeaponStats => _weapon;
 
+        public ArmorTier EquippedArmor => _profile?.EquippedArmor ?? ArmorTier.None;
+
+        public ArmorStats EquippedArmorStats => _profile == null
+            ? default
+            : ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor);
+
         public bool ArmoryVisible => _ui != null && _ui.ArmoryVisible;
 
         public bool HudVisible => _ui != null && _ui.HudVisible;
@@ -131,6 +137,8 @@ namespace JabaSurvivol.Gameplay
                 ShowArmory,
                 HandleArmoryAction,
                 HandleArmoryUpgrade,
+                HandleArmorAction,
+                HandleArmorUpgrade,
                 CloseArmory);
 
             _state = GameSessionState.MainMenu;
@@ -247,7 +255,7 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
-            _ui.UpdateHud(_run.Player, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
+            _ui.UpdateHud(_run.Player, _run.Armor, _run.MaxArmor, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
         }
 
         private void UpdatePlayer(InputFrame frame, float deltaTime)
@@ -407,7 +415,8 @@ namespace JabaSurvivol.Gameplay
 
         public void StartRun()
         {
-            _run = new RunState(GameBalance.PlayerMaxHealth, 1, Environment.TickCount);
+            var armor = ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor);
+            _run = new RunState(GameBalance.PlayerMaxHealth, 1, Environment.TickCount, armor.AbsorbAmount);
             _weapon = WeaponUpgradeService.GetEffectiveStats(_profile, _profile.EquippedWeapon);
             _runSuppliesEarned = 0;
             _runXpEarned = 0;
@@ -426,7 +435,7 @@ namespace JabaSurvivol.Gameplay
 
             SpawnZombie();
             _ui.ShowHud();
-            _ui.UpdateHud(_run.Player, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
+            _ui.UpdateHud(_run.Player, _run.Armor, _run.MaxArmor, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
             _ui.SetSticks(default, default);
             _store.Save(_profile);
         }
@@ -588,6 +597,89 @@ namespace JabaSurvivol.Gameplay
             return result;
         }
 
+        private void HandleArmorAction(ArmorTier tier)
+        {
+            if (_profile.HasArmor(tier))
+            {
+                if (TryEquipArmor(tier))
+                {
+                    _ui.SetArmoryStatus(
+                        Localization.Format("armory.armor.equipped.status", Localization.ArmorName(tier)));
+                }
+            }
+            else
+            {
+                var result = TryPurchaseArmor(tier);
+                if (result == ArmorPurchaseResult.Purchased)
+                {
+                    TryEquipArmor(tier);
+                    _ui.SetArmoryStatus(
+                        Localization.Format("armory.armor.purchased", Localization.ArmorName(tier)));
+                }
+                else if (result == ArmorPurchaseResult.InsufficientSupplies)
+                {
+                    _ui.SetArmoryStatus(Localization.Get("armory.insufficient"));
+                }
+            }
+
+            _ui.RefreshArmory(_profile);
+        }
+
+        private void HandleArmorUpgrade()
+        {
+            var result = TryPurchaseArmorUpgrade(_profile.EquippedArmor);
+            if (result == ArmorUpgradePurchaseResult.Purchased)
+            {
+                _ui.SetArmoryStatus(
+                    Localization.Format(
+                        "armory.armor.upgraded",
+                        _profile.GetArmorUpgradeTier(_profile.EquippedArmor)));
+            }
+            else if (result == ArmorUpgradePurchaseResult.InsufficientSupplies)
+            {
+                _ui.SetArmoryStatus(Localization.Get("armory.insufficient"));
+            }
+            else if (result == ArmorUpgradePurchaseResult.MaxTier)
+            {
+                _ui.SetArmoryStatus(Localization.Get("armory.armor.maxed"));
+            }
+
+            _ui.RefreshArmory(_profile);
+        }
+
+        public ArmorPurchaseResult TryPurchaseArmor(ArmorTier tier)
+        {
+            var result = ArmorService.PurchaseArmor(_profile, tier);
+            if (result == ArmorPurchaseResult.Purchased)
+            {
+                _store.Save(_profile);
+            }
+
+            return result;
+        }
+
+        public bool TryEquipArmor(ArmorTier tier)
+        {
+            if (!ArmorService.EquipArmor(_profile, tier))
+            {
+                return false;
+            }
+
+            _store.Save(_profile);
+            return true;
+        }
+
+        public ArmorUpgradePurchaseResult TryPurchaseArmorUpgrade(ArmorTier tier)
+        {
+            var result = ArmorService.TryPurchaseUpgrade(_profile, tier);
+            if (result == ArmorUpgradePurchaseResult.Purchased)
+            {
+                _store.Save(_profile);
+            }
+
+            return result;
+        }
+
         /// <summary>
         /// Purchases a weapon and persists the unlock. Returns the atomic
         /// purchase result so callers can surface insufficient supplies.
@@ -631,7 +723,7 @@ namespace JabaSurvivol.Gameplay
             }
             else
             {
-                _ui.UpdateHud(_run.Player, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
+                _ui.UpdateHud(_run.Player, _run.Armor, _run.MaxArmor, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
             }
         }
 
@@ -696,7 +788,7 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
-            _ui.UpdateHud(_run.Player, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
+            _ui.UpdateHud(_run.Player, _run.Armor, _run.MaxArmor, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
         }
 
         /// <summary>
@@ -713,7 +805,7 @@ namespace JabaSurvivol.Gameplay
                 _runSuppliesEarned,
                 _runXpEarned,
                 _roundRewardOptions);
-            _ui.UpdateHud(_run.Player, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
+            _ui.UpdateHud(_run.Player, _run.Armor, _run.MaxArmor, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
         }
 
         /// <summary>
@@ -767,7 +859,7 @@ namespace JabaSurvivol.Gameplay
                 SpawnZombie();
             }
 
-            _ui.UpdateHud(_run.Player, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
+            _ui.UpdateHud(_run.Player, _run.Armor, _run.MaxArmor, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
         }
 
         /// <summary>

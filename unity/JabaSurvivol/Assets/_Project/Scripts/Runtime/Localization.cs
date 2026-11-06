@@ -20,6 +20,7 @@ namespace JabaSurvivol.Gameplay
             ["menu.progress"] = "SUPPLIES {0}    LEVEL {1}    BEST ROUND {2}",
             ["menu.controls"] = "LEFT STICK MOVE    RIGHT STICK AIM & FIRE",
             ["hud.health"] = "HP {0}/{1}",
+            ["hud.armor"] = "ARMOR {0}/{1}",
             ["hud.round"] = "ROUND {0}/{1}",
             ["hud.enemies"] = "ENEMIES REMAINING {0}",
             ["hud.supplies"] = "SUPPLIES {0}",
@@ -50,6 +51,26 @@ namespace JabaSurvivol.Gameplay
             ["weapon.upgrade.firerate"] = "FIRE RATE",
             ["weapon.upgrade.magazine"] = "MAGAZINE",
             ["weapon.upgrade.reload"] = "RELOAD",
+            ["armory.tab.weapons"] = "WEAPONS",
+            ["armory.tab.armor"] = "ARMOR",
+            ["armory.armor.none"] = "NO ARMOR",
+            ["armory.armor.light"] = "LIGHT ARMOR",
+            ["armory.armor.medium"] = "MEDIUM ARMOR",
+            ["armory.armor.heavy"] = "HEAVY ARMOR",
+            ["armory.armor.absorb"] = "ABSORB {0}",
+            ["armory.armor.row"] = "ABSORB {0}   TIER {1}/{2}",
+            ["armory.armor.upgrade.title"] = "ARMOR UPGRADE - {0}",
+            ["armory.armor.upgrade.card"] = "ABSORB +10%\nTIER {0}/{1}\n{2} SUPPLIES",
+            ["armory.armor.upgrade.max"] = "ABSORB +10%\nMAX TIER {0}",
+            ["armory.armor.upgrade.none"] = "EQUIP ARMOR TO UPGRADE",
+            ["armory.armor.unlock"] = "UNLOCK {0}",
+            ["armory.armor.unlock.free"] = "UNLOCK",
+            ["armory.armor.equip"] = "EQUIP",
+            ["armory.armor.equipped"] = "EQUIPPED",
+            ["armory.armor.purchased"] = "{0} UNLOCKED AND EQUIPPED",
+            ["armory.armor.equipped.status"] = "{0} EQUIPPED",
+            ["armory.armor.upgraded"] = "ARMOR TIER {0}",
+            ["armory.armor.maxed"] = "MAX ARMOR TIER",
             ["weapon.pistol.name"] = "PISTOL",
             ["weapon.smg.name"] = "SMG",
             ["weapon.shotgun.name"] = "SHOTGUN",
@@ -109,6 +130,22 @@ namespace JabaSurvivol.Gameplay
         public static string WeaponUpgradeStatName(WeaponUpgradeStat stat)
         {
             return Get(WeaponUpgradeStatKey(stat));
+        }
+
+        public static string ArmorNameKey(ArmorTier tier)
+        {
+            return tier switch
+            {
+                ArmorTier.Light => "armory.armor.light",
+                ArmorTier.Medium => "armory.armor.medium",
+                ArmorTier.Heavy => "armory.armor.heavy",
+                _ => "armory.armor.none"
+            };
+        }
+
+        public static string ArmorName(ArmorTier tier)
+        {
+            return Get(ArmorNameKey(tier));
         }
     }
 }

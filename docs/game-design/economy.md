@@ -60,10 +60,16 @@ stored in the profile and survive death.
 
 ## Armor
 
-- Light, medium, and heavy tiers.
-- Absorbs damage before health.
-- Repairs are free or drop-based.
-- Upgrades are permanent.
+- Light: 25 absorb, free unlock.
+- Medium: 50 absorb, 800 supplies.
+- Heavy: 90 absorb, 1,600 supplies.
+- Armor absorbs damage before health.
+- Repairs are free or drop-based. An armor plate restores 10 condition and
+  never consumes persistent supplies.
+- Each unlocked armor tier has five permanent upgrade tiers at +10% absorb per
+  tier, with data-driven costs.
+- Unlocks, equipped armor, and upgrades are stored in the profile and survive
+  death. Death resets only the current run's armor condition.
 
 ## Round rewards
 
@@ -80,7 +86,7 @@ deterministically from the run seed and the round number. The pool contains:
 | Supplies | 50 | 275 | Persistent profile |
 | XP | 30 | 165 | Persistent profile |
 | Ammo crate | 24 | 24 | Current run only |
-| Armor plate | 1 | 1 | Current run only |
+| Armor plate | 10 | 10 | Current run only |
 
 The base round-clear bonus is awarded separately: 100 supplies and 50 XP.
 Ammo and armor are free, drop-based, and never purchased with persistent

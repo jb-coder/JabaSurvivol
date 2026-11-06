@@ -43,6 +43,21 @@ namespace JabaSurvivol.Core
         public List<WeaponUpgrade> WeaponUpgrades = new List<WeaponUpgrade>();
 
         /// <summary>
+        /// Permanently unlocked armor tiers. None is always available.
+        /// </summary>
+        public List<ArmorTier> UnlockedArmor = new List<ArmorTier> { ArmorTier.None };
+
+        /// <summary>
+        /// Permanently equipped armor tier. Run armor condition is not stored.
+        /// </summary>
+        public ArmorTier EquippedArmor = ArmorTier.None;
+
+        /// <summary>
+        /// Permanent armor upgrade tiers. Additive to schema version 1.
+        /// </summary>
+        public List<ArmorUpgrade> ArmorUpgrades = new List<ArmorUpgrade>();
+
+        /// <summary>
         /// XP needed to advance from <paramref name="level"/> to the next level.
         /// Returns zero at the level cap.
         /// </summary>
@@ -202,6 +217,94 @@ namespace JabaSurvivol.Core
             return true;
         }
 
+        public bool HasArmor(ArmorTier tier)
+        {
+            return tier == ArmorTier.None ||
+                   (UnlockedArmor != null && UnlockedArmor.Contains(tier));
+        }
+
+        public bool UnlockArmor(ArmorTier tier)
+        {
+            if (!ArmorCatalog.IsDefined(tier) || HasArmor(tier))
+            {
+                return false;
+            }
+
+            if (UnlockedArmor == null)
+            {
+                UnlockedArmor = new List<ArmorTier>();
+            }
+
+            UnlockedArmor.Add(tier);
+            return true;
+        }
+
+        public bool EquipArmor(ArmorTier tier)
+        {
+            if (!ArmorCatalog.IsDefined(tier) || !HasArmor(tier))
+            {
+                return false;
+            }
+
+            EquippedArmor = tier;
+            return true;
+        }
+
+        public int GetArmorUpgradeTier(ArmorTier tier)
+        {
+            if (!ArmorCatalog.IsDefined(tier))
+            {
+                return 0;
+            }
+
+            var maxTier = ArmorCatalog.Get(tier).MaxUpgradeTier;
+            var upgradeTier = 0;
+            if (ArmorUpgrades != null)
+            {
+                for (var i = 0; i < ArmorUpgrades.Count; i++)
+                {
+                    var upgrade = ArmorUpgrades[i];
+                    if (upgrade != null && upgrade.Tier == tier)
+                    {
+                        upgradeTier = Math.Max(upgradeTier, upgrade.UpgradeTier);
+                    }
+                }
+            }
+
+            return Math.Clamp(upgradeTier, 0, maxTier);
+        }
+
+        public bool SetArmorUpgradeTier(ArmorTier tier, int upgradeTier)
+        {
+            if (!ArmorCatalog.IsDefined(tier) || !HasArmor(tier))
+            {
+                return false;
+            }
+
+            var maxTier = ArmorCatalog.Get(tier).MaxUpgradeTier;
+            var clampedTier = Math.Clamp(upgradeTier, 0, maxTier);
+            if (ArmorUpgrades == null)
+            {
+                ArmorUpgrades = new List<ArmorUpgrade>();
+            }
+
+            for (var i = ArmorUpgrades.Count - 1; i >= 0; i--)
+            {
+                var upgrade = ArmorUpgrades[i];
+                if (upgrade != null && upgrade.Tier == tier)
+                {
+                    ArmorUpgrades.RemoveAt(i);
+                }
+            }
+
+            if (clampedTier > 0)
+            {
+                ArmorUpgrades.Add(new ArmorUpgrade(tier, clampedTier));
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Adds XP and returns the number of levels gained.
         /// </summary>
@@ -286,6 +389,8 @@ namespace JabaSurvivol.Core
             ClampSkillPoints();
             ValidateWeapons();
             ValidateWeaponUpgrades();
+            ValidateArmor();
+            ValidateArmorUpgrades();
         }
 
         private void ValidateWeaponUpgrades()
@@ -323,6 +428,85 @@ namespace JabaSurvivol.Core
 
                     earlier.Tier = Math.Max(earlier.Tier, upgrade.Tier);
                     WeaponUpgrades.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
+        private void ValidateArmor()
+        {
+            if (UnlockedArmor == null)
+            {
+                UnlockedArmor = new List<ArmorTier>();
+            }
+
+            for (var i = UnlockedArmor.Count - 1; i >= 0; i--)
+            {
+                var tier = UnlockedArmor[i];
+                if (!ArmorCatalog.IsDefined(tier))
+                {
+                    UnlockedArmor.RemoveAt(i);
+                    continue;
+                }
+
+                for (var j = 0; j < i; j++)
+                {
+                    if (UnlockedArmor[j] == tier)
+                    {
+                        UnlockedArmor.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
+
+            if (!UnlockedArmor.Contains(ArmorTier.None))
+            {
+                UnlockedArmor.Insert(0, ArmorTier.None);
+            }
+
+            if (!ArmorCatalog.IsDefined(EquippedArmor) || !HasArmor(EquippedArmor))
+            {
+                EquippedArmor = ArmorTier.None;
+            }
+        }
+
+        private void ValidateArmorUpgrades()
+        {
+            if (ArmorUpgrades == null)
+            {
+                ArmorUpgrades = new List<ArmorUpgrade>();
+            }
+
+            for (var i = ArmorUpgrades.Count - 1; i >= 0; i--)
+            {
+                var upgrade = ArmorUpgrades[i];
+                if (upgrade == null ||
+                    !ArmorCatalog.IsDefined(upgrade.Tier) ||
+                    !HasArmor(upgrade.Tier) ||
+                    upgrade.UpgradeTier <= 0)
+                {
+                    ArmorUpgrades.RemoveAt(i);
+                    continue;
+                }
+
+                var maxTier = ArmorCatalog.Get(upgrade.Tier).MaxUpgradeTier;
+                upgrade.UpgradeTier = Math.Min(upgrade.UpgradeTier, maxTier);
+                if (upgrade.UpgradeTier <= 0)
+                {
+                    ArmorUpgrades.RemoveAt(i);
+                    continue;
+                }
+
+                for (var j = 0; j < i; j++)
+                {
+                    var earlier = ArmorUpgrades[j];
+                    if (earlier == null || earlier.Tier != upgrade.Tier)
+                    {
+                        continue;
+                    }
+
+                    earlier.UpgradeTier = Math.Max(earlier.UpgradeTier, upgrade.UpgradeTier);
+                    ArmorUpgrades.RemoveAt(i);
                     break;
                 }
             }
