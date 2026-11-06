@@ -37,6 +37,7 @@ namespace JabaSurvivol.Gameplay
         private float _roundClearCountdown;
         private bool _zombieActive;
         private bool _roundClearPending;
+        private RoundRewardOption[] _roundRewardOptions;
         private int _runSuppliesEarned;
         private int _runXpEarned;
 
@@ -59,6 +60,18 @@ namespace JabaSurvivol.Gameplay
         public RoundPhase RoundPhase => _run?.RoundModel.Phase ?? RoundPhase.NotStarted;
 
         public bool RoundClearPending => _roundClearPending;
+
+        public int PendingRewardCount => _roundRewardOptions?.Length ?? 0;
+
+        public RoundRewardOption PendingRewardAt(int index)
+        {
+            if (_roundRewardOptions == null || index < 0 || index >= _roundRewardOptions.Length)
+            {
+                return default;
+            }
+
+            return _roundRewardOptions[index];
+        }
 
         public string SavePath => _store?.FilePath;
 
@@ -284,6 +297,7 @@ namespace JabaSurvivol.Gameplay
             _runXpEarned = 0;
             _roundClearPending = false;
             _roundClearCountdown = 0f;
+            _roundRewardOptions = null;
             _state = GameSessionState.Playing;
 
             _playerObject.SetActive(true);
@@ -344,6 +358,7 @@ namespace JabaSurvivol.Gameplay
 
             _state = GameSessionState.MainMenu;
             _roundClearPending = false;
+            _roundRewardOptions = null;
             _playerObject.SetActive(false);
             _zombieActive = false;
             _zombieObject.SetActive(false);
@@ -433,15 +448,37 @@ namespace JabaSurvivol.Gameplay
         }
 
         /// <summary>
-        /// Round clear hook. Reward selection is added by the economy slice; the
-        /// round model pauses here so the flow can run before the next round.
+        /// Round clear hook. Generates the deterministic reward choices and
+        /// pauses the run until the player picks one. The timed fallback keeps
+        /// the run playable until the reward selection panel is available.
         /// </summary>
         private void BeginRoundRewardFlow(KillReward reward)
         {
+            _roundRewardOptions = RoundRewardModel.GenerateOptions(_run.Round, _run.Seed);
             _roundClearPending = true;
             _roundClearCountdown = GameBalance.RoundClearPauseSeconds;
-            _ui.ShowRoundCleared(reward.Round);
+            _ui.ShowRoundCleared(reward.Round, _roundRewardOptions[0]);
             _ui.UpdateHud(_run.Player, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
+        }
+
+        /// <summary>
+        /// Applies the selected reward, saves persistent progress, and starts
+        /// the next round.
+        /// </summary>
+        public bool SelectRoundReward(int index)
+        {
+            if (!_roundClearPending || _state != GameSessionState.Playing ||
+                _roundRewardOptions == null || index < 0 || index >= _roundRewardOptions.Length)
+            {
+                return false;
+            }
+
+            var result = RoundRewardModel.Apply(_roundRewardOptions[index], _profile, _run);
+            _runSuppliesEarned += result.Supplies;
+            _runXpEarned += result.Xp;
+            _store.Save(_profile);
+            CompleteRoundClear();
+            return true;
         }
 
         /// <summary>
@@ -455,8 +492,20 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
+            if (_roundRewardOptions == null || _roundRewardOptions.Length == 0)
+            {
+                CompleteRoundClear();
+                return;
+            }
+
+            SelectRoundReward(0);
+        }
+
+        private void CompleteRoundClear()
+        {
             _roundClearPending = false;
             _roundClearCountdown = 0f;
+            _roundRewardOptions = null;
             _ui.HideRoundCleared();
 
             if (_run.AdvanceRound())
@@ -487,6 +536,7 @@ namespace JabaSurvivol.Gameplay
 
             _state = GameSessionState.GameOver;
             _roundClearPending = false;
+            _roundRewardOptions = null;
             _ui.HideRoundCleared();
             _zombieActive = false;
             _zombieObject.SetActive(false);

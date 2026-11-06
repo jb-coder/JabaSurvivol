@@ -146,17 +146,78 @@ namespace JabaSurvivol.Tests.PlayMode
 
             Assert.That(session.RoundPhase, Is.EqualTo(RoundPhase.Cleared));
             Assert.That(session.RoundClearPending, Is.True);
+            Assert.That(session.PendingRewardCount, Is.EqualTo(GameBalance.RoundRewardOptionCount));
+
             var suppliesAfterClear = session.Profile.Supplies;
+            var xpAfterClear = session.Profile.Xp;
+            var reward = session.PendingRewardAt(0);
 
             session.ContinueAfterRoundClear();
             yield return null;
+
+            var expectedSupplies = suppliesAfterClear + (reward.Type == RoundRewardType.Supplies ? reward.Amount : 0);
+            var expectedXp = xpAfterClear + (reward.Type == RoundRewardType.Xp ? reward.Amount : 0);
 
             Assert.That(session.State, Is.EqualTo(GameSessionState.Playing));
             Assert.That(session.Run.Round, Is.EqualTo(2));
             Assert.That(session.EnemiesRemaining, Is.EqualTo(session.SpawnBudget));
             Assert.That(session.RoundPhase, Is.EqualTo(RoundPhase.Active));
-            Assert.That(session.Profile.Supplies, Is.EqualTo(suppliesAfterClear));
+            Assert.That(session.Profile.Supplies, Is.EqualTo(expectedSupplies));
+            Assert.That(session.Profile.Xp, Is.EqualTo(expectedXp));
             Assert.That(File.Exists(_path), Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator Round_reward_persists_across_bootstrap_recreation()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.StartRun();
+            var budget = session.SpawnBudget;
+
+            for (var i = 0; i < budget; i++)
+            {
+                session.DamageZombieForTests(100000f);
+                yield return null;
+
+                if (i < budget - 1)
+                {
+                    session.SpawnZombieForTests();
+                    yield return null;
+                }
+            }
+
+            var rewardIndex = -1;
+            RoundRewardOption reward = default;
+            for (var i = 0; i < session.PendingRewardCount; i++)
+            {
+                var option = session.PendingRewardAt(i);
+                if (option.Type == RoundRewardType.Supplies || option.Type == RoundRewardType.Xp)
+                {
+                    rewardIndex = i;
+                    reward = option;
+                    break;
+                }
+            }
+
+            Assert.That(rewardIndex, Is.GreaterThanOrEqualTo(0));
+            Assert.That(session.SelectRoundReward(rewardIndex), Is.True);
+            yield return null;
+
+            var supplies = session.Profile.Supplies;
+            var xp = session.Profile.Xp;
+            session.SaveNow();
+            UnityEngine.Object.DestroyImmediate(_bootstrap.gameObject);
+            _bootstrap = null;
+            yield return null;
+
+            _bootstrap = CreateBootstrap();
+            yield return null;
+
+            Assert.That(_bootstrap.Session.Profile.Supplies, Is.EqualTo(supplies));
+            Assert.That(_bootstrap.Session.Profile.Xp, Is.EqualTo(xp));
+            Assert.That(reward.IsPersistent, Is.True);
         }
 
         [UnityTest]
