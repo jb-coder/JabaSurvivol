@@ -41,6 +41,15 @@ namespace JabaSurvivol.Gameplay
             ["armory.insufficient"] = "NOT ENOUGH SUPPLIES",
             ["armory.stats"] = "DMG {0}   RATE {1}/s   MAG {2}   RANGE {3}   RESERVE {4}",
             ["armory.reserve.infinite"] = "INF",
+            ["armory.upgrade.title"] = "UPGRADES - {0}",
+            ["armory.upgrade.card"] = "{0}\nTIER {1}/{2}\n+{4}% NEXT\n{3} SUPPLIES",
+            ["armory.upgrade.max"] = "{0}\nMAX TIER {1}",
+            ["armory.upgrade.purchased"] = "{0} TIER {1}",
+            ["armory.upgrade.maxed"] = "MAX TIER REACHED",
+            ["weapon.upgrade.damage"] = "DAMAGE",
+            ["weapon.upgrade.firerate"] = "FIRE RATE",
+            ["weapon.upgrade.magazine"] = "MAGAZINE",
+            ["weapon.upgrade.reload"] = "RELOAD",
             ["weapon.pistol.name"] = "PISTOL",
             ["weapon.smg.name"] = "SMG",
             ["weapon.shotgun.name"] = "SHOTGUN",
@@ -84,6 +93,22 @@ namespace JabaSurvivol.Gameplay
         public static string WeaponName(WeaponId weaponId)
         {
             return Get(WeaponNameKey(weaponId));
+        }
+
+        public static string WeaponUpgradeStatKey(WeaponUpgradeStat stat)
+        {
+            return stat switch
+            {
+                WeaponUpgradeStat.FireRate => "weapon.upgrade.firerate",
+                WeaponUpgradeStat.MagazineSize => "weapon.upgrade.magazine",
+                WeaponUpgradeStat.ReloadSpeed => "weapon.upgrade.reload",
+                _ => "weapon.upgrade.damage"
+            };
+        }
+
+        public static string WeaponUpgradeStatName(WeaponUpgradeStat stat)
+        {
+            return Get(WeaponUpgradeStatKey(stat));
         }
     }
 }

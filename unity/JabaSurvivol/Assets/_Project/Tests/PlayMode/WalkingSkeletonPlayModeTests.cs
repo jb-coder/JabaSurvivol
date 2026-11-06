@@ -405,6 +405,85 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(session.EquippedWeaponStats.Range, Is.EqualTo(smg.Range));
         }
 
+        [UnityTest]
+        public IEnumerator Weapon_upgrade_increases_effective_stats_and_persists()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddSupplies(1000);
+            session.SaveNow();
+            var baseDamage = WeaponCatalog.Get(WeaponId.Pistol).Damage;
+
+            Assert.That(
+                session.TryPurchaseWeaponUpgrade(WeaponUpgradeStat.Damage),
+                Is.EqualTo(WeaponUpgradePurchaseResult.Purchased));
+            yield return null;
+
+            Assert.That(session.Profile.GetWeaponUpgradeTier(WeaponId.Pistol, WeaponUpgradeStat.Damage), Is.EqualTo(1));
+            Assert.That(session.EquippedWeaponStats.Damage, Is.GreaterThan(baseDamage));
+
+            session.SaveNow();
+            UnityEngine.Object.DestroyImmediate(_bootstrap.gameObject);
+            _bootstrap = null;
+            yield return null;
+
+            _bootstrap = CreateBootstrap();
+            yield return null;
+
+            Assert.That(
+                _bootstrap.Session.Profile.GetWeaponUpgradeTier(WeaponId.Pistol, WeaponUpgradeStat.Damage),
+                Is.EqualTo(1));
+            Assert.That(_bootstrap.Session.EquippedWeaponStats.Damage, Is.GreaterThan(baseDamage));
+        }
+
+        [UnityTest]
+        public IEnumerator Weapon_upgrade_survives_death()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddSupplies(1000);
+            session.TryPurchaseWeaponUpgrade(WeaponUpgradeStat.Damage);
+            session.StartRun();
+            yield return null;
+
+            session.ApplyDamage(GameBalance.PlayerMaxHealth * 2f);
+            yield return null;
+
+            Assert.That(session.State, Is.EqualTo(GameSessionState.GameOver));
+            Assert.That(
+                session.Profile.GetWeaponUpgradeTier(WeaponId.Pistol, WeaponUpgradeStat.Damage),
+                Is.EqualTo(1));
+        }
+
+        [UnityTest]
+        public IEnumerator Weapon_upgrade_reaches_max_tier_and_rejects_extra()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddSupplies(1000);
+            var track = WeaponUpgradeCatalog.Get(WeaponId.Pistol, WeaponUpgradeStat.Damage);
+
+            for (var tier = 0; tier < track.MaxTier; tier++)
+            {
+                Assert.That(
+                    session.TryPurchaseWeaponUpgrade(WeaponUpgradeStat.Damage),
+                    Is.EqualTo(WeaponUpgradePurchaseResult.Purchased));
+            }
+
+            Assert.That(
+                session.TryPurchaseWeaponUpgrade(WeaponUpgradeStat.Damage),
+                Is.EqualTo(WeaponUpgradePurchaseResult.MaxTier));
+            Assert.That(
+                session.Profile.GetWeaponUpgradeTier(WeaponId.Pistol, WeaponUpgradeStat.Damage),
+                Is.EqualTo(track.MaxTier));
+            Assert.That(
+                session.EquippedWeaponStats.Damage,
+                Is.EqualTo(WeaponCatalog.Get(WeaponId.Pistol).Damage * 1.5f).Within(0.001f));
+        }
+
         private static GameBootstrap CreateBootstrap()
         {
             var gameObject = new GameObject("Test Bootstrap");
