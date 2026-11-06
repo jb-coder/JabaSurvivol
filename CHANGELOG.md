@@ -6,6 +6,15 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+### Added
+
+- Deterministic round lifecycle in `Game.Core` with round start, active, cleared, and failed phases, per-round spawn budgets, and round-scaled zombie health, speed, and damage.
+- HUD round counter with enemies remaining and the persistent highest round record.
+
+### Changed
+
+- `GameSession` now uses the round model instead of a fixed kill count; clearing a round pauses for the reward flow before the next round starts.
+
 ## [0.1.0] - 2026-11-06
 
 ### Added
