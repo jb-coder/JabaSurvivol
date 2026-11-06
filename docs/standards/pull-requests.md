@@ -12,6 +12,7 @@
 | `release/*` | `develop` | `main` | Merge commit |
 | `hotfix/*` | `main` | `main` | Merge commit |
 | `backmerge/*` | `main` | `develop` | Merge commit |
+| `dependabot/*` | Dependabot | `develop` | Squash |
 
 Every change enters through a pull request. No direct pushes to `main` or `develop`.
 

@@ -104,6 +104,7 @@ Gitflow with short-lived branches:
 - `release/*`: from `develop`, PR to `main`, merge commit, tag, backmerge to `develop`.
 - `hotfix/*`: from `main`, PR to `main`, merge commit, tag, backmerge to `develop`.
 - `backmerge/*`: from `main`, PR to `develop`, merge commit.
+- `dependabot/*`: auto-generated dependency updates, PR to `develop`, squash merge.
 
 Every change enters through a pull request. No exceptions for documentation, CI, or hotfixes.
 
