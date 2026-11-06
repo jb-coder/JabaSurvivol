@@ -31,7 +31,12 @@ namespace JabaSurvivol.Gameplay
             ["gameover.summary"] = "ROUND {0}    KILLS {1}\nSUPPLIES EARNED {2}",
             ["gameover.restart"] = "RESTART",
             ["gameover.menu"] = "MAIN MENU",
-            ["round.clear"] = "ROUND {0} CLEARED"
+            ["round.clear"] = "ROUND {0} CLEARED",
+            ["round.clear_reward"] = "ROUND {0} CLEARED\nREWARD: {1}",
+            ["reward.supplies"] = "SUPPLIES +{0}",
+            ["reward.xp"] = "XP +{0}",
+            ["reward.ammo"] = "AMMO CRATE +{0}",
+            ["reward.armor"] = "ARMOR PLATE +{0}"
         };
 
         public static string Get(string key)

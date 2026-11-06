@@ -52,13 +52,24 @@ Weapon upgrades use supplies and are permanent. Suggested tiers:
 
 ## Round rewards
 
-After each round, the player chooses one of three:
+After each round, the player chooses one of three options generated
+deterministically from the run seed and the round number. The pool contains:
 
 - Supplies.
 - XP.
-- Upgrade token.
 - Ammo crate.
 - Armor plate.
+
+| Reward | Round 1 | Round 10 | Persistence |
+|---|---:|---:|---|
+| Supplies | 50 | 275 | Persistent profile |
+| XP | 30 | 165 | Persistent profile |
+| Ammo crate | 24 | 24 | Current run only |
+| Armor plate | 1 | 1 | Current run only |
+
+The base round-clear bonus is awarded separately: 100 supplies and 50 XP.
+Ammo and armor are free, drop-based, and never purchased with persistent
+supplies.
 
 ## Premium currency
 

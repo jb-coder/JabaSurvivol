@@ -157,10 +157,26 @@ namespace JabaSurvivol.Gameplay
             _gameOverSummary.text = Localization.Format("gameover.summary", round, kills, suppliesEarned);
         }
 
-        public void ShowRoundCleared(int round)
+        public void ShowRoundCleared(int round, RoundRewardOption reward)
         {
-            _roundClearText.text = Localization.Format("round.clear", round);
+            _roundClearText.text = Localization.Format(
+                "round.clear_reward",
+                round,
+                FormatReward(reward));
             _roundClearText.gameObject.SetActive(true);
+        }
+
+        private static string FormatReward(RoundRewardOption reward)
+        {
+            var key = reward.Type switch
+            {
+                RoundRewardType.Supplies => "reward.supplies",
+                RoundRewardType.Xp => "reward.xp",
+                RoundRewardType.AmmoCrate => "reward.ammo",
+                _ => "reward.armor"
+            };
+
+            return Localization.Format(key, reward.Amount);
         }
 
         public void HideRoundCleared()
