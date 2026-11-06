@@ -27,7 +27,7 @@ Never remove on death:
 | Supplies | Kills, headshots, rounds, elites, boss | Weapons, upgrades, armor | No |
 | XP | Kills, rounds, challenges, boss | Character levels | No |
 | Skill points | Character levels | Skill tree | No |
-| Núcleos | Real money, battle pass, events | Cosmetics, battle pass, slots | No |
+| Cores | Real money, battle pass, events | Cosmetics, battle pass, slots | No |
 
 ## Character progression
 

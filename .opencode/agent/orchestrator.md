@@ -28,6 +28,16 @@ You are the delivery orchestrator for JabaSurvivol. Read `AGENTS.md` and the rel
 - Respect autonomy guardrails and the kill switch.
 - Never bypass a failed gate. Fix the cause or park the work with `agent:blocked` and a follow-up issue.
 
+## GitHub credentials
+
+Use the builder wrapper for every GitHub operation:
+
+```powershell
+pwsh tools/agent/gh-builder.ps1 <gh arguments>
+```
+
+Never use plain `gh` for writes. Never print tokens. The wrapper reads `JABA_BUILDER_TOKEN`.
+
 ## Working method
 
 1. Read the issue and acceptance criteria.

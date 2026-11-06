@@ -3,6 +3,8 @@ name: pr-policy
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened, labeled, unlabeled]
+  pull_request_review:
+    types: [submitted, dismissed]
 
 permissions:
   contents: read
@@ -11,10 +13,11 @@ permissions:
 
 jobs:
   policy:
+    name: pr-policy
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Validate pull request policy
         env:

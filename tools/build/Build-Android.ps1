@@ -9,11 +9,18 @@ if (-not [string]::IsNullOrWhiteSpace($UnityPath)) {
     $candidatePaths += $UnityPath
 }
 else {
-    $hubRoot = "C:\Program Files\Unity\Hub\Editor"
-    if (Test-Path -LiteralPath $hubRoot) {
-        $candidatePaths += Get-ChildItem -LiteralPath $hubRoot -Directory |
-            Sort-Object Name -Descending |
-            ForEach-Object { Join-Path $_.FullName "Editor\Unity.exe" }
+    $hubRoots = @(
+        "C:\Program Files\Unity\Hub\Editor",
+        "C:\dev\personal\Unity\Hub\Editor",
+        (Join-Path $env:LOCALAPPDATA "Unity\Hub\Editor")
+    )
+
+    foreach ($hubRoot in $hubRoots) {
+        if (Test-Path -LiteralPath $hubRoot) {
+            $candidatePaths += Get-ChildItem -LiteralPath $hubRoot -Directory |
+                Sort-Object Name -Descending |
+                ForEach-Object { Join-Path $_.FullName "Editor\Unity.exe" }
+        }
     }
 }
 
@@ -31,6 +38,7 @@ if (-not (Test-Path -LiteralPath (Join-Path $ProjectPath "ProjectSettings/Projec
     exit 1
 }
 
+$OutputPath = [System.IO.Path]::GetFullPath($OutputPath)
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $OutputPath) | Out-Null
 
 & $unity -batchmode -quit -projectPath $ProjectPath -buildTarget Android -executeMethod JabaSurvivol.Editor.BuildScript.BuildAndroid -logFile - -buildOutput $OutputPath

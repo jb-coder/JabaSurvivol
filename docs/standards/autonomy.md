@@ -6,11 +6,11 @@ Agents deliver, review, build, merge, and deploy without human review. Human inv
 
 ## Identities
 
-- `jaba-builder`: creates branches, commits, PRs, enables auto-merge, and merges.
-- `jaba-reviewer`: independent reviewer; approves or requests changes.
-- `jaba-deployer`: deploys backend images and releases using short-lived credentials.
+- **Builder:** `jb-coder` creates branches, commits, PRs, enables auto-merge, and merges.
+- **Reviewer:** the GitHub App `jaba-survivol-reviewer-jb` approves or requests changes.
+- **Deployer:** optional short-lived credentials deploy backend images and releases.
 
-The builder must not approve its own PR. The reviewer must not edit code. The deployer must not change application code.
+The builder must not approve its own PR. The reviewer app must not edit code. The deployer must not change application code.
 
 ## Pre-merge gates
 

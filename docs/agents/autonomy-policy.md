@@ -27,6 +27,14 @@ Agents own the full development loop: plan, implement, test, review, merge, buil
 - The security reviewer never edits code.
 - The deployer does not change application code.
 
+## Credentials
+
+- Builder operations use `pwsh tools/agent/gh-builder.ps1` with the current `gh` login or `JABA_BUILDER_TOKEN`.
+- Reviewer operations use `pwsh tools/agent/gh-reviewer.ps1`. The wrapper mints a short-lived installation token from the `jaba-survivol-reviewer-jb` GitHub App.
+- The reviewer app credentials live outside the repository at `%USERPROFILE%\.config\jaba-survivol\github-app`.
+- Never use plain `gh` for writes.
+- Never print, commit, or log tokens.
+
 ## Autonomy loop
 
 1. Pick an issue from `Ready`.

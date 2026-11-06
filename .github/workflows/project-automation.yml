@@ -1,0 +1,49 @@
+name: project-automation
+
+on:
+  issues:
+    types: [opened, reopened, edited, labeled, unlabeled, closed, assigned, unassigned, milestoned, demilestoned]
+  pull_request:
+    types: [opened, reopened, edited, labeled, unlabeled, closed, ready_for_review, converted_to_draft, review_requested, review_request_removed, synchronize]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+concurrency:
+  group: project-sync-${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: project-sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Resolve item URL
+        id: item
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "issues") {
+            "url=${{ github.event.issue.html_url }}" >> $env:GITHUB_OUTPUT
+          }
+          else {
+            "url=${{ github.event.pull_request.html_url }}" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Sync project item
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: |
+          pwsh -NoProfile -File tools/agent/sync-project-item.ps1 `
+            -ItemUrl "${{ steps.item.outputs.url }}" `
+            -EventName "${{ github.event_name }}" `
+            -Action "${{ github.event.action }}" `
+            -ReviewState "${{ github.event.review.state }}"

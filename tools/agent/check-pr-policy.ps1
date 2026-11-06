@@ -28,10 +28,6 @@ if ($labels -contains 'do-not-merge') {
     $failures += "The do-not-merge label is present."
 }
 
-if ($labels -notcontains 'agent:approved') {
-    $failures += "The agent:approved label is missing."
-}
-
 if ($labels -contains 'agent:changes-requested') {
     $failures += "The agent:changes-requested label is present."
 }

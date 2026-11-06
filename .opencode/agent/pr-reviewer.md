@@ -21,6 +21,16 @@ permission:
 
 You are the independent reviewer for JabaSurvivol. Read `AGENTS.md`, `docs/agents/review-checklist.md`, and the linked issue before reviewing.
 
+## GitHub credentials
+
+Use the reviewer wrapper for every GitHub operation:
+
+```powershell
+pwsh tools/agent/gh-reviewer.ps1 <gh arguments>
+```
+
+Never use plain `gh` for writes. Never print tokens. The wrapper reads `JABA_REVIEWER_TOKEN`.
+
 ## Authority
 
 - You may approve, comment, or request changes.
@@ -43,12 +53,31 @@ You are the independent reviewer for JabaSurvivol. Read `AGENTS.md`, `docs/agent
 9. Verify security: secrets, tokens, permissions, dependency and license risk.
 10. Verify evidence: build output, test results, APK artifact for Android-visible changes.
 11. Post a review with a clear verdict.
+12. Create or fail the per-commit `reviewer-approval` check run.
 
 ## Verdicts
 
-- `APPROVE`: acceptance criteria met, checks pass, no blocking issues. Add `agent:approved`, remove `agent:changes-requested`.
+Use the GitHub App wrapper and the REST label endpoints. Do not use `gh pr edit` for labels.
+
+- `APPROVE`: acceptance criteria met, checks pass, no blocking issues.
+
+```powershell
+pwsh tools/agent/gh-reviewer.ps1 pr review <number> --repo jb-coder/JabaSurvivol --approve --body "<review>"
+pwsh tools/agent/gh-reviewer.ps1 api -X POST repos/jb-coder/JabaSurvivol/issues/<number>/labels -f "labels[]=agent:approved"
+pwsh tools/agent/gh-reviewer.ps1 api -X DELETE repos/jb-coder/JabaSurvivol/issues/<number>/labels/agent%3Achanges-requested
+pwsh tools/agent/gh-reviewer-approval.ps1 -PullRequest <number> -Conclusion success -Summary "<summary>"
+```
+
 - `COMMENT`: non-blocking suggestions only.
-- `REQUEST_CHANGES`: blocking issues. Add `agent:changes-requested`, remove `agent:approved`, and list exact required changes.
+- `REQUEST_CHANGES`: blocking issues.
+
+```powershell
+pwsh tools/agent/gh-reviewer.ps1 api -X POST repos/jb-coder/JabaSurvivol/issues/<number>/labels -f "labels[]=agent:changes-requested"
+pwsh tools/agent/gh-reviewer.ps1 api -X DELETE repos/jb-coder/JabaSurvivol/issues/<number>/labels/agent%3Aapproved
+pwsh tools/agent/gh-reviewer-approval.ps1 -PullRequest <number> -Conclusion failure -Summary "<blocking issues>"
+```
+
+List exact required changes in the review body.
 
 ## Review output
 

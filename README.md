@@ -4,7 +4,12 @@ JabaSurvivol is a 2D top-down, round-based zombie survival game for Android phon
 
 ## Status
 
-Repository bootstrap is in progress. The .NET solution, Aspire AppHost, service skeletons, agent definitions, standards, and automation are in place. The Unity project is created in the next phase after Unity 6.3 LTS is installed.
+The repository bootstrap and the Unity walking skeleton are complete. The .NET
+solution, Aspire AppHost, service skeletons, agent definitions, standards, and
+automation are in place. Unity 6.3.28f1 is installed with Android, Windows
+IL2CPP, and WebGL build support. The Unity project at `unity/JabaSurvivol`
+contains landscape twin-stick touch controls, shooting, one zombie, health,
+supplies, game over, restart, and local persistent progression.
 
 ## Product rules
 
@@ -72,7 +77,7 @@ Unity setup instructions are in `docs/setup/unity.md`.
 - `docs/standards/`: English-only, commits, PRs, autonomy, security, localization.
 - `docs/game-design/`: core loop, economy, skills.
 - `docs/architecture/adr/`: architecture decisions.
-- `docs/setup/`: GitHub, Unity, Oracle.
+- `docs/setup/`: GitHub, GitHub Project, Unity, Oracle.
 - `docs/agents/`: autonomy policy, review checklist, incident runbook, kill switch.
 
 ## License

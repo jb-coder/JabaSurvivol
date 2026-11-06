@@ -13,14 +13,14 @@ JabaSurvivol is a 2D top-down, round-based zombie survival game for Android phon
 - One playable character for the MVP.
 - Character level cap: 30.
 - Skill points: 1 per level, plus 1 extra at levels 5, 10, 15, 20, 25, and 30. Total: 35.
-- Respect is free between runs during the MVP.
+- Respec is free between runs during the MVP.
 - Skill points are allocated only in the armory, pause menu, or round-end screen.
 - Survival active skill: Turret.
 - Synergies are delivered after the core loop is stable.
 - All progression is persistent. Death only resets the current run: health, round, position, and enemies.
-- Never remove Puntos de Suministros, XP, character level, skill points, allocated skills, weapon unlocks, weapon upgrades, or armor unlocks on death.
+- Never remove Supplies, XP, character level, skill points, allocated skills, weapon unlocks, weapon upgrades, or armor unlocks on death.
 - Ammo and armor repairs are free or drop-based. Do not consume persistent currency on consumables.
-- Premium currency (Núcleos) is implemented last and is cosmetic-only unless a future ADR explicitly changes this.
+- Premium currency (Cores) is implemented last and is cosmetic-only unless a future ADR explicitly changes this.
 - No loot boxes, randomized paid rewards, or pay-to-win mechanics.
 - Localization is the final phase before monetization. English is the only locale until then.
 
@@ -119,15 +119,31 @@ Every change enters through a pull request. No exceptions for documentation, CI,
 - The reviewer agent must approve before merge. The reviewer can request changes and block the PR.
 - Auto-merge is enabled only after the reviewer approves and all required checks pass.
 
+## Project tracking
+
+- Project: `JabaSurvivol Roadmap` at https://github.com/users/jb-coder/projects/1
+- Every issue and pull request is added to the project by `project-automation`.
+- `tools/agent/sync-project-item.ps1` maps labels, state, milestone, and review state to project fields.
+- Use `tools/bootstrap/Initialize-GitHubProject.ps1` to repair fields, milestones, views, and item synchronization.
+- Required project fields: Status, Priority, Area, Size, Phase, Sprint, Target.
+- Keep labels `priority:*`, `area:*`, `size:*`, and `status:ready` current so automation remains accurate.
+- `PROJECT_TOKEN` is a GitHub Actions secret with project scope. Never print or commit it.
+
 ## Autonomous review
 
-- `jaba-builder` creates branches and PRs.
-- `jaba-reviewer` is a separate identity and is the only required approver.
+- The repository owner account `jb-coder` is the builder. It creates branches and PRs.
+- The GitHub App `jaba-survivol-reviewer-jb` is the independent reviewer. It approves or requests changes.
+- Use `pwsh tools/agent/gh-builder.ps1` for builder GitHub operations.
+- Use `pwsh tools/agent/gh-reviewer.ps1` for reviewer GitHub operations.
+- The builder wrapper uses the current `gh` login or `JABA_BUILDER_TOKEN`. The reviewer wrapper mints an app installation token.
+- Never use plain `gh` for writes and never print tokens.
 - The builder never approves its own PR.
 - The reviewer never edits code.
 - Reviewers may reject up to three cycles. After three failed cycles, label the PR `agent:blocked`, open a follow-up issue, and move on.
 - The reviewer checks acceptance criteria, architecture, tests, security, performance, English-only, and attribution policy.
-- Required checks: `pr-policy`, `backend-ci`, `unity-tests`, `android-build`, `security`.
+- Required checks: `pr-policy`, `agent-guardrails`, `security`, `reviewer-approval`.
+- The `reviewer-approval` check is a per-commit check run created by the reviewer GitHub App. A new push requires a new approval.
+- Path-specific checks such as `backend-ci`, `unity-tests`, and `android-build` run when their paths change but are not required by the current ruleset until a summary gate exists.
 - The reviewer must not merge code it authored.
 
 ## Autonomy guardrails

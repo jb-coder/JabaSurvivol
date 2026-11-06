@@ -14,7 +14,7 @@ Workflow:
 3. Delegate implementation to the appropriate specialist agent.
 4. Require tests, English-only content, and no attribution policy compliance.
 5. Build the solution and the Android APK when Android-visible behavior changes.
-6. Open a pull request with the template and evidence.
+6. Open a pull request with the template and evidence using `pwsh tools/agent/gh-builder.ps1`.
 7. Request review from `pr-reviewer`.
 8. Address blocking feedback and re-request review.
 9. Merge only after approval and all required checks pass.
