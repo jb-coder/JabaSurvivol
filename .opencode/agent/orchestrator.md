@@ -5,12 +5,10 @@ model: opencode-go/deepseek-v4.1-flash
 permission:
   edit: allow
   bash:
-    "*": ask
-    "git *": allow
-    "gh *": allow
-    "dotnet *": allow
-    "pwsh *": allow
-    "powershell *": allow
+    "*": allow
+    "rm *": ask
+    "git reset --hard*": ask
+    "git push --force*": deny
   task: allow
   question: deny
 ---
