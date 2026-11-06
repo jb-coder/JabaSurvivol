@@ -15,13 +15,19 @@ namespace JabaSurvivol.Gameplay
         private readonly GameObject _hud;
         private readonly GameObject _pausePanel;
         private readonly GameObject _gameOverPanel;
+        private readonly GameObject _roundEndPanel;
         private readonly Text _progressText;
         private readonly Text _healthText;
         private readonly Text _roundText;
+        private readonly Text _enemiesText;
         private readonly Text _killsText;
         private readonly Text _suppliesText;
         private readonly Text _levelText;
         private readonly Text _gameOverSummary;
+        private readonly Text _roundEndTitle;
+        private readonly Text _roundEndSummary;
+        private readonly Button[] _rewardButtons;
+        private readonly Text[] _rewardLabels;
         private readonly Image _healthFill;
         private readonly RectTransform _moveBase;
         private readonly RectTransform _aimBase;
@@ -34,6 +40,7 @@ namespace JabaSurvivol.Gameplay
         private int _lastHealth = int.MinValue;
         private int _lastMaxHealth = int.MinValue;
         private int _lastRound = int.MinValue;
+        private int _lastEnemies = int.MinValue;
         private int _lastKills = int.MinValue;
         private int _lastSupplies = int.MinValue;
         private int _lastLevel = int.MinValue;
@@ -44,7 +51,8 @@ namespace JabaSurvivol.Gameplay
             System.Action onRestart,
             System.Action onMenu,
             System.Action onPause,
-            System.Action onResume)
+            System.Action onResume,
+            System.Action<int> onRewardSelected)
         {
             var canvasObject = UiFactory.CreateCanvas("JabaSurvivol UI", parent);
 
@@ -55,9 +63,15 @@ namespace JabaSurvivol.Gameplay
             safeAreaObject.AddComponent<SafeAreaFitter>();
 
             _mainMenu = BuildMainMenu(onStart);
-            _hud = BuildHud(onPause, out _healthText, out _healthFill, out _roundText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
+            _hud = BuildHud(onPause, out _healthText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
             _pausePanel = BuildPausePanel(onResume, onMenu);
             _gameOverPanel = BuildGameOverPanel(onRestart, onMenu, out _gameOverSummary);
+            _roundEndPanel = BuildRoundEndPanel(
+                onRewardSelected,
+                out _roundEndTitle,
+                out _roundEndSummary,
+                out _rewardButtons,
+                out _rewardLabels);
 
             _progressText = FindText(_mainMenu, "Progress");
             ShowMainMenu(new Profile());
@@ -69,6 +83,7 @@ namespace JabaSurvivol.Gameplay
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(false);
+            HideRoundEnd();
             _progressText.text = Localization.Format(
                 "menu.progress",
                 profile.Supplies,
@@ -85,12 +100,14 @@ namespace JabaSurvivol.Gameplay
             _lastHealth = int.MinValue;
             _lastMaxHealth = int.MinValue;
             _lastRound = int.MinValue;
+            _lastEnemies = int.MinValue;
             _lastKills = int.MinValue;
             _lastSupplies = int.MinValue;
             _lastLevel = int.MinValue;
+            HideRoundEnd();
         }
 
-        public void UpdateHud(PlayerState player, int round, int kills, Profile profile)
+        public void UpdateHud(PlayerState player, int round, int enemiesRemaining, int kills, Profile profile)
         {
             var health = Mathf.CeilToInt(player.Health);
             var maxHealth = Mathf.CeilToInt(player.MaxHealth);
@@ -108,7 +125,13 @@ namespace JabaSurvivol.Gameplay
             if (round != _lastRound)
             {
                 _lastRound = round;
-                _roundText.text = Localization.Format("hud.round", round);
+                _roundText.text = Localization.Format("hud.round", round, GameBalance.MaxRound);
+            }
+
+            if (enemiesRemaining != _lastEnemies)
+            {
+                _lastEnemies = enemiesRemaining;
+                _enemiesText.text = Localization.Format("hud.enemies", enemiesRemaining);
             }
 
             if (kills != _lastKills)
@@ -141,7 +164,53 @@ namespace JabaSurvivol.Gameplay
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(true);
+            HideRoundEnd();
             _gameOverSummary.text = Localization.Format("gameover.summary", round, kills, suppliesEarned);
+        }
+
+        public bool RoundEndVisible => _roundEndPanel != null && _roundEndPanel.activeSelf;
+
+        public void ShowRoundEnd(
+            int round,
+            int kills,
+            int suppliesEarned,
+            int xpEarned,
+            RoundRewardOption[] options)
+        {
+            _roundEndTitle.text = Localization.Format("round.end.title", round);
+            _roundEndSummary.text = Localization.Format("round.end.summary", kills, suppliesEarned, xpEarned);
+
+            for (var i = 0; i < _rewardButtons.Length; i++)
+            {
+                var hasOption = options != null && i < options.Length;
+                _rewardButtons[i].gameObject.SetActive(hasOption);
+                if (!hasOption)
+                {
+                    continue;
+                }
+
+                _rewardLabels[i].text = FormatRewardCard(options[i]);
+            }
+
+            _roundEndPanel.SetActive(true);
+        }
+
+        public void HideRoundEnd()
+        {
+            _roundEndPanel.SetActive(false);
+        }
+
+        private static string FormatRewardCard(RoundRewardOption reward)
+        {
+            var key = reward.Type switch
+            {
+                RoundRewardType.Supplies => "reward.supplies.card",
+                RoundRewardType.Xp => "reward.xp.card",
+                RoundRewardType.AmmoCrate => "reward.ammo.card",
+                _ => "reward.armor.card"
+            };
+
+            return Localization.Format(key, reward.Amount);
         }
 
         public void SetSticks(StickState move, StickState aim)
@@ -217,6 +286,7 @@ namespace JabaSurvivol.Gameplay
             out Text healthText,
             out Image healthFill,
             out Text roundText,
+            out Text enemiesText,
             out Text killsText,
             out Text suppliesText,
             out Text levelText,
@@ -250,8 +320,11 @@ namespace JabaSurvivol.Gameplay
             roundText.fontStyle = FontStyle.Bold;
             UiFactory.Place(roundText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -26f), new Vector2(420f, 60f));
 
+            enemiesText = UiFactory.CreateText(root.transform, "Enemies", string.Empty, 24, TextAnchor.MiddleCenter, new Color(0.95f, 0.72f, 0.42f));
+            UiFactory.Place(enemiesText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -74f), new Vector2(420f, 40f));
+
             killsText = UiFactory.CreateText(root.transform, "Kills", string.Empty, 22, TextAnchor.MiddleCenter, new Color(0.6f, 0.68f, 0.78f));
-            UiFactory.Place(killsText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -84f), new Vector2(420f, 40f));
+            UiFactory.Place(killsText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -112f), new Vector2(420f, 40f));
 
             suppliesText = UiFactory.CreateText(root.transform, "Supplies", string.Empty, 28, TextAnchor.MiddleRight, new Color(0.55f, 0.95f, 0.75f));
             UiFactory.Place(suppliesText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-150f, -30f), new Vector2(420f, 44f));
@@ -333,6 +406,53 @@ namespace JabaSurvivol.Gameplay
             var menu = UiFactory.CreateButton(root.transform, "Menu", Localization.Get("gameover.menu"), 30, onMenu);
             UiFactory.Place(menu.GetComponent<RectTransform>(), new Vector2(0.5f, 0.25f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 88f));
 
+            return root;
+        }
+
+        private GameObject BuildRoundEndPanel(
+            System.Action<int> onSelect,
+            out Text title,
+            out Text summary,
+            out Button[] buttons,
+            out Text[] labels)
+        {
+            var panel = UiFactory.CreatePanel(_safeArea, "Round End Panel", new Color(0.012f, 0.02f, 0.035f, 0.98f));
+            var root = panel.gameObject;
+
+            title = UiFactory.CreateText(root.transform, "Title", string.Empty, 64, TextAnchor.MiddleCenter, new Color(0.4f, 0.95f, 1f));
+            title.fontStyle = FontStyle.Bold;
+            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.86f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1400f, 90f));
+
+            var hint = UiFactory.CreateText(root.transform, "Hint", Localization.Get("round.end.hint"), 24, TextAnchor.MiddleCenter, new Color(0.55f, 0.62f, 0.72f));
+            UiFactory.Place(hint.rectTransform, new Vector2(0.5f, 0.72f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1400f, 40f));
+
+            summary = UiFactory.CreateText(root.transform, "Summary", string.Empty, 28, TextAnchor.MiddleCenter, new Color(0.86f, 0.9f, 0.96f));
+            UiFactory.Place(summary.rectTransform, new Vector2(0.5f, 0.63f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1400f, 50f));
+
+            buttons = new Button[GameBalance.RoundRewardOptionCount];
+            labels = new Text[GameBalance.RoundRewardOptionCount];
+            var anchors = new[] { 0.22f, 0.5f, 0.78f };
+
+            for (var i = 0; i < buttons.Length; i++)
+            {
+                var index = i;
+                var button = UiFactory.CreateButton(
+                    root.transform,
+                    $"Reward {i + 1}",
+                    string.Empty,
+                    32,
+                    () => onSelect?.Invoke(index));
+                UiFactory.Place(
+                    button.GetComponent<RectTransform>(),
+                    new Vector2(anchors[i], 0.4f),
+                    new Vector2(0.5f, 0.5f),
+                    Vector2.zero,
+                    new Vector2(480f, 260f));
+                labels[i] = button.GetComponentInChildren<Text>();
+                buttons[i] = button;
+            }
+
+            root.SetActive(false);
             return root;
         }
 

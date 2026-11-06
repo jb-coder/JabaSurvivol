@@ -18,7 +18,8 @@ namespace JabaSurvivol.Gameplay
             ["menu.progress"] = "SUPPLIES {0}    LEVEL {1}    BEST ROUND {2}",
             ["menu.controls"] = "LEFT STICK MOVE    RIGHT STICK AIM & FIRE",
             ["hud.health"] = "HP {0}/{1}",
-            ["hud.round"] = "ROUND {0}",
+            ["hud.round"] = "ROUND {0}/{1}",
+            ["hud.enemies"] = "ENEMIES REMAINING {0}",
             ["hud.supplies"] = "SUPPLIES {0}",
             ["hud.level"] = "LEVEL {0}",
             ["hud.kills"] = "KILLS {0}",
@@ -30,7 +31,13 @@ namespace JabaSurvivol.Gameplay
             ["gameover.summary"] = "ROUND {0}    KILLS {1}\nSUPPLIES EARNED {2}",
             ["gameover.restart"] = "RESTART",
             ["gameover.menu"] = "MAIN MENU",
-            ["round.clear"] = "ROUND {0} CLEARED"
+            ["round.end.title"] = "ROUND {0} CLEARED",
+            ["round.end.hint"] = "TAP A REWARD OR PRESS 1, 2, OR 3",
+            ["round.end.summary"] = "KILLS {0}    SUPPLIES {1}    XP {2}",
+            ["reward.supplies.card"] = "SUPPLIES\n+{0}",
+            ["reward.xp.card"] = "XP\n+{0}",
+            ["reward.ammo.card"] = "AMMO CRATE\n+{0}",
+            ["reward.armor.card"] = "ARMOR PLATE\n+{0}"
         };
 
         public static string Get(string key)

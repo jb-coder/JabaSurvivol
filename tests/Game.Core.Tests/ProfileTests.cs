@@ -57,10 +57,13 @@ public sealed class ProfileTests
     {
         var profile = new Profile { Supplies = 400, Level = 7, SkillPoints = 8 };
         var run = new RunState(GameBalance.PlayerMaxHealth);
-        for (var i = 0; i < 7; i++)
+        for (var i = 0; i < run.SpawnBudget; i++)
         {
             run.RegisterKill();
         }
+
+        run.AdvanceRound();
+        run.RegisterKill();
 
         profile.RecordRunEnd(run);
 

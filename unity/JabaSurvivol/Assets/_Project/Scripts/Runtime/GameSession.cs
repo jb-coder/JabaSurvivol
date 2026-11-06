@@ -1,6 +1,7 @@
 using System;
 using JabaSurvivol.Core;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace JabaSurvivol.Gameplay
 {
@@ -35,7 +36,10 @@ namespace JabaSurvivol.Gameplay
         private float _contactCooldown;
         private float _respawnCooldown;
         private bool _zombieActive;
+        private bool _roundClearPending;
+        private RoundRewardOption[] _roundRewardOptions;
         private int _runSuppliesEarned;
+        private int _runXpEarned;
 
         public Profile Profile => _profile;
 
@@ -48,6 +52,28 @@ namespace JabaSurvivol.Gameplay
         public bool ZombieActive => _zombieActive;
 
         public int ActiveBullets => _bullets?.ActiveCount ?? 0;
+
+        public int EnemiesRemaining => _run?.EnemiesRemaining ?? 0;
+
+        public int SpawnBudget => _run?.SpawnBudget ?? 0;
+
+        public RoundPhase RoundPhase => _run?.RoundModel.Phase ?? RoundPhase.NotStarted;
+
+        public bool RoundClearPending => _roundClearPending;
+
+        public bool RoundEndVisible => _ui != null && _ui.RoundEndVisible;
+
+        public int PendingRewardCount => _roundRewardOptions?.Length ?? 0;
+
+        public RoundRewardOption PendingRewardAt(int index)
+        {
+            if (_roundRewardOptions == null || index < 0 || index >= _roundRewardOptions.Length)
+            {
+                return default;
+            }
+
+            return _roundRewardOptions[index];
+        }
 
         public string SavePath => _store?.FilePath;
 
@@ -84,7 +110,8 @@ namespace JabaSurvivol.Gameplay
                 RestartRun,
                 ReturnToMenu,
                 PauseGame,
-                ResumeGame);
+                ResumeGame,
+                index => SelectRoundReward(index));
 
             _state = GameSessionState.MainMenu;
             _ui.ShowMainMenu(_profile);
@@ -102,7 +129,7 @@ namespace JabaSurvivol.Gameplay
             var playerPosition = (Vector2)_playerObject.transform.position;
             var frame = _input.Read(playerPosition);
 
-            if (frame.PausePressed)
+            if (frame.PausePressed && !_roundClearPending)
             {
                 if (_state == GameSessionState.Playing)
                 {
@@ -116,12 +143,41 @@ namespace JabaSurvivol.Gameplay
 
             if (_state == GameSessionState.Playing)
             {
+                if (_roundClearPending)
+                {
+                    HandleRewardHotkeys();
+                    _ui.SetSticks(default, default);
+                    return;
+                }
+
                 UpdatePlaying(frame, Time.deltaTime);
                 _ui.SetSticks(frame.MoveStick, frame.AimStick);
             }
             else
             {
                 _ui.SetSticks(default, default);
+            }
+        }
+
+        private void HandleRewardHotkeys()
+        {
+            var keyboard = Keyboard.current;
+            if (keyboard == null)
+            {
+                return;
+            }
+
+            if (keyboard.digit1Key.wasPressedThisFrame || keyboard.numpad1Key.wasPressedThisFrame)
+            {
+                SelectRoundReward(0);
+            }
+            else if (keyboard.digit2Key.wasPressedThisFrame || keyboard.numpad2Key.wasPressedThisFrame)
+            {
+                SelectRoundReward(1);
+            }
+            else if (keyboard.digit3Key.wasPressedThisFrame || keyboard.numpad3Key.wasPressedThisFrame)
+            {
+                SelectRoundReward(2);
             }
         }
 
@@ -156,7 +212,7 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
-            _ui.UpdateHud(_run.Player, _run.Round, _run.Kills, _profile);
+            _ui.UpdateHud(_run.Player, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
         }
 
         private void UpdatePlayer(InputFrame frame, float deltaTime)
@@ -204,7 +260,7 @@ namespace JabaSurvivol.Gameplay
         {
             if (!_zombieActive)
             {
-                if (_run.IsGameOver)
+                if (_run.IsGameOver || !_run.RoundModel.IsActive || _roundClearPending)
                 {
                     return;
                 }
@@ -218,6 +274,7 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
+            var definition = _run.RoundModel.Definition;
             var zombiePosition = (Vector2)_zombieObject.transform.position;
             var playerPosition = (Vector2)_playerObject.transform.position;
             var delta = playerPosition - zombiePosition;
@@ -225,7 +282,7 @@ namespace JabaSurvivol.Gameplay
             if (delta.sqrMagnitude > 0.0001f)
             {
                 var direction = delta.normalized;
-                zombiePosition += direction * (GameBalance.ZombieMoveSpeed * deltaTime);
+                zombiePosition += direction * (definition.ZombieMoveSpeed * deltaTime);
                 CombatMath.ClampToArena(
                     zombiePosition.x,
                     zombiePosition.y,
@@ -252,14 +309,17 @@ namespace JabaSurvivol.Gameplay
                     GameBalance.PlayerRadius))
             {
                 _contactCooldown = GameBalance.ZombieContactInterval;
-                ApplyDamage(GameBalance.ZombieContactDamage);
+                ApplyDamage(definition.ZombieContactDamage);
             }
         }
 
         public void StartRun()
         {
-            _run = new RunState(GameBalance.PlayerMaxHealth);
+            _run = new RunState(GameBalance.PlayerMaxHealth, 1, Environment.TickCount);
             _runSuppliesEarned = 0;
+            _runXpEarned = 0;
+            _roundClearPending = false;
+            _roundRewardOptions = null;
             _state = GameSessionState.Playing;
 
             _playerObject.SetActive(true);
@@ -272,7 +332,7 @@ namespace JabaSurvivol.Gameplay
 
             SpawnZombie();
             _ui.ShowHud();
-            _ui.UpdateHud(_run.Player, _run.Round, _run.Kills, _profile);
+            _ui.UpdateHud(_run.Player, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
             _ui.SetSticks(default, default);
             _store.Save(_profile);
         }
@@ -319,6 +379,8 @@ namespace JabaSurvivol.Gameplay
             }
 
             _state = GameSessionState.MainMenu;
+            _roundClearPending = false;
+            _roundRewardOptions = null;
             _playerObject.SetActive(false);
             _zombieActive = false;
             _zombieObject.SetActive(false);
@@ -339,7 +401,7 @@ namespace JabaSurvivol.Gameplay
             }
             else
             {
-                _ui.UpdateHud(_run.Player, _run.Round, _run.Kills, _profile);
+                _ui.UpdateHud(_run.Player, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
             }
         }
 
@@ -395,9 +457,98 @@ namespace JabaSurvivol.Gameplay
             _profile.AddSupplies(reward.Supplies);
             _profile.AddXp(reward.Xp);
             _runSuppliesEarned += reward.Supplies;
+            _runXpEarned += reward.Xp;
             _store.Save(_profile);
 
-            _ui.UpdateHud(_run.Player, _run.Round, _run.Kills, _profile);
+            if (reward.CompletedRound)
+            {
+                BeginRoundRewardFlow(reward);
+                return;
+            }
+
+            _ui.UpdateHud(_run.Player, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
+        }
+
+        /// <summary>
+        /// Round clear hook. Generates the deterministic reward choices and
+        /// pauses the run until the player picks one.
+        /// </summary>
+        private void BeginRoundRewardFlow(KillReward reward)
+        {
+            _roundRewardOptions = RoundRewardModel.GenerateOptions(_run.Round, _run.Seed);
+            _roundClearPending = true;
+            _ui.ShowRoundEnd(
+                reward.Round,
+                _run.Kills,
+                _runSuppliesEarned,
+                _runXpEarned,
+                _roundRewardOptions);
+            _ui.UpdateHud(_run.Player, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
+        }
+
+        /// <summary>
+        /// Applies the selected reward, saves persistent progress, and starts
+        /// the next round.
+        /// </summary>
+        public bool SelectRoundReward(int index)
+        {
+            if (!_roundClearPending || _state != GameSessionState.Playing ||
+                _roundRewardOptions == null || index < 0 || index >= _roundRewardOptions.Length)
+            {
+                return false;
+            }
+
+            var result = RoundRewardModel.Apply(_roundRewardOptions[index], _profile, _run);
+            _runSuppliesEarned += result.Supplies;
+            _runXpEarned += result.Xp;
+            _store.Save(_profile);
+            CompleteRoundClear();
+            return true;
+        }
+
+        /// <summary>
+        /// Finishes the round-clear flow and starts the next round when one is
+        /// available.
+        /// </summary>
+        public void ContinueAfterRoundClear()
+        {
+            if (!_roundClearPending || _state != GameSessionState.Playing)
+            {
+                return;
+            }
+
+            if (_roundRewardOptions == null || _roundRewardOptions.Length == 0)
+            {
+                CompleteRoundClear();
+                return;
+            }
+
+            SelectRoundReward(0);
+        }
+
+        private void CompleteRoundClear()
+        {
+            _roundClearPending = false;
+            _roundRewardOptions = null;
+            _ui.HideRoundEnd();
+
+            if (_run.AdvanceRound())
+            {
+                SpawnZombie();
+            }
+
+            _ui.UpdateHud(_run.Player, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
+        }
+
+        /// <summary>
+        /// Test hook that spawns the next round enemy immediately.
+        /// </summary>
+        public void SpawnZombieForTests()
+        {
+            if (_state == GameSessionState.Playing && !_zombieActive)
+            {
+                SpawnZombie();
+            }
         }
 
         private void EndRun()
@@ -408,6 +559,9 @@ namespace JabaSurvivol.Gameplay
             }
 
             _state = GameSessionState.GameOver;
+            _roundClearPending = false;
+            _roundRewardOptions = null;
+            _ui.HideRoundEnd();
             _zombieActive = false;
             _zombieObject.SetActive(false);
             _playerObject.SetActive(false);
@@ -417,14 +571,21 @@ namespace JabaSurvivol.Gameplay
             _ui.ShowGameOver(_run.Round, _run.Kills, _runSuppliesEarned);
         }
 
-        private void SpawnZombie()
+        private bool SpawnZombie()
         {
-            _zombie = new ZombieState(GameBalance.ZombieMaxHealth);
+            if (!_run.RoundModel.TryMarkSpawned())
+            {
+                return false;
+            }
+
+            var definition = _run.RoundModel.Definition;
+            _zombie = new ZombieState(definition.ZombieMaxHealth);
             _zombieActive = true;
             _zombieObject.SetActive(true);
             _zombieObject.transform.position = PickSpawnPosition();
             _respawnCooldown = 0f;
             _contactCooldown = 0f;
+            return true;
         }
 
         private static Vector2 PickSpawnPosition()
