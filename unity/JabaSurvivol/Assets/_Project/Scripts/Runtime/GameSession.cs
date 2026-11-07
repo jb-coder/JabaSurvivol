@@ -741,7 +741,9 @@ namespace JabaSurvivol.Gameplay
         public void StartRun()
         {
             StartRunInternal(1);
-        }        /// <summary>
+        }
+
+        /// <summary>
         /// Starts a run at a specific round. Used by automated scenario tests.
         /// </summary>
         public void StartRunForTests(int startingRound)

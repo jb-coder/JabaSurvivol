@@ -86,7 +86,7 @@ The Warden spawns only in round 10, after every regular enemy in the round has b
 | Supplies | 1,000 |
 | XP | 500 |
 
-The slam is telegraphed with an expanding red ring before it resolves. The boss enrages below half health, moves faster between attacks, and slams more often. Defeating the boss awards its supplies and XP once, records round 10 as the highest round, and enters the victory state.
+The slam is telegraphed with an expanding red ring before it resolves. The boss enrages below half health and slams more often. Defeating the boss awards its supplies and XP once, records round 10 as the highest round, and enters the victory state.
 
 The victory screen shows the round, kills, supplies earned, and XP earned, with next-run and main-menu actions. Death during the boss round preserves all persistent progression and resets only the current run.
 
