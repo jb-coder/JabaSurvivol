@@ -6,6 +6,12 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+### Added
+
+- Data-driven zombie catalog in `Game.Core` for Walker, Runner, and Brute with health, speed, contact damage, supplies, XP, and visual scale values.
+- Deterministic round spawn composition generated from the run seed and round number, with Runners from round 2 and Brutes from round 4.
+- Elite rounds every fifth round with increased health, contact damage, and rewards, plus a HUD modifier.
+- Archetype-based kill rewards and a pooled zombie actor and death-effect system in Unity.
 ## [0.3.0] - 2026-11-07
 
 ### Added
