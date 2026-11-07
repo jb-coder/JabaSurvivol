@@ -21,14 +21,26 @@ public sealed class BalanceSimulationTests
         Assert.Equal(first.TotalSuppliesEarned, second.TotalSuppliesEarned);
         Assert.Equal(first.TotalSuppliesSpent, second.TotalSuppliesSpent);
         Assert.Equal(first.TotalXp, second.TotalXp);
+        Assert.Equal(first.FinalLevel, second.FinalLevel);
+        Assert.Equal(first.FinalSkillPoints, second.FinalSkillPoints);
+        Assert.Equal(first.Outliers.Count, second.Outliers.Count);
         Assert.Equal(first.Rounds.Count, second.Rounds.Count);
 
         for (var i = 0; i < first.Rounds.Count; i++)
         {
             Assert.Equal(first.Rounds[i].Reward.Type, second.Rounds[i].Reward.Type);
             Assert.Equal(first.Rounds[i].SuppliesEarned, second.Rounds[i].SuppliesEarned);
+            Assert.Equal(first.Rounds[i].XpEarned, second.Rounds[i].XpEarned);
+            Assert.Equal(first.Rounds[i].Level, second.Rounds[i].Level);
+            Assert.Equal(first.Rounds[i].SkillPoints, second.Rounds[i].SkillPoints);
             Assert.Equal(first.Rounds[i].Build.Weapon, second.Rounds[i].Build.Weapon);
+            Assert.Equal(first.Rounds[i].Build.Armor, second.Rounds[i].Build.Armor);
             Assert.Equal(first.Rounds[i].Build.DamageTier, second.Rounds[i].Build.DamageTier);
+            Assert.Equal(first.Rounds[i].Build.FireRateTier, second.Rounds[i].Build.FireRateTier);
+            Assert.Equal(first.Rounds[i].Build.MagazineTier, second.Rounds[i].Build.MagazineTier);
+            Assert.Equal(first.Rounds[i].Build.ReloadTier, second.Rounds[i].Build.ReloadTier);
+            Assert.Equal(first.Rounds[i].Build.StrengthRank, second.Rounds[i].Build.StrengthRank);
+            Assert.Equal(first.Rounds[i].Build.VitalityRank, second.Rounds[i].Build.VitalityRank);
         }
     }
 
@@ -43,11 +55,17 @@ public sealed class BalanceSimulationTests
         Assert.True(report.TotalXp > 0);
         Assert.True(report.FinalLevel >= 2);
         Assert.True(last.CumulativeXp > report.Rounds[0].CumulativeXp);
-        Assert.NotEqual(WeaponId.Pistol, last.Build.Weapon);
+        Assert.Equal(WeaponId.Rifle, last.Build.Weapon);
         Assert.True(last.Build.HasRifle);
+        Assert.False(last.Build.HasSmg);
+        Assert.False(last.Build.HasShotgun);
+        Assert.False(last.Build.HasLmg);
         Assert.True(last.Build.DamageTier > 0);
-        Assert.NotEqual(ArmorTier.None, last.Build.Armor);
+        Assert.True(last.Build.FireRateTier > 0);
+        Assert.Equal(ArmorTier.Medium, last.Build.Armor);
+        Assert.True(last.Build.TotalArmor >= last.Build.ArmorTierAbsorb);
         Assert.True(last.Build.StrengthRank > 0);
+        Assert.True(last.Build.VitalityRank > 0);
     }
 
     [Fact]
@@ -67,6 +85,29 @@ public sealed class BalanceSimulationTests
     }
 
     [Fact]
+    public void Run_detects_over_cap_raw_builds()
+    {
+        var profile = new Profile();
+        var weapon = WeaponCatalog.GetStats(WeaponId.Pistol);
+        var armor = new ArmorStats(ArmorTier.None, 0, 0, 0, 0, 0, 0);
+        var temporary = new TemporaryStatModifiers
+        {
+            MoveSpeedBonus = 10f,
+            DamageBonus = 10f,
+            ArmorBonus = 1000,
+            CriticalChanceBonus = 10f,
+            HeadshotBonusBonus = 10f
+        };
+
+        var raw = StatAggregation.ComputeRaw(profile, weapon, armor, temporary);
+        var capped = StatAggregation.Compute(profile, weapon, armor, temporary);
+
+        Assert.True(BalanceSimulation.HasCapViolation(raw, out var reason));
+        Assert.False(string.IsNullOrWhiteSpace(reason));
+        Assert.False(BalanceSimulation.HasCapViolation(capped, out _));
+    }
+
+    [Fact]
     public void Run_reports_no_outliers_for_the_default_balance()
     {
         var report = BalanceSimulation.Run();
@@ -79,9 +120,9 @@ public sealed class BalanceSimulationTests
     }
 
     [Fact]
-    public void Run_flags_unreachable_upgrades_when_the_cost_exceeds_income()
+    public void Run_flags_unreachable_upgrades_when_income_cannot_cover_the_maximum_cost()
     {
-        var report = BalanceSimulation.Run(new BalanceSimulationOptions { UnreachableUpgradeCost = 1_000_000 });
+        var report = BalanceSimulation.Run(new BalanceSimulationOptions { MaxRound = 1 });
 
         Assert.Contains(report.Outliers, outlier => outlier.Contains("unreachable", StringComparison.OrdinalIgnoreCase));
     }

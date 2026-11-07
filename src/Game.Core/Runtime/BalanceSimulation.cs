@@ -15,8 +15,6 @@ namespace JabaSurvivol.Core
         public int MaxRound { get; set; } = GameBalance.MaxRound;
 
         public int RunawaySupplyThreshold { get; set; } = 6000;
-
-        public int UnreachableUpgradeCost { get; set; } = 2000;
     }
 
     /// <summary>
@@ -35,7 +33,8 @@ namespace JabaSurvivol.Core
             int magazineTier,
             int reloadTier,
             ArmorTier armor,
-            int armorAbsorb,
+            int armorTierAbsorb,
+            int totalArmor,
             int strengthRank,
             int vitalityRank,
             int speedRank,
@@ -46,7 +45,8 @@ namespace JabaSurvivol.Core
             int suppliesSpent,
             float damagePerShot,
             float fireInterval,
-            CharacterStats stats)
+            CharacterStats stats,
+            CharacterStats rawStats)
         {
             Weapon = weapon;
             HasSmg = hasSmg;
@@ -58,7 +58,8 @@ namespace JabaSurvivol.Core
             MagazineTier = magazineTier;
             ReloadTier = reloadTier;
             Armor = armor;
-            ArmorAbsorb = armorAbsorb;
+            ArmorTierAbsorb = armorTierAbsorb;
+            TotalArmor = totalArmor;
             StrengthRank = strengthRank;
             VitalityRank = vitalityRank;
             SpeedRank = speedRank;
@@ -70,6 +71,7 @@ namespace JabaSurvivol.Core
             DamagePerShot = damagePerShot;
             FireInterval = fireInterval;
             Stats = stats;
+            RawStats = rawStats;
         }
 
         public WeaponId Weapon { get; }
@@ -92,7 +94,9 @@ namespace JabaSurvivol.Core
 
         public ArmorTier Armor { get; }
 
-        public int ArmorAbsorb { get; }
+        public int ArmorTierAbsorb { get; }
+
+        public int TotalArmor { get; }
 
         public int StrengthRank { get; }
 
@@ -115,6 +119,8 @@ namespace JabaSurvivol.Core
         public float FireInterval { get; }
 
         public CharacterStats Stats { get; }
+
+        public CharacterStats RawStats { get; }
     }
 
     /// <summary>
@@ -294,6 +300,7 @@ namespace JabaSurvivol.Core
             {
                 ProgressBuild(profile, ref suppliesSpent);
                 var build = CreateSnapshot(profile, suppliesSpent);
+                run.ApplyMaxStats(build.Stats.MaxHealth, build.Stats.Armor);
                 var definition = run.RoundModel.Definition;
                 var budget = definition.SpawnBudget;
                 var shotsToKill = Math.Max(
@@ -362,10 +369,11 @@ namespace JabaSurvivol.Core
                         $"Supplies are runaway: {totalSuppliesEarned} earned exceeds {options.RunawaySupplyThreshold}.");
                 }
 
-                if (totalSuppliesEarned < options.UnreachableUpgradeCost)
+                var maxUpgradeCost = GetMaxUpgradeCost();
+                if (totalSuppliesEarned < maxUpgradeCost)
                 {
                     outliers.Add(
-                        $"Upgrades are unreachable: {totalSuppliesEarned} earned is below {options.UnreachableUpgradeCost}.");
+                        $"Upgrades are unreachable: {totalSuppliesEarned} earned is below the {maxUpgradeCost} maximum upgrade cost.");
                 }
 
                 if (last.Level >= Profile.MaxLevel && options.MaxRound < Profile.MaxLevel)
@@ -421,7 +429,7 @@ namespace JabaSurvivol.Core
                 }
             }
 
-            TryBuyWeapon(profile, WeaponId.Lmg, ref suppliesSpent);
+            TryBuyWeapon(profile, WeaponId.Rifle, ref suppliesSpent);
 
             // Save for medium armor next so the report exercises an armor tier
             // beyond the free light armor.
@@ -573,6 +581,7 @@ namespace JabaSurvivol.Core
             var weaponStats = WeaponUpgradeService.GetEffectiveStats(profile, profile.EquippedWeapon);
             var armorStats = ArmorService.GetEffectiveStats(profile, profile.EquippedArmor);
             var stats = StatAggregation.Compute(profile, weaponStats, armorStats);
+            var rawStats = StatAggregation.ComputeRaw(profile, weaponStats, armorStats);
             var damagePerShot = stats.EffectiveWeaponDamage * weapon.PelletCount;
 
             return new BuildSnapshot(
@@ -586,6 +595,7 @@ namespace JabaSurvivol.Core
                 profile.GetWeaponUpgradeTier(profile.EquippedWeapon, WeaponUpgradeStat.MagazineSize),
                 profile.GetWeaponUpgradeTier(profile.EquippedWeapon, WeaponUpgradeStat.ReloadSpeed),
                 profile.EquippedArmor,
+                armorStats.AbsorbAmount,
                 stats.Armor,
                 profile.GetSkillRank(SkillNode.Strength),
                 profile.GetSkillRank(SkillNode.Vitality),
@@ -597,39 +607,81 @@ namespace JabaSurvivol.Core
                 suppliesSpent,
                 damagePerShot,
                 weaponStats.FireInterval,
-                stats);
+                stats,
+                rawStats);
+        }
+
+        private static int GetMaxUpgradeCost()
+        {
+            var maxCost = 0;
+            foreach (var weapon in WeaponCatalog.All)
+            {
+                var tracks = WeaponUpgradeCatalog.GetTracks(weapon.Id);
+                foreach (var track in tracks)
+                {
+                    maxCost = Math.Max(maxCost, track.GetCost(track.MaxTier));
+                }
+            }
+
+            foreach (var armor in ArmorCatalog.All)
+            {
+                if (armor.MaxUpgradeTier > 0)
+                {
+                    maxCost = Math.Max(maxCost, armor.GetUpgradeCost(armor.MaxUpgradeTier));
+                }
+            }
+
+            return maxCost;
         }
 
         private static void AddCapOutliers(List<RoundSimulation> rounds, List<string> outliers)
         {
             foreach (var round in rounds)
             {
-                var stats = round.Build.Stats;
-                if (stats.WeaponDamageMultiplier > 1f + StatCaps.DamageBonus + 0.0001f)
+                if (HasCapViolation(round.Build.RawStats, out var reason))
                 {
-                    outliers.Add($"Round {round.Round} exceeds the damage cap.");
-                }
-
-                if (stats.MoveSpeed > GameBalance.PlayerMoveSpeed * (1f + StatCaps.MoveSpeedBonus) + 0.0001f)
-                {
-                    outliers.Add($"Round {round.Round} exceeds the movement speed cap.");
-                }
-
-                if (stats.Armor > StatCaps.Armor)
-                {
-                    outliers.Add($"Round {round.Round} exceeds the armor cap.");
-                }
-
-                if (stats.CriticalChance > StatCaps.CriticalChance + 0.0001f)
-                {
-                    outliers.Add($"Round {round.Round} exceeds the critical chance cap.");
-                }
-
-                if (stats.HeadshotBonus > StatCaps.HeadshotBonus + 0.0001f)
-                {
-                    outliers.Add($"Round {round.Round} exceeds the headshot cap.");
+                    outliers.Add($"Round {round.Round} exceeds the {reason} cap.");
                 }
             }
+        }
+
+        /// <summary>
+        /// Checks raw, uncapped character stats against the documented caps.
+        /// </summary>
+        public static bool HasCapViolation(CharacterStats stats, out string reason)
+        {
+            if (stats.WeaponDamageMultiplier > 1f + StatCaps.DamageBonus + 0.0001f)
+            {
+                reason = "damage";
+                return true;
+            }
+
+            if (stats.MoveSpeed > GameBalance.PlayerMoveSpeed * (1f + StatCaps.MoveSpeedBonus) + 0.0001f)
+            {
+                reason = "movement speed";
+                return true;
+            }
+
+            if (stats.Armor > StatCaps.Armor)
+            {
+                reason = "armor";
+                return true;
+            }
+
+            if (stats.CriticalChance > StatCaps.CriticalChance + 0.0001f)
+            {
+                reason = "critical chance";
+                return true;
+            }
+
+            if (stats.HeadshotBonus > StatCaps.HeadshotBonus + 0.0001f)
+            {
+                reason = "headshot";
+                return true;
+            }
+
+            reason = string.Empty;
+            return false;
         }
 
         private static RoundRewardOption SelectReward(RoundRewardOption[] options)

@@ -37,8 +37,8 @@ foreach (var round in report.Rounds)
 builder.AppendLine();
 builder.AppendLine("## Build");
 builder.AppendLine();
-builder.AppendLine("| Round | Weapon | Unlocks | DMG | RATE | MAG | RELOAD | Armor | Absorb | STR | VIT | SPD | PRC | END | ENG | TUR |");
-builder.AppendLine("|---:|---|---|---:|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|");
+builder.AppendLine("| Round | Weapon | Unlocks | DMG | RATE | MAG | RELOAD | Armor | Tier absorb | Total armor | STR | VIT | SPD | PRC | END | ENG | TUR |");
+builder.AppendLine("|---:|---|---|---:|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|");
 
 foreach (var round in report.Rounds)
 {
@@ -46,7 +46,7 @@ foreach (var round in report.Rounds)
     builder.AppendLine(
         $"| {round.Round} | {build.Weapon} | {UnlockSummary(build)} | " +
         $"{build.DamageTier} | {build.FireRateTier} | {build.MagazineTier} | {build.ReloadTier} | " +
-        $"{build.Armor} | {build.ArmorAbsorb} | {build.StrengthRank} | {build.VitalityRank} | " +
+        $"{build.Armor} | {build.ArmorTierAbsorb} | {build.TotalArmor} | {build.StrengthRank} | {build.VitalityRank} | " +
         $"{build.SpeedRank} | {build.PrecisionRank} | {build.EnduranceRank} | " +
         $"{build.EngineeringRank} | {build.TurretRank} |");
 }
