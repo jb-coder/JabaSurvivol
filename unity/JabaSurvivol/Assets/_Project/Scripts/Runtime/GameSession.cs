@@ -44,6 +44,7 @@ namespace JabaSurvivol.Gameplay
         private CharacterStats _stats;
         private GameSessionState _armoryReturnState;
         private int _spreadSequence;
+        private float _levelUpRemaining;
 
         public Profile Profile => _profile;
 
@@ -64,6 +65,8 @@ namespace JabaSurvivol.Gameplay
             : ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor);
 
         public bool ArmoryVisible => _ui != null && _ui.ArmoryVisible;
+
+        public bool CharacterSheetVisible => _ui != null && _ui.CharacterSheetVisible;
 
         public bool HudVisible => _ui != null && _ui.HudVisible;
 
@@ -146,6 +149,10 @@ namespace JabaSurvivol.Gameplay
                 HandleArmoryUpgrade,
                 HandleArmorAction,
                 HandleArmorUpgrade,
+                ShowCharacterSheet,
+                HandleAllocateSkill,
+                HandleRespecSkills,
+                CloseCharacterSheet,
                 CloseArmory);
 
             _state = GameSessionState.MainMenu;
@@ -161,8 +168,28 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
+            if (_levelUpRemaining > 0f)
+            {
+                _levelUpRemaining -= Time.deltaTime;
+                if (_levelUpRemaining <= 0f)
+                {
+                    _ui.HideLevelUp();
+                }
+            }
+
             var playerPosition = (Vector2)_playerObject.transform.position;
             var frame = _input.Read(playerPosition);
+
+            if (_ui.CharacterSheetVisible)
+            {
+                if (frame.PausePressed)
+                {
+                    CloseCharacterSheet();
+                }
+
+                _ui.SetSticks(default, default);
+                return;
+            }
 
             if (_ui.ArmoryVisible)
             {
@@ -432,6 +459,7 @@ namespace JabaSurvivol.Gameplay
             _roundClearPending = false;
             _roundRewardOptions = null;
             _spreadSequence = 0;
+            _levelUpRemaining = 0f;
             _state = GameSessionState.Playing;
 
             _playerObject.SetActive(true);
@@ -534,6 +562,90 @@ namespace JabaSurvivol.Gameplay
             _ui.ShowMainMenu(_profile);
         }
 
+        public void ShowCharacterSheet()
+        {
+            if (_ui == null)
+            {
+                return;
+            }
+
+            if (_state != GameSessionState.MainMenu &&
+                _state != GameSessionState.Paused &&
+                !_roundClearPending)
+            {
+                return;
+            }
+
+            RefreshStats();
+            var canRespec = _state == GameSessionState.MainMenu || _roundClearPending;
+            _ui.ShowCharacterSheet(
+                _profile,
+                canRespec,
+                _weapon,
+                ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor));
+        }
+
+        public void CloseCharacterSheet()
+        {
+            _ui?.HideCharacterSheet();
+        }
+
+        private void HandleAllocateSkill(SkillNode node)
+        {
+            if (TryAllocateSkill(node))
+            {
+                RefreshCharacterSheetUi();
+                _ui.SetCharacterSheetStatus(
+                    Localization.Format(
+                        "character.status.allocated",
+                        Localization.SkillName(node),
+                        _profile.GetSkillRank(node)));
+                return;
+            }
+
+            var maxRank = SkillCatalog.Get(node).MaxRanks;
+            _ui.SetCharacterSheetStatus(
+                Localization.Get(
+                    _profile.GetSkillRank(node) >= maxRank
+                        ? "character.status.maxrank"
+                        : "character.status.nopoints"));
+        }
+
+        private void HandleRespecSkills()
+        {
+            var refunded = RespecSkills();
+            if (refunded > 0)
+            {
+                RefreshCharacterSheetUi();
+                _ui.SetCharacterSheetStatus(Localization.Format("character.respec.done", refunded));
+                return;
+            }
+
+            _ui.SetCharacterSheetStatus(
+                Localization.Get(
+                    _profile.GetSpentSkillPoints() == 0
+                        ? "character.respec.empty"
+                        : "character.respec.blocked"));
+        }
+
+        private void RefreshCharacterSheetUi()
+        {
+            if (_ui != null && _ui.CharacterSheetVisible)
+            {
+                _ui.RefreshCharacterSheet(
+                    _profile,
+                    CanRespecSkillsNow(),
+                    _weapon,
+                    ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor));
+            }
+        }
+
+        private void ShowLevelUpNotification()
+        {
+            _ui.ShowLevelUp(_profile.Level);
+            _levelUpRemaining = GameBalance.LevelUpNotificationSeconds;
+        }
+
         private void HandleArmoryAction(WeaponId weaponId)
         {
             if (_profile.HasWeapon(weaponId))
@@ -617,14 +729,16 @@ namespace JabaSurvivol.Gameplay
 
         private bool CanAllocateSkillsNow()
         {
-            return (_ui != null && _ui.ArmoryVisible) ||
+            return (_ui != null && (_ui.ArmoryVisible || _ui.CharacterSheetVisible)) ||
                    _state == GameSessionState.Paused ||
                    _roundClearPending;
         }
 
         private bool CanRespecSkillsNow()
         {
-            return (_ui != null && _ui.ArmoryVisible && _state == GameSessionState.MainMenu) ||
+            return (_ui != null &&
+                    (_ui.ArmoryVisible || _ui.CharacterSheetVisible) &&
+                    _state == GameSessionState.MainMenu) ||
                    _roundClearPending;
         }
 
@@ -647,8 +761,9 @@ namespace JabaSurvivol.Gameplay
         }
 
         /// <summary>
-        /// Allocates one skill point. Allocation is only allowed from the
-        /// main menu, pause menu, or the round-end screen.
+        /// Allocates one skill point. Allocation is only allowed while the
+        /// armory or character sheet is open, while paused, or on the
+        /// round-end screen.
         /// </summary>
         public bool TryAllocateSkill(SkillNode node)
         {
@@ -867,7 +982,12 @@ namespace JabaSurvivol.Gameplay
 
             var reward = _run.RegisterKill();
             _profile.AddSupplies(reward.Supplies);
-            _profile.AddXp(reward.Xp);
+            var levelsGained = _profile.AddXp(reward.Xp);
+            if (levelsGained > 0)
+            {
+                ShowLevelUpNotification();
+            }
+
             _runSuppliesEarned += reward.Supplies;
             _runXpEarned += reward.Xp;
             _store.Save(_profile);
@@ -910,7 +1030,13 @@ namespace JabaSurvivol.Gameplay
                 return false;
             }
 
+            var previousLevel = _profile.Level;
             var result = RoundRewardModel.Apply(_roundRewardOptions[index], _profile, _run);
+            if (_profile.Level > previousLevel)
+            {
+                ShowLevelUpNotification();
+            }
+
             _runSuppliesEarned += result.Supplies;
             _runXpEarned += result.Xp;
             _store.Save(_profile);
