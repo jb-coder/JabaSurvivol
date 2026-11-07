@@ -93,7 +93,7 @@ namespace JabaSurvivol.Core
         /// Maximum armor condition for this run, derived from the equipped
         /// armor tier. Zero means no armor is equipped.
         /// </summary>
-        public int MaxArmor { get; }
+        public int MaxArmor { get; private set; }
 
         /// <summary>
         /// Registers a kill and returns the reward. Persistent progression is
@@ -210,6 +210,28 @@ namespace JabaSurvivol.Core
             IsGameOver = false;
             _round.Reset(StartingRound);
             _round.Start();
+        }
+
+        /// <summary>
+        /// Applies new maximum health and armor to the active run. Health and
+        /// armor increases are added; decreases clamp the current values.
+        /// </summary>
+        public void ApplyMaxStats(float maxHealth, int maxArmor)
+        {
+            if (maxArmor < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maxArmor));
+            }
+
+            var previousMaxArmor = MaxArmor;
+            Player.ApplyMaxHealth(maxHealth, healIncrease: true);
+            MaxArmor = maxArmor;
+            if (MaxArmor > previousMaxArmor)
+            {
+                Armor = SafeAdd(Armor, MaxArmor - previousMaxArmor);
+            }
+
+            Armor = Math.Min(Armor, MaxArmor);
         }
 
         private static int SafeAdd(int left, int right)

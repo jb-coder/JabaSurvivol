@@ -578,6 +578,156 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(session.Run.Armor, Is.EqualTo(0));
         }
 
+        [UnityTest]
+        public IEnumerator Skill_allocation_spends_points_and_updates_damage()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddXp(int.MaxValue);
+            session.StartRun();
+            session.PauseGame();
+            yield return null;
+
+            var baseDamage = session.Stats.EffectiveWeaponDamage;
+            Assert.That(session.TryAllocateSkill(SkillNode.Strength), Is.True);
+            Assert.That(session.Profile.GetSkillRank(SkillNode.Strength), Is.EqualTo(1));
+            Assert.That(session.Profile.SkillPoints, Is.EqualTo(34));
+            Assert.That(session.Stats.EffectiveWeaponDamage, Is.GreaterThan(baseDamage));
+
+            session.ResumeGame();
+            yield return null;
+            session.FireForTests();
+
+            Assert.That(session.LastBulletDamageForTests, Is.EqualTo(session.Stats.EffectiveWeaponDamage));
+        }
+
+        [UnityTest]
+        public IEnumerator Vitality_and_endurance_apply_to_the_active_run()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddXp(int.MaxValue);
+            session.StartRun();
+            session.PauseGame();
+            yield return null;
+
+            Assert.That(session.Run.Player.MaxHealth, Is.EqualTo(GameBalance.PlayerMaxHealth));
+            Assert.That(session.Run.MaxArmor, Is.EqualTo(0));
+
+            Assert.That(session.TryAllocateSkill(SkillNode.Vitality), Is.True);
+            Assert.That(session.Run.Player.MaxHealth, Is.EqualTo(GameBalance.PlayerMaxHealth + 10f));
+            Assert.That(session.Run.Player.Health, Is.EqualTo(GameBalance.PlayerMaxHealth + 10f));
+
+            Assert.That(session.TryAllocateSkill(SkillNode.Endurance), Is.True);
+            Assert.That(session.Run.MaxArmor, Is.EqualTo(5));
+            Assert.That(session.Run.Armor, Is.EqualTo(5));
+        }
+
+        [UnityTest]
+        public IEnumerator Skill_respec_is_free_and_restores_points()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddXp(int.MaxValue);
+            session.ShowArmory();
+            yield return null;
+
+            Assert.That(session.TryAllocateSkill(SkillNode.Strength), Is.True);
+            Assert.That(session.TryAllocateSkill(SkillNode.Vitality), Is.True);
+            Assert.That(session.Profile.SkillPoints, Is.EqualTo(33));
+
+            var refunded = session.RespecSkills();
+
+            Assert.That(refunded, Is.EqualTo(2));
+            Assert.That(session.Profile.SkillPoints, Is.EqualTo(35));
+            Assert.That(session.Profile.GetSkillRank(SkillNode.Strength), Is.EqualTo(0));
+            Assert.That(session.Profile.GetSkillRank(SkillNode.Vitality), Is.EqualTo(0));
+        }
+
+        [UnityTest]
+        public IEnumerator Skill_allocation_is_rejected_from_bare_main_menu_and_game_over()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddXp(int.MaxValue);
+
+            Assert.That(session.TryAllocateSkill(SkillNode.Strength), Is.False);
+
+            session.StartRun();
+            yield return null;
+            session.ApplyDamage(GameBalance.PlayerMaxHealth * 2f);
+            yield return null;
+
+            Assert.That(session.State, Is.EqualTo(GameSessionState.GameOver));
+            Assert.That(session.TryAllocateSkill(SkillNode.Strength), Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator Skill_respec_is_rejected_during_an_active_run()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddXp(int.MaxValue);
+            session.StartRun();
+            session.PauseGame();
+            yield return null;
+
+            Assert.That(session.TryAllocateSkill(SkillNode.Strength), Is.True);
+            Assert.That(session.RespecSkills(), Is.EqualTo(0));
+            Assert.That(session.Profile.GetSkillRank(SkillNode.Strength), Is.EqualTo(1));
+        }
+
+        [UnityTest]
+        public IEnumerator Skill_ranks_and_unlocks_survive_death()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddSupplies(2000);
+            session.TryPurchaseWeapon(WeaponId.Smg);
+            session.TryPurchaseArmor(ArmorTier.Light);
+            session.Profile.AddXp(int.MaxValue);
+            session.StartRun();
+            session.PauseGame();
+            yield return null;
+
+            Assert.That(session.TryAllocateSkill(SkillNode.Strength), Is.True);
+            Assert.That(session.TryAllocateSkill(SkillNode.Vitality), Is.True);
+
+            session.ResumeGame();
+            yield return null;
+            session.ApplyDamage(GameBalance.PlayerMaxHealth * 2f);
+            yield return null;
+
+            Assert.That(session.State, Is.EqualTo(GameSessionState.GameOver));
+            Assert.That(session.Profile.Level, Is.EqualTo(Profile.MaxLevel));
+            Assert.That(session.Profile.SkillPoints, Is.EqualTo(33));
+            Assert.That(session.Profile.GetSkillRank(SkillNode.Strength), Is.EqualTo(1));
+            Assert.That(session.Profile.GetSkillRank(SkillNode.Vitality), Is.EqualTo(1));
+            Assert.That(session.Profile.HasWeapon(WeaponId.Smg), Is.True);
+            Assert.That(session.Profile.HasArmor(ArmorTier.Light), Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator Skill_allocation_is_rejected_while_playing()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddXp(int.MaxValue);
+            session.StartRun();
+            yield return null;
+
+            Assert.That(session.TryAllocateSkill(SkillNode.Strength), Is.False);
+            Assert.That(session.Profile.GetSkillRank(SkillNode.Strength), Is.EqualTo(0));
+            Assert.That(session.Profile.SkillPoints, Is.EqualTo(35));
+        }
+
         private static GameBootstrap CreateBootstrap()
         {
             var gameObject = new GameObject("Test Bootstrap");

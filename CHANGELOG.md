@@ -19,6 +19,10 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Run armor now absorbs damage before health, resets to its maximum on a new run, and is repaired by free armor plate drops.
 - Armory armor tab with unlock, equip, and upgrade actions, plus a HUD armor readout.
 - Profile persistence for armor unlocks, equipped armor, and armor upgrades under schema version 1.
+- Data-driven nine-node Strength, Agility, and Survival skill tree with five ranks per node and Turret rank data.
+- Skill point allocation, free respec, active skill slot persistence, and the 35-point level 30 progression rule.
+- Deterministic stat aggregation across base stats, skills, weapon upgrades, armor, and temporary modifiers, with movement speed, damage, armor, critical chance, and headshot caps.
+- Combat, movement, health, and armor now consume the aggregated character stats.
 
 ## [0.2.0] - 2026-11-06
 

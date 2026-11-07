@@ -58,6 +58,16 @@ namespace JabaSurvivol.Core
         public List<ArmorUpgrade> ArmorUpgrades = new List<ArmorUpgrade>();
 
         /// <summary>
+        /// Allocated skill ranks. Additive to schema version 1.
+        /// </summary>
+        public List<SkillAllocation> AllocatedSkills = new List<SkillAllocation>();
+
+        /// <summary>
+        /// Persisted active skill slot. The Turret is the only MVP active skill.
+        /// </summary>
+        public SkillNode ActiveSkill = SkillNode.Turret;
+
+        /// <summary>
         /// XP needed to advance from <paramref name="level"/> to the next level.
         /// Returns zero at the level cap.
         /// </summary>
@@ -305,6 +315,146 @@ namespace JabaSurvivol.Core
             return true;
         }
 
+        public static int GetEarnedSkillPoints(int level)
+        {
+            var clampedLevel = Math.Clamp(level, 1, MaxLevel);
+            return Math.Max(0, clampedLevel - 1) + (clampedLevel / 5);
+        }
+
+        public int GetSpentSkillPoints()
+        {
+            var spent = 0;
+            if (AllocatedSkills == null)
+            {
+                return 0;
+            }
+
+            for (var i = 0; i < AllocatedSkills.Count; i++)
+            {
+                var allocation = AllocatedSkills[i];
+                if (allocation == null || !SkillCatalog.IsDefined(allocation.Node))
+                {
+                    continue;
+                }
+
+                var maxRank = SkillCatalog.Get(allocation.Node).MaxRanks;
+                spent += Math.Clamp(allocation.Rank, 0, maxRank);
+            }
+
+            return spent;
+        }
+
+        public int GetSkillRank(SkillNode node)
+        {
+            if (!SkillCatalog.IsDefined(node))
+            {
+                return 0;
+            }
+
+            var maxRank = SkillCatalog.Get(node).MaxRanks;
+            var rank = 0;
+            if (AllocatedSkills != null)
+            {
+                for (var i = 0; i < AllocatedSkills.Count; i++)
+                {
+                    var allocation = AllocatedSkills[i];
+                    if (allocation != null && allocation.Node == node)
+                    {
+                        rank = Math.Max(rank, allocation.Rank);
+                    }
+                }
+            }
+
+            return Math.Clamp(rank, 0, maxRank);
+        }
+
+        /// <summary>
+        /// Sets one skill rank without spending points. Intended for
+        /// validation and deterministic tests; gameplay uses
+        /// <see cref="AllocateSkill"/>.
+        /// </summary>
+        public bool SetSkillRank(SkillNode node, int rank)
+        {
+            if (!SkillCatalog.IsDefined(node))
+            {
+                return false;
+            }
+
+            var maxRank = SkillCatalog.Get(node).MaxRanks;
+            var clampedRank = Math.Clamp(rank, 0, maxRank);
+            if (AllocatedSkills == null)
+            {
+                AllocatedSkills = new List<SkillAllocation>();
+            }
+
+            for (var i = AllocatedSkills.Count - 1; i >= 0; i--)
+            {
+                var allocation = AllocatedSkills[i];
+                if (allocation != null && allocation.Node == node)
+                {
+                    AllocatedSkills.RemoveAt(i);
+                }
+            }
+
+            if (clampedRank > 0)
+            {
+                AllocatedSkills.Add(new SkillAllocation(node, clampedRank));
+            }
+
+            return true;
+        }
+
+        public bool CanAllocateSkill(SkillNode node)
+        {
+            if (!SkillCatalog.IsDefined(node) || SkillPoints <= 0)
+            {
+                return false;
+            }
+
+            return GetSkillRank(node) < SkillCatalog.Get(node).MaxRanks;
+        }
+
+        /// <summary>
+        /// Spends one available skill point on a node. Returns false when the
+        /// node is unknown, maxed, or no points are available.
+        /// </summary>
+        public bool AllocateSkill(SkillNode node)
+        {
+            if (!CanAllocateSkill(node))
+            {
+                return false;
+            }
+
+            var nextRank = GetSkillRank(node) + 1;
+            SetSkillRank(node, nextRank);
+            SkillPoints--;
+            return true;
+        }
+
+        /// <summary>
+        /// Refunds every allocated rank for free and returns the refunded
+        /// point count.
+        /// </summary>
+        public int RespecSkills()
+        {
+            var refunded = GetSpentSkillPoints();
+            if (refunded <= 0)
+            {
+                return 0;
+            }
+
+            if (AllocatedSkills != null)
+            {
+                AllocatedSkills.Clear();
+            }
+
+            SkillPoints = Math.Clamp(
+                SkillPoints + refunded,
+                0,
+                GetEarnedSkillPoints(Level));
+            return refunded;
+        }
+
         /// <summary>
         /// Adds XP and returns the number of levels gained.
         /// </summary>
@@ -386,11 +536,12 @@ namespace JabaSurvivol.Core
             TotalKills = Math.Max(0, TotalKills);
             TotalRuns = Math.Max(0, TotalRuns);
             BestKills = Math.Max(0, BestKills);
-            ClampSkillPoints();
             ValidateWeapons();
             ValidateWeaponUpgrades();
             ValidateArmor();
             ValidateArmorUpgrades();
+            ValidateSkills();
+            ClampSkillPoints();
         }
 
         private void ValidateWeaponUpgrades()
@@ -549,9 +700,59 @@ namespace JabaSurvivol.Core
             }
         }
 
+        private void ValidateSkills()
+        {
+            if (AllocatedSkills == null)
+            {
+                AllocatedSkills = new List<SkillAllocation>();
+            }
+
+            for (var i = AllocatedSkills.Count - 1; i >= 0; i--)
+            {
+                var allocation = AllocatedSkills[i];
+                if (allocation == null ||
+                    !SkillCatalog.IsDefined(allocation.Node) ||
+                    allocation.Rank <= 0)
+                {
+                    AllocatedSkills.RemoveAt(i);
+                    continue;
+                }
+
+                var maxRank = SkillCatalog.Get(allocation.Node).MaxRanks;
+                allocation.Rank = Math.Min(allocation.Rank, maxRank);
+
+                for (var j = 0; j < i; j++)
+                {
+                    var earlier = AllocatedSkills[j];
+                    if (earlier == null || earlier.Node != allocation.Node)
+                    {
+                        continue;
+                    }
+
+                    earlier.Rank = Math.Max(earlier.Rank, allocation.Rank);
+                    AllocatedSkills.RemoveAt(i);
+                    break;
+                }
+            }
+
+            var earned = GetEarnedSkillPoints(Level);
+            var spent = GetSpentSkillPoints();
+            if (spent > earned)
+            {
+                AllocatedSkills.Clear();
+                SkillPoints = earned;
+            }
+
+            if (!SkillCatalog.IsDefined(ActiveSkill) || !SkillCatalog.Get(ActiveSkill).IsActiveSlot)
+            {
+                ActiveSkill = SkillNode.Turret;
+            }
+        }
+
         private void ClampSkillPoints()
         {
-            SkillPoints = Math.Clamp(SkillPoints, 0, MaxSkillPoints);
+            var available = Math.Max(0, GetEarnedSkillPoints(Level) - GetSpentSkillPoints());
+            SkillPoints = Math.Clamp(SkillPoints, 0, Math.Min(MaxSkillPoints, available));
         }
 
         private static int SafeAdd(int left, int right)
