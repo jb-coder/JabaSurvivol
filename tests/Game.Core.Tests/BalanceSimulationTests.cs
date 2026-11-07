@@ -61,8 +61,7 @@ public sealed class BalanceSimulationTests
         Assert.False(last.Build.HasShotgun);
         Assert.False(last.Build.HasLmg);
         Assert.True(last.Build.DamageTier > 0);
-        Assert.True(
-            last.Build.DamageTier + last.Build.FireRateTier + last.Build.MagazineTier + last.Build.ReloadTier > 0);
+        Assert.True(last.Build.FireRateTier > 0);
         Assert.Equal(ArmorTier.Medium, last.Build.Armor);
         Assert.True(last.Build.TotalArmor >= last.Build.ArmorTierAbsorb);
         Assert.True(last.Build.StrengthRank > 0);

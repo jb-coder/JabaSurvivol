@@ -3,8 +3,8 @@
 - Date: 2026-11-07
 - Emulator: Android 15 (API 35), x86_64 Google Play system image, `jaba_survivol_api35`
 - Device profile: phone 1080 x 2340 at 440 dpi; tablet display override 2560 x 1600 at 320 dpi
-- Production APK: `JabaSurvivol-0.4.0-53.apk` (ARM64)
-- Emulator APK: `JabaSurvivol-0.4.0-53-emulator.apk` (ARM64 + x86_64)
+- Production APK: `JabaSurvivol-0.4.0-53.apk` (ARM64), 32,370,793 bytes, SHA-256 `44D5A2D07EB44B37817F1779736C64E909785E168AA1686127D82104C74EB90B`
+- Emulator APK: `JabaSurvivol-0.4.0-53-emulator.apk` (ARM64 + x86_64), 59,096,621 bytes, SHA-256 `8B58FA8FB8F5655DB25A2EA5A4A315C7CFDA9EC3A90C48BF63925B1CF1905439`
 - Activity: `com.jabasurvivol.game/com.unity3d.player.UnityPlayerActivity`
 - Result: main menu and active round rendered on phone and tablet layouts
 - Fatal search: no `FATAL EXCEPTION`, `AndroidRuntime` crash, unhandled exception, or `NullReferenceException` in the app process log

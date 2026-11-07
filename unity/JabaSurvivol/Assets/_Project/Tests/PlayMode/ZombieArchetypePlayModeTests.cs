@@ -124,6 +124,30 @@ namespace JabaSurvivol.Tests.PlayMode
             }
         }
 
+        [UnityTest]
+        public IEnumerator Archetype_actor_and_death_effect_are_pooled()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.StartRun();
+            yield return null;
+
+            var actorId = session.CurrentZombieActorId;
+            Assert.That(actorId, Is.Not.EqualTo(0));
+
+            session.DamageZombieForTests(100000f);
+            yield return null;
+
+            Assert.That(session.ActiveDeathEffects, Is.GreaterThan(0));
+
+            session.SpawnZombieForTests();
+            yield return null;
+
+            Assert.That(session.CurrentZombieActorId, Is.EqualTo(actorId));
+            Assert.That(session.ZombiePoolCount, Is.EqualTo(ZombieCatalog.All.Count));
+        }
+
         private static GameBootstrap CreateBootstrap()
         {
             var gameObject = new GameObject("Test Bootstrap");

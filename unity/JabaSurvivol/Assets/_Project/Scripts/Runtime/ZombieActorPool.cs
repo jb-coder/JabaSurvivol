@@ -200,5 +200,22 @@ namespace JabaSurvivol.Gameplay
                 _objects[i].SetActive(false);
             }
         }
+
+        public int ActiveCount
+        {
+            get
+            {
+                var count = 0;
+                for (var i = 0; i < _objects.Length; i++)
+                {
+                    if (_objects[i].activeSelf)
+                    {
+                        count++;
+                    }
+                }
+
+                return count;
+            }
+        }
     }
 }

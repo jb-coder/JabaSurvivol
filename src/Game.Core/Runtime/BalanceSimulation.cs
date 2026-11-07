@@ -298,14 +298,15 @@ namespace JabaSurvivol.Core
 
             for (var round = options.StartingRound; round <= options.MaxRound; round++)
             {
-                ProgressBuild(profile, ref suppliesSpent);
+                ProgressBuild(profile, round, ref suppliesSpent);
                 var build = CreateSnapshot(profile, suppliesSpent);
                 run.ApplyMaxStats(build.Stats.MaxHealth, build.Stats.Armor);
                 var definition = run.RoundModel.Definition;
+                var encounter = definition.GetEncounter(ZombieArchetype.Walker);
                 var budget = definition.SpawnBudget;
                 var shotsToKill = Math.Max(
                     1,
-                    (int)Math.Ceiling(definition.ZombieMaxHealth / build.DamagePerShot));
+                    (int)Math.Ceiling(encounter.MaxHealth / build.DamagePerShot));
                 var killSeconds = shotsToKill * build.FireInterval;
                 var roundSeconds = budget * (killSeconds + GameBalance.ZombieRespawnDelay);
 
@@ -331,9 +332,9 @@ namespace JabaSurvivol.Core
                 rounds.Add(new RoundSimulation(
                     round,
                     budget,
-                    definition.ZombieMaxHealth,
-                    definition.ZombieMoveSpeed,
-                    definition.ZombieContactDamage,
+                    encounter.MaxHealth,
+                    encounter.MoveSpeed,
+                    encounter.ContactDamage,
                     definition.IsElite,
                     definition.IsBoss,
                     shotsToKill,
@@ -407,7 +408,7 @@ namespace JabaSurvivol.Core
                 suppliesSpent);
         }
 
-        private static void ProgressBuild(Profile profile, ref int suppliesSpent)
+        private static void ProgressBuild(Profile profile, int round, ref int suppliesSpent)
         {
             TryBuyArmor(profile, ArmorTier.Light, ref suppliesSpent);
             EquipBestArmor(profile);
@@ -450,11 +451,7 @@ namespace JabaSurvivol.Core
             TryBuyArmor(profile, ArmorTier.Heavy, ref suppliesSpent);
             EquipBestArmor(profile);
 
-            for (var i = 0; i < UpgradePriority.Length; i++)
-            {
-                BuyWeaponUpgrades(profile, UpgradePriority[i], ref suppliesSpent);
-            }
-
+            BuyWeaponUpgrades(profile, round, ref suppliesSpent);
             BuyArmorUpgrades(profile, ref suppliesSpent);
             AllocateSkills(profile);
         }
@@ -526,26 +523,53 @@ namespace JabaSurvivol.Core
             }
         }
 
-        private static void BuyWeaponUpgrades(Profile profile, WeaponUpgradeStat stat, ref int suppliesSpent)
+        private static void BuyWeaponUpgrades(Profile profile, int round, ref int suppliesSpent)
+        {
+            // Rotate the starting stat each round so scarce supplies still
+            // exercise every documented upgrade path instead of sinking all of
+            // them into the first track.
+            var start = round % UpgradePriority.Length;
+            var bought = true;
+            while (bought)
+            {
+                bought = false;
+                for (var i = 0; i < UpgradePriority.Length; i++)
+                {
+                    var stat = UpgradePriority[(start + i) % UpgradePriority.Length];
+                    if (TryBuyNextWeaponUpgrade(profile, stat, ref suppliesSpent))
+                    {
+                        bought = true;
+                    }
+                }
+            }
+        }
+
+        private static bool TryBuyNextWeaponUpgrade(
+            Profile profile,
+            WeaponUpgradeStat stat,
+            ref int suppliesSpent)
         {
             var track = WeaponUpgradeCatalog.Get(profile.EquippedWeapon, stat);
-            while (profile.GetWeaponUpgradeTier(profile.EquippedWeapon, stat) < track.MaxTier)
+            if (profile.GetWeaponUpgradeTier(profile.EquippedWeapon, stat) >= track.MaxTier)
             {
-                var cost = WeaponUpgradeService.GetNextCost(profile, profile.EquippedWeapon, stat);
-                if (cost <= 0 || profile.Supplies < cost)
-                {
-                    return;
-                }
-
-                var before = profile.Supplies;
-                if (WeaponUpgradeService.TryPurchase(profile, profile.EquippedWeapon, stat) !=
-                    WeaponUpgradePurchaseResult.Purchased)
-                {
-                    return;
-                }
-
-                suppliesSpent += before - profile.Supplies;
+                return false;
             }
+
+            var cost = WeaponUpgradeService.GetNextCost(profile, profile.EquippedWeapon, stat);
+            if (cost <= 0 || profile.Supplies < cost)
+            {
+                return false;
+            }
+
+            var before = profile.Supplies;
+            if (WeaponUpgradeService.TryPurchase(profile, profile.EquippedWeapon, stat) !=
+                WeaponUpgradePurchaseResult.Purchased)
+            {
+                return false;
+            }
+
+            suppliesSpent += before - profile.Supplies;
+            return true;
         }
 
         private static void BuyArmorUpgrades(Profile profile, ref int suppliesSpent)

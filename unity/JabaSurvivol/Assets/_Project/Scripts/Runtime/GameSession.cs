@@ -91,6 +91,12 @@ namespace JabaSurvivol.Gameplay
 
         public int ZombiePoolCount => _zombieActors?.Count ?? 0;
 
+        public int CurrentZombieActorId => _zombieActor != null
+            ? _zombieActor.GameObject.GetInstanceID()
+            : 0;
+
+        public int ActiveDeathEffects => _deathEffects?.ActiveCount ?? 0;
+
         public bool RoundModifierVisible => _ui != null && _ui.RoundModifierVisible;
 
         public int ActiveBullets => _bullets?.ActiveCount ?? 0;
