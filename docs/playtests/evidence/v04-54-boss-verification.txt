@@ -1,0 +1,34 @@
+# v0.4.0 Slice 54 Boss and Victory Verification
+
+Automated verification for the round 10 boss and victory flow.
+
+## Core
+
+- Boss catalog values, telegraphed slam data, enrage threshold, and enraged attack interval.
+- Boss round stays active after the last regular enemy and waits for the boss.
+- Boss spawn is rejected outside round 10 and before the regular enemies are cleared.
+- Boss death grants 1,000 supplies and 500 XP once, clears the round, and sets victory.
+- Restart resets boss and victory state.
+- Death during the boss round ends the run without a victory.
+
+## EditMode
+
+- Boss definition data.
+- Boss round gating.
+- Victory reward and duplicate rejection.
+- Enrage below half health.
+
+## PlayMode
+
+- Boss spawns after the regular enemies and shows the boss HUD.
+- Boss kill enters victory, updates the profile, records round 10, and saves.
+- Boss enrages and starts the telegraphed slam.
+- Death during the boss round keeps persistent supplies.
+- Victory rewards are not granted twice.
+
+## Android
+
+- ARM64 production APK and ARM64 + x86_64 emulator APK built.
+- Emulator smoke test passed on phone and tablet layouts with no fatal app errors.
+- Boss and victory visuals are exercised by the PlayMode suite; the normal menu
+  flow does not expose a round 10 shortcut on device.

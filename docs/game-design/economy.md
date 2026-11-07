@@ -105,6 +105,10 @@ Round values are data-driven in `GameBalance` and `RoundTable`:
 - Zombie speed: `1.9 * (1 + 0.04 * (round - 1))`, capped at 1.35x.
 - Zombie contact damage: `10 * (1 + 0.12 * (round - 1))`, from 10 to 20.8.
 - Round 5 is an elite round and round 10 is the boss round.
+- The round 10 boss spawns after the regular enemies are cleared and the round does not clear until it dies.
+- The boss has 2,400 health, 1.15 move speed, 30 contact damage every 0.8 seconds, and a telegraphed 45-damage slam with a 2.6 radius, 0.9-second telegraph, and 4.5-second interval.
+- The boss enrages below 50% health and uses a 0.6x slam interval while enraged.
+- Defeating the boss awards 1,000 supplies and 500 XP once and enters the victory state.
 - Archetype multipliers: Walker 1.00x/1.00x/1.00x, Runner 0.70x health and 1.70x speed, Brute 2.60x health, 0.70x speed, and 1.60x contact damage.
 - Elite rounds multiply health by 1.50x, contact damage by 1.25x, and supplies and XP by 2.00x.
 - Spawn composition is deterministic from the run seed and round number, with Runners from round 2 and Brutes from round 4.
