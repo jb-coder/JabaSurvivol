@@ -160,6 +160,33 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(session.Profile.Supplies, Is.EqualTo(supplies));
         }
 
+        [UnityTest]
+        public IEnumerator Boss_hud_returns_after_the_armory_from_pause()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.StartRunForTests(GameBalance.BossRound);
+            yield return null;
+            yield return ClearRegularEnemies(session);
+            session.SpawnBossForTests();
+            yield return null;
+
+            session.PauseGame();
+            yield return null;
+            session.ShowArmory();
+            yield return null;
+            Assert.That(session.ArmoryVisible, Is.True);
+
+            session.CloseArmory();
+            yield return null;
+
+            Assert.That(session.State, Is.EqualTo(GameSessionState.Paused));
+            Assert.That(session.HudVisible, Is.True);
+            Assert.That(session.BossVisible, Is.True);
+            Assert.That(session.BossActive, Is.True);
+        }
+
         private static IEnumerator ClearRegularEnemies(GameSession session)
         {
             var budget = session.SpawnBudget;

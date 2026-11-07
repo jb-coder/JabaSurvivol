@@ -81,6 +81,9 @@ namespace JabaSurvivol.Gameplay
         private int _lastLevel = int.MinValue;
         private int _lastXp = int.MinValue;
         private int _lastSkillPoints = int.MinValue;
+        private int _lastBossHealth = int.MinValue;
+        private int _lastBossMaxHealth = int.MinValue;
+        private bool _lastBossEnraged;
         private bool _characterSheetTablet;
         private int _activeCharacterBranch;
 
@@ -373,6 +376,9 @@ namespace JabaSurvivol.Gameplay
             }
 
             _bossNameText.text = name;
+            _lastBossHealth = int.MinValue;
+            _lastBossMaxHealth = int.MinValue;
+            _lastBossEnraged = false;
             _bossPanel.SetActive(true);
         }
 
@@ -383,12 +389,24 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
+            var roundedHealth = Mathf.CeilToInt(health);
+            var roundedMaxHealth = Mathf.CeilToInt(maxHealth);
+            if (roundedHealth == _lastBossHealth &&
+                roundedMaxHealth == _lastBossMaxHealth &&
+                enraged == _lastBossEnraged)
+            {
+                return;
+            }
+
+            _lastBossHealth = roundedHealth;
+            _lastBossMaxHealth = roundedMaxHealth;
+            _lastBossEnraged = enraged;
             var fraction = maxHealth <= 0f ? 0f : Mathf.Clamp01(health / maxHealth);
             _bossHealthFill.fillAmount = fraction;
             _bossHealthFill.color = enraged
                 ? new Color(1f, 0.28f, 0.22f)
                 : new Color(0.92f, 0.35f, 0.72f);
-            _bossHealthText.text = Localization.Format("hud.boss.health", Mathf.CeilToInt(health), Mathf.CeilToInt(maxHealth));
+            _bossHealthText.text = Localization.Format("hud.boss.health", roundedHealth, roundedMaxHealth);
         }
 
         public void HideBoss()

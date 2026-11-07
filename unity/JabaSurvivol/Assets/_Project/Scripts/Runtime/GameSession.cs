@@ -875,6 +875,13 @@ namespace JabaSurvivol.Gameplay
             if (_armoryReturnState == GameSessionState.Paused && _state == GameSessionState.Paused)
             {
                 _ui.ShowHud();
+                var boss = _run?.Boss;
+                if (boss != null && _run.BossActive)
+                {
+                    _ui.ShowBoss(Localization.Get("boss.name"));
+                    _ui.UpdateBoss(boss.Health, boss.MaxHealth, boss.IsEnraged);
+                }
+
                 _ui.ShowPaused(true);
                 return;
             }
