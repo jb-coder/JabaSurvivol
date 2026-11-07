@@ -23,6 +23,9 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Skill point allocation, free respec, active skill slot persistence, and the 35-point level 30 progression rule.
 - Deterministic stat aggregation across base stats, skills, weapon upgrades, armor, and temporary modifiers, with movement speed, damage, armor, critical chance, and headshot caps.
 - Combat, movement, health, and armor now consume the aggregated character stats.
+- Character sheet with phone branch tabs, tablet three-column layout, rank pips, large touch targets, and before/after stat previews.
+- Character sheet access from the main menu, pause menu, and round-end screen, with free respec between runs.
+- HUD level, XP progress, available skill points, and a temporary level-up notification.
 
 ## [0.2.0] - 2026-11-06
 

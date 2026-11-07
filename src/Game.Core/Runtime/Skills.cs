@@ -274,6 +274,12 @@ namespace JabaSurvivol.Core
         public float CriticalChanceBonus { get; set; }
 
         public float HeadshotBonusBonus { get; set; }
+
+        public float MaxHealthBonus { get; set; }
+
+        public float ReloadSpeedBonus { get; set; }
+
+        public float AmmoCapacityBonus { get; set; }
     }
 
     /// <summary>
@@ -352,7 +358,7 @@ namespace JabaSurvivol.Core
             var endurance = profile.GetSkillRank(SkillNode.Endurance);
             var engineering = profile.GetSkillRank(SkillNode.Engineering);
 
-            var maxHealth = GameBalance.PlayerMaxHealth + (vitality * 10f);
+            var maxHealth = GameBalance.PlayerMaxHealth + (vitality * 10f) + temporary.MaxHealthBonus;
             var moveBonus = Math.Min(
                 StatCaps.MoveSpeedBonus,
                 (speed * 0.02f) + temporary.MoveSpeedBonus);
@@ -384,8 +390,44 @@ namespace JabaSurvivol.Core
                 criticalChance,
                 headshotBonus,
                 armor,
-                (engineering * 0.05f) + 1f,
-                (engineering * 0.05f) + 1f);
+                (engineering * 0.05f) + 1f + temporary.ReloadSpeedBonus,
+                (engineering * 0.05f) + 1f + temporary.AmmoCapacityBonus);
+        }
+
+        /// <summary>
+        /// Computes the character stats as if one additional rank of the node
+        /// were allocated. Used for the armory/character-sheet preview.
+        /// </summary>
+        public static CharacterStats PreviewAddRank(
+            Profile profile,
+            SkillNode node,
+            WeaponStats weaponStats,
+            ArmorStats armorStats)
+        {
+            if (profile is null)
+            {
+                throw new ArgumentNullException(nameof(profile));
+            }
+
+            if (!SkillCatalog.IsDefined(node))
+            {
+                throw new ArgumentOutOfRangeException(nameof(node));
+            }
+
+            var definition = SkillCatalog.Get(node);
+            var temporary = new TemporaryStatModifiers
+            {
+                DamageBonus = definition.DamageBonusPerRank,
+                MaxHealthBonus = definition.MaxHealthPerRank,
+                MoveSpeedBonus = definition.MoveSpeedBonusPerRank,
+                CriticalChanceBonus = definition.CriticalChancePerRank,
+                HeadshotBonusBonus = definition.HeadshotBonusPerRank,
+                ArmorBonus = definition.ArmorPerRank,
+                ReloadSpeedBonus = definition.ReloadSpeedBonusPerRank,
+                AmmoCapacityBonus = definition.AmmoCapacityBonusPerRank
+            };
+
+            return Compute(profile, weaponStats, armorStats, temporary);
         }
     }
 }
