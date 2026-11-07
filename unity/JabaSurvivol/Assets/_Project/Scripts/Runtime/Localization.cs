@@ -24,7 +24,8 @@ namespace JabaSurvivol.Gameplay
             ["hud.round"] = "ROUND {0}/{1}",
             ["hud.enemies"] = "ENEMIES REMAINING {0}",
             ["hud.supplies"] = "SUPPLIES {0}",
-            ["hud.level"] = "LEVEL {0}",
+            ["hud.level"] = "LEVEL {0}   XP {1}/{2}   POINTS {3}",
+            ["hud.levelup"] = "LEVEL UP! LEVEL {0}",
             ["hud.kills"] = "KILLS {0}",
             ["hud.pause"] = "II",
             ["pause.title"] = "PAUSED",
@@ -71,6 +72,44 @@ namespace JabaSurvivol.Gameplay
             ["armory.armor.equipped.status"] = "{0} EQUIPPED",
             ["armory.armor.upgraded"] = "ARMOR TIER {0}",
             ["armory.armor.maxed"] = "MAX ARMOR TIER",
+            ["character.title"] = "CHARACTER",
+            ["character.close"] = "CLOSE",
+            ["character.open"] = "SKILLS",
+            ["character.level"] = "LEVEL {0}   XP {1}/{2}",
+            ["character.points"] = "SKILL POINTS {0}",
+            ["character.rank"] = "RANK {0}/{1}",
+            ["character.allocate"] = "+",
+            ["character.max"] = "MAX",
+            ["character.respec"] = "RESPEC",
+            ["character.stats"] = "HP {0}   DAMAGE x{1}   MOVE {2}   ARMOR {3}   CRIT {4}   HEADSHOT {5}   RELOAD x{6}   AMMO x{7}",
+            ["character.respec.done"] = "RESPEC COMPLETE: {0} POINTS RETURNED",
+            ["character.respec.empty"] = "NO ALLOCATED POINTS TO RESPEC",
+            ["character.respec.blocked"] = "RESPEC IS ONLY AVAILABLE BETWEEN RUNS",
+            ["character.status.allocated"] = "{0} RANK {1}",
+            ["character.status.nopoints"] = "NO SKILL POINTS AVAILABLE",
+            ["character.status.maxrank"] = "MAX RANK",
+            ["character.allocation.blocked"] = "ALLOCATION REQUIRES THE ARMORY, PAUSE MENU, OR ROUND END",
+            ["character.branch.strength"] = "STRENGTH",
+            ["character.branch.agility"] = "AGILITY",
+            ["character.branch.survival"] = "SURVIVAL",
+            ["skill.strength.name"] = "STRENGTH",
+            ["skill.vitality.name"] = "VITALITY",
+            ["skill.shockwave.name"] = "SHOCKWAVE",
+            ["skill.speed.name"] = "SPEED",
+            ["skill.precision.name"] = "PRECISION",
+            ["skill.dash.name"] = "DASH",
+            ["skill.endurance.name"] = "ENDURANCE",
+            ["skill.engineering.name"] = "ENGINEERING",
+            ["skill.turret.name"] = "TURRET",
+            ["skill.strength.preview"] = "DAMAGE x{0} -> x{1}",
+            ["skill.vitality.preview"] = "MAX HP {0} -> {1}",
+            ["skill.speed.preview"] = "MOVE SPEED {0} -> {1}",
+            ["skill.precision.preview"] = "CRIT {0} -> {1}   HEADSHOT {2} -> {3}",
+            ["skill.endurance.preview"] = "ARMOR {0} -> {1}",
+            ["skill.engineering.preview"] = "RELOAD x{0} -> x{1}   AMMO x{2} -> x{3}",
+            ["skill.shockwave.preview"] = "DAMAGE {0} -> {1}   RADIUS {2} -> {3}   COOLDOWN {4} -> {5}",
+            ["skill.dash.preview"] = "DISTANCE {0} -> {1}   COOLDOWN {2} -> {3}",
+            ["skill.turret.preview"] = "DAMAGE {0} -> {1}   DURATION {2} -> {3}   COOLDOWN {4} -> {5}",
             ["weapon.pistol.name"] = "PISTOL",
             ["weapon.smg.name"] = "SMG",
             ["weapon.shotgun.name"] = "SHOTGUN",
@@ -146,6 +185,42 @@ namespace JabaSurvivol.Gameplay
         public static string ArmorName(ArmorTier tier)
         {
             return Get(ArmorNameKey(tier));
+        }
+
+        public static string BranchNameKey(SkillBranch branch)
+        {
+            return branch switch
+            {
+                SkillBranch.Agility => "character.branch.agility",
+                SkillBranch.Survival => "character.branch.survival",
+                _ => "character.branch.strength"
+            };
+        }
+
+        public static string BranchName(SkillBranch branch)
+        {
+            return Get(BranchNameKey(branch));
+        }
+
+        public static string SkillNameKey(SkillNode node)
+        {
+            return node switch
+            {
+                SkillNode.Vitality => "skill.vitality.name",
+                SkillNode.Shockwave => "skill.shockwave.name",
+                SkillNode.Speed => "skill.speed.name",
+                SkillNode.Precision => "skill.precision.name",
+                SkillNode.Dash => "skill.dash.name",
+                SkillNode.Endurance => "skill.endurance.name",
+                SkillNode.Engineering => "skill.engineering.name",
+                SkillNode.Turret => "skill.turret.name",
+                _ => "skill.strength.name"
+            };
+        }
+
+        public static string SkillName(SkillNode node)
+        {
+            return Get(SkillNameKey(node));
         }
     }
 }

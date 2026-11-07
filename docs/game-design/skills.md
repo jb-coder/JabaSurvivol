@@ -106,12 +106,12 @@ and temporary bonuses are combined.
 
 - Character sheet accessible from the main menu, pause, and round end.
 - Phone: three tabs, one per branch.
-- Tablet: two or three columns.
-- Large touch targets.
-- Rank pips and long-press tooltips.
-- Before/after stat comparison.
-- Respec confirmation.
-- HUD: level, XP bar, available points, and level-up notification.
+- Tablet: three columns, one per branch.
+- Large touch targets, rank pips, and before/after stat previews.
+- Inline previews replace long-press tooltips in the MVP.
+- Free respec between runs. Respec is a single tap in the MVP; a confirmation
+  step is deferred.
+- HUD: level, XP progress, available points, and level-up notification.
 - Active skill button with radial cooldown.
 
 ## Persistence

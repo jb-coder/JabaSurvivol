@@ -235,6 +235,26 @@ public sealed class SkillTests
     }
 
     [Fact]
+    public void Preview_add_rank_returns_the_next_passive_value_and_handles_activation_nodes()
+    {
+        var profile = new Profile();
+        profile.SetSkillRank(SkillNode.Vitality, 2);
+        var weapon = WeaponCatalog.GetStats(WeaponId.Pistol);
+        var armor = new ArmorStats(ArmorTier.None, 0, 0, 0, 0, 0, 0);
+
+        var current = StatAggregation.Compute(profile, weapon, armor);
+        var preview = StatAggregation.PreviewAddRank(profile, SkillNode.Vitality, weapon, armor);
+
+        Assert.Equal(120f, current.MaxHealth, 3);
+        Assert.Equal(130f, preview.MaxHealth, 3);
+
+        var turretCurrent = StatAggregation.Compute(profile, weapon, armor);
+        var turretPreview = StatAggregation.PreviewAddRank(profile, SkillNode.Turret, weapon, armor);
+        Assert.Equal(turretCurrent.MaxHealth, turretPreview.MaxHealth, 3);
+        Assert.Equal(turretCurrent.WeaponDamageMultiplier, turretPreview.WeaponDamageMultiplier, 3);
+    }
+
+    [Fact]
     public void Active_skill_defaults_to_turret()
     {
         var profile = new Profile();

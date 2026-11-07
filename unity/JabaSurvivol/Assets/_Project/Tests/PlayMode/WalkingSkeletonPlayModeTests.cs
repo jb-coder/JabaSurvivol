@@ -714,6 +714,138 @@ namespace JabaSurvivol.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator Character_sheet_opens_allocates_and_respecs_from_the_main_menu()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddXp(int.MaxValue);
+            session.Profile.AllocateSkill(SkillNode.Strength);
+
+            session.ShowCharacterSheet();
+            yield return null;
+
+            Assert.That(session.CharacterSheetVisible, Is.True);
+            Assert.That(session.TryAllocateSkill(SkillNode.Vitality), Is.False);
+            Assert.That(session.Profile.GetSkillRank(SkillNode.Vitality), Is.EqualTo(0));
+            Assert.That(session.RespecSkills(), Is.EqualTo(1));
+            Assert.That(session.Profile.GetSkillRank(SkillNode.Strength), Is.EqualTo(0));
+            Assert.That(session.Profile.SkillPoints, Is.EqualTo(35));
+
+            session.CloseCharacterSheet();
+            yield return null;
+            Assert.That(session.CharacterSheetVisible, Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator Character_sheet_allocation_is_available_from_the_armory()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddXp(int.MaxValue);
+            session.ShowArmory();
+            yield return null;
+
+            Assert.That(session.TryAllocateSkill(SkillNode.Strength), Is.True);
+            Assert.That(session.Profile.GetSkillRank(SkillNode.Strength), Is.EqualTo(1));
+            Assert.That(session.RespecSkills(), Is.EqualTo(1));
+            Assert.That(session.Profile.GetSkillRank(SkillNode.Strength), Is.EqualTo(0));
+        }
+
+        [UnityTest]
+        public IEnumerator Character_sheet_opens_from_pause_and_respec_stays_blocked()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddXp(int.MaxValue);
+            session.StartRun();
+            session.PauseGame();
+            yield return null;
+
+            session.ShowCharacterSheet();
+            yield return null;
+
+            Assert.That(session.CharacterSheetVisible, Is.True);
+            Assert.That(session.TryAllocateSkill(SkillNode.Vitality), Is.True);
+            Assert.That(session.RespecSkills(), Is.EqualTo(0));
+            Assert.That(session.Profile.GetSkillRank(SkillNode.Vitality), Is.EqualTo(1));
+
+            session.CloseCharacterSheet();
+            session.ResumeGame();
+            yield return null;
+            Assert.That(session.State, Is.EqualTo(GameSessionState.Playing));
+        }
+
+        [UnityTest]
+        public IEnumerator Character_sheet_opens_during_round_end_and_keeps_the_reward_flow()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddXp(int.MaxValue);
+            session.StartRun();
+            var budget = session.SpawnBudget;
+
+            for (var i = 0; i < budget; i++)
+            {
+                session.DamageZombieForTests(100000f);
+                yield return null;
+
+                if (i < budget - 1)
+                {
+                    session.SpawnZombieForTests();
+                    yield return null;
+                }
+            }
+
+            Assert.That(session.RoundClearPending, Is.True);
+            session.ShowCharacterSheet();
+            yield return null;
+
+            Assert.That(session.CharacterSheetVisible, Is.True);
+            Assert.That(session.TryAllocateSkill(SkillNode.Strength), Is.True);
+            Assert.That(session.RespecSkills(), Is.EqualTo(0));
+            Assert.That(session.Profile.GetSkillRank(SkillNode.Strength), Is.EqualTo(1));
+
+            session.CloseCharacterSheet();
+            yield return null;
+            Assert.That(session.CharacterSheetVisible, Is.False);
+            Assert.That(session.RoundClearPending, Is.True);
+            Assert.That(session.SelectRoundReward(0), Is.True);
+            yield return null;
+            Assert.That(session.Run.Round, Is.EqualTo(2));
+        }
+
+        [UnityTest]
+        public IEnumerator Level_up_notification_is_visible_over_round_end()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.Xp = 90;
+            session.StartRun();
+            var budget = session.SpawnBudget;
+
+            for (var i = 0; i < budget; i++)
+            {
+                session.DamageZombieForTests(100000f);
+                yield return null;
+
+                if (i < budget - 1)
+                {
+                    session.SpawnZombieForTests();
+                    yield return null;
+                }
+            }
+
+            Assert.That(session.Profile.Level, Is.EqualTo(2));
+            Assert.That(session.RoundClearPending, Is.True);
+            Assert.That(session.LevelUpVisible, Is.True);
+        }
+
+        [UnityTest]
         public IEnumerator Skill_allocation_is_rejected_while_playing()
         {
             _bootstrap = CreateBootstrap();

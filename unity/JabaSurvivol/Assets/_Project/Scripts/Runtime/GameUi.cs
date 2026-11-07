@@ -20,6 +20,7 @@ namespace JabaSurvivol.Gameplay
         private readonly GameObject _armoryPanel;
         private readonly GameObject _armoryWeaponsPanel;
         private readonly GameObject _armoryArmorPanel;
+        private readonly GameObject _characterSheet;
         private readonly Text _progressText;
         private readonly Text _healthText;
         private readonly Text _armorText;
@@ -28,6 +29,7 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _killsText;
         private readonly Text _suppliesText;
         private readonly Text _levelText;
+        private readonly Text _levelUpText;
         private readonly Text _gameOverSummary;
         private readonly Text _roundEndTitle;
         private readonly Text _roundEndSummary;
@@ -37,6 +39,16 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _armoryArmorUpgradeTitle;
         private readonly Button _armoryArmorUpgradeButton;
         private readonly Text _armoryArmorUpgradeLabel;
+        private readonly Text _characterLevelText;
+        private readonly Text _characterPointsText;
+        private readonly Text _characterStatsText;
+        private readonly Text _characterStatusText;
+        private readonly Button _characterRespecButton;
+        private readonly Text _characterRespecLabel;
+        private readonly Button[] _characterTabs;
+        private readonly Text[] _characterTabLabels;
+        private readonly GameObject[] _characterBranchPanels;
+        private readonly CharacterNodeRow[] _characterNodeRows;
         private readonly Button[] _rewardButtons;
         private readonly Text[] _rewardLabels;
         private readonly ArmoryRow[] _armoryRows;
@@ -60,6 +72,10 @@ namespace JabaSurvivol.Gameplay
         private int _lastKills = int.MinValue;
         private int _lastSupplies = int.MinValue;
         private int _lastLevel = int.MinValue;
+        private int _lastXp = int.MinValue;
+        private int _lastSkillPoints = int.MinValue;
+        private bool _characterSheetTablet;
+        private int _activeCharacterBranch;
 
         public GameUi(
             Transform parent,
@@ -74,6 +90,10 @@ namespace JabaSurvivol.Gameplay
             System.Action<WeaponUpgradeStat> onArmoryUpgrade,
             System.Action<ArmorTier> onArmorAction,
             System.Action onArmorUpgrade,
+            System.Action onCharacterSheet,
+            System.Action<SkillNode> onAllocateSkill,
+            System.Action onRespecSkills,
+            System.Action onCharacterSheetClose,
             System.Action onArmoryClose)
         {
             var canvasObject = UiFactory.CreateCanvas("JabaSurvivol UI", parent);
@@ -84,12 +104,13 @@ namespace JabaSurvivol.Gameplay
             UiFactory.Stretch(_safeArea);
             safeAreaObject.AddComponent<SafeAreaFitter>();
 
-            _mainMenu = BuildMainMenu(onStart, onArmory);
+            _mainMenu = BuildMainMenu(onStart, onArmory, onCharacterSheet);
             _hud = BuildHud(onPause, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
-            _pausePanel = BuildPausePanel(onResume, onMenu, onArmory);
+            _pausePanel = BuildPausePanel(onResume, onMenu, onArmory, onCharacterSheet);
             _gameOverPanel = BuildGameOverPanel(onRestart, onMenu, out _gameOverSummary);
             _roundEndPanel = BuildRoundEndPanel(
                 onRewardSelected,
+                onCharacterSheet,
                 out _roundEndTitle,
                 out _roundEndSummary,
                 out _rewardButtons,
@@ -99,6 +120,7 @@ namespace JabaSurvivol.Gameplay
                 onArmoryUpgrade,
                 onArmorAction,
                 onArmorUpgrade,
+                onCharacterSheet,
                 onArmoryClose,
                 out _armoryRows,
                 out _armoryUpgradeRows,
@@ -111,6 +133,36 @@ namespace JabaSurvivol.Gameplay
                 out _armoryArmorUpgradeButton,
                 out _armoryArmorUpgradeLabel,
                 out _armoryStatusText);
+            _characterSheet = BuildCharacterSheet(
+                onAllocateSkill,
+                onRespecSkills,
+                onCharacterSheetClose,
+                out _characterLevelText,
+                out _characterPointsText,
+                out _characterStatsText,
+                out _characterStatusText,
+                out _characterRespecButton,
+                out _characterRespecLabel,
+                out _characterTabs,
+                out _characterTabLabels,
+                out _characterBranchPanels,
+                out _characterNodeRows);
+
+            _levelUpText = UiFactory.CreateText(
+                _safeArea,
+                "Level Up",
+                string.Empty,
+                34,
+                TextAnchor.MiddleCenter,
+                new Color(1f, 0.85f, 0.35f));
+            _levelUpText.fontStyle = FontStyle.Bold;
+            UiFactory.Place(
+                _levelUpText.rectTransform,
+                new Vector2(0.5f, 0.72f),
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                new Vector2(900f, 60f));
+            _levelUpText.gameObject.SetActive(false);
 
             _progressText = FindText(_mainMenu, "Progress");
             ShowMainMenu(new Profile());
@@ -124,6 +176,7 @@ namespace JabaSurvivol.Gameplay
             _gameOverPanel.SetActive(false);
             HideRoundEnd();
             HideArmory();
+            HideCharacterSheet();
             _progressText.text = Localization.Format(
                 "menu.progress",
                 profile.Supplies,
@@ -138,6 +191,7 @@ namespace JabaSurvivol.Gameplay
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(false);
             HideArmory();
+            HideCharacterSheet();
             _lastHealth = int.MinValue;
             _lastMaxHealth = int.MinValue;
             _lastArmor = int.MinValue;
@@ -147,6 +201,9 @@ namespace JabaSurvivol.Gameplay
             _lastKills = int.MinValue;
             _lastSupplies = int.MinValue;
             _lastLevel = int.MinValue;
+            _lastXp = int.MinValue;
+            _lastSkillPoints = int.MinValue;
+            HideLevelUp();
             HideRoundEnd();
         }
 
@@ -198,10 +255,33 @@ namespace JabaSurvivol.Gameplay
                 _suppliesText.text = Localization.Format("hud.supplies", profile.Supplies);
             }
 
-            if (profile.Level != _lastLevel)
+            if (profile.Level != _lastLevel ||
+                profile.Xp != _lastXp ||
+                profile.SkillPoints != _lastSkillPoints)
             {
                 _lastLevel = profile.Level;
-                _levelText.text = Localization.Format("hud.level", profile.Level);
+                _lastXp = profile.Xp;
+                _lastSkillPoints = profile.SkillPoints;
+                _levelText.text = Localization.Format(
+                    "hud.level",
+                    profile.Level,
+                    profile.Xp,
+                    Profile.XpToNext(profile.Level),
+                    profile.SkillPoints);
+            }
+        }
+
+        public void ShowLevelUp(int level)
+        {
+            _levelUpText.text = Localization.Format("hud.levelup", level);
+            _levelUpText.gameObject.SetActive(true);
+        }
+
+        public void HideLevelUp()
+        {
+            if (_levelUpText != null)
+            {
+                _levelUpText.gameObject.SetActive(false);
             }
         }
 
@@ -218,6 +298,7 @@ namespace JabaSurvivol.Gameplay
             _gameOverPanel.SetActive(true);
             HideRoundEnd();
             HideArmory();
+            HideCharacterSheet();
             _gameOverSummary.text = Localization.Format("gameover.summary", round, kills, suppliesEarned);
         }
 
@@ -232,6 +313,7 @@ namespace JabaSurvivol.Gameplay
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(false);
             HideRoundEnd();
+            HideCharacterSheet();
             _armoryPanel.SetActive(true);
             _armoryWeaponsPanel.SetActive(true);
             _armoryArmorPanel.SetActive(false);
@@ -244,6 +326,253 @@ namespace JabaSurvivol.Gameplay
             if (_armoryPanel != null)
             {
                 _armoryPanel.SetActive(false);
+            }
+        }
+
+        public bool CharacterSheetVisible => _characterSheet != null && _characterSheet.activeSelf;
+
+        public bool LevelUpVisible => _levelUpText != null && _levelUpText.gameObject.activeSelf;
+
+        public void ShowCharacterSheet(Profile profile, bool canAllocate, bool canRespec, WeaponStats weapon, ArmorStats armor)
+        {
+            _characterSheetTablet = IsTabletLayout();
+            _characterSheet.SetActive(true);
+            ApplyCharacterSheetLayout();
+            SetActiveCharacterTab(_activeCharacterBranch);
+            RefreshCharacterSheet(profile, canAllocate, canRespec, weapon, armor);
+            SetCharacterSheetStatus(
+                canAllocate ? string.Empty : Localization.Get("character.allocation.blocked"));
+        }
+
+        public void HideCharacterSheet()
+        {
+            if (_characterSheet != null)
+            {
+                _characterSheet.SetActive(false);
+            }
+        }
+
+        public void RefreshCharacterSheet(Profile profile, bool canAllocate, bool canRespec, WeaponStats weapon, ArmorStats armor)
+        {
+            var stats = StatAggregation.Compute(profile, weapon, armor);
+            _characterLevelText.text = Localization.Format(
+                "character.level",
+                profile.Level,
+                profile.Xp,
+                Profile.XpToNext(profile.Level));
+            _characterPointsText.text = Localization.Format("character.points", profile.SkillPoints);
+            _characterStatsText.text = FormatCharacterStats(stats);
+
+            for (var i = 0; i < _characterNodeRows.Length; i++)
+            {
+                var row = _characterNodeRows[i];
+                var definition = SkillCatalog.Get(row.Node);
+                var rank = profile.GetSkillRank(row.Node);
+
+                row.Name.text = Localization.SkillName(row.Node);
+                row.Rank.text = Localization.Format("character.rank", rank, definition.MaxRanks);
+                row.Pips.text = RankPips(rank, definition.MaxRanks);
+                row.Preview.text = FormatNodePreview(profile, row.Node, rank, stats, weapon, armor);
+                row.Allocate.interactable = canAllocate && profile.CanAllocateSkill(row.Node);
+                row.AllocateLabel.text = rank >= definition.MaxRanks
+                    ? Localization.Get("character.max")
+                    : Localization.Get("character.allocate");
+            }
+
+            _characterRespecButton.interactable = canRespec && profile.GetSpentSkillPoints() > 0;
+            _characterRespecLabel.text = Localization.Get("character.respec");
+        }
+
+        public void SetCharacterSheetStatus(string status)
+        {
+            _characterStatusText.text = status;
+        }
+
+        public void SetActiveCharacterTab(int index)
+        {
+            _activeCharacterBranch = Mathf.Clamp(index, 0, _characterBranchPanels.Length - 1);
+            for (var i = 0; i < _characterTabLabels.Length; i++)
+            {
+                _characterTabLabels[i].color = i == _activeCharacterBranch
+                    ? new Color(0.45f, 0.95f, 0.7f)
+                    : new Color(0.7f, 0.8f, 0.9f);
+                if (!_characterSheetTablet)
+                {
+                    _characterBranchPanels[i].SetActive(i == _activeCharacterBranch);
+                }
+            }
+        }
+
+        private void ApplyCharacterSheetLayout()
+        {
+            for (var i = 0; i < _characterBranchPanels.Length; i++)
+            {
+                var rect = _characterBranchPanels[i].GetComponent<RectTransform>();
+                _characterTabs[i].gameObject.SetActive(!_characterSheetTablet);
+                _characterBranchPanels[i].SetActive(_characterSheetTablet || i == _activeCharacterBranch);
+                var branchTitle = _characterBranchPanels[i].transform.Find("Branch Title");
+                if (branchTitle != null)
+                {
+                    branchTitle.gameObject.SetActive(_characterSheetTablet);
+                }
+
+                if (_characterSheetTablet)
+                {
+                    rect.anchorMin = new Vector2(0.02f + (i * 0.32f), 0.17f);
+                    rect.anchorMax = new Vector2(0.30f + (i * 0.32f), 0.78f);
+                }
+                else
+                {
+                    rect.anchorMin = new Vector2(0.04f, 0.17f);
+                    rect.anchorMax = new Vector2(0.96f, 0.78f);
+                }
+
+                rect.offsetMin = Vector2.zero;
+                rect.offsetMax = Vector2.zero;
+            }
+        }
+
+        private static bool IsTabletLayout()
+        {
+            return Screen.width >= 1200 &&
+                   Screen.height >= 700 &&
+                   (Screen.width / (float)Mathf.Max(1, Screen.height)) < 1.7f;
+        }
+
+        private static string RankPips(int rank, int maxRank)
+        {
+            return new string('\u25CF', rank) + new string('\u25CB', Mathf.Max(0, maxRank - rank));
+        }
+
+        private static string FormatPercent(float value)
+        {
+            return (value * 100f).ToString("0'%'", CultureInfo.InvariantCulture);
+        }
+
+        private static string FormatCharacterStats(CharacterStats stats)
+        {
+            return Localization.Format(
+                "character.stats",
+                stats.MaxHealth.ToString("0", CultureInfo.InvariantCulture),
+                stats.WeaponDamageMultiplier.ToString("0.00", CultureInfo.InvariantCulture),
+                stats.MoveSpeed.ToString("0.00", CultureInfo.InvariantCulture),
+                stats.Armor,
+                FormatPercent(stats.CriticalChance),
+                FormatPercent(stats.HeadshotBonus),
+                stats.ReloadSpeedMultiplier.ToString("0.00", CultureInfo.InvariantCulture),
+                stats.AmmoCapacityMultiplier.ToString("0.00", CultureInfo.InvariantCulture));
+        }
+
+        private static string FormatNodePreview(
+            Profile profile,
+            SkillNode node,
+            int rank,
+            CharacterStats current,
+            WeaponStats weapon,
+            ArmorStats armor)
+        {
+            var definition = SkillCatalog.Get(node);
+            if (rank >= definition.MaxRanks)
+            {
+                return Localization.Get("character.max");
+            }
+
+            switch (node)
+            {
+                case SkillNode.Strength:
+                {
+                    var next = StatAggregation.PreviewAddRank(profile, node, weapon, armor);
+                    return Localization.Format(
+                        "skill.strength.preview",
+                        current.WeaponDamageMultiplier.ToString("0.00", CultureInfo.InvariantCulture),
+                        next.WeaponDamageMultiplier.ToString("0.00", CultureInfo.InvariantCulture));
+                }
+
+                case SkillNode.Vitality:
+                {
+                    var next = StatAggregation.PreviewAddRank(profile, node, weapon, armor);
+                    return Localization.Format(
+                        "skill.vitality.preview",
+                        current.MaxHealth.ToString("0", CultureInfo.InvariantCulture),
+                        next.MaxHealth.ToString("0", CultureInfo.InvariantCulture));
+                }
+
+                case SkillNode.Speed:
+                {
+                    var next = StatAggregation.PreviewAddRank(profile, node, weapon, armor);
+                    return Localization.Format(
+                        "skill.speed.preview",
+                        current.MoveSpeed.ToString("0.00", CultureInfo.InvariantCulture),
+                        next.MoveSpeed.ToString("0.00", CultureInfo.InvariantCulture));
+                }
+
+                case SkillNode.Precision:
+                {
+                    var next = StatAggregation.PreviewAddRank(profile, node, weapon, armor);
+                    return Localization.Format(
+                        "skill.precision.preview",
+                        FormatPercent(current.CriticalChance),
+                        FormatPercent(next.CriticalChance),
+                        FormatPercent(current.HeadshotBonus),
+                        FormatPercent(next.HeadshotBonus));
+                }
+
+                case SkillNode.Endurance:
+                {
+                    var next = StatAggregation.PreviewAddRank(profile, node, weapon, armor);
+                    return Localization.Format("skill.endurance.preview", current.Armor, next.Armor);
+                }
+
+                case SkillNode.Engineering:
+                {
+                    var next = StatAggregation.PreviewAddRank(profile, node, weapon, armor);
+                    return Localization.Format(
+                        "skill.engineering.preview",
+                        current.ReloadSpeedMultiplier.ToString("0.00", CultureInfo.InvariantCulture),
+                        next.ReloadSpeedMultiplier.ToString("0.00", CultureInfo.InvariantCulture),
+                        current.AmmoCapacityMultiplier.ToString("0.00", CultureInfo.InvariantCulture),
+                        next.AmmoCapacityMultiplier.ToString("0.00", CultureInfo.InvariantCulture));
+                }
+
+                case SkillNode.Shockwave:
+                {
+                    var first = definition.GetActivationStats(rank);
+                    var second = definition.GetActivationStats(rank + 1);
+                    return Localization.Format(
+                        "skill.shockwave.preview",
+                        first.AreaDamage.ToString("0.#", CultureInfo.InvariantCulture),
+                        second.AreaDamage.ToString("0.#", CultureInfo.InvariantCulture),
+                        first.AreaRadius.ToString("0.00", CultureInfo.InvariantCulture),
+                        second.AreaRadius.ToString("0.00", CultureInfo.InvariantCulture),
+                        first.CooldownSeconds.ToString("0.#", CultureInfo.InvariantCulture),
+                        second.CooldownSeconds.ToString("0.#", CultureInfo.InvariantCulture));
+                }
+
+                case SkillNode.Dash:
+                {
+                    var first = definition.GetActivationStats(rank);
+                    var second = definition.GetActivationStats(rank + 1);
+                    return Localization.Format(
+                        "skill.dash.preview",
+                        first.DashDistance.ToString("0.00", CultureInfo.InvariantCulture),
+                        second.DashDistance.ToString("0.00", CultureInfo.InvariantCulture),
+                        first.CooldownSeconds.ToString("0.#", CultureInfo.InvariantCulture),
+                        second.CooldownSeconds.ToString("0.#", CultureInfo.InvariantCulture));
+                }
+
+                default:
+                {
+                    var first = definition.GetActivationStats(rank);
+                    var second = definition.GetActivationStats(rank + 1);
+                    return Localization.Format(
+                        "skill.turret.preview",
+                        first.TurretDamage.ToString("0.#", CultureInfo.InvariantCulture),
+                        second.TurretDamage.ToString("0.#", CultureInfo.InvariantCulture),
+                        first.TurretDuration.ToString("0.#", CultureInfo.InvariantCulture),
+                        second.TurretDuration.ToString("0.#", CultureInfo.InvariantCulture),
+                        first.CooldownSeconds.ToString("0.#", CultureInfo.InvariantCulture),
+                        second.CooldownSeconds.ToString("0.#", CultureInfo.InvariantCulture));
+                }
             }
         }
 
@@ -492,7 +821,7 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
-        private GameObject BuildMainMenu(System.Action onStart, System.Action onArmory)
+        private GameObject BuildMainMenu(System.Action onStart, System.Action onArmory, System.Action onCharacterSheet)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Main Menu", new Color(0.012f, 0.018f, 0.03f, 0.98f));
             var root = panel.gameObject;
@@ -508,13 +837,16 @@ namespace JabaSurvivol.Gameplay
             UiFactory.Place(progress.rectTransform, new Vector2(0.5f, 0.57f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(1300f, 50f));
 
             var start = UiFactory.CreateButton(root.transform, "Start", Localization.Get("menu.start"), 38, onStart);
-            UiFactory.Place(start.GetComponent<RectTransform>(), new Vector2(0.5f, 0.4f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 100f));
+            UiFactory.Place(start.GetComponent<RectTransform>(), new Vector2(0.5f, 0.43f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 96f));
 
-            var armory = UiFactory.CreateButton(root.transform, "Armory", Localization.Get("menu.armory"), 34, onArmory);
-            UiFactory.Place(armory.GetComponent<RectTransform>(), new Vector2(0.5f, 0.29f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 88f));
+            var armory = UiFactory.CreateButton(root.transform, "Armory", Localization.Get("menu.armory"), 32, onArmory);
+            UiFactory.Place(armory.GetComponent<RectTransform>(), new Vector2(0.5f, 0.32f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 78f));
+
+            var character = UiFactory.CreateButton(root.transform, "Skills", Localization.Get("character.open"), 32, onCharacterSheet);
+            UiFactory.Place(character.GetComponent<RectTransform>(), new Vector2(0.5f, 0.21f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 78f));
 
             var controls = UiFactory.CreateText(root.transform, "Controls", Localization.Get("menu.controls"), 24, TextAnchor.MiddleCenter, new Color(0.55f, 0.62f, 0.72f));
-            UiFactory.Place(controls.rectTransform, new Vector2(0.5f, 0.17f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300f, 50f));
+            UiFactory.Place(controls.rectTransform, new Vector2(0.5f, 0.1f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300f, 50f));
 
             return root;
         }
@@ -571,8 +903,8 @@ namespace JabaSurvivol.Gameplay
             suppliesText = UiFactory.CreateText(root.transform, "Supplies", string.Empty, 28, TextAnchor.MiddleRight, new Color(0.55f, 0.95f, 0.75f));
             UiFactory.Place(suppliesText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-150f, -30f), new Vector2(420f, 44f));
 
-            levelText = UiFactory.CreateText(root.transform, "Level", string.Empty, 24, TextAnchor.MiddleRight, new Color(0.6f, 0.68f, 0.78f));
-            UiFactory.Place(levelText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-150f, -78f), new Vector2(420f, 40f));
+            levelText = UiFactory.CreateText(root.transform, "Level", string.Empty, 20, TextAnchor.MiddleRight, new Color(0.6f, 0.68f, 0.78f));
+            UiFactory.Place(levelText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-140f, -78f), new Vector2(620f, 40f));
 
             var pause = UiFactory.CreateButton(root.transform, "Pause", Localization.Get("hud.pause"), 28, onPause);
             UiFactory.Place(pause.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-30f, -30f), new Vector2(84f, 84f));
@@ -612,7 +944,7 @@ namespace JabaSurvivol.Gameplay
             return baseImage;
         }
 
-        private GameObject BuildPausePanel(System.Action onResume, System.Action onMenu, System.Action onArmory)
+        private GameObject BuildPausePanel(System.Action onResume, System.Action onMenu, System.Action onArmory, System.Action onCharacterSheet)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Pause Panel", new Color(0.01f, 0.02f, 0.03f, 0.9f));
             var root = panel.gameObject;
@@ -621,14 +953,17 @@ namespace JabaSurvivol.Gameplay
             title.fontStyle = FontStyle.Bold;
             UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.68f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900f, 100f));
 
-            var resume = UiFactory.CreateButton(root.transform, "Resume", Localization.Get("pause.resume"), 34, onResume);
-            UiFactory.Place(resume.GetComponent<RectTransform>(), new Vector2(0.5f, 0.48f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 92f));
+            var resume = UiFactory.CreateButton(root.transform, "Resume", Localization.Get("pause.resume"), 32, onResume);
+            UiFactory.Place(resume.GetComponent<RectTransform>(), new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 84f));
 
-            var armory = UiFactory.CreateButton(root.transform, "Armory", Localization.Get("pause.armory"), 30, onArmory);
-            UiFactory.Place(armory.GetComponent<RectTransform>(), new Vector2(0.5f, 0.35f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 82f));
+            var armory = UiFactory.CreateButton(root.transform, "Armory", Localization.Get("pause.armory"), 28, onArmory);
+            UiFactory.Place(armory.GetComponent<RectTransform>(), new Vector2(0.5f, 0.40f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
 
-            var menu = UiFactory.CreateButton(root.transform, "Menu", Localization.Get("pause.menu"), 30, onMenu);
-            UiFactory.Place(menu.GetComponent<RectTransform>(), new Vector2(0.5f, 0.22f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 82f));
+            var character = UiFactory.CreateButton(root.transform, "Skills", Localization.Get("character.open"), 28, onCharacterSheet);
+            UiFactory.Place(character.GetComponent<RectTransform>(), new Vector2(0.5f, 0.29f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
+
+            var menu = UiFactory.CreateButton(root.transform, "Menu", Localization.Get("pause.menu"), 28, onMenu);
+            UiFactory.Place(menu.GetComponent<RectTransform>(), new Vector2(0.5f, 0.18f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
 
             return root;
         }
@@ -656,6 +991,7 @@ namespace JabaSurvivol.Gameplay
 
         private GameObject BuildRoundEndPanel(
             System.Action<int> onSelect,
+            System.Action onCharacterSheet,
             out Text title,
             out Text summary,
             out Button[] buttons,
@@ -697,8 +1033,245 @@ namespace JabaSurvivol.Gameplay
                 buttons[i] = button;
             }
 
+            var character = UiFactory.CreateButton(
+                root.transform,
+                "Skills",
+                Localization.Get("character.open"),
+                28,
+                onCharacterSheet);
+            UiFactory.Place(
+                character.GetComponent<RectTransform>(),
+                new Vector2(0.5f, 0.12f),
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                new Vector2(360f, 76f));
+
             root.SetActive(false);
             return root;
+        }
+
+        private GameObject BuildCharacterSheet(
+            System.Action<SkillNode> onAllocate,
+            System.Action onRespec,
+            System.Action onClose,
+            out Text levelText,
+            out Text pointsText,
+            out Text statsText,
+            out Text statusText,
+            out Button respecButton,
+            out Text respecLabel,
+            out Button[] tabs,
+            out Text[] tabLabels,
+            out GameObject[] branchPanels,
+            out CharacterNodeRow[] nodeRows)
+        {
+            var panel = UiFactory.CreatePanel(_safeArea, "Character Sheet", new Color(0.008f, 0.012f, 0.022f, 1f));
+            var root = panel.gameObject;
+
+            var title = UiFactory.CreateText(
+                root.transform,
+                "Title",
+                Localization.Get("character.title"),
+                60,
+                TextAnchor.MiddleCenter,
+                new Color(0.4f, 0.95f, 1f));
+            title.fontStyle = FontStyle.Bold;
+            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.95f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900f, 70f));
+
+            levelText = UiFactory.CreateText(
+                root.transform,
+                "Level",
+                string.Empty,
+                26,
+                TextAnchor.MiddleLeft,
+                new Color(0.72f, 0.82f, 0.9f));
+            UiFactory.Place(levelText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(40f, -26f), new Vector2(700f, 46f));
+
+            pointsText = UiFactory.CreateText(
+                root.transform,
+                "Points",
+                string.Empty,
+                26,
+                TextAnchor.MiddleRight,
+                new Color(0.55f, 0.95f, 0.75f));
+            UiFactory.Place(pointsText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-290f, -26f), new Vector2(500f, 46f));
+
+            var close = UiFactory.CreateButton(root.transform, "Close", Localization.Get("character.close"), 26, onClose);
+            UiFactory.Place(close.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-30f, -24f), new Vector2(220f, 72f));
+
+            var branches = new[] { SkillBranch.Strength, SkillBranch.Agility, SkillBranch.Survival };
+            tabs = new Button[branches.Length];
+            tabLabels = new Text[branches.Length];
+            for (var i = 0; i < branches.Length; i++)
+            {
+                var index = i;
+                tabs[i] = UiFactory.CreateButton(
+                    root.transform,
+                    $"Tab {branches[i]}",
+                    Localization.BranchName(branches[i]),
+                    28,
+                    () => SetActiveCharacterTab(index));
+                UiFactory.Place(
+                    tabs[i].GetComponent<RectTransform>(),
+                    new Vector2(0.27f + (i * 0.23f), 0.81f),
+                    new Vector2(0.5f, 0.5f),
+                    Vector2.zero,
+                    new Vector2(320f, 62f));
+                tabLabels[i] = tabs[i].GetComponentInChildren<Text>();
+            }
+
+            branchPanels = new GameObject[branches.Length];
+            nodeRows = new CharacterNodeRow[SkillCatalog.All.Count];
+            for (var branchIndex = 0; branchIndex < branches.Length; branchIndex++)
+            {
+                var branch = branches[branchIndex];
+                var branchPanel = new GameObject($"Branch {branch}", typeof(RectTransform));
+                branchPanel.transform.SetParent(root.transform, false);
+                branchPanels[branchIndex] = branchPanel;
+
+                var branchTitle = UiFactory.CreateText(
+                    branchPanel.transform,
+                    "Branch Title",
+                    Localization.BranchName(branch),
+                    28,
+                    TextAnchor.MiddleCenter,
+                    new Color(0.4f, 0.9f, 1f));
+                branchTitle.fontStyle = FontStyle.Bold;
+                UiFactory.Place(branchTitle.rectTransform, new Vector2(0.5f, 0.98f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(420f, 40f));
+
+                var rowIndex = 0;
+                for (var nodeIndex = 0; nodeIndex < SkillCatalog.All.Count; nodeIndex++)
+                {
+                    var definition = SkillCatalog.All[nodeIndex];
+                    if (definition.Branch != branch)
+                    {
+                        continue;
+                    }
+
+                    var rowImage = UiFactory.CreateImage(
+                        branchPanel.transform,
+                        $"Node {definition.Node}",
+                        SpriteFactory.Square,
+                        new Color(0.05f, 0.08f, 0.12f, 0.96f));
+                    var rowRect = rowImage.rectTransform;
+                    rowRect.anchorMin = new Vector2(0.03f, 0.66f - (rowIndex * 0.27f));
+                    rowRect.anchorMax = new Vector2(0.97f, 0.90f - (rowIndex * 0.27f));
+                    rowRect.offsetMin = Vector2.zero;
+                    rowRect.offsetMax = Vector2.zero;
+
+                    var name = UiFactory.CreateText(
+                        rowImage.transform,
+                        "Name",
+                        string.Empty,
+                        24,
+                        TextAnchor.MiddleLeft,
+                        Color.white);
+                    name.fontStyle = FontStyle.Bold;
+                    UiFactory.Place(name.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(18f, -8f), new Vector2(260f, 32f));
+
+                    var rank = UiFactory.CreateText(
+                        rowImage.transform,
+                        "Rank",
+                        string.Empty,
+                        20,
+                        TextAnchor.MiddleRight,
+                        new Color(0.72f, 0.82f, 0.9f));
+                    UiFactory.Place(rank.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-100f, -8f), new Vector2(160f, 32f));
+
+                    var pips = UiFactory.CreateText(
+                        rowImage.transform,
+                        "Pips",
+                        string.Empty,
+                        22,
+                        TextAnchor.MiddleLeft,
+                        new Color(0.45f, 0.95f, 0.7f));
+                    UiFactory.Place(pips.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(18f, -40f), new Vector2(380f, 30f));
+
+                    var preview = UiFactory.CreateText(
+                        rowImage.transform,
+                        "Preview",
+                        string.Empty,
+                        18,
+                        TextAnchor.MiddleLeft,
+                        new Color(0.72f, 0.8f, 0.9f));
+                    preview.rectTransform.anchorMin = new Vector2(0f, 0f);
+                    preview.rectTransform.anchorMax = new Vector2(1f, 0f);
+                    preview.rectTransform.pivot = new Vector2(0f, 0f);
+                    preview.rectTransform.offsetMin = new Vector2(18f, 8f);
+                    preview.rectTransform.offsetMax = new Vector2(-110f, 58f);
+
+                    var allocate = UiFactory.CreateButton(
+                        rowImage.transform,
+                        "Allocate",
+                        Localization.Get("character.allocate"),
+                        38,
+                        () => onAllocate?.Invoke(definition.Node));
+                    UiFactory.Place(
+                        allocate.GetComponent<RectTransform>(),
+                        new Vector2(1f, 0.5f),
+                        new Vector2(1f, 0.5f),
+                        new Vector2(-16f, 0f),
+                        new Vector2(84f, 76f));
+
+                    nodeRows[(int)definition.Node] = new CharacterNodeRow
+                    {
+                        Node = definition.Node,
+                        Allocate = allocate,
+                        AllocateLabel = allocate.GetComponentInChildren<Text>(),
+                        Name = name,
+                        Rank = rank,
+                        Pips = pips,
+                        Preview = preview
+                    };
+                    rowIndex++;
+                }
+            }
+
+            statsText = UiFactory.CreateText(
+                root.transform,
+                "Stats",
+                string.Empty,
+                20,
+                TextAnchor.MiddleCenter,
+                new Color(0.55f, 0.92f, 0.7f));
+            UiFactory.Place(statsText.rectTransform, new Vector2(0.5f, 0.075f), new Vector2(0.5f, 0.5f), new Vector2(-100f, 0f), new Vector2(1300f, 36f));
+
+            respecButton = UiFactory.CreateButton(
+                root.transform,
+                "Respec",
+                Localization.Get("character.respec"),
+                24,
+                onRespec);
+            UiFactory.Place(
+                respecButton.GetComponent<RectTransform>(),
+                new Vector2(1f, 0.075f),
+                new Vector2(1f, 0.5f),
+                new Vector2(-40f, 0f),
+                new Vector2(300f, 64f));
+            respecLabel = respecButton.GetComponentInChildren<Text>();
+
+            statusText = UiFactory.CreateText(
+                root.transform,
+                "Status",
+                string.Empty,
+                20,
+                TextAnchor.MiddleCenter,
+                new Color(1f, 0.75f, 0.42f));
+            UiFactory.Place(statusText.rectTransform, new Vector2(0.5f, 0.025f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1100f, 36f));
+
+            root.SetActive(false);
+            return root;
+        }
+
+        private sealed class CharacterNodeRow
+        {
+            public SkillNode Node;
+            public Button Allocate;
+            public Text AllocateLabel;
+            public Text Name;
+            public Text Rank;
+            public Text Pips;
+            public Text Preview;
         }
 
         private GameObject BuildArmoryPanel(
@@ -706,6 +1279,7 @@ namespace JabaSurvivol.Gameplay
             System.Action<WeaponUpgradeStat> onUpgrade,
             System.Action<ArmorTier> onArmorAction,
             System.Action onArmorUpgrade,
+            System.Action onCharacterSheet,
             System.Action onClose,
             out ArmoryRow[] rows,
             out ArmoryUpgradeRow[] upgradeRows,
@@ -731,6 +1305,9 @@ namespace JabaSurvivol.Gameplay
 
             var close = UiFactory.CreateButton(root.transform, "Close", Localization.Get("armory.close"), 28, onClose);
             UiFactory.Place(close.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-30f, -24f), new Vector2(220f, 76f));
+
+            var skills = UiFactory.CreateButton(root.transform, "Skills", Localization.Get("character.open"), 26, onCharacterSheet);
+            UiFactory.Place(skills.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-270f, -24f), new Vector2(220f, 76f));
 
             weaponsPanel = new GameObject("Weapons Panel", typeof(RectTransform));
             weaponsPanel.transform.SetParent(root.transform, false);

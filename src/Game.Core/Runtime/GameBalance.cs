@@ -53,5 +53,6 @@ namespace JabaSurvivol.Core
 
         public const float StickDeadZone = 0.16f;
         public const float AimStickDeadZone = 0.2f;
+        public const float LevelUpNotificationSeconds = 2.5f;
     }
 }
