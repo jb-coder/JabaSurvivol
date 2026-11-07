@@ -333,6 +333,10 @@ namespace JabaSurvivol.Gameplay
             }
 
             var equippedArmor = ArmorService.GetEffectiveStats(profile, profile.EquippedArmor);
+            var armorDefinition = ArmorCatalog.Get(profile.EquippedArmor);
+            var armorPercent = (armorDefinition.UpgradeEffectPerTier * 100f).ToString(
+                "0.#",
+                CultureInfo.InvariantCulture);
             _armoryArmorUpgradeTitle.text = Localization.Format(
                 "armory.armor.upgrade.title",
                 Localization.ArmorName(profile.EquippedArmor));
@@ -346,6 +350,7 @@ namespace JabaSurvivol.Gameplay
             {
                 _armoryArmorUpgradeLabel.text = Localization.Format(
                     "armory.armor.upgrade.max",
+                    armorPercent,
                     equippedArmor.MaxUpgradeTier);
                 _armoryArmorUpgradeButton.interactable = false;
             }
@@ -353,6 +358,7 @@ namespace JabaSurvivol.Gameplay
             {
                 _armoryArmorUpgradeLabel.text = Localization.Format(
                     "armory.armor.upgrade.card",
+                    armorPercent,
                     equippedArmor.UpgradeTier,
                     equippedArmor.MaxUpgradeTier,
                     equippedArmor.NextUpgradeCost);

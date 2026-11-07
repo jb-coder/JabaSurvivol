@@ -64,12 +64,16 @@ stored in the profile and survive death.
 - Medium: 50 absorb, 800 supplies.
 - Heavy: 90 absorb, 1,600 supplies.
 - Armor absorbs damage before health.
+- Armor absorbs whole points. Fractional damage below 1 is not absorbed, and
+  any fractional remainder reaches health.
 - Repairs are free or drop-based. An armor plate restores 10 condition and
   never consumes persistent supplies.
 - Each unlocked armor tier has five permanent upgrade tiers at +10% absorb per
   tier, with data-driven costs.
 - Unlocks, equipped armor, and upgrades are stored in the profile and survive
   death. Death resets only the current run's armor condition.
+- Equipping or upgrading armor from the pause-menu armory applies to the next
+  run; an active run keeps its starting armor tier and maximum condition.
 
 ## Round rewards
 
