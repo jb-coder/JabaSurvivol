@@ -26,6 +26,8 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Character sheet with phone branch tabs, tablet three-column layout, rank pips, large touch targets, and before/after stat previews.
 - Character sheet access from the main menu, pause menu, and round-end screen, with free respec between runs.
 - HUD level, XP progress, available skill points, and a temporary level-up notification.
+- Extended headless balance simulation for the full v0.3.0 build path, including rifle unlock, weapon upgrade tiers, armor tiers, skill ranks, supplies earned/spent/remaining, XP, level, and available skill points.
+- Simulation outliers for trivial rounds, runaway supplies, unreachable upgrades, cap violations, and missing weapon, damage upgrade, or armor unlocks.
 
 ## [0.2.0] - 2026-11-06
 

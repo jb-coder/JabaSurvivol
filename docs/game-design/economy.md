@@ -107,15 +107,22 @@ Round values are data-driven in `GameBalance` and `RoundTable`:
 - Round 5 is an elite round and round 10 is the boss round.
 
 The headless simulation uses the same core rules and reports pacing, income,
-progression, and outliers:
+progression, build state, and outliers:
 
 ```powershell
 dotnet run --project tools/BalanceSimulation/BalanceSimulation.csproj -c Release
 ```
 
+The default build is deterministic: it unlocks light armor, saves for the
+rifle, then medium armor, then buys rifle upgrades, armor upgrades, and skill
+ranks in a fixed priority. The report includes per-round weapon, unlock flags,
+weapon upgrade tiers, armor tier and absorb, skill ranks, supplies earned,
+spent, and remaining, XP, level, and available skill points.
+
 It writes `artifacts/balance/rounds.md` with a fixed seed so CI and local runs
-produce the same report. Outliers cover trivial rounds, runaway supplies, and
-unreachable upgrade costs.
+produce the same report. Outliers cover trivial rounds, runaway supplies,
+unreachable upgrade costs, builds that exceed the documented caps, and runs
+that never unlock a weapon, weapon damage upgrade, or armor tier.
 
 ## Premium currency
 
