@@ -17,12 +17,17 @@
 | 2 | 100 | 1 |
 | 5 | 400 | 5 |
 | 10 | 1,200 | 11 |
-| 20 | 4,000 | 24 |
+| 20 | 4,000 | 23 |
 | 30 | 10,000 | 35 |
 
 The curve is configurable and will be validated with simulations.
 
 ## Skill tree
+
+The nine nodes are data-driven in `SkillCatalog`. Each node has five ranks.
+Turret rank data is included, but turret activation is delivered in the
+active-skill milestone. Shockwave and Dash rank data is included, but their
+activation systems are also later scope.
 
 ### Strength
 
@@ -70,6 +75,18 @@ Final stats = base
             + temporary buffs
 ```
 
+`StatAggregation.Compute` receives the effective weapon stats (base plus
+permanent upgrades) and effective armor stats (base plus permanent upgrades),
+then adds skill ranks and optional temporary modifiers.
+
+Final stats:
+- Vitality adds 10 max health per rank.
+- Strength adds 3% weapon damage per rank.
+- Speed adds 2% movement speed per rank.
+- Precision adds 1% critical chance and 5% headshot damage per rank.
+- Endurance adds 5 armor per rank.
+- Engineering adds 5% reload speed and 5% ammo capacity per rank.
+
 ## Caps
 
 - Movement speed bonus: +50%.
@@ -93,6 +110,11 @@ Final stats = base
 ## Persistence
 
 The profile stores level, XP, available points, allocated ranks, equipped active skill, supplies, weapon unlocks and upgrades, armor tier, records, settings, and schema version.
+
+Allocated ranks are stored as node and rank pairs. Respec clears the pairs and
+refunds every spent point without changing level, XP, weapon unlocks, or armor
+unlocks. Allocation is allowed only from the armory, pause menu, or round-end
+screen.
 
 Saving occurs on round end, purchase, level-up, pause, and app exit. Writes are atomic and validated on load.
 

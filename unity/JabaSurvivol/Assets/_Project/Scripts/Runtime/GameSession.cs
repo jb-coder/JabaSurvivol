@@ -41,6 +41,7 @@ namespace JabaSurvivol.Gameplay
         private int _runSuppliesEarned;
         private int _runXpEarned;
         private WeaponStats _weapon;
+        private CharacterStats _stats;
         private GameSessionState _armoryReturnState;
         private int _spreadSequence;
 
@@ -49,6 +50,8 @@ namespace JabaSurvivol.Gameplay
         public RunState Run => _run;
 
         public GameSessionState State => _state;
+
+        public CharacterStats Stats => _stats;
 
         public WeaponId EquippedWeapon => _profile?.EquippedWeapon ?? WeaponId.Pistol;
 
@@ -123,6 +126,10 @@ namespace JabaSurvivol.Gameplay
             _profile = _store.Load();
             _profile.Validate();
             _weapon = WeaponUpgradeService.GetEffectiveStats(_profile, _profile.EquippedWeapon);
+            _stats = StatAggregation.Compute(
+                _profile,
+                _weapon,
+                ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor));
 
             CreateActors();
 
@@ -263,7 +270,7 @@ namespace JabaSurvivol.Gameplay
             if (frame.Move.sqrMagnitude > 0.0001f)
             {
                 var current = (Vector2)_playerObject.transform.position;
-                var next = current + (frame.Move * (GameBalance.PlayerMoveSpeed * deltaTime));
+                var next = current + (frame.Move * (_stats.MoveSpeed * deltaTime));
                 CombatMath.ClampToArena(
                     next.x,
                     next.y,
@@ -295,7 +302,8 @@ namespace JabaSurvivol.Gameplay
         private void Fire()
         {
             _fireCooldown = _weapon.FireInterval;
-            LastBulletDamageForTests = _weapon.Damage;
+            var damage = _stats.EffectiveWeaponDamage;
+            LastBulletDamageForTests = damage;
 
             var origin = (Vector2)_playerObject.transform.position + (_aimDirection * 0.55f);
             var lifetime = _weapon.Range / _weapon.ProjectileSpeed;
@@ -304,7 +312,7 @@ namespace JabaSurvivol.Gameplay
             {
                 var direction = Rotate(_aimDirection, NextSpreadAngle(_weapon.SpreadDegrees));
                 LastShotDirectionForTests = direction;
-                _bullets.Spawn(origin, direction, _weapon.ProjectileSpeed, lifetime, _weapon.Damage);
+                _bullets.Spawn(origin, direction, _weapon.ProjectileSpeed, lifetime, damage);
                 return;
             }
 
@@ -318,7 +326,7 @@ namespace JabaSurvivol.Gameplay
                     LastShotDirectionForTests = direction;
                 }
 
-                _bullets.Spawn(origin, direction, _weapon.ProjectileSpeed, lifetime, _weapon.Damage);
+                _bullets.Spawn(origin, direction, _weapon.ProjectileSpeed, lifetime, damage);
             }
         }
 
@@ -416,8 +424,9 @@ namespace JabaSurvivol.Gameplay
         public void StartRun()
         {
             var armor = ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor);
-            _run = new RunState(GameBalance.PlayerMaxHealth, 1, Environment.TickCount, armor.AbsorbAmount);
             _weapon = WeaponUpgradeService.GetEffectiveStats(_profile, _profile.EquippedWeapon);
+            _stats = StatAggregation.Compute(_profile, _weapon, armor);
+            _run = new RunState(_stats.MaxHealth, 1, Environment.TickCount, _stats.Armor);
             _runSuppliesEarned = 0;
             _runXpEarned = 0;
             _roundClearPending = false;
@@ -590,11 +599,84 @@ namespace JabaSurvivol.Gameplay
             var result = WeaponUpgradeService.TryPurchase(_profile, _profile.EquippedWeapon, stat);
             if (result == WeaponUpgradePurchaseResult.Purchased)
             {
-                _weapon = WeaponUpgradeService.GetEffectiveStats(_profile, _profile.EquippedWeapon);
+                RefreshStats();
                 _store.Save(_profile);
             }
 
             return result;
+        }
+
+        private void RefreshStats()
+        {
+            _weapon = WeaponUpgradeService.GetEffectiveStats(_profile, _profile.EquippedWeapon);
+            _stats = StatAggregation.Compute(
+                _profile,
+                _weapon,
+                ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor));
+        }
+
+        private bool CanAllocateSkillsNow()
+        {
+            return _state == GameSessionState.MainMenu ||
+                   _state == GameSessionState.Paused ||
+                   _roundClearPending;
+        }
+
+        private void ApplyStatsToRun()
+        {
+            if (_run == null || _run.IsGameOver)
+            {
+                return;
+            }
+
+            _run.ApplyMaxStats(_stats.MaxHealth, _stats.Armor);
+            _ui.UpdateHud(
+                _run.Player,
+                _run.Armor,
+                _run.MaxArmor,
+                _run.Round,
+                _run.EnemiesRemaining,
+                _run.Kills,
+                _profile);
+        }
+
+        /// <summary>
+        /// Allocates one skill point. Allocation is only allowed from the
+        /// main menu, pause menu, or the round-end screen.
+        /// </summary>
+        public bool TryAllocateSkill(SkillNode node)
+        {
+            if (!CanAllocateSkillsNow() || !_profile.AllocateSkill(node))
+            {
+                return false;
+            }
+
+            RefreshStats();
+            ApplyStatsToRun();
+            _store.Save(_profile);
+            return true;
+        }
+
+        /// <summary>
+        /// Performs the free respec. Returns the number of refunded points.
+        /// </summary>
+        public int RespecSkills()
+        {
+            if (!CanAllocateSkillsNow())
+            {
+                return 0;
+            }
+
+            var refunded = _profile.RespecSkills();
+            if (refunded == 0)
+            {
+                return 0;
+            }
+
+            RefreshStats();
+            ApplyStatsToRun();
+            _store.Save(_profile);
+            return refunded;
         }
 
         private void HandleArmorAction(ArmorTier tier)
@@ -665,6 +747,7 @@ namespace JabaSurvivol.Gameplay
                 return false;
             }
 
+            RefreshStats();
             _store.Save(_profile);
             return true;
         }
@@ -674,6 +757,7 @@ namespace JabaSurvivol.Gameplay
             var result = ArmorService.TryPurchaseUpgrade(_profile, tier);
             if (result == ArmorUpgradePurchaseResult.Purchased)
             {
+                RefreshStats();
                 _store.Save(_profile);
             }
 
@@ -705,7 +789,7 @@ namespace JabaSurvivol.Gameplay
                 return false;
             }
 
-            _weapon = WeaponUpgradeService.GetEffectiveStats(_profile, weaponId);
+            RefreshStats();
             _store.Save(_profile);
             return true;
         }

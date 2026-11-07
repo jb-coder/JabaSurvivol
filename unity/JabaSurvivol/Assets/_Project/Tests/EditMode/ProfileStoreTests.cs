@@ -31,7 +31,7 @@ namespace JabaSurvivol.Tests.EditMode
         public void Save_and_load_round_trips_persistent_progress()
         {
             var store = new ProfileStore(_path);
-            var profile = new Profile { Supplies = 730, Level = 8, Xp = 55, SkillPoints = 9 };
+            var profile = new Profile { Supplies = 730, Level = 8, Xp = 55, SkillPoints = 8 };
             profile.AddSupplies(70);
 
             store.Save(profile);
@@ -41,7 +41,7 @@ namespace JabaSurvivol.Tests.EditMode
             Assert.That(loaded.Supplies, Is.EqualTo(800));
             Assert.That(loaded.Level, Is.EqualTo(8));
             Assert.That(loaded.Xp, Is.EqualTo(55));
-            Assert.That(loaded.SkillPoints, Is.EqualTo(9));
+            Assert.That(loaded.SkillPoints, Is.EqualTo(8));
             Assert.That(loaded.SchemaVersion, Is.EqualTo(Profile.CurrentSchemaVersion));
         }
 
@@ -138,6 +138,23 @@ namespace JabaSurvivol.Tests.EditMode
         }
 
         [Test]
+        public void Save_and_load_round_trips_skill_allocation_and_active_skill()
+        {
+            var store = new ProfileStore(_path);
+            var profile = new Profile { Level = 10, SkillPoints = 11 };
+            Assert.That(profile.AllocateSkill(SkillNode.Strength), Is.True);
+            Assert.That(profile.AllocateSkill(SkillNode.Vitality), Is.True);
+
+            store.Save(profile);
+            var loaded = store.Load();
+
+            Assert.That(loaded.GetSkillRank(SkillNode.Strength), Is.EqualTo(1));
+            Assert.That(loaded.GetSkillRank(SkillNode.Vitality), Is.EqualTo(1));
+            Assert.That(loaded.SkillPoints, Is.EqualTo(9));
+            Assert.That(loaded.ActiveSkill, Is.EqualTo(SkillNode.Turret));
+        }
+
+        [Test]
         public void Load_adds_none_armor_to_a_legacy_save_without_armor_fields()
         {
             Directory.CreateDirectory(_directory);
@@ -151,6 +168,8 @@ namespace JabaSurvivol.Tests.EditMode
             Assert.That(loaded.HasArmor(ArmorTier.None), Is.True);
             Assert.That(loaded.EquippedArmor, Is.EqualTo(ArmorTier.None));
             Assert.That(loaded.GetArmorUpgradeTier(ArmorTier.None), Is.EqualTo(0));
+            Assert.That(loaded.GetSkillRank(SkillNode.Strength), Is.EqualTo(0));
+            Assert.That(loaded.ActiveSkill, Is.EqualTo(SkillNode.Turret));
         }
 
         [Test]
