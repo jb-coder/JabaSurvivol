@@ -484,6 +484,100 @@ namespace JabaSurvivol.Tests.PlayMode
                 Is.EqualTo(WeaponCatalog.Get(WeaponId.Pistol).Damage * 1.5f).Within(0.001f));
         }
 
+        [UnityTest]
+        public IEnumerator Armor_purchase_equip_and_upgrade_apply_to_runs_and_persist()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddSupplies(1000);
+
+            Assert.That(
+                session.TryPurchaseArmor(ArmorTier.Medium),
+                Is.EqualTo(ArmorPurchaseResult.Purchased));
+            Assert.That(session.TryEquipArmor(ArmorTier.Medium), Is.True);
+            Assert.That(
+                session.TryPurchaseArmorUpgrade(ArmorTier.Medium),
+                Is.EqualTo(ArmorUpgradePurchaseResult.Purchased));
+
+            var stats = session.EquippedArmorStats;
+            Assert.That(stats.AbsorbAmount, Is.EqualTo(55));
+            session.StartRun();
+            yield return null;
+
+            Assert.That(session.Run.MaxArmor, Is.EqualTo(55));
+            Assert.That(session.Run.Armor, Is.EqualTo(55));
+
+            session.SaveNow();
+            UnityEngine.Object.DestroyImmediate(_bootstrap.gameObject);
+            _bootstrap = null;
+            yield return null;
+
+            _bootstrap = CreateBootstrap();
+            yield return null;
+
+            Assert.That(_bootstrap.Session.EquippedArmor, Is.EqualTo(ArmorTier.Medium));
+            Assert.That(_bootstrap.Session.Profile.GetArmorUpgradeTier(ArmorTier.Medium), Is.EqualTo(1));
+            Assert.That(_bootstrap.Session.EquippedArmorStats.AbsorbAmount, Is.EqualTo(55));
+        }
+
+        [UnityTest]
+        public IEnumerator Armor_absorbs_damage_before_health_and_death_resets_run_armor()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddSupplies(800);
+            session.TryPurchaseArmor(ArmorTier.Medium);
+            session.TryEquipArmor(ArmorTier.Medium);
+            session.StartRun();
+            yield return null;
+
+            session.ApplyDamage(20f);
+            Assert.That(session.Run.Armor, Is.EqualTo(30));
+            Assert.That(session.Run.Player.Health, Is.EqualTo(GameBalance.PlayerMaxHealth));
+
+            session.ApplyDamage(1000f);
+            yield return null;
+            Assert.That(session.State, Is.EqualTo(GameSessionState.GameOver));
+            Assert.That(session.Profile.EquippedArmor, Is.EqualTo(ArmorTier.Medium));
+
+            session.RestartRun();
+            yield return null;
+            Assert.That(session.State, Is.EqualTo(GameSessionState.Playing));
+            Assert.That(session.Run.MaxArmor, Is.EqualTo(50));
+            Assert.That(session.Run.Armor, Is.EqualTo(50));
+        }
+
+        [UnityTest]
+        public IEnumerator Armor_plates_repair_run_condition_but_not_without_armor()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddSupplies(800);
+            session.TryPurchaseArmor(ArmorTier.Medium);
+            session.TryEquipArmor(ArmorTier.Medium);
+            session.StartRun();
+            yield return null;
+
+            session.ApplyDamage(20f);
+            Assert.That(session.Run.Armor, Is.EqualTo(30));
+            Assert.That(session.Run.AddArmor(10), Is.EqualTo(10));
+            Assert.That(session.Run.Armor, Is.EqualTo(40));
+            Assert.That(session.Run.AddArmor(100), Is.EqualTo(10));
+            Assert.That(session.Run.Armor, Is.EqualTo(50));
+
+            session.ReturnToMenu();
+            session.TryEquipArmor(ArmorTier.None);
+            session.StartRun();
+            yield return null;
+
+            Assert.That(session.Run.MaxArmor, Is.EqualTo(0));
+            Assert.That(session.Run.AddArmor(10), Is.EqualTo(0));
+            Assert.That(session.Run.Armor, Is.EqualTo(0));
+        }
+
         private static GameBootstrap CreateBootstrap()
         {
             var gameObject = new GameObject("Test Bootstrap");

@@ -95,14 +95,29 @@ public sealed class RoundRewardTests
     public void Apply_armor_adds_only_run_resources()
     {
         var profile = new Profile { Supplies = 200 };
-        var run = new RunState(GameBalance.PlayerMaxHealth);
+        var run = new RunState(GameBalance.PlayerMaxHealth, maxArmor: 20);
+        run.DamagePlayer(15f);
         var option = new RoundRewardOption(RoundRewardType.ArmorPlate, GameBalance.ArmorPlateAmount);
 
         var result = RoundRewardModel.Apply(option, profile, run);
 
-        Assert.Equal(GameBalance.ArmorPlateAmount, run.Armor);
+        Assert.Equal(15, run.Armor);
         Assert.Equal(GameBalance.ArmorPlateAmount, result.Armor);
         Assert.Equal(200, profile.Supplies);
+    }
+
+    [Fact]
+    public void Apply_armor_reports_only_the_repair_that_was_applied()
+    {
+        var profile = new Profile();
+        var run = new RunState(GameBalance.PlayerMaxHealth, maxArmor: 10);
+        run.DamagePlayer(5f);
+        var option = new RoundRewardOption(RoundRewardType.ArmorPlate, 10);
+
+        var result = RoundRewardModel.Apply(option, profile, run);
+
+        Assert.Equal(5, result.Armor);
+        Assert.Equal(10, run.Armor);
     }
 
     [Fact]

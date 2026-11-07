@@ -15,6 +15,10 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Permanent weapon upgrade tiers for damage, fire rate, magazine size, and reload speed, with five tiers per stat, per-weapon costs, and effective stat aggregation.
 - Armory upgrade section showing the equipped weapon's current tier, next cost, next effect, and max-tier state, with atomic purchases.
 - Profile persistence for weapon upgrades that survives death and remains compatible with schema version 1 saves.
+- Data-driven armor tiers for light, medium, and heavy armor with absorb amounts, unlock costs, and five permanent upgrade tiers per armor.
+- Run armor now absorbs damage before health, resets to its maximum on a new run, and is repaired by free armor plate drops.
+- Armory armor tab with unlock, equip, and upgrade actions, plus a HUD armor readout.
+- Profile persistence for armor unlocks, equipped armor, and armor upgrades under schema version 1.
 
 ## [0.2.0] - 2026-11-06
 

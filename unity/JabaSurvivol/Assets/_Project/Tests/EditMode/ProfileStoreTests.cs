@@ -119,6 +119,41 @@ namespace JabaSurvivol.Tests.EditMode
         }
 
         [Test]
+        public void Save_and_load_round_trips_armor_unlocks_equip_and_upgrades()
+        {
+            var store = new ProfileStore(_path);
+            var profile = new Profile();
+            profile.AddSupplies(1000);
+            ArmorService.PurchaseArmor(profile, ArmorTier.Medium);
+            ArmorService.EquipArmor(profile, ArmorTier.Medium);
+            ArmorService.TryPurchaseUpgrade(profile, ArmorTier.Medium);
+
+            store.Save(profile);
+            var loaded = store.Load();
+
+            Assert.That(loaded.HasArmor(ArmorTier.Medium), Is.True);
+            Assert.That(loaded.EquippedArmor, Is.EqualTo(ArmorTier.Medium));
+            Assert.That(loaded.GetArmorUpgradeTier(ArmorTier.Medium), Is.EqualTo(1));
+            Assert.That(loaded.Supplies, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Load_adds_none_armor_to_a_legacy_save_without_armor_fields()
+        {
+            Directory.CreateDirectory(_directory);
+            File.WriteAllText(
+                _path,
+                "{\"SchemaVersion\":1,\"Supplies\":123,\"Level\":4,\"Xp\":10,\"SkillPoints\":3}");
+            var store = new ProfileStore(_path);
+
+            var loaded = store.Load();
+
+            Assert.That(loaded.HasArmor(ArmorTier.None), Is.True);
+            Assert.That(loaded.EquippedArmor, Is.EqualTo(ArmorTier.None));
+            Assert.That(loaded.GetArmorUpgradeTier(ArmorTier.None), Is.EqualTo(0));
+        }
+
+        [Test]
         public void Load_recovers_from_corrupt_file_and_keeps_a_backup()
         {
             Directory.CreateDirectory(_directory);
