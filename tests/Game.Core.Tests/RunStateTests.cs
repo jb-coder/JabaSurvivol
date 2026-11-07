@@ -89,9 +89,10 @@ public sealed class RunStateTests
         run.AddAmmo(4);
         run.AddArmor(2);
 
-        Assert.True(run.DamagePlayer(GameBalance.PlayerMaxHealth));
+        Assert.True(run.DamagePlayer(GameBalance.PlayerMaxHealth + 2f));
         Assert.True(run.IsGameOver);
         Assert.False(run.Player.IsAlive);
+        Assert.Equal(0, run.Armor);
         Assert.Equal(RoundPhase.Failed, run.RoundModel.Phase);
 
         run.Restart();

@@ -139,8 +139,8 @@ namespace JabaSurvivol.Core
                     return new RoundRewardResult(option, 0, 0, option.Amount, 0);
 
                 case RoundRewardType.ArmorPlate:
-                    run.AddArmor(option.Amount);
-                    return new RoundRewardResult(option, 0, 0, 0, option.Amount);
+                    var appliedArmor = run.AddArmor(option.Amount);
+                    return new RoundRewardResult(option, 0, 0, 0, appliedArmor);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(option));

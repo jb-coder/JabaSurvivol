@@ -19,10 +19,10 @@ JabaSurvivol is a 2D top-down, round-based zombie survival game for Android phon
 
 - One arena.
 - One playable character.
-- Four weapons.
+- Five weapons.
 - Three zombie types plus one boss.
 - Ten rounds.
-- Armory between rounds.
+- Armory from the main menu and pause menu.
 - Persistent supplies, XP, levels, skills, weapons, and armor.
 - Local save.
 - Android APK builds for verification.

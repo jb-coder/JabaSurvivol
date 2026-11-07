@@ -20,7 +20,7 @@ namespace JabaSurvivol.Core
             Health = maxHealth;
         }
 
-        public float MaxHealth { get; }
+        public float MaxHealth { get; private set; }
 
         public float Health { get; private set; }
 
@@ -62,6 +62,27 @@ namespace JabaSurvivol.Core
         public void Reset()
         {
             Health = MaxHealth;
+        }
+
+        /// <summary>
+        /// Applies a permanent or temporary maximum-health change. Increases
+        /// heal the player by the added amount; decreases clamp current health.
+        /// </summary>
+        public void ApplyMaxHealth(float maxHealth, bool healIncrease)
+        {
+            if (maxHealth <= 0f)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maxHealth));
+            }
+
+            var previousMax = MaxHealth;
+            MaxHealth = maxHealth;
+            if (healIncrease && MaxHealth > previousMax)
+            {
+                Health += MaxHealth - previousMax;
+            }
+
+            Health = Math.Min(Health, MaxHealth);
         }
     }
 }

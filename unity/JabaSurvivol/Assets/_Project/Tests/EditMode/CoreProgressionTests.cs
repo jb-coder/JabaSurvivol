@@ -8,7 +8,7 @@ namespace JabaSurvivol.Tests.EditMode
         [Test]
         public void Death_does_not_remove_persistent_progress()
         {
-            var profile = new Profile { Supplies = 500, Level = 6, SkillPoints = 7 };
+            var profile = new Profile { Supplies = 500, Level = 10, SkillPoints = 11 };
             var run = new RunState(GameBalance.PlayerMaxHealth);
 
             run.RegisterKill();
@@ -19,8 +19,8 @@ namespace JabaSurvivol.Tests.EditMode
             profile.RecordRunEnd(run);
 
             Assert.That(profile.Supplies, Is.EqualTo(510));
-            Assert.That(profile.Level, Is.GreaterThanOrEqualTo(6));
-            Assert.That(profile.SkillPoints, Is.GreaterThanOrEqualTo(7));
+            Assert.That(profile.Level, Is.GreaterThanOrEqualTo(10));
+            Assert.That(profile.SkillPoints, Is.GreaterThanOrEqualTo(11));
         }
 
         [Test]

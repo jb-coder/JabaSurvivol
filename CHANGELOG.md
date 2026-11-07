@@ -6,6 +6,36 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-07
+
+### Added
+
+- Data-driven weapon catalog in `Game.Core` for the pistol, SMG, shotgun, rifle, and LMG, including damage, fire rate, magazine size, reload time, range, reserve ammunition, and unlock cost.
+- Persistent weapon unlocks and equipped weapon in the profile, with the pistol always available and infinite reserve.
+- Armory panel accessible from the main menu and pause menu with supply purchases, equip actions, and touch-friendly weapon rows.
+- Combat now uses the equipped weapon's damage, fire interval, range, projectile speed, pellet count, and spread.
+- Permanent weapon upgrade tiers for damage, fire rate, magazine size, and reload speed, with five tiers per stat, per-weapon costs, and effective stat aggregation.
+- Armory upgrade section showing the equipped weapon's current tier, next cost, next effect, and max-tier state, with atomic purchases.
+- Profile persistence for weapon upgrades that survives death and remains compatible with schema version 1 saves.
+- Data-driven armor tiers for light, medium, and heavy armor with absorb amounts, unlock costs, and five permanent upgrade tiers per armor.
+- Run armor now absorbs damage before health, resets to its maximum on a new run, and is repaired by free armor plate drops.
+- Armory armor tab with unlock, equip, and upgrade actions, plus a HUD armor readout.
+- Profile persistence for armor unlocks, equipped armor, and armor upgrades under schema version 1.
+- Data-driven nine-node Strength, Agility, and Survival skill tree with five ranks per node and Turret rank data.
+- Skill point allocation, free respec, active skill slot persistence, and the 35-point level 30 progression rule.
+- Deterministic stat aggregation across base stats, skills, weapon upgrades, armor, and temporary modifiers, with movement speed, damage, armor, critical chance, and headshot caps.
+- Combat, movement, health, and armor now consume the aggregated character stats.
+- Character sheet with phone branch tabs, tablet three-column layout, rank pips, large touch targets, and before/after stat previews.
+- Character sheet access from the main menu, pause menu, and round-end screen, with free respec between runs.
+- HUD level, XP progress, available skill points, and a temporary level-up notification.
+- Extended headless balance simulation for the full v0.3.0 build path, including rifle unlock, weapon upgrade tiers, armor tiers, skill ranks, supplies earned/spent/remaining, XP, level, and available skill points.
+- Simulation outliers for trivial rounds, runaway supplies, unreachable upgrades, cap violations, and missing weapon, damage upgrade, or armor unlocks.
+
+### Changed
+
+- Android version bumped to `0.3.0` with version code `3`.
+- Core package version bumped to `0.3.0`.
+
 ## [0.2.0] - 2026-11-06
 
 ### Added

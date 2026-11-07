@@ -1,4 +1,3 @@
-using System;
 using JabaSurvivol.Core;
 using UnityEngine;
 
@@ -14,6 +13,8 @@ namespace JabaSurvivol.Gameplay
         private readonly Vector2[] _positions;
         private readonly Vector2[] _directions;
         private readonly float[] _lifetimes;
+        private readonly float[] _speeds;
+        private readonly float[] _damages;
 
         public BulletPool(Transform parent, int size = GameBalance.BulletPoolSize)
         {
@@ -21,6 +22,8 @@ namespace JabaSurvivol.Gameplay
             _positions = new Vector2[size];
             _directions = new Vector2[size];
             _lifetimes = new float[size];
+            _speeds = new float[size];
+            _damages = new float[size];
 
             for (var i = 0; i < size; i++)
             {
@@ -38,7 +41,7 @@ namespace JabaSurvivol.Gameplay
 
         public int ActiveCount { get; private set; }
 
-        public void Spawn(Vector2 position, Vector2 direction)
+        public void Spawn(Vector2 position, Vector2 direction, float speed, float lifetime, float damage)
         {
             for (var i = 0; i < _objects.Length; i++)
             {
@@ -49,7 +52,9 @@ namespace JabaSurvivol.Gameplay
 
                 _positions[i] = position;
                 _directions[i] = direction.sqrMagnitude > 0f ? direction.normalized : Vector2.right;
-                _lifetimes[i] = GameBalance.BulletLifetime;
+                _lifetimes[i] = lifetime > 0f ? lifetime : GameBalance.BulletLifetime;
+                _speeds[i] = speed > 0f ? speed : GameBalance.BulletSpeed;
+                _damages[i] = Mathf.Max(0f, damage);
                 _objects[i].transform.position = position;
                 _objects[i].SetActive(true);
                 ActiveCount++;
@@ -58,16 +63,16 @@ namespace JabaSurvivol.Gameplay
         }
 
         /// <summary>
-        /// Moves active bullets and consumes at most one hit per frame.
+        /// Moves active bullets and returns the total damage of every hit in
+        /// this frame. Multiple pellets may hit the same target in one frame.
         /// </summary>
-        public bool UpdateAndCheck(
+        public float UpdateAndCheck(
             float deltaTime,
             bool hasTarget,
             Vector2 targetPosition,
-            float targetRadius,
-            Action onHit)
+            float targetRadius)
         {
-            var hit = false;
+            var totalDamage = 0f;
 
             for (var i = 0; i < _objects.Length; i++)
             {
@@ -83,10 +88,10 @@ namespace JabaSurvivol.Gameplay
                     continue;
                 }
 
-                _positions[i] += _directions[i] * (GameBalance.BulletSpeed * deltaTime);
+                _positions[i] += _directions[i] * (_speeds[i] * deltaTime);
                 _objects[i].transform.position = _positions[i];
 
-                if (!hit && hasTarget && CombatMath.CirclesOverlap(
+                if (hasTarget && CombatMath.CirclesOverlap(
                         _positions[i].x,
                         _positions[i].y,
                         0.1f,
@@ -94,13 +99,12 @@ namespace JabaSurvivol.Gameplay
                         targetPosition.y,
                         targetRadius))
                 {
+                    totalDamage += _damages[i];
                     Deactivate(i);
-                    hit = true;
-                    onHit?.Invoke();
                 }
             }
 
-            return hit;
+            return totalDamage;
         }
 
         public void Clear()

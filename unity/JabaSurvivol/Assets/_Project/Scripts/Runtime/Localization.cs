@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using JabaSurvivol.Core;
 
 namespace JabaSurvivol.Gameplay
 {
@@ -15,18 +16,105 @@ namespace JabaSurvivol.Gameplay
             ["app.title"] = "JABASURVIVOL",
             ["menu.subtitle"] = "SURVIVE THE NIGHT. KEEP EVERYTHING.",
             ["menu.start"] = "START RUN",
+            ["menu.armory"] = "ARMORY",
             ["menu.progress"] = "SUPPLIES {0}    LEVEL {1}    BEST ROUND {2}",
             ["menu.controls"] = "LEFT STICK MOVE    RIGHT STICK AIM & FIRE",
             ["hud.health"] = "HP {0}/{1}",
+            ["hud.armor"] = "ARMOR {0}/{1}",
             ["hud.round"] = "ROUND {0}/{1}",
             ["hud.enemies"] = "ENEMIES REMAINING {0}",
             ["hud.supplies"] = "SUPPLIES {0}",
-            ["hud.level"] = "LEVEL {0}",
+            ["hud.level"] = "LEVEL {0}   XP {1}/{2}   POINTS {3}",
+            ["hud.levelup"] = "LEVEL UP! LEVEL {0}",
             ["hud.kills"] = "KILLS {0}",
             ["hud.pause"] = "II",
             ["pause.title"] = "PAUSED",
             ["pause.resume"] = "RESUME",
             ["pause.menu"] = "MAIN MENU",
+            ["pause.armory"] = "ARMORY",
+            ["armory.title"] = "ARMORY",
+            ["armory.close"] = "CLOSE",
+            ["armory.supplies"] = "SUPPLIES {0}",
+            ["armory.buy"] = "BUY {0}",
+            ["armory.equip"] = "EQUIP",
+            ["armory.equipped"] = "EQUIPPED",
+            ["armory.purchased"] = "{0} PURCHASED AND EQUIPPED",
+            ["armory.equipped.status"] = "{0} EQUIPPED",
+            ["armory.insufficient"] = "NOT ENOUGH SUPPLIES",
+            ["armory.stats"] = "DMG {0}   RATE {1}/s   MAG {2}   RANGE {3}   RESERVE {4}",
+            ["armory.reserve.infinite"] = "INF",
+            ["armory.upgrade.title"] = "UPGRADES - {0}",
+            ["armory.upgrade.card"] = "{0}\nTIER {1}/{2}\n+{4}% NEXT\n{3} SUPPLIES",
+            ["armory.upgrade.max"] = "{0}\nMAX TIER {1}",
+            ["armory.upgrade.purchased"] = "{0} TIER {1}",
+            ["armory.upgrade.maxed"] = "MAX TIER REACHED",
+            ["weapon.upgrade.damage"] = "DAMAGE",
+            ["weapon.upgrade.firerate"] = "FIRE RATE",
+            ["weapon.upgrade.magazine"] = "MAGAZINE",
+            ["weapon.upgrade.reload"] = "RELOAD",
+            ["armory.tab.weapons"] = "WEAPONS",
+            ["armory.tab.armor"] = "ARMOR",
+            ["armory.armor.none"] = "NO ARMOR",
+            ["armory.armor.light"] = "LIGHT ARMOR",
+            ["armory.armor.medium"] = "MEDIUM ARMOR",
+            ["armory.armor.heavy"] = "HEAVY ARMOR",
+            ["armory.armor.absorb"] = "ABSORB {0}",
+            ["armory.armor.row"] = "ABSORB {0}   TIER {1}/{2}",
+            ["armory.armor.upgrade.title"] = "ARMOR UPGRADE - {0}",
+            ["armory.armor.upgrade.card"] = "ABSORB +{0}%\nTIER {1}/{2}\n{3} SUPPLIES",
+            ["armory.armor.upgrade.max"] = "ABSORB +{0}% PER TIER\nMAX TIER {1}",
+            ["armory.armor.upgrade.none"] = "EQUIP ARMOR TO UPGRADE",
+            ["armory.armor.unlock"] = "UNLOCK {0}",
+            ["armory.armor.unlock.free"] = "UNLOCK",
+            ["armory.armor.equip"] = "EQUIP",
+            ["armory.armor.equipped"] = "EQUIPPED",
+            ["armory.armor.purchased"] = "{0} UNLOCKED AND EQUIPPED",
+            ["armory.armor.equipped.status"] = "{0} EQUIPPED",
+            ["armory.armor.upgraded"] = "ARMOR TIER {0}",
+            ["armory.armor.maxed"] = "MAX ARMOR TIER",
+            ["character.title"] = "CHARACTER",
+            ["character.close"] = "CLOSE",
+            ["character.open"] = "SKILLS",
+            ["character.level"] = "LEVEL {0}   XP {1}/{2}",
+            ["character.points"] = "SKILL POINTS {0}",
+            ["character.rank"] = "RANK {0}/{1}",
+            ["character.allocate"] = "+",
+            ["character.max"] = "MAX",
+            ["character.respec"] = "RESPEC",
+            ["character.stats"] = "HP {0}   DAMAGE x{1}   MOVE {2}   ARMOR {3}   CRIT {4}   HEADSHOT {5}   RELOAD x{6}   AMMO x{7}",
+            ["character.respec.done"] = "RESPEC COMPLETE: {0} POINTS RETURNED",
+            ["character.respec.empty"] = "NO ALLOCATED POINTS TO RESPEC",
+            ["character.respec.blocked"] = "RESPEC IS ONLY AVAILABLE BETWEEN RUNS",
+            ["character.status.allocated"] = "{0} RANK {1}",
+            ["character.status.nopoints"] = "NO SKILL POINTS AVAILABLE",
+            ["character.status.maxrank"] = "MAX RANK",
+            ["character.allocation.blocked"] = "ALLOCATION REQUIRES THE ARMORY, PAUSE MENU, OR ROUND END",
+            ["character.branch.strength"] = "STRENGTH",
+            ["character.branch.agility"] = "AGILITY",
+            ["character.branch.survival"] = "SURVIVAL",
+            ["skill.strength.name"] = "STRENGTH",
+            ["skill.vitality.name"] = "VITALITY",
+            ["skill.shockwave.name"] = "SHOCKWAVE",
+            ["skill.speed.name"] = "SPEED",
+            ["skill.precision.name"] = "PRECISION",
+            ["skill.dash.name"] = "DASH",
+            ["skill.endurance.name"] = "ENDURANCE",
+            ["skill.engineering.name"] = "ENGINEERING",
+            ["skill.turret.name"] = "TURRET",
+            ["skill.strength.preview"] = "DAMAGE x{0} -> x{1}",
+            ["skill.vitality.preview"] = "MAX HP {0} -> {1}",
+            ["skill.speed.preview"] = "MOVE SPEED {0} -> {1}",
+            ["skill.precision.preview"] = "CRIT {0} -> {1}   HEADSHOT {2} -> {3}",
+            ["skill.endurance.preview"] = "ARMOR {0} -> {1}",
+            ["skill.engineering.preview"] = "RELOAD x{0} -> x{1}   AMMO x{2} -> x{3}",
+            ["skill.shockwave.preview"] = "DAMAGE {0} -> {1}   RADIUS {2} -> {3}   COOLDOWN {4} -> {5}",
+            ["skill.dash.preview"] = "DISTANCE {0} -> {1}   COOLDOWN {2} -> {3}",
+            ["skill.turret.preview"] = "DAMAGE {0} -> {1}   DURATION {2} -> {3}   COOLDOWN {4} -> {5}",
+            ["weapon.pistol.name"] = "PISTOL",
+            ["weapon.smg.name"] = "SMG",
+            ["weapon.shotgun.name"] = "SHOTGUN",
+            ["weapon.rifle.name"] = "RIFLE",
+            ["weapon.lmg.name"] = "LMG",
             ["gameover.title"] = "YOU DIED",
             ["gameover.summary"] = "ROUND {0}    KILLS {1}\nSUPPLIES EARNED {2}",
             ["gameover.restart"] = "RESTART",
@@ -48,6 +136,91 @@ namespace JabaSurvivol.Gameplay
         public static string Format(string key, params object[] arguments)
         {
             return string.Format(CultureInfo.InvariantCulture, Get(key), arguments);
+        }
+
+        public static string WeaponNameKey(WeaponId weaponId)
+        {
+            return weaponId switch
+            {
+                WeaponId.Smg => "weapon.smg.name",
+                WeaponId.Shotgun => "weapon.shotgun.name",
+                WeaponId.Rifle => "weapon.rifle.name",
+                WeaponId.Lmg => "weapon.lmg.name",
+                _ => "weapon.pistol.name"
+            };
+        }
+
+        public static string WeaponName(WeaponId weaponId)
+        {
+            return Get(WeaponNameKey(weaponId));
+        }
+
+        public static string WeaponUpgradeStatKey(WeaponUpgradeStat stat)
+        {
+            return stat switch
+            {
+                WeaponUpgradeStat.FireRate => "weapon.upgrade.firerate",
+                WeaponUpgradeStat.MagazineSize => "weapon.upgrade.magazine",
+                WeaponUpgradeStat.ReloadSpeed => "weapon.upgrade.reload",
+                _ => "weapon.upgrade.damage"
+            };
+        }
+
+        public static string WeaponUpgradeStatName(WeaponUpgradeStat stat)
+        {
+            return Get(WeaponUpgradeStatKey(stat));
+        }
+
+        public static string ArmorNameKey(ArmorTier tier)
+        {
+            return tier switch
+            {
+                ArmorTier.Light => "armory.armor.light",
+                ArmorTier.Medium => "armory.armor.medium",
+                ArmorTier.Heavy => "armory.armor.heavy",
+                _ => "armory.armor.none"
+            };
+        }
+
+        public static string ArmorName(ArmorTier tier)
+        {
+            return Get(ArmorNameKey(tier));
+        }
+
+        public static string BranchNameKey(SkillBranch branch)
+        {
+            return branch switch
+            {
+                SkillBranch.Agility => "character.branch.agility",
+                SkillBranch.Survival => "character.branch.survival",
+                _ => "character.branch.strength"
+            };
+        }
+
+        public static string BranchName(SkillBranch branch)
+        {
+            return Get(BranchNameKey(branch));
+        }
+
+        public static string SkillNameKey(SkillNode node)
+        {
+            return node switch
+            {
+                SkillNode.Vitality => "skill.vitality.name",
+                SkillNode.Shockwave => "skill.shockwave.name",
+                SkillNode.Speed => "skill.speed.name",
+                SkillNode.Precision => "skill.precision.name",
+                SkillNode.Dash => "skill.dash.name",
+                SkillNode.Endurance => "skill.endurance.name",
+                SkillNode.Engineering => "skill.engineering.name",
+                SkillNode.Turret => "skill.turret.name",
+                _ => "skill.strength.name"
+            };
+        }
+
+        public static string SkillName(SkillNode node)
+        {
+            return Get(SkillNameKey(node));
         }
     }
 }

@@ -36,19 +36,44 @@ All values are data-driven and subject to simulation.
 | Rifle | 1,200 | Accurate mid-range damage |
 | LMG | 2,000 | Sustained suppression |
 
-Weapon upgrades use supplies and are permanent. Suggested tiers:
+`Game.Core` owns the data-driven catalog in `WeaponCatalog`. It is the single
+source of truth for damage, fire rate, magazine size, reload time, range,
+projectile speed, reserve ammunition, pellet count, spread, and unlock cost.
+The pistol always starts unlocked and has infinite reserve.
 
-- Damage.
-- Fire rate.
-- Magazine size.
-- Reload speed.
+The armory is available from the main menu and the pause menu. It spends
+persistent supplies to unlock weapons and equips owned weapons. Unlocks and the
+equipped weapon are stored in the profile and survive death.
+
+Weapon upgrades use supplies and are permanent. Each weapon has five tiers for
+each stat:
+
+- Damage: +10% base damage per tier.
+- Fire rate: +8% shots per second per tier.
+- Magazine size: +15% base capacity per tier.
+- Reload speed: +10% reload speed per tier.
+
+Costs are data-driven per weapon and stat and grow with each tier. The armory
+shows the current tier, the next cost, and the next effect for the equipped
+weapon. Max-tier purchases are rejected without spending supplies. Upgrades are
+stored in the profile and survive death.
 
 ## Armor
 
-- Light, medium, and heavy tiers.
-- Absorbs damage before health.
-- Repairs are free or drop-based.
-- Upgrades are permanent.
+- Light: 25 absorb, free unlock.
+- Medium: 50 absorb, 800 supplies.
+- Heavy: 90 absorb, 1,600 supplies.
+- Armor absorbs damage before health.
+- Armor absorbs whole points. Fractional damage below 1 is not absorbed, and
+  any fractional remainder reaches health.
+- Repairs are free or drop-based. An armor plate restores 10 condition and
+  never consumes persistent supplies.
+- Each unlocked armor tier has five permanent upgrade tiers at +10% absorb per
+  tier, with data-driven costs.
+- Unlocks, equipped armor, and upgrades are stored in the profile and survive
+  death. Death resets only the current run's armor condition.
+- Equipping or upgrading armor from the pause-menu armory applies to the next
+  run; an active run keeps its starting armor tier and maximum condition.
 
 ## Round rewards
 
@@ -65,7 +90,7 @@ deterministically from the run seed and the round number. The pool contains:
 | Supplies | 50 | 275 | Persistent profile |
 | XP | 30 | 165 | Persistent profile |
 | Ammo crate | 24 | 24 | Current run only |
-| Armor plate | 1 | 1 | Current run only |
+| Armor plate | 10 | 10 | Current run only |
 
 The base round-clear bonus is awarded separately: 100 supplies and 50 XP.
 Ammo and armor are free, drop-based, and never purchased with persistent
@@ -82,15 +107,22 @@ Round values are data-driven in `GameBalance` and `RoundTable`:
 - Round 5 is an elite round and round 10 is the boss round.
 
 The headless simulation uses the same core rules and reports pacing, income,
-progression, and outliers:
+progression, build state, and outliers:
 
 ```powershell
 dotnet run --project tools/BalanceSimulation/BalanceSimulation.csproj -c Release
 ```
 
+The default build is deterministic: it unlocks light armor, saves for the
+rifle, then medium armor, then buys rifle upgrades, armor upgrades, and skill
+ranks in a fixed priority. The report includes per-round weapon, unlock flags,
+weapon upgrade tiers, armor tier and absorb, skill ranks, supplies earned,
+spent, and remaining, XP, level, and available skill points.
+
 It writes `artifacts/balance/rounds.md` with a fixed seed so CI and local runs
-produce the same report. Outliers cover trivial rounds, runaway supplies, and
-unreachable upgrade costs.
+produce the same report. Outliers cover trivial rounds, runaway supplies,
+unreachable upgrade costs, builds that exceed the documented caps, and runs
+that never unlock a weapon, weapon damage upgrade, or armor tier.
 
 ## Premium currency
 
