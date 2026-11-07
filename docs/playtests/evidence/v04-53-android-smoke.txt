@@ -1,0 +1,15 @@
+# v0.4.0 Slice 53 Android Smoke Test
+
+- Date: 2026-11-07
+- Emulator: Android 15 (API 35), x86_64 Google Play system image, `jaba_survivol_api35`
+- Device profile: phone 1080 x 2340 at 440 dpi; tablet display override 2560 x 1600 at 320 dpi
+- Production APK: `JabaSurvivol-0.4.0-53.apk` (ARM64)
+- Emulator APK: `JabaSurvivol-0.4.0-53-emulator.apk` (ARM64 + x86_64)
+- Activity: `com.jabasurvivol.game/com.unity3d.player.UnityPlayerActivity`
+- Result: main menu and active round rendered on phone and tablet layouts
+- Fatal search: no `FATAL EXCEPTION`, `AndroidRuntime` crash, unhandled exception, or `NullReferenceException` in the app process log
+- Evidence: `v04-53-phone.png`, `v04-53-tablet.png`, `v04-53-playing.png`
+
+The emulator-only APK is required because the local x86_64 emulator does not
+support the GLES 3.1/3.2 context requested by the ARM64-only production build.
+This matches the documented Android build process in `docs/setup/unity.md`.

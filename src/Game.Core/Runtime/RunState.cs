@@ -53,7 +53,7 @@ namespace JabaSurvivol.Core
             Seed = seed;
             MaxArmor = maxArmor;
             Armor = maxArmor;
-            _round = new RoundState(startingRound);
+            _round = new RoundState(startingRound, seed);
             _round.Start();
         }
 
@@ -74,6 +74,11 @@ namespace JabaSurvivol.Core
         public int EnemiesRemaining => _round.EnemiesRemaining;
 
         public int SpawnBudget => _round.SpawnBudget;
+
+        /// <summary>
+        /// Archetype of the most recent kill. Used by visuals and tests.
+        /// </summary>
+        public ZombieArchetype LastKillArchetype { get; private set; } = ZombieArchetype.Walker;
 
         public bool IsGameOver { get; private set; }
 
@@ -99,13 +104,14 @@ namespace JabaSurvivol.Core
         /// Registers a kill and returns the reward. Persistent progression is
         /// applied by the caller so the core remains deterministic.
         /// </summary>
-        public KillReward RegisterKill()
+        public KillReward RegisterKill(ZombieArchetype archetype = ZombieArchetype.Walker)
         {
             if (IsGameOver)
             {
                 return default;
             }
 
+            var encounter = _round.Definition.GetEncounter(archetype);
             var result = _round.RegisterKill();
             if (!result.Accepted)
             {
@@ -113,9 +119,10 @@ namespace JabaSurvivol.Core
             }
 
             Kills++;
+            LastKillArchetype = archetype;
 
-            var supplies = GameBalance.SuppliesPerKill;
-            var xp = GameBalance.XpPerKill;
+            var supplies = encounter.Supplies;
+            var xp = encounter.Xp;
 
             if (result.RoundCleared)
             {

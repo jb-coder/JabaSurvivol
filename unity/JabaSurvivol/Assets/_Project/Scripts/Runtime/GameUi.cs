@@ -25,6 +25,7 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _healthText;
         private readonly Text _armorText;
         private readonly Text _roundText;
+        private readonly Text _roundModifierText;
         private readonly Text _enemiesText;
         private readonly Text _killsText;
         private readonly Text _suppliesText;
@@ -106,6 +107,7 @@ namespace JabaSurvivol.Gameplay
 
             _mainMenu = BuildMainMenu(onStart, onArmory, onCharacterSheet);
             _hud = BuildHud(onPause, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
+            _roundModifierText = FindText(_hud, "Round Modifier");
             _pausePanel = BuildPausePanel(onResume, onMenu, onArmory, onCharacterSheet);
             _gameOverPanel = BuildGameOverPanel(onRestart, onMenu, out _gameOverSummary);
             _roundEndPanel = BuildRoundEndPanel(
@@ -270,6 +272,24 @@ namespace JabaSurvivol.Gameplay
                     profile.SkillPoints);
             }
         }
+
+        /// <summary>
+        /// Shows the elite round modifier on the HUD.
+        /// </summary>
+        public void SetRoundModifier(bool isElite)
+        {
+            if (_roundModifierText == null)
+            {
+                return;
+            }
+
+            _roundModifierText.text = isElite
+                ? Localization.Get("hud.elite")
+                : string.Empty;
+        }
+
+        public bool RoundModifierVisible => _roundModifierText != null &&
+                                            !string.IsNullOrEmpty(_roundModifierText.text);
 
         public void ShowLevelUp(int level)
         {
@@ -896,6 +916,10 @@ namespace JabaSurvivol.Gameplay
 
             enemiesText = UiFactory.CreateText(root.transform, "Enemies", string.Empty, 24, TextAnchor.MiddleCenter, new Color(0.95f, 0.72f, 0.42f));
             UiFactory.Place(enemiesText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -74f), new Vector2(420f, 40f));
+
+            var roundModifier = UiFactory.CreateText(root.transform, "Round Modifier", string.Empty, 24, TextAnchor.MiddleCenter, new Color(1f, 0.62f, 0.25f));
+            roundModifier.fontStyle = FontStyle.Bold;
+            UiFactory.Place(roundModifier.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -152f), new Vector2(700f, 40f));
 
             killsText = UiFactory.CreateText(root.transform, "Kills", string.Empty, 22, TextAnchor.MiddleCenter, new Color(0.6f, 0.68f, 0.78f));
             UiFactory.Place(killsText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -112f), new Vector2(420f, 40f));

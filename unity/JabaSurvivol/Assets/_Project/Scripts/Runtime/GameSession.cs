@@ -27,8 +27,11 @@ namespace JabaSurvivol.Gameplay
         private GameUi _ui;
         private GameObject _playerObject;
         private Transform _aimPivot;
-        private GameObject _zombieObject;
+        private ZombieActor _zombieActor;
+        private ZombieEncounterStats _zombieStats;
         private ZombieState _zombie;
+        private ZombieActorPool _zombieActors;
+        private DeathEffectPool _deathEffects;
         private BulletPool _bullets;
         private GameSessionState _state;
         private Vector2 _aimDirection = Vector2.right;
@@ -80,6 +83,16 @@ namespace JabaSurvivol.Gameplay
 
         public bool ZombieActive => _zombieActive;
 
+        public ZombieArchetype CurrentZombieArchetype => _zombieStats.Archetype;
+
+        public float CurrentZombieMaxHealth => _zombieStats.MaxHealth;
+
+        public bool EliteRound => _run?.RoundModel.Definition.IsElite ?? false;
+
+        public int ZombiePoolCount => _zombieActors?.Count ?? 0;
+
+        public bool RoundModifierVisible => _ui != null && _ui.RoundModifierVisible;
+
         public int ActiveBullets => _bullets?.ActiveCount ?? 0;
 
         public int EnemiesRemaining => _run?.EnemiesRemaining ?? 0;
@@ -110,8 +123,8 @@ namespace JabaSurvivol.Gameplay
             ? (Vector2)_playerObject.transform.position
             : Vector2.zero;
 
-        public Vector2 ZombiePosition => _zombieObject != null
-            ? (Vector2)_zombieObject.transform.position
+        public Vector2 ZombiePosition => _zombieActor != null
+            ? (Vector2)_zombieActor.GameObject.transform.position
             : Vector2.zero;
 
         /// <summary>
@@ -160,7 +173,7 @@ namespace JabaSurvivol.Gameplay
             _state = GameSessionState.MainMenu;
             _ui.ShowMainMenu(_profile);
             _playerObject.SetActive(false);
-            _zombieObject.SetActive(false);
+            _zombieActors.ReturnAll();
         }
 
         private void Update()
@@ -269,11 +282,17 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
+            _deathEffects.Update(deltaTime);
+
+            var targetPosition = _zombieActor != null
+                ? (Vector2)_zombieActor.GameObject.transform.position
+                : Vector2.zero;
+            var targetRadius = _zombieActor != null ? _zombieStats.Radius : 0f;
             var damage = _bullets.UpdateAndCheck(
                 deltaTime,
                 _zombieActive,
-                _zombieObject.transform.position,
-                GameBalance.ZombieRadius);
+                targetPosition,
+                targetRadius);
 
             if (damage > 0f)
             {
@@ -411,26 +430,26 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
-            var definition = _run.RoundModel.Definition;
-            var zombiePosition = (Vector2)_zombieObject.transform.position;
+            var zombieObject = _zombieActor.GameObject;
+            var zombiePosition = (Vector2)zombieObject.transform.position;
             var playerPosition = (Vector2)_playerObject.transform.position;
             var delta = playerPosition - zombiePosition;
 
             if (delta.sqrMagnitude > 0.0001f)
             {
                 var direction = delta.normalized;
-                zombiePosition += direction * (definition.ZombieMoveSpeed * deltaTime);
+                zombiePosition += direction * (_zombieStats.MoveSpeed * deltaTime);
                 CombatMath.ClampToArena(
                     zombiePosition.x,
                     zombiePosition.y,
                     GameBalance.ArenaHalfWidth,
                     GameBalance.ArenaHalfHeight,
-                    GameBalance.ZombieRadius,
+                    _zombieStats.Radius,
                     out var clampedX,
                     out var clampedY);
                 zombiePosition = new Vector2(clampedX, clampedY);
-                _zombieObject.transform.position = zombiePosition;
-                _zombieObject.transform.localRotation = Quaternion.Euler(
+                zombieObject.transform.position = zombiePosition;
+                zombieObject.transform.localRotation = Quaternion.Euler(
                     0f,
                     0f,
                     (Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg) - 90f);
@@ -440,22 +459,35 @@ namespace JabaSurvivol.Gameplay
             if (_contactCooldown <= 0f && CombatMath.CirclesOverlap(
                     zombiePosition.x,
                     zombiePosition.y,
-                    GameBalance.ZombieRadius,
+                    _zombieStats.Radius,
                     playerPosition.x,
                     playerPosition.y,
                     GameBalance.PlayerRadius))
             {
-                _contactCooldown = GameBalance.ZombieContactInterval;
-                ApplyDamage(definition.ZombieContactDamage);
+                _contactCooldown = _zombieStats.ContactInterval;
+                ApplyDamage(_zombieStats.ContactDamage);
             }
         }
 
         public void StartRun()
         {
+            StartRunInternal(1);
+        }
+
+        /// <summary>
+        /// Starts a run at a specific round. Used by automated scenario tests.
+        /// </summary>
+        public void StartRunForTests(int startingRound)
+        {
+            StartRunInternal(startingRound);
+        }
+
+        private void StartRunInternal(int startingRound)
+        {
             var armor = ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor);
             _weapon = WeaponUpgradeService.GetEffectiveStats(_profile, _profile.EquippedWeapon);
             _stats = StatAggregation.Compute(_profile, _weapon, armor);
-            _run = new RunState(_stats.MaxHealth, 1, Environment.TickCount, _stats.Armor);
+            _run = new RunState(_stats.MaxHealth, startingRound, Environment.TickCount, _stats.Armor);
             _runSuppliesEarned = 0;
             _runXpEarned = 0;
             _roundClearPending = false;
@@ -471,9 +503,13 @@ namespace JabaSurvivol.Gameplay
             _fireCooldown = 0f;
             _contactCooldown = 0f;
             _bullets.Clear();
+            _deathEffects.Clear();
+            _zombieActors.ReturnAll();
+            _zombieActive = false;
 
             SpawnZombie();
             _ui.ShowHud();
+            _ui.SetRoundModifier(_run.RoundModel.Definition.IsElite);
             _ui.UpdateHud(_run.Player, _run.Armor, _run.MaxArmor, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
             _ui.SetSticks(default, default);
             _store.Save(_profile);
@@ -525,7 +561,8 @@ namespace JabaSurvivol.Gameplay
             _roundRewardOptions = null;
             _playerObject.SetActive(false);
             _zombieActive = false;
-            _zombieObject.SetActive(false);
+            _zombieActors.ReturnAll();
+            _deathEffects.Clear();
             _bullets.Clear();
             _ui.ShowMainMenu(_profile);
         }
@@ -990,11 +1027,21 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
+            var archetype = _zombieStats.Archetype;
+            var wasElite = _zombieStats.IsElite;
+            var deathPosition = (Vector2)_zombieActor.GameObject.transform.position;
+            var deathScale = _zombieStats.VisualScale;
+
             _zombieActive = false;
-            _zombieObject.SetActive(false);
+            _zombieActors.Return(_zombieActor);
+            _zombieActor = null;
+            _deathEffects.Spawn(
+                deathPosition,
+                ZombieActorPool.ColorFor(archetype, wasElite),
+                deathScale);
             _respawnCooldown = GameBalance.ZombieRespawnDelay;
 
-            var reward = _run.RegisterKill();
+            var reward = _run.RegisterKill(archetype);
             _profile.AddSupplies(reward.Supplies);
             var levelsGained = _profile.AddXp(reward.Xp);
             if (levelsGained > 0)
@@ -1114,8 +1161,19 @@ namespace JabaSurvivol.Gameplay
             _roundClearPending = false;
             _roundRewardOptions = null;
             _ui.HideRoundEnd();
+            var wasElite = _zombieStats.IsElite;
+            var position = _zombieActor != null ? (Vector2)_zombieActor.GameObject.transform.position : Vector2.zero;
+            var color = _zombieActor != null
+                ? ZombieActorPool.ColorFor(_zombieStats.Archetype, wasElite)
+                : new Color(0.86f, 0.25f, 0.3f);
             _zombieActive = false;
-            _zombieObject.SetActive(false);
+            if (_zombieActor != null)
+            {
+                _zombieActors.Return(_zombieActor);
+                _zombieActor = null;
+            }
+
+            _deathEffects.Spawn(position, color, 1f);
             _playerObject.SetActive(false);
 
             _profile.RecordRunEnd(_run);
@@ -1125,25 +1183,30 @@ namespace JabaSurvivol.Gameplay
 
         private bool SpawnZombie()
         {
-            if (!_run.RoundModel.TryMarkSpawned())
+            if (!_run.RoundModel.TryMarkSpawned(out var archetype))
             {
                 return false;
             }
 
-            var definition = _run.RoundModel.Definition;
-            _zombie = new ZombieState(definition.ZombieMaxHealth);
+            _zombieStats = _run.RoundModel.Definition.GetEncounter(archetype);
+            _zombie = new ZombieState(_zombieStats.MaxHealth);
+            _zombieActor = _zombieActors.Rent(
+                archetype,
+                _zombieStats.VisualScale,
+                _zombieStats.IsElite);
             _zombieActive = true;
-            _zombieObject.SetActive(true);
-            _zombieObject.transform.position = PickSpawnPosition();
+            _zombieActor.GameObject.SetActive(true);
+            _zombieActor.GameObject.transform.position = PickSpawnPosition(_zombieStats.Radius);
             _respawnCooldown = 0f;
             _contactCooldown = 0f;
+            _ui?.SetRoundModifier(_run.RoundModel.Definition.IsElite);
             return true;
         }
 
-        private static Vector2 PickSpawnPosition()
+        private static Vector2 PickSpawnPosition(float radius)
         {
             var edge = UnityEngine.Random.Range(0, 4);
-            const float inset = 0.65f;
+            var inset = Mathf.Max(0.65f, radius + 0.2f);
             var x = UnityEngine.Random.Range(-GameBalance.ArenaHalfWidth + inset, GameBalance.ArenaHalfWidth - inset);
             var y = UnityEngine.Random.Range(-GameBalance.ArenaHalfHeight + inset, GameBalance.ArenaHalfHeight - inset);
 
@@ -1178,13 +1241,8 @@ namespace JabaSurvivol.Gameplay
             barrelRenderer.color = new Color(0.85f, 0.98f, 1f);
             barrelRenderer.sortingOrder = 21;
 
-            _zombieObject = new GameObject("Zombie");
-            _zombieObject.transform.SetParent(_worldRoot, false);
-            var zombieRenderer = _zombieObject.AddComponent<SpriteRenderer>();
-            zombieRenderer.sprite = SpriteFactory.Circle;
-            zombieRenderer.color = new Color(0.86f, 0.25f, 0.3f);
-            zombieRenderer.sortingOrder = 15;
-
+            _zombieActors = new ZombieActorPool(_worldRoot);
+            _deathEffects = new DeathEffectPool(_worldRoot);
             _bullets = new BulletPool(_worldRoot);
         }
     }

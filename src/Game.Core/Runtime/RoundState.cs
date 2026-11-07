@@ -51,6 +51,30 @@ namespace JabaSurvivol.Core
         public bool IsElite { get; }
 
         public bool IsBoss { get; }
+
+        /// <summary>
+        /// Resolves the archetype values for this round, including round
+        /// scaling and the elite modifier.
+        /// </summary>
+        public ZombieEncounterStats GetEncounter(ZombieArchetype archetype)
+        {
+            var definition = ZombieCatalog.Get(archetype);
+            var healthScale = IsElite ? GameBalance.EliteHealthMultiplier : 1f;
+            var damageScale = IsElite ? GameBalance.EliteDamageMultiplier : 1f;
+            var rewardScale = IsElite ? GameBalance.EliteRewardMultiplier : 1f;
+
+            return new ZombieEncounterStats(
+                archetype,
+                ZombieMaxHealth * definition.HealthMultiplier * healthScale,
+                ZombieMoveSpeed * definition.SpeedMultiplier,
+                ZombieContactDamage * definition.ContactDamageMultiplier * damageScale,
+                GameBalance.ZombieContactInterval,
+                GameBalance.ZombieRadius * definition.VisualScale,
+                definition.VisualScale,
+                (int)Math.Round(definition.Supplies * rewardScale, MidpointRounding.AwayFromZero),
+                (int)Math.Round(definition.Xp * rewardScale, MidpointRounding.AwayFromZero),
+                IsElite);
+        }
     }
 
     /// <summary>
@@ -115,21 +139,34 @@ namespace JabaSurvivol.Core
     public sealed class RoundState
     {
         private RoundDefinition _definition;
+        private ZombieArchetype[] _spawnPlan;
+        private int _spawnIndex;
 
-        public RoundState(int startingRound = 1)
+        public RoundState(int startingRound = 1, int seed = 0)
         {
             if (startingRound < 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(startingRound));
             }
 
+            Seed = seed;
             RoundNumber = startingRound;
             _definition = RoundTable.Get(startingRound);
             EnemiesRemaining = _definition.SpawnBudget;
+            _spawnPlan = ZombieSpawnPlan.Build(startingRound, _definition.SpawnBudget, seed);
             Phase = RoundPhase.NotStarted;
         }
 
+        public int Seed { get; }
+
         public int RoundNumber { get; private set; }
+
+        /// <summary>
+        /// Deterministic archetype order for every enemy in the round.
+        /// </summary>
+        public System.Collections.Generic.IReadOnlyList<ZombieArchetype> SpawnPlan => _spawnPlan;
+
+        public int SpawnIndex => _spawnIndex;
 
         public RoundPhase Phase { get; private set; }
 
@@ -188,11 +225,24 @@ namespace JabaSurvivol.Core
         /// </summary>
         public bool TryMarkSpawned()
         {
+            return TryMarkSpawned(out _);
+        }
+
+        /// <summary>
+        /// Marks one spawn and returns the deterministic archetype for it.
+        /// </summary>
+        public bool TryMarkSpawned(out ZombieArchetype archetype)
+        {
             if (!CanSpawnMore)
             {
+                archetype = ZombieArchetype.Walker;
                 return false;
             }
 
+            archetype = _spawnIndex < _spawnPlan.Length
+                ? _spawnPlan[_spawnIndex]
+                : ZombieArchetype.Walker;
+            _spawnIndex++;
             EnemiesSpawned++;
             return true;
         }
@@ -213,6 +263,8 @@ namespace JabaSurvivol.Core
             EnemiesRemaining = _definition.SpawnBudget;
             EnemiesSpawned = 0;
             KillsThisRound = 0;
+            _spawnIndex = 0;
+            _spawnPlan = ZombieSpawnPlan.Build(RoundNumber, _definition.SpawnBudget, Seed);
             Phase = RoundPhase.Active;
             return true;
         }
@@ -243,6 +295,8 @@ namespace JabaSurvivol.Core
             EnemiesRemaining = _definition.SpawnBudget;
             EnemiesSpawned = 0;
             KillsThisRound = 0;
+            _spawnIndex = 0;
+            _spawnPlan = ZombieSpawnPlan.Build(startingRound, _definition.SpawnBudget, Seed);
             Phase = RoundPhase.NotStarted;
         }
     }

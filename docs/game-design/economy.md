@@ -19,7 +19,7 @@ Initial balance targets:
 | Walker kill | 10 | 10 |
 | Runner kill | 15 | 15 |
 | Brute kill | 30 | 30 |
-| Elite kill | 250 | 100 |
+| Elite round kill | archetype value x2 | archetype value x2 |
 | Boss kill | 1,000 | 500 |
 | Round clear | 100 | 50 |
 | Run end bonus | 100 + 25 per round | 100 + 25 per round |
@@ -105,6 +105,9 @@ Round values are data-driven in `GameBalance` and `RoundTable`:
 - Zombie speed: `1.9 * (1 + 0.04 * (round - 1))`, capped at 1.35x.
 - Zombie contact damage: `10 * (1 + 0.12 * (round - 1))`, from 10 to 20.8.
 - Round 5 is an elite round and round 10 is the boss round.
+- Archetype multipliers: Walker 1.00x/1.00x/1.00x, Runner 0.70x health and 1.70x speed, Brute 2.60x health, 0.70x speed, and 1.60x contact damage.
+- Elite rounds multiply health by 1.50x, contact damage by 1.25x, and supplies and XP by 2.00x.
+- Spawn composition is deterministic from the run seed and round number, with Runners from round 2 and Brutes from round 4.
 
 The headless simulation uses the same core rules and reports pacing, income,
 progression, build state, and outliers:
