@@ -743,12 +743,10 @@ namespace JabaSurvivol.Core
                 SkillPoints = earned;
             }
 
-            if (!SkillCatalog.IsDefined(ActiveSkill))
+            if (!SkillCatalog.IsDefined(ActiveSkill) || !SkillCatalog.Get(ActiveSkill).IsActiveSlot)
             {
                 ActiveSkill = SkillNode.Turret;
             }
-
-            ActiveSkill = SkillNode.Turret;
         }
 
         private void ClampSkillPoints()

@@ -617,8 +617,14 @@ namespace JabaSurvivol.Gameplay
 
         private bool CanAllocateSkillsNow()
         {
-            return _state == GameSessionState.MainMenu ||
+            return (_ui != null && _ui.ArmoryVisible) ||
                    _state == GameSessionState.Paused ||
+                   _roundClearPending;
+        }
+
+        private bool CanRespecSkillsNow()
+        {
+            return (_ui != null && _ui.ArmoryVisible && _state == GameSessionState.MainMenu) ||
                    _roundClearPending;
         }
 
@@ -662,7 +668,7 @@ namespace JabaSurvivol.Gameplay
         /// </summary>
         public int RespecSkills()
         {
-            if (!CanAllocateSkillsNow())
+            if (!CanRespecSkillsNow())
             {
                 return 0;
             }

@@ -29,6 +29,10 @@ Turret rank data is included, but turret activation is delivered in the
 active-skill milestone. Shockwave and Dash rank data is included, but their
 activation systems are also later scope.
 
+Shockwave, Dash, and Turret store per-rank activation values: area damage and
+radius, dash distance, turret damage and duration, and cooldown reduction. The
+activation systems consume those values in later milestones.
+
 ### Strength
 
 | Node | Effect | Ranks | Maximum |
@@ -94,6 +98,9 @@ Final stats:
 - Armor: 200.
 - Critical chance: 50%.
 - Headshot bonus: +100%.
+
+The damage cap applies to the final multiplier after weapon upgrades, skills,
+and temporary bonuses are combined.
 
 ## UI
 

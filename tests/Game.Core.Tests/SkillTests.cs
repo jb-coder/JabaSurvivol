@@ -176,6 +176,65 @@ public sealed class SkillTests
     }
 
     [Fact]
+    public void Active_nodes_expose_rank_scaled_activation_data()
+    {
+        var shockwaveRank1 = SkillCatalog.Get(SkillNode.Shockwave).GetActivationStats(1);
+        var shockwaveRank5 = SkillCatalog.Get(SkillNode.Shockwave).GetActivationStats(5);
+        var dashRank1 = SkillCatalog.Get(SkillNode.Dash).GetActivationStats(1);
+        var dashRank5 = SkillCatalog.Get(SkillNode.Dash).GetActivationStats(5);
+        var turretRank1 = SkillCatalog.Get(SkillNode.Turret).GetActivationStats(1);
+        var turretRank5 = SkillCatalog.Get(SkillNode.Turret).GetActivationStats(5);
+
+        Assert.True(shockwaveRank5.AreaDamage > shockwaveRank1.AreaDamage);
+        Assert.True(shockwaveRank5.AreaRadius > shockwaveRank1.AreaRadius);
+        Assert.True(shockwaveRank5.CooldownSeconds < shockwaveRank1.CooldownSeconds);
+        Assert.True(dashRank5.DashDistance > dashRank1.DashDistance);
+        Assert.True(dashRank5.CooldownSeconds < dashRank1.CooldownSeconds);
+        Assert.True(turretRank5.TurretDamage > turretRank1.TurretDamage);
+        Assert.True(turretRank5.TurretDuration > turretRank1.TurretDuration);
+        Assert.True(turretRank5.CooldownSeconds < turretRank1.CooldownSeconds);
+        Assert.True(SkillCatalog.Get(SkillNode.Turret).IsActiveSlot);
+        Assert.False(SkillCatalog.Get(SkillNode.Strength).IsActiveSlot);
+    }
+
+    [Fact]
+    public void Stat_aggregation_caps_total_damage_including_weapon_upgrades()
+    {
+        var profile = new Profile();
+        profile.SetSkillRank(SkillNode.Strength, 5);
+        profile.SetWeaponUpgradeTier(WeaponId.Pistol, WeaponUpgradeStat.Damage, 5);
+
+        var upgradedWeapon = WeaponUpgradeService.GetEffectiveStats(profile, WeaponId.Pistol);
+        var armor = new ArmorStats(ArmorTier.None, 0, 0, 0, 0, 0, 0);
+        var temporary = new TemporaryStatModifiers { DamageBonus = 10f };
+        var stats = StatAggregation.Compute(profile, upgradedWeapon, armor, temporary);
+
+        Assert.Equal(3f, stats.WeaponDamageMultiplier, 3);
+        Assert.Equal(60f, stats.EffectiveWeaponDamage, 3);
+    }
+
+    [Fact]
+    public void Apply_max_stats_updates_health_and_armor_up_and_down()
+    {
+        var run = new RunState(GameBalance.PlayerMaxHealth, maxArmor: 10);
+        run.DamagePlayer(5f);
+
+        run.ApplyMaxStats(150f, 25);
+
+        Assert.Equal(150f, run.Player.MaxHealth);
+        Assert.Equal(150f, run.Player.Health);
+        Assert.Equal(25, run.MaxArmor);
+        Assert.Equal(20, run.Armor);
+
+        run.ApplyMaxStats(120f, 10);
+
+        Assert.Equal(120f, run.Player.MaxHealth);
+        Assert.Equal(120f, run.Player.Health);
+        Assert.Equal(10, run.MaxArmor);
+        Assert.Equal(10, run.Armor);
+    }
+
+    [Fact]
     public void Active_skill_defaults_to_turret()
     {
         var profile = new Profile();

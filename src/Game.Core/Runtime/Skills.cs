@@ -40,7 +40,15 @@ namespace JabaSurvivol.Core
             float headshotBonusPerRank = 0f,
             int armorPerRank = 0,
             float reloadSpeedBonusPerRank = 0f,
-            float ammoCapacityBonusPerRank = 0f)
+            float ammoCapacityBonusPerRank = 0f,
+            bool isActiveSlot = false,
+            float baseCooldownSeconds = 0f,
+            float cooldownReductionPerRank = 0f,
+            float areaDamagePerRank = 0f,
+            float areaRadiusPerRank = 0f,
+            float dashDistancePerRank = 0f,
+            float turretDamagePerRank = 0f,
+            float turretDurationPerRank = 0f)
         {
             if (maxRanks <= 0)
             {
@@ -58,6 +66,14 @@ namespace JabaSurvivol.Core
             ArmorPerRank = armorPerRank;
             ReloadSpeedBonusPerRank = reloadSpeedBonusPerRank;
             AmmoCapacityBonusPerRank = ammoCapacityBonusPerRank;
+            IsActiveSlot = isActiveSlot;
+            BaseCooldownSeconds = baseCooldownSeconds;
+            CooldownReductionPerRank = cooldownReductionPerRank;
+            AreaDamagePerRank = areaDamagePerRank;
+            AreaRadiusPerRank = areaRadiusPerRank;
+            DashDistancePerRank = dashDistancePerRank;
+            TurretDamagePerRank = turretDamagePerRank;
+            TurretDurationPerRank = turretDurationPerRank;
         }
 
         public SkillNode Node { get; }
@@ -81,6 +97,73 @@ namespace JabaSurvivol.Core
         public float ReloadSpeedBonusPerRank { get; }
 
         public float AmmoCapacityBonusPerRank { get; }
+
+        public bool IsActiveSlot { get; }
+
+        public float BaseCooldownSeconds { get; }
+
+        public float CooldownReductionPerRank { get; }
+
+        public float AreaDamagePerRank { get; }
+
+        public float AreaRadiusPerRank { get; }
+
+        public float DashDistancePerRank { get; }
+
+        public float TurretDamagePerRank { get; }
+
+        public float TurretDurationPerRank { get; }
+
+        /// <summary>
+        /// Per-rank activation data for active nodes. Passive nodes return
+        /// zero values and a zero cooldown.
+        /// </summary>
+        public SkillActivationStats GetActivationStats(int rank)
+        {
+            var clampedRank = Math.Clamp(rank, 0, MaxRanks);
+            return new SkillActivationStats(
+                AreaDamagePerRank * clampedRank,
+                AreaRadiusPerRank * clampedRank,
+                DashDistancePerRank * clampedRank,
+                TurretDamagePerRank * clampedRank,
+                TurretDurationPerRank * clampedRank,
+                Math.Max(0f, BaseCooldownSeconds - (CooldownReductionPerRank * clampedRank)));
+        }
+    }
+
+    /// <summary>
+    /// Rank-scaled activation values for Shockwave, Dash, and Turret. The
+    /// activation systems themselves are delivered in later milestones.
+    /// </summary>
+    public readonly struct SkillActivationStats
+    {
+        public SkillActivationStats(
+            float areaDamage,
+            float areaRadius,
+            float dashDistance,
+            float turretDamage,
+            float turretDuration,
+            float cooldownSeconds)
+        {
+            AreaDamage = areaDamage;
+            AreaRadius = areaRadius;
+            DashDistance = dashDistance;
+            TurretDamage = turretDamage;
+            TurretDuration = turretDuration;
+            CooldownSeconds = cooldownSeconds;
+        }
+
+        public float AreaDamage { get; }
+
+        public float AreaRadius { get; }
+
+        public float DashDistance { get; }
+
+        public float TurretDamage { get; }
+
+        public float TurretDuration { get; }
+
+        public float CooldownSeconds { get; }
     }
 
     /// <summary>
@@ -112,13 +195,34 @@ namespace JabaSurvivol.Core
         {
             new SkillNodeDefinition(SkillNode.Strength, SkillBranch.Strength, maxRanks: 5, damageBonusPerRank: 0.03f),
             new SkillNodeDefinition(SkillNode.Vitality, SkillBranch.Strength, maxRanks: 5, maxHealthPerRank: 10f),
-            new SkillNodeDefinition(SkillNode.Shockwave, SkillBranch.Strength, maxRanks: 5),
+            new SkillNodeDefinition(
+                SkillNode.Shockwave,
+                SkillBranch.Strength,
+                maxRanks: 5,
+                baseCooldownSeconds: 10f,
+                cooldownReductionPerRank: 1f,
+                areaDamagePerRank: 10f,
+                areaRadiusPerRank: 0.25f),
             new SkillNodeDefinition(SkillNode.Speed, SkillBranch.Agility, maxRanks: 5, moveSpeedBonusPerRank: 0.02f),
             new SkillNodeDefinition(SkillNode.Precision, SkillBranch.Agility, maxRanks: 5, criticalChancePerRank: 0.01f, headshotBonusPerRank: 0.05f),
-            new SkillNodeDefinition(SkillNode.Dash, SkillBranch.Agility, maxRanks: 5),
+            new SkillNodeDefinition(
+                SkillNode.Dash,
+                SkillBranch.Agility,
+                maxRanks: 5,
+                baseCooldownSeconds: 6f,
+                cooldownReductionPerRank: 0.5f,
+                dashDistancePerRank: 0.5f),
             new SkillNodeDefinition(SkillNode.Endurance, SkillBranch.Survival, maxRanks: 5, armorPerRank: 5),
             new SkillNodeDefinition(SkillNode.Engineering, SkillBranch.Survival, maxRanks: 5, reloadSpeedBonusPerRank: 0.05f, ammoCapacityBonusPerRank: 0.05f),
-            new SkillNodeDefinition(SkillNode.Turret, SkillBranch.Survival, maxRanks: 5)
+            new SkillNodeDefinition(
+                SkillNode.Turret,
+                SkillBranch.Survival,
+                maxRanks: 5,
+                isActiveSlot: true,
+                baseCooldownSeconds: 20f,
+                cooldownReductionPerRank: 1f,
+                turretDamagePerRank: 2f,
+                turretDurationPerRank: 2f)
         };
 
         public static IReadOnlyList<SkillNodeDefinition> All => Nodes;
@@ -213,6 +317,9 @@ namespace JabaSurvivol.Core
 
         public int Armor { get; }
 
+        /// <summary>
+        /// Multiplier on reload speed. Reload time is divided by this value.
+        /// </summary>
         public float ReloadSpeedMultiplier { get; }
 
         public float AmmoCapacityMultiplier { get; }
@@ -252,7 +359,13 @@ namespace JabaSurvivol.Core
             var damageBonus = Math.Min(
                 StatCaps.DamageBonus,
                 (strength * 0.03f) + temporary.DamageBonus);
-            var damageMultiplier = 1f + damageBonus;
+            var baseWeaponDamage = WeaponCatalog.GetStats(weaponStats.Id).Damage;
+            var upgradeMultiplier = baseWeaponDamage <= 0f
+                ? 1f
+                : weaponStats.Damage / baseWeaponDamage;
+            var damageMultiplier = Math.Min(
+                1f + StatCaps.DamageBonus,
+                upgradeMultiplier * (1f + damageBonus));
             var criticalChance = Math.Min(
                 StatCaps.CriticalChance,
                 (precision * 0.01f) + temporary.CriticalChanceBonus);
@@ -267,7 +380,7 @@ namespace JabaSurvivol.Core
                 maxHealth,
                 GameBalance.PlayerMoveSpeed * (1f + moveBonus),
                 damageMultiplier,
-                weaponStats.Damage * damageMultiplier,
+                baseWeaponDamage * damageMultiplier,
                 criticalChance,
                 headshotBonus,
                 armor,
