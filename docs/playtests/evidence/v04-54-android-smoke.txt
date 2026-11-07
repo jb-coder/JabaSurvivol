@@ -1,0 +1,15 @@
+# v0.4.0 Slice 54 Android Smoke Test
+
+- Date: 2026-11-07
+- Emulator: Android 15 (API 35), x86_64 Google Play system image, `jaba_survivol_api35`
+- Device profile: phone 1080 x 2340 at 440 dpi; tablet display override 2560 x 1600 at 320 dpi
+- Production APK: `JabaSurvivol-0.4.0-54.apk` (ARM64), 32,381,117 bytes, SHA-256 `28C16FBFB99DD90F9E143674EC209D7CE0D2DCDD3CE81F67351878EDE7E6C253`
+- Emulator APK: `JabaSurvivol-0.4.0-54-emulator.apk` (ARM64 + x86_64), 59,117,985 bytes, SHA-256 `2FDE39524917479781FDBACF674C682033E1C7652304AEE69988163106113DCB`
+- Activity: `com.jabasurvivol.game/com.unity3d.player.UnityPlayerActivity`
+- Result: main menu and active round rendered on phone and tablet layouts
+- Fatal search: no `FATAL EXCEPTION`, `AndroidRuntime` crash, unhandled exception, or `NullReferenceException` in the app process log
+- Evidence: `v04-54-phone.png`, `v04-54-tablet.png`, `v04-54-playing.png`
+
+The boss spawn, HUD, telegraph, enrage, victory, death, and repeat-victory
+behaviors are covered by the PlayMode suite because the round 10 encounter is
+not reachable through the normal menu flow in a short smoke test.

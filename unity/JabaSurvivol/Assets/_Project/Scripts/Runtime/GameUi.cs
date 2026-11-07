@@ -16,6 +16,8 @@ namespace JabaSurvivol.Gameplay
         private readonly GameObject _hud;
         private readonly GameObject _pausePanel;
         private readonly GameObject _gameOverPanel;
+        private readonly GameObject _victoryPanel;
+        private readonly GameObject _bossPanel;
         private readonly GameObject _roundEndPanel;
         private readonly GameObject _armoryPanel;
         private readonly GameObject _armoryWeaponsPanel;
@@ -32,6 +34,10 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _levelText;
         private readonly Text _levelUpText;
         private readonly Text _gameOverSummary;
+        private readonly Text _victorySummary;
+        private readonly Text _bossNameText;
+        private readonly Text _bossHealthText;
+        private readonly Image _bossHealthFill;
         private readonly Text _roundEndTitle;
         private readonly Text _roundEndSummary;
         private readonly Text _armorySuppliesText;
@@ -75,6 +81,9 @@ namespace JabaSurvivol.Gameplay
         private int _lastLevel = int.MinValue;
         private int _lastXp = int.MinValue;
         private int _lastSkillPoints = int.MinValue;
+        private int _lastBossHealth = int.MinValue;
+        private int _lastBossMaxHealth = int.MinValue;
+        private bool _lastBossEnraged;
         private bool _characterSheetTablet;
         private int _activeCharacterBranch;
 
@@ -108,8 +117,13 @@ namespace JabaSurvivol.Gameplay
             _mainMenu = BuildMainMenu(onStart, onArmory, onCharacterSheet);
             _hud = BuildHud(onPause, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
             _roundModifierText = FindText(_hud, "Round Modifier");
+            _bossPanel = FindGameObject(_hud, "Boss Panel");
+            _bossNameText = FindText(_hud, "Boss Name");
+            _bossHealthText = FindText(_hud, "Boss Health Text");
+            _bossHealthFill = FindImage(_hud, "Boss Health Fill");
             _pausePanel = BuildPausePanel(onResume, onMenu, onArmory, onCharacterSheet);
             _gameOverPanel = BuildGameOverPanel(onRestart, onMenu, out _gameOverSummary);
+            _victoryPanel = BuildVictoryPanel(onRestart, onMenu, out _victorySummary);
             _roundEndPanel = BuildRoundEndPanel(
                 onRewardSelected,
                 onCharacterSheet,
@@ -176,6 +190,8 @@ namespace JabaSurvivol.Gameplay
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(false);
+            HideVictory();
+            HideBoss();
             HideRoundEnd();
             HideArmory();
             HideCharacterSheet();
@@ -192,6 +208,8 @@ namespace JabaSurvivol.Gameplay
             _hud.SetActive(true);
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(false);
+            HideVictory();
+            HideBoss();
             HideArmory();
             HideCharacterSheet();
             _lastHealth = int.MinValue;
@@ -316,10 +334,87 @@ namespace JabaSurvivol.Gameplay
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(true);
+            HideVictory();
+            HideBoss();
             HideRoundEnd();
             HideArmory();
             HideCharacterSheet();
             _gameOverSummary.text = Localization.Format("gameover.summary", round, kills, suppliesEarned);
+        }
+
+        public void ShowVictory(int round, int kills, int suppliesEarned, int xpEarned)
+        {
+            _mainMenu.SetActive(false);
+            _hud.SetActive(false);
+            _pausePanel.SetActive(false);
+            _gameOverPanel.SetActive(false);
+            HideBoss();
+            HideRoundEnd();
+            HideArmory();
+            HideCharacterSheet();
+            _victorySummary.text = Localization.Format("victory.summary", round, kills, suppliesEarned, xpEarned);
+            _victoryPanel.SetActive(true);
+        }
+
+        public bool VictoryVisible => _victoryPanel != null && _victoryPanel.activeSelf;
+
+        public void HideVictory()
+        {
+            if (_victoryPanel != null)
+            {
+                _victoryPanel.SetActive(false);
+            }
+        }
+
+        public bool BossVisible => _bossPanel != null && _bossPanel.activeSelf;
+
+        public void ShowBoss(string name)
+        {
+            if (_bossPanel == null)
+            {
+                return;
+            }
+
+            _bossNameText.text = name;
+            _lastBossHealth = int.MinValue;
+            _lastBossMaxHealth = int.MinValue;
+            _lastBossEnraged = false;
+            _bossPanel.SetActive(true);
+        }
+
+        public void UpdateBoss(float health, float maxHealth, bool enraged)
+        {
+            if (_bossHealthFill == null || _bossHealthText == null)
+            {
+                return;
+            }
+
+            var roundedHealth = Mathf.CeilToInt(health);
+            var roundedMaxHealth = Mathf.CeilToInt(maxHealth);
+            if (roundedHealth == _lastBossHealth &&
+                roundedMaxHealth == _lastBossMaxHealth &&
+                enraged == _lastBossEnraged)
+            {
+                return;
+            }
+
+            _lastBossHealth = roundedHealth;
+            _lastBossMaxHealth = roundedMaxHealth;
+            _lastBossEnraged = enraged;
+            var fraction = maxHealth <= 0f ? 0f : Mathf.Clamp01(health / maxHealth);
+            _bossHealthFill.fillAmount = fraction;
+            _bossHealthFill.color = enraged
+                ? new Color(1f, 0.28f, 0.22f)
+                : new Color(0.92f, 0.35f, 0.72f);
+            _bossHealthText.text = Localization.Format("hud.boss.health", roundedHealth, roundedMaxHealth);
+        }
+
+        public void HideBoss()
+        {
+            if (_bossPanel != null)
+            {
+                _bossPanel.SetActive(false);
+            }
         }
 
         public bool ArmoryVisible => _armoryPanel != null && _armoryPanel.activeSelf;
@@ -332,6 +427,7 @@ namespace JabaSurvivol.Gameplay
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(false);
+            HideVictory();
             HideRoundEnd();
             HideCharacterSheet();
             _armoryPanel.SetActive(true);
@@ -921,6 +1017,30 @@ namespace JabaSurvivol.Gameplay
             roundModifier.fontStyle = FontStyle.Bold;
             UiFactory.Place(roundModifier.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -152f), new Vector2(700f, 40f));
 
+            var bossPanel = UiFactory.CreatePanel(root.transform, "Boss Panel", new Color(0.09f, 0.02f, 0.07f, 0.86f), blocksRaycasts: false);
+            UiFactory.Place(bossPanel, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -218f), new Vector2(860f, 92f));
+
+            var bossName = UiFactory.CreateText(bossPanel, "Boss Name", Localization.Get("boss.name"), 24, TextAnchor.MiddleCenter, new Color(1f, 0.64f, 0.88f));
+            bossName.fontStyle = FontStyle.Bold;
+            UiFactory.Place(bossName.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -18f), new Vector2(820f, 32f));
+
+            var bossHealthBackground = UiFactory.CreateImage(bossPanel, "Boss Health", SpriteFactory.Square, new Color(0.06f, 0.01f, 0.05f, 0.95f));
+            UiFactory.Place(bossHealthBackground.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 16f), new Vector2(800f, 34f));
+
+            var bossHealthFill = UiFactory.CreateImage(bossHealthBackground.transform, "Boss Health Fill", SpriteFactory.Square, new Color(0.92f, 0.35f, 0.72f));
+            UiFactory.Stretch(bossHealthFill.rectTransform);
+            bossHealthFill.rectTransform.offsetMin = new Vector2(3f, 3f);
+            bossHealthFill.rectTransform.offsetMax = new Vector2(-3f, -3f);
+            bossHealthFill.type = Image.Type.Filled;
+            bossHealthFill.fillMethod = Image.FillMethod.Horizontal;
+            bossHealthFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+
+            var bossHealthText = UiFactory.CreateText(bossHealthBackground.transform, "Boss Health Text", string.Empty, 18, TextAnchor.MiddleCenter, Color.white);
+            UiFactory.Stretch(bossHealthText.rectTransform);
+            bossHealthText.fontStyle = FontStyle.Bold;
+
+            bossPanel.gameObject.SetActive(false);
+
             killsText = UiFactory.CreateText(root.transform, "Kills", string.Empty, 22, TextAnchor.MiddleCenter, new Color(0.6f, 0.68f, 0.78f));
             UiFactory.Place(killsText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -112f), new Vector2(420f, 40f));
 
@@ -1013,8 +1133,32 @@ namespace JabaSurvivol.Gameplay
             return root;
         }
 
-        private GameObject BuildRoundEndPanel(
-            System.Action<int> onSelect,
+        private GameObject BuildVictoryPanel(System.Action onNextRun, System.Action onMenu, out Text summary)
+        {
+            var panel = UiFactory.CreatePanel(_safeArea, "Victory Panel", new Color(0.01f, 0.045f, 0.03f, 0.97f));
+            var root = panel.gameObject;
+
+            var title = UiFactory.CreateText(root.transform, "Title", Localization.Get("victory.title"), 72, TextAnchor.MiddleCenter, new Color(0.45f, 1f, 0.62f));
+            title.fontStyle = FontStyle.Bold;
+            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.76f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1100f, 110f));
+
+            var subtitle = UiFactory.CreateText(root.transform, "Subtitle", Localization.Get("victory.subtitle"), 28, TextAnchor.MiddleCenter, new Color(0.8f, 0.92f, 0.86f));
+            UiFactory.Place(subtitle.rectTransform, new Vector2(0.5f, 0.64f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1100f, 60f));
+
+            summary = UiFactory.CreateText(root.transform, "Summary", string.Empty, 30, TextAnchor.MiddleCenter, new Color(0.9f, 0.96f, 0.92f));
+            UiFactory.Place(summary.rectTransform, new Vector2(0.5f, 0.52f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1100f, 120f));
+
+            var next = UiFactory.CreateButton(root.transform, "Next Run", Localization.Get("victory.next"), 36, onNextRun);
+            UiFactory.Place(next.GetComponent<RectTransform>(), new Vector2(0.5f, 0.34f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 104f));
+
+            var menu = UiFactory.CreateButton(root.transform, "Menu", Localization.Get("victory.menu"), 30, onMenu);
+            UiFactory.Place(menu.GetComponent<RectTransform>(), new Vector2(0.5f, 0.21f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 88f));
+
+            root.SetActive(false);
+            return root;
+        }
+
+        private GameObject BuildRoundEndPanel(            System.Action<int> onSelect,
             System.Action onCharacterSheet,
             out Text title,
             out Text summary,
@@ -1618,6 +1762,34 @@ namespace JabaSurvivol.Gameplay
                 if (text.name == name)
                 {
                     return text;
+                }
+            }
+
+            return null;
+        }
+
+        private static Image FindImage(GameObject root, string name)
+        {
+            var images = root.GetComponentsInChildren<Image>(true);
+            foreach (var image in images)
+            {
+                if (image.name == name)
+                {
+                    return image;
+                }
+            }
+
+            return null;
+        }
+
+        private static GameObject FindGameObject(GameObject root, string name)
+        {
+            var transforms = root.GetComponentsInChildren<Transform>(true);
+            foreach (var child in transforms)
+            {
+                if (child.name == name)
+                {
+                    return child.gameObject;
                 }
             }
 

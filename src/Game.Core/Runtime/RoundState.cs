@@ -180,6 +180,17 @@ namespace JabaSurvivol.Core
 
         public int KillsThisRound { get; private set; }
 
+        /// <summary>
+        /// True in the boss round after every regular enemy is dead and before
+        /// the boss is spawned.
+        /// </summary>
+        public bool BossSpawnPending { get; private set; }
+
+        /// <summary>
+        /// True once the round 10 boss has been defeated.
+        /// </summary>
+        public bool BossDefeated { get; private set; }
+
         public bool IsActive => Phase == RoundPhase.Active;
 
         public bool IsCleared => Phase == RoundPhase.Cleared;
@@ -214,10 +225,43 @@ namespace JabaSurvivol.Core
 
             if (EnemiesRemaining <= 0)
             {
-                Phase = RoundPhase.Cleared;
+                if (_definition.IsBoss && !BossDefeated)
+                {
+                    BossSpawnPending = true;
+                }
+                else
+                {
+                    Phase = RoundPhase.Cleared;
+                }
             }
 
             return new RoundKillResult(true, Phase == RoundPhase.Cleared, EnemiesRemaining, Phase);
+        }
+
+        /// <summary>
+        /// Marks that the round 10 boss has spawned.
+        /// </summary>
+        public void MarkBossSpawned()
+        {
+            if (_definition.IsBoss && !BossDefeated)
+            {
+                BossSpawnPending = false;
+            }
+        }
+
+        /// <summary>
+        /// Marks the round 10 boss as defeated and clears the round.
+        /// </summary>
+        public void MarkBossDefeated()
+        {
+            if (!_definition.IsBoss || BossDefeated)
+            {
+                return;
+            }
+
+            BossDefeated = true;
+            BossSpawnPending = false;
+            Phase = RoundPhase.Cleared;
         }
 
         /// <summary>
@@ -263,6 +307,8 @@ namespace JabaSurvivol.Core
             EnemiesRemaining = _definition.SpawnBudget;
             EnemiesSpawned = 0;
             KillsThisRound = 0;
+            BossSpawnPending = false;
+            BossDefeated = false;
             _spawnIndex = 0;
             _spawnPlan = ZombieSpawnPlan.Build(RoundNumber, _definition.SpawnBudget, Seed);
             Phase = RoundPhase.Active;
@@ -295,6 +341,8 @@ namespace JabaSurvivol.Core
             EnemiesRemaining = _definition.SpawnBudget;
             EnemiesSpawned = 0;
             KillsThisRound = 0;
+            BossSpawnPending = false;
+            BossDefeated = false;
             _spawnIndex = 0;
             _spawnPlan = ZombieSpawnPlan.Build(startingRound, _definition.SpawnBudget, Seed);
             Phase = RoundPhase.NotStarted;

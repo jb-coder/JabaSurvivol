@@ -137,6 +137,13 @@ public sealed class RoundStateTests
         }
 
         Assert.True(round.IsFinalRound);
+        Assert.False(round.IsCleared);
+        Assert.True(round.BossSpawnPending);
+        Assert.False(round.TryAdvanceToNextRound());
+
+        round.MarkBossSpawned();
+        round.MarkBossDefeated();
+
         Assert.True(round.IsCleared);
         Assert.False(round.TryAdvanceToNextRound());
         Assert.Equal(GameBalance.MaxRound, round.RoundNumber);

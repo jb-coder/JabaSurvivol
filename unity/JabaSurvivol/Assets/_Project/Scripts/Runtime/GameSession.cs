@@ -10,7 +10,8 @@ namespace JabaSurvivol.Gameplay
         MainMenu,
         Playing,
         Paused,
-        GameOver
+        GameOver,
+        Victory
     }
 
     /// <summary>
@@ -32,6 +33,13 @@ namespace JabaSurvivol.Gameplay
         private ZombieState _zombie;
         private ZombieActorPool _zombieActors;
         private DeathEffectPool _deathEffects;
+        private GameObject _bossObject;
+        private SpriteRenderer _bossRenderer;
+        private GameObject _bossTelegraphRing;
+        private SpriteRenderer _bossTelegraphRenderer;
+        private float _bossTelegraphRemaining;
+        private float _bossAttackCooldown;
+        private bool _bossEnraged;
         private BulletPool _bullets;
         private GameSessionState _state;
         private Vector2 _aimDirection = Vector2.right;
@@ -88,6 +96,24 @@ namespace JabaSurvivol.Gameplay
         public float CurrentZombieMaxHealth => _zombieStats.MaxHealth;
 
         public bool EliteRound => _run?.RoundModel.Definition.IsElite ?? false;
+
+        public bool BossActive => _run?.BossActive ?? false;
+
+        public bool BossSpawnPending => _run?.BossSpawnPending ?? false;
+
+        public bool BossVisible => _ui != null && _ui.BossVisible;
+
+        public bool VictoryVisible => _ui != null && _ui.VictoryVisible;
+
+        public bool IsVictory => _run?.IsVictory ?? false;
+
+        public bool BossEnraged => _run?.Boss?.IsEnraged ?? false;
+
+        public bool BossTelegraphing => _bossTelegraphRemaining > 0f;
+
+        public float BossHealth => _run?.Boss?.Health ?? 0f;
+
+        public float BossMaxHealth => _run?.Boss?.MaxHealth ?? 0f;
 
         public int ZombiePoolCount => _zombieActors?.Count ?? 0;
 
@@ -290,6 +316,35 @@ namespace JabaSurvivol.Gameplay
 
             _deathEffects.Update(deltaTime);
 
+            if (_run.BossActive)
+            {
+                var boss = BossCatalog.BossDefinition;
+                var bossPosition = (Vector2)_bossObject.transform.position;
+                var bossDamage = _bullets.UpdateAndCheck(
+                    deltaTime,
+                    true,
+                    bossPosition,
+                    boss.SlamRadius * 0.35f);
+                if (bossDamage > 0f)
+                {
+                    OnBulletHitBoss(bossDamage);
+                }
+
+                if (_state != GameSessionState.Playing)
+                {
+                    return;
+                }
+
+                UpdateBoss(deltaTime);
+                if (_state != GameSessionState.Playing)
+                {
+                    return;
+                }
+
+                _ui.UpdateHud(_run.Player, _run.Armor, _run.MaxArmor, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
+                return;
+            }
+
             var targetPosition = _zombieActor != null
                 ? (Vector2)_zombieActor.GameObject.transform.position
                 : Vector2.zero;
@@ -427,6 +482,17 @@ namespace JabaSurvivol.Gameplay
                     return;
                 }
 
+                if (_run.BossSpawnPending)
+                {
+                    _respawnCooldown -= deltaTime;
+                    if (_respawnCooldown <= 0f)
+                    {
+                        SpawnBoss();
+                    }
+
+                    return;
+                }
+
                 _respawnCooldown -= deltaTime;
                 if (_respawnCooldown <= 0f)
                 {
@@ -475,6 +541,203 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
+        private bool SpawnBoss()
+        {
+            if (!_run.TrySpawnBoss())
+            {
+                return false;
+            }
+
+            var definition = BossCatalog.BossDefinition;
+            _bossObject.SetActive(true);
+            _bossObject.transform.position = PickSpawnPosition(definition.SlamRadius * 0.5f);
+            _bossObject.transform.localScale = Vector3.one * definition.VisualScale;
+            _bossRenderer.color = new Color(0.95f, 0.35f, 0.72f);
+            _bossTelegraphRemaining = 0f;
+            _bossAttackCooldown = definition.SlamIntervalSeconds;
+            _bossEnraged = false;
+            _bossTelegraphRing.SetActive(false);
+            _ui.ShowBoss(Localization.Get("boss.name"));
+            _ui.UpdateBoss(definition.MaxHealth, definition.MaxHealth, false);
+            return true;
+        }
+
+        private void UpdateBoss(float deltaTime)
+        {
+            var boss = _run.Boss;
+            if (boss == null || _bossObject == null || !_bossObject.activeSelf)
+            {
+                return;
+            }
+
+            var definition = BossCatalog.BossDefinition;
+            var bossPosition = (Vector2)_bossObject.transform.position;
+            var playerPosition = (Vector2)_playerObject.transform.position;
+
+            _bossEnraged = boss.IsEnraged;
+            _bossRenderer.color = _bossEnraged
+                ? new Color(1f, 0.22f, 0.32f)
+                : new Color(0.95f, 0.35f, 0.72f);
+
+            if (_bossTelegraphRemaining > 0f)
+            {
+                _bossTelegraphRemaining -= deltaTime;
+                var progress = 1f - Mathf.Clamp01(_bossTelegraphRemaining / definition.SlamTelegraphSeconds);
+                var ringScale = definition.SlamRadius * 2f * (0.35f + (0.65f * progress));
+                _bossTelegraphRing.transform.position = bossPosition;
+                _bossTelegraphRing.transform.localScale = Vector3.one * ringScale;
+                var ringColor = new Color(1f, 0.25f, 0.2f, 0.35f + (0.55f * progress));
+                _bossTelegraphRenderer.color = ringColor;
+
+                if (_bossTelegraphRemaining <= 0f)
+                {
+                    _bossTelegraphRing.SetActive(false);
+                    if (CombatMath.CirclesOverlap(
+                            bossPosition.x,
+                            bossPosition.y,
+                            definition.SlamRadius,
+                            playerPosition.x,
+                            playerPosition.y,
+                            GameBalance.PlayerRadius))
+                    {
+                        ApplyDamage(definition.SlamDamage);
+                    }
+
+                    _bossAttackCooldown = _bossEnraged
+                        ? definition.EnragedSlamIntervalSeconds
+                        : definition.SlamIntervalSeconds;
+                }
+            }
+            else
+            {
+                _bossAttackCooldown = Mathf.Max(0f, _bossAttackCooldown - deltaTime);
+                if (_bossAttackCooldown <= 0f)
+                {
+                    _bossTelegraphRemaining = definition.SlamTelegraphSeconds;
+                    _bossTelegraphRing.transform.position = bossPosition;
+                    _bossTelegraphRing.transform.localScale = Vector3.one * (definition.SlamRadius * 2f * 0.35f);
+                    _bossTelegraphRenderer.color = new Color(1f, 0.25f, 0.2f, 0.35f);
+                    _bossTelegraphRing.SetActive(true);
+                }
+                else
+                {
+                    var delta = playerPosition - bossPosition;
+                    if (delta.sqrMagnitude > 0.0001f)
+                    {
+                        var direction = delta.normalized;
+                        bossPosition += direction * (definition.MoveSpeed * deltaTime);
+                        CombatMath.ClampToArena(
+                            bossPosition.x,
+                            bossPosition.y,
+                            GameBalance.ArenaHalfWidth,
+                            GameBalance.ArenaHalfHeight,
+                            definition.SlamRadius * 0.35f,
+                            out var clampedX,
+                            out var clampedY);
+                        _bossObject.transform.position = new Vector2(clampedX, clampedY);
+                    }
+                }
+            }
+
+            _contactCooldown = Mathf.Max(0f, _contactCooldown - deltaTime);
+            if (_contactCooldown <= 0f && CombatMath.CirclesOverlap(
+                    bossPosition.x,
+                    bossPosition.y,
+                    definition.SlamRadius * 0.35f,
+                    playerPosition.x,
+                    playerPosition.y,
+                    GameBalance.PlayerRadius))
+            {
+                _contactCooldown = definition.ContactInterval;
+                ApplyDamage(definition.ContactDamage);
+            }
+
+            if (_state == GameSessionState.Playing)
+            {
+                _ui.UpdateBoss(boss.Health, boss.MaxHealth, _bossEnraged);
+            }
+        }
+
+        private void OnBulletHitBoss(float damage)
+        {
+            if (!_run.BossActive)
+            {
+                return;
+            }
+
+            if (_run.ApplyBossDamage(damage, out var reward))
+            {
+                OnBossKilled(reward);
+                return;
+            }
+
+            var boss = _run.Boss;
+            if (boss != null)
+            {
+                _ui.UpdateBoss(boss.Health, boss.MaxHealth, boss.IsEnraged);
+            }
+        }
+
+        private void OnBossKilled(KillReward reward)
+        {
+            var position = _bossObject != null
+                ? (Vector2)_bossObject.transform.position
+                : Vector2.zero;
+
+            if (_bossObject != null)
+            {
+                _bossObject.SetActive(false);
+            }
+
+            if (_bossTelegraphRing != null)
+            {
+                _bossTelegraphRing.SetActive(false);
+            }
+
+            _bossTelegraphRemaining = 0f;
+            _deathEffects.Spawn(position, new Color(1f, 0.35f, 0.72f), 2.4f);
+
+            _profile.AddSupplies(reward.Supplies);
+            var levelsGained = _profile.AddXp(reward.Xp);
+            if (levelsGained > 0)
+            {
+                ShowLevelUpNotification();
+            }
+
+            _runSuppliesEarned += reward.Supplies;
+            _runXpEarned += reward.Xp;
+            _profile.RecordRunEnd(_run);
+            _store.Save(_profile);
+
+            _state = GameSessionState.Victory;
+            _zombieActive = false;
+            _playerObject.SetActive(false);
+            _bullets.Clear();
+            _ui.HideBoss();
+            _ui.ShowVictory(_run.Round, _run.Kills, _runSuppliesEarned, _runXpEarned);
+        }
+
+        public void SpawnBossForTests()
+        {
+            if (_state == GameSessionState.Playing && _run != null && _run.BossSpawnPending)
+            {
+                SpawnBoss();
+            }
+        }
+
+        public void DamageBossForTests(float amount)
+        {
+            if (_state == GameSessionState.Playing && _run != null && _run.BossActive)
+            {
+                OnBulletHitBoss(amount);
+            }
+        }
+
+        public void SetBossAttackCooldownForTests(float seconds)
+        {
+            _bossAttackCooldown = Mathf.Max(0f, seconds);
+        }
+
         public void StartRun()
         {
             StartRunInternal(1);
@@ -512,6 +775,11 @@ namespace JabaSurvivol.Gameplay
             _deathEffects.Clear();
             _zombieActors.ReturnAll();
             _zombieActive = false;
+            _bossObject.SetActive(false);
+            _bossTelegraphRing.SetActive(false);
+            _bossTelegraphRemaining = 0f;
+            _bossAttackCooldown = 0f;
+            _bossEnraged = false;
 
             SpawnZombie();
             _ui.ShowHud();
@@ -570,6 +838,16 @@ namespace JabaSurvivol.Gameplay
             _zombieActors.ReturnAll();
             _deathEffects.Clear();
             _bullets.Clear();
+            if (_bossObject != null)
+            {
+                _bossObject.SetActive(false);
+            }
+
+            if (_bossTelegraphRing != null)
+            {
+                _bossTelegraphRing.SetActive(false);
+            }
+
             _ui.ShowMainMenu(_profile);
         }
 
@@ -599,6 +877,13 @@ namespace JabaSurvivol.Gameplay
             if (_armoryReturnState == GameSessionState.Paused && _state == GameSessionState.Paused)
             {
                 _ui.ShowHud();
+                var boss = _run?.Boss;
+                if (boss != null && _run.BossActive)
+                {
+                    _ui.ShowBoss(Localization.Get("boss.name"));
+                    _ui.UpdateBoss(boss.Health, boss.MaxHealth, boss.IsEnraged);
+                }
+
                 _ui.ShowPaused(true);
                 return;
             }
@@ -1181,7 +1466,17 @@ namespace JabaSurvivol.Gameplay
 
             _deathEffects.Spawn(position, color, 1f);
             _playerObject.SetActive(false);
+            if (_bossObject != null)
+            {
+                _bossObject.SetActive(false);
+            }
 
+            if (_bossTelegraphRing != null)
+            {
+                _bossTelegraphRing.SetActive(false);
+            }
+
+            _ui.HideBoss();
             _profile.RecordRunEnd(_run);
             _store.Save(_profile);
             _ui.ShowGameOver(_run.Round, _run.Kills, _runSuppliesEarned);
@@ -1249,6 +1544,31 @@ namespace JabaSurvivol.Gameplay
 
             _zombieActors = new ZombieActorPool(_worldRoot);
             _deathEffects = new DeathEffectPool(_worldRoot);
+
+            _bossObject = new GameObject("Boss");
+            _bossObject.transform.SetParent(_worldRoot, false);
+            _bossRenderer = _bossObject.AddComponent<SpriteRenderer>();
+            _bossRenderer.sprite = SpriteFactory.Circle;
+            _bossRenderer.color = new Color(0.95f, 0.35f, 0.72f);
+            _bossRenderer.sortingOrder = 18;
+
+            var bossRing = new GameObject("Boss Ring");
+            bossRing.transform.SetParent(_bossObject.transform, false);
+            bossRing.transform.localScale = Vector3.one * 1.3f;
+            var bossRingRenderer = bossRing.AddComponent<SpriteRenderer>();
+            bossRingRenderer.sprite = SpriteFactory.Ring;
+            bossRingRenderer.color = new Color(1f, 0.7f, 0.95f, 0.8f);
+            bossRingRenderer.sortingOrder = 19;
+            _bossObject.SetActive(false);
+
+            _bossTelegraphRing = new GameObject("Boss Telegraph");
+            _bossTelegraphRing.transform.SetParent(_worldRoot, false);
+            _bossTelegraphRenderer = _bossTelegraphRing.AddComponent<SpriteRenderer>();
+            _bossTelegraphRenderer.sprite = SpriteFactory.Ring;
+            _bossTelegraphRenderer.color = new Color(1f, 0.25f, 0.2f, 0.4f);
+            _bossTelegraphRenderer.sortingOrder = 12;
+            _bossTelegraphRing.SetActive(false);
+
             _bullets = new BulletPool(_worldRoot);
         }
     }

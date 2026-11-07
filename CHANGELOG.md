@@ -12,6 +12,10 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Deterministic round spawn composition generated from the run seed and round number, with Runners from round 2 and Brutes from round 4.
 - Elite rounds every fifth round with increased health, contact damage, and rewards, plus a HUD modifier.
 - Archetype-based kill rewards and a pooled zombie actor and death-effect system in Unity.
+- Round 10 boss encounter with a dedicated boss catalog, telegraphed slam attack, enrage phase, and boss HUD.
+- Boss spawn gate that keeps the final round active until the boss is defeated.
+- Victory state with run summary, next-run action, and main-menu action.
+- Boss death rewards, highest-round recording, and persistent-progression-safe death during the boss round.
 ## [0.3.0] - 2026-11-07
 
 ### Added

@@ -8,13 +8,20 @@ namespace JabaSurvivol.Core
     /// </summary>
     public readonly struct KillReward
     {
-        public KillReward(int supplies, int xp, bool completedRound, int round, int enemiesRemaining)
+        public KillReward(
+            int supplies,
+            int xp,
+            bool completedRound,
+            int round,
+            int enemiesRemaining,
+            bool isBoss = false)
         {
             Supplies = supplies;
             Xp = xp;
             CompletedRound = completedRound;
             Round = round;
             EnemiesRemaining = enemiesRemaining;
+            IsBoss = isBoss;
         }
 
         public int Supplies { get; }
@@ -26,6 +33,8 @@ namespace JabaSurvivol.Core
         public int Round { get; }
 
         public int EnemiesRemaining { get; }
+
+        public bool IsBoss { get; }
     }
 
     /// <summary>
@@ -35,6 +44,7 @@ namespace JabaSurvivol.Core
     public sealed class RunState
     {
         private readonly RoundState _round;
+        private BossState? _boss;
 
         public RunState(float maxHealth, int startingRound = 1, int seed = 0, int maxArmor = 0)
         {
@@ -81,6 +91,26 @@ namespace JabaSurvivol.Core
         public ZombieArchetype LastKillArchetype { get; private set; } = ZombieArchetype.Walker;
 
         public bool IsGameOver { get; private set; }
+
+        /// <summary>
+        /// True while the round 10 boss is alive.
+        /// </summary>
+        public bool BossActive => _boss != null && _boss.IsAlive;
+
+        /// <summary>
+        /// True after all regular enemies in the boss round are dead and
+        /// before the boss has spawned.
+        /// </summary>
+        public bool BossSpawnPending => _round.BossSpawnPending;
+
+        public bool BossDefeated => _round.BossDefeated;
+
+        public BossState? Boss => _boss;
+
+        /// <summary>
+        /// True after the boss is defeated in the current run.
+        /// </summary>
+        public bool IsVictory { get; private set; }
 
         /// <summary>
         /// Run-only ammunition. It is never stored in the profile and resets on
@@ -140,6 +170,68 @@ namespace JabaSurvivol.Core
         public bool AdvanceRound()
         {
             return !IsGameOver && _round.TryAdvanceToNextRound();
+        }
+
+        /// <summary>
+        /// Spawns the round 10 boss after the regular enemies are cleared.
+        /// Returns false when the boss is not pending or already active.
+        /// </summary>
+        public bool TrySpawnBoss()
+        {
+            if (IsGameOver || IsVictory || _boss != null || !_round.BossSpawnPending)
+            {
+                return false;
+            }
+
+            _boss = new BossState(BossCatalog.BossDefinition);
+            _round.MarkBossSpawned();
+            return true;
+        }
+
+        /// <summary>
+        /// Applies damage to the active boss and returns true when this hit
+        /// killed it. The reward is returned through <paramref name="reward"/>.
+        /// </summary>
+        public bool ApplyBossDamage(float amount, out KillReward reward)
+        {
+            reward = default;
+            if (IsGameOver || _boss == null || !_boss.IsAlive)
+            {
+                return false;
+            }
+
+            if (!_boss.ApplyDamage(amount))
+            {
+                return false;
+            }
+
+            reward = RegisterBossKill();
+            return true;
+        }
+
+        /// <summary>
+        /// Registers the boss kill after its health reaches zero. The reward is
+        /// granted once per run and clears the round.
+        /// </summary>
+        public KillReward RegisterBossKill()
+        {
+            if (IsGameOver || _boss == null || _boss.IsAlive || IsVictory)
+            {
+                return default;
+            }
+
+            var definition = _boss.Definition;
+            _boss = null;
+            IsVictory = true;
+            Kills++;
+            _round.MarkBossDefeated();
+            return new KillReward(
+                definition.Supplies,
+                definition.Xp,
+                completedRound: true,
+                Round,
+                enemiesRemaining: 0,
+                isBoss: true);
         }
 
         /// <summary>
@@ -215,6 +307,8 @@ namespace JabaSurvivol.Core
             Ammo = 0;
             Armor = MaxArmor;
             IsGameOver = false;
+            IsVictory = false;
+            _boss = null;
             _round.Reset(StartingRound);
             _round.Start();
         }
