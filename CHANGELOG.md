@@ -6,6 +6,8 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-07
+
 ### Added
 
 - Data-driven weapon catalog in `Game.Core` for the pistol, SMG, shotgun, rifle, and LMG, including damage, fire rate, magazine size, reload time, range, reserve ammunition, and unlock cost.
@@ -28,6 +30,11 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - HUD level, XP progress, available skill points, and a temporary level-up notification.
 - Extended headless balance simulation for the full v0.3.0 build path, including rifle unlock, weapon upgrade tiers, armor tiers, skill ranks, supplies earned/spent/remaining, XP, level, and available skill points.
 - Simulation outliers for trivial rounds, runaway supplies, unreachable upgrades, cap violations, and missing weapon, damage upgrade, or armor unlocks.
+
+### Changed
+
+- Android version bumped to `0.3.0` with version code `3`.
+- Core package version bumped to `0.3.0`.
 
 ## [0.2.0] - 2026-11-06
 
