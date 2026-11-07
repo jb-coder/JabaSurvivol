@@ -16,6 +16,10 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Boss spawn gate that keeps the final round active until the boss is defeated.
 - Victory state with run summary, next-run action, and main-menu action.
 - Boss death rewards, highest-round recording, and persistent-progression-safe death during the boss round.
+- Run-only weapon loadout with per-weapon magazines, finite reserves, reload timing, and weapon switching.
+- Manual and automatic reload with effective reload time from weapon upgrades and Engineering.
+- HUD weapon, ammo, reserve, and reload state, plus touch and keyboard reload and switch controls.
+- Ammo crates refill every finite reserve without spending persistent supplies.
 ## [0.3.0] - 2026-11-07
 
 ### Added

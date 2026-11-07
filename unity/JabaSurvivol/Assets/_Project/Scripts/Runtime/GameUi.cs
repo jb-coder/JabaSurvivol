@@ -33,6 +33,10 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _suppliesText;
         private readonly Text _levelText;
         private readonly Text _levelUpText;
+        private readonly Text _weaponText;
+        private readonly Text _ammoText;
+        private readonly Text _reloadText;
+        private readonly Image _reloadFill;
         private readonly Text _gameOverSummary;
         private readonly Text _victorySummary;
         private readonly Text _bossNameText;
@@ -84,6 +88,12 @@ namespace JabaSurvivol.Gameplay
         private int _lastBossHealth = int.MinValue;
         private int _lastBossMaxHealth = int.MinValue;
         private bool _lastBossEnraged;
+        private string _lastWeaponName = string.Empty;
+        private int _lastMagazine = int.MinValue;
+        private int _lastMagazineSize = int.MinValue;
+        private int _lastReserve = int.MinValue;
+        private bool _lastInfiniteReserve;
+        private bool _lastReloading;
         private bool _characterSheetTablet;
         private int _activeCharacterBranch;
 
@@ -94,6 +104,8 @@ namespace JabaSurvivol.Gameplay
             System.Action onMenu,
             System.Action onPause,
             System.Action onResume,
+            System.Action onReload,
+            System.Action onSwitchWeapon,
             System.Action<int> onRewardSelected,
             System.Action onArmory,
             System.Action<WeaponId> onArmoryAction,
@@ -115,8 +127,12 @@ namespace JabaSurvivol.Gameplay
             safeAreaObject.AddComponent<SafeAreaFitter>();
 
             _mainMenu = BuildMainMenu(onStart, onArmory, onCharacterSheet);
-            _hud = BuildHud(onPause, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
+            _hud = BuildHud(onPause, onReload, onSwitchWeapon, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
             _roundModifierText = FindText(_hud, "Round Modifier");
+            _weaponText = FindText(_hud, "Weapon");
+            _ammoText = FindText(_hud, "Ammo");
+            _reloadText = FindText(_hud, "Reload Status");
+            _reloadFill = FindImage(_hud, "Reload Fill");
             _bossPanel = FindGameObject(_hud, "Boss Panel");
             _bossNameText = FindText(_hud, "Boss Name");
             _bossHealthText = FindText(_hud, "Boss Health Text");
@@ -223,6 +239,12 @@ namespace JabaSurvivol.Gameplay
             _lastLevel = int.MinValue;
             _lastXp = int.MinValue;
             _lastSkillPoints = int.MinValue;
+            _lastWeaponName = string.Empty;
+            _lastMagazine = int.MinValue;
+            _lastMagazineSize = int.MinValue;
+            _lastReserve = int.MinValue;
+            _lastInfiniteReserve = false;
+            _lastReloading = false;
             HideLevelUp();
             HideRoundEnd();
         }
@@ -308,6 +330,57 @@ namespace JabaSurvivol.Gameplay
 
         public bool RoundModifierVisible => _roundModifierText != null &&
                                             !string.IsNullOrEmpty(_roundModifierText.text);
+
+        /// <summary>
+        /// Updates the equipped weapon, magazine, reserve, and reload state.
+        /// Values are cached so steady-state frames do not allocate.
+        /// </summary>
+        public void UpdateWeaponHud(
+            string weaponName,
+            int magazine,
+            int magazineSize,
+            int reserve,
+            bool infiniteReserve,
+            bool reloading,
+            float reloadRemaining,
+            float reloadDuration)
+        {
+            if (_weaponText == null || _ammoText == null || _reloadText == null || _reloadFill == null)
+            {
+                return;
+            }
+
+            if (!string.Equals(weaponName, _lastWeaponName, System.StringComparison.Ordinal) ||
+                magazine != _lastMagazine ||
+                magazineSize != _lastMagazineSize ||
+                reserve != _lastReserve ||
+                infiniteReserve != _lastInfiniteReserve)
+            {
+                _lastWeaponName = weaponName;
+                _lastMagazine = magazine;
+                _lastMagazineSize = magazineSize;
+                _lastReserve = reserve;
+                _lastInfiniteReserve = infiniteReserve;
+                _weaponText.text = weaponName;
+                _ammoText.text = Localization.Format(
+                    infiniteReserve ? "hud.ammo.infinite" : "hud.ammo",
+                    magazine,
+                    magazineSize,
+                    infiniteReserve
+                        ? Localization.Get("armory.reserve.infinite")
+                        : reserve.ToString(CultureInfo.InvariantCulture));
+            }
+
+            if (reloading != _lastReloading)
+            {
+                _lastReloading = reloading;
+                _reloadText.text = reloading ? Localization.Get("hud.reloading") : string.Empty;
+            }
+
+            _reloadFill.fillAmount = reloading && reloadDuration > 0f
+                ? Mathf.Clamp01(1f - (reloadRemaining / reloadDuration))
+                : 0f;
+        }
 
         public void ShowLevelUp(int level)
         {
@@ -969,6 +1042,8 @@ namespace JabaSurvivol.Gameplay
 
         private GameObject BuildHud(
             System.Action onPause,
+            System.Action onReload,
+            System.Action onSwitchWeapon,
             out Text healthText,
             out Text armorText,
             out Image healthFill,
@@ -1052,6 +1127,31 @@ namespace JabaSurvivol.Gameplay
 
             var pause = UiFactory.CreateButton(root.transform, "Pause", Localization.Get("hud.pause"), 28, onPause);
             UiFactory.Place(pause.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-30f, -30f), new Vector2(84f, 84f));
+
+            var weaponText = UiFactory.CreateText(root.transform, "Weapon", string.Empty, 22, TextAnchor.MiddleLeft, new Color(0.45f, 0.9f, 1f));
+            weaponText.fontStyle = FontStyle.Bold;
+            UiFactory.Place(weaponText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(40f, -128f), new Vector2(340f, 28f));
+
+            var ammoText = UiFactory.CreateText(root.transform, "Ammo", string.Empty, 24, TextAnchor.MiddleLeft, new Color(0.92f, 0.95f, 1f));
+            ammoText.fontStyle = FontStyle.Bold;
+            UiFactory.Place(ammoText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(40f, -158f), new Vector2(340f, 32f));
+
+            var reloadBackground = UiFactory.CreateImage(root.transform, "Reload", SpriteFactory.Square, new Color(0.05f, 0.07f, 0.1f, 0.9f));
+            UiFactory.Place(reloadBackground.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(40f, -196f), new Vector2(300f, 10f));
+            var reloadFill = UiFactory.CreateImage(reloadBackground.transform, "Reload Fill", SpriteFactory.Square, new Color(1f, 0.78f, 0.35f));
+            UiFactory.Stretch(reloadFill.rectTransform);
+            reloadFill.type = Image.Type.Filled;
+            reloadFill.fillMethod = Image.FillMethod.Horizontal;
+            reloadFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+
+            var reloadStatus = UiFactory.CreateText(root.transform, "Reload Status", string.Empty, 18, TextAnchor.MiddleLeft, new Color(1f, 0.78f, 0.35f));
+            UiFactory.Place(reloadStatus.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(40f, -222f), new Vector2(340f, 26f));
+
+            var reload = UiFactory.CreateButton(root.transform, "Reload Button", Localization.Get("hud.reload"), 22, onReload);
+            UiFactory.Place(reload.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-110f, 84f), new Vector2(190f, 66f));
+
+            var switchWeapon = UiFactory.CreateButton(root.transform, "Switch Weapon", Localization.Get("hud.switch"), 22, onSwitchWeapon);
+            UiFactory.Place(switchWeapon.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(100f, 84f), new Vector2(190f, 66f));
 
             var hint = UiFactory.CreateText(root.transform, "Controls Hint", Localization.Get("menu.controls"), 20, TextAnchor.MiddleCenter, new Color(0.48f, 0.56f, 0.66f));
             UiFactory.Place(hint.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 24f), new Vector2(1400f, 40f));

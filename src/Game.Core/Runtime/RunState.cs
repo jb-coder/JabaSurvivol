@@ -46,7 +46,14 @@ namespace JabaSurvivol.Core
         private readonly RoundState _round;
         private BossState? _boss;
 
-        public RunState(float maxHealth, int startingRound = 1, int seed = 0, int maxArmor = 0)
+        public RunState(
+            float maxHealth,
+            int startingRound = 1,
+            int seed = 0,
+            int maxArmor = 0,
+            Profile? profile = null,
+            float ammoCapacityMultiplier = 1f,
+            float reloadSpeedMultiplier = 1f)
         {
             if (startingRound < 1)
             {
@@ -63,6 +70,10 @@ namespace JabaSurvivol.Core
             Seed = seed;
             MaxArmor = maxArmor;
             Armor = maxArmor;
+            Loadout = new WeaponLoadout(
+                profile ?? new Profile(),
+                ammoCapacityMultiplier,
+                reloadSpeedMultiplier);
             _round = new RoundState(startingRound, seed);
             _round.Start();
         }
@@ -113,10 +124,40 @@ namespace JabaSurvivol.Core
         public bool IsVictory { get; private set; }
 
         /// <summary>
-        /// Run-only ammunition. It is never stored in the profile and resets on
-        /// death or restart.
+        /// Run-only ammunition and weapon state. It is never stored in the
+        /// profile and resets on death or restart.
         /// </summary>
-        public int Ammo { get; private set; }
+        public WeaponLoadout Loadout { get; }
+
+        public WeaponId CurrentWeapon => Loadout.Current.Id;
+
+        public WeaponRuntimeState CurrentWeaponState => Loadout.Current;
+
+        public int Magazine => Loadout.Current.Magazine;
+
+        public int Reserve => Loadout.Current.Reserve;
+
+        public bool IsReloading => Loadout.Current.IsReloading;
+
+        public float ReloadRemaining => Loadout.Current.ReloadRemaining;
+
+        /// <summary>
+        /// Total finite reserve across the loadout. The pistol contributes
+        /// nothing because its reserve is infinite.
+        /// </summary>
+        public int Ammo
+        {
+            get
+            {
+                var total = 0;
+                for (var i = 0; i < Loadout.States.Count; i++)
+                {
+                    total = SafeAdd(total, Loadout.States[i].Reserve);
+                }
+
+                return total;
+            }
+        }
 
         /// <summary>
         /// Run-only armor. It is never stored in the profile and resets on
@@ -235,17 +276,65 @@ namespace JabaSurvivol.Core
         }
 
         /// <summary>
-        /// Adds run-only ammunition for the current run.
+        /// Adds free, drop-based reserve ammunition to every finite-reserve
+        /// weapon. The pistol is unaffected.
         /// </summary>
         public int AddAmmo(int amount)
         {
-            if (amount <= 0)
-            {
-                return 0;
-            }
+            return amount <= 0 ? 0 : Loadout.AddReserve(amount);
+        }
 
-            Ammo = SafeAdd(Ammo, amount);
-            return amount;
+        /// <summary>
+        /// Consumes one round from the current weapon. Returns false when the
+        /// magazine is empty or the weapon is reloading.
+        /// </summary>
+        public bool TryFireCurrentWeapon()
+        {
+            return !IsGameOver && Loadout.TryFireCurrent();
+        }
+
+        /// <summary>
+        /// Starts a manual reload on the current weapon.
+        /// </summary>
+        public bool StartReload()
+        {
+            return !IsGameOver && Loadout.StartReload();
+        }
+
+        /// <summary>
+        /// Cycles to the next unlocked weapon for the rest of the run.
+        /// </summary>
+        public bool SwitchNextWeapon()
+        {
+            return !IsGameOver && Loadout.SwitchNext();
+        }
+
+        /// <summary>
+        /// Switches to a specific unlocked weapon.
+        /// </summary>
+        public bool SwitchToWeapon(WeaponId weaponId)
+        {
+            return !IsGameOver && Loadout.TrySwitchTo(weaponId);
+        }
+
+        /// <summary>
+        /// Advances reload timers for every weapon in the loadout.
+        /// </summary>
+        public void TickWeapons(float deltaTime)
+        {
+            if (!IsGameOver)
+            {
+                Loadout.Tick(deltaTime);
+            }
+        }
+
+        /// <summary>
+        /// Applies Engineering multipliers to magazine capacity and reload
+        /// speed without discarding the current run's ammunition.
+        /// </summary>
+        public void ApplyAmmoStats(float ammoCapacityMultiplier, float reloadSpeedMultiplier)
+        {
+            Loadout.UpdateMultipliers(ammoCapacityMultiplier, reloadSpeedMultiplier);
         }
 
         /// <summary>
@@ -304,7 +393,7 @@ namespace JabaSurvivol.Core
         {
             Player.Reset();
             Kills = 0;
-            Ammo = 0;
+            Loadout.Reset();
             Armor = MaxArmor;
             IsGameOver = false;
             IsVictory = false;

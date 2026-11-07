@@ -81,12 +81,16 @@ public sealed class RoundRewardTests
     public void Apply_ammo_adds_only_run_resources()
     {
         var profile = new Profile { Supplies = 200 };
-        var run = new RunState(GameBalance.PlayerMaxHealth);
+        profile.UnlockWeapon(WeaponId.Smg);
+        profile.EquipWeapon(WeaponId.Smg);
+        var run = new RunState(GameBalance.PlayerMaxHealth, profile: profile);
+        var initialReserve = run.Reserve;
         var option = new RoundRewardOption(RoundRewardType.AmmoCrate, GameBalance.AmmoCrateAmount);
 
         var result = RoundRewardModel.Apply(option, profile, run);
 
-        Assert.Equal(GameBalance.AmmoCrateAmount, run.Ammo);
+        Assert.Equal(initialReserve + GameBalance.AmmoCrateAmount, run.Ammo);
+        Assert.Equal(initialReserve + GameBalance.AmmoCrateAmount, run.Reserve);
         Assert.Equal(GameBalance.AmmoCrateAmount, result.Ammo);
         Assert.Equal(200, profile.Supplies);
     }
@@ -124,7 +128,10 @@ public sealed class RoundRewardTests
     public void Persistent_rewards_survive_death_and_run_only_rewards_do_not()
     {
         var profile = new Profile();
-        var run = new RunState(GameBalance.PlayerMaxHealth);
+        profile.UnlockWeapon(WeaponId.Smg);
+        profile.EquipWeapon(WeaponId.Smg);
+        var run = new RunState(GameBalance.PlayerMaxHealth, profile: profile);
+        var initialReserve = run.Reserve;
 
         RoundRewardModel.Apply(new RoundRewardOption(RoundRewardType.Supplies, 75), profile, run);
         RoundRewardModel.Apply(new RoundRewardOption(RoundRewardType.Xp, 30), profile, run);
@@ -137,13 +144,15 @@ public sealed class RoundRewardTests
             profile,
             run);
 
+        Assert.Equal(initialReserve + GameBalance.AmmoCrateAmount, run.Reserve);
+
         run.DamagePlayer(GameBalance.PlayerMaxHealth * 2f);
         profile.RecordRunEnd(run);
         run.Restart();
 
         Assert.Equal(75, profile.Supplies);
         Assert.Equal(30, profile.Xp);
-        Assert.Equal(0, run.Ammo);
+        Assert.Equal(initialReserve, run.Reserve);
         Assert.Equal(0, run.Armor);
     }
 

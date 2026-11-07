@@ -67,6 +67,14 @@ namespace JabaSurvivol.Gameplay
 
         public WeaponId EquippedWeapon => _profile?.EquippedWeapon ?? WeaponId.Pistol;
 
+        public WeaponId CurrentWeapon => _run?.CurrentWeapon ?? EquippedWeapon;
+
+        public int Magazine => _run?.Magazine ?? 0;
+
+        public int Reserve => _run?.Reserve ?? 0;
+
+        public bool IsReloading => _run?.IsReloading ?? false;
+
         public WeaponStats EquippedWeaponStats => _weapon;
 
         public ArmorTier EquippedArmor => _profile?.EquippedArmor ?? ArmorTier.None;
@@ -190,6 +198,8 @@ namespace JabaSurvivol.Gameplay
                 ReturnToMenu,
                 PauseGame,
                 ResumeGame,
+                () => ReloadWeapon(),
+                () => SwitchWeapon(),
                 index => SelectRoundReward(index),
                 ShowArmory,
                 HandleArmoryAction,
@@ -270,6 +280,16 @@ namespace JabaSurvivol.Gameplay
                     return;
                 }
 
+                if (frame.ReloadPressed)
+                {
+                    ReloadWeapon();
+                }
+
+                if (frame.SwitchWeaponPressed)
+                {
+                    SwitchWeapon();
+                }
+
                 UpdatePlaying(frame, Time.deltaTime);
                 _ui.SetSticks(frame.MoveStick, frame.AimStick);
             }
@@ -315,6 +335,7 @@ namespace JabaSurvivol.Gameplay
             }
 
             _deathEffects.Update(deltaTime);
+            _run.TickWeapons(deltaTime);
 
             if (_run.BossActive)
             {
@@ -342,6 +363,7 @@ namespace JabaSurvivol.Gameplay
                 }
 
                 _ui.UpdateHud(_run.Player, _run.Armor, _run.MaxArmor, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
+                UpdateWeaponHud();
                 return;
             }
 
@@ -372,6 +394,7 @@ namespace JabaSurvivol.Gameplay
             }
 
             _ui.UpdateHud(_run.Player, _run.Armor, _run.MaxArmor, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
+            UpdateWeaponHud();
         }
 
         private void UpdatePlayer(InputFrame frame, float deltaTime)
@@ -404,7 +427,15 @@ namespace JabaSurvivol.Gameplay
             _fireCooldown = Mathf.Max(0f, _fireCooldown - deltaTime);
             if (frame.FireHeld && _fireCooldown <= 0f)
             {
-                Fire();
+                if (_run.TryFireCurrentWeapon())
+                {
+                    Fire();
+                }
+                else
+                {
+                    _run.StartReload();
+                    _fireCooldown = 0.15f;
+                }
             }
         }
 
@@ -469,8 +500,43 @@ namespace JabaSurvivol.Gameplay
         {
             if (_state == GameSessionState.Playing && _playerObject != null && _playerObject.activeSelf)
             {
-                Fire();
+                if (_run.TryFireCurrentWeapon())
+                {
+                    Fire();
+                }
             }
+        }
+
+        /// <summary>
+        /// Starts a manual reload on the current weapon.
+        /// </summary>
+        public bool ReloadWeapon()
+        {
+            if (_state != GameSessionState.Playing || _run == null)
+            {
+                return false;
+            }
+
+            return _run.StartReload();
+        }
+
+        /// <summary>
+        /// Cycles to the next unlocked weapon and refreshes combat stats.
+        /// </summary>
+        public bool SwitchWeapon()
+        {
+            if (_state != GameSessionState.Playing || _run == null || !_run.SwitchNextWeapon())
+            {
+                return false;
+            }
+
+            _weapon = _run.CurrentWeaponState.Stats;
+            _stats = StatAggregation.Compute(
+                _profile,
+                _weapon,
+                ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor));
+            _fireCooldown = 0f;
+            return true;
         }
 
         private void UpdateZombie(float deltaTime)
@@ -756,7 +822,15 @@ namespace JabaSurvivol.Gameplay
             var armor = ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor);
             _weapon = WeaponUpgradeService.GetEffectiveStats(_profile, _profile.EquippedWeapon);
             _stats = StatAggregation.Compute(_profile, _weapon, armor);
-            _run = new RunState(_stats.MaxHealth, startingRound, Environment.TickCount, _stats.Armor);
+            _run = new RunState(
+                _stats.MaxHealth,
+                startingRound,
+                Environment.TickCount,
+                _stats.Armor,
+                _profile,
+                _stats.AmmoCapacityMultiplier,
+                _stats.ReloadSpeedMultiplier);
+            _weapon = _run.CurrentWeaponState.Stats;
             _runSuppliesEarned = 0;
             _runXpEarned = 0;
             _roundClearPending = false;
@@ -785,6 +859,7 @@ namespace JabaSurvivol.Gameplay
             _ui.ShowHud();
             _ui.SetRoundModifier(_run.RoundModel.Definition.IsElite);
             _ui.UpdateHud(_run.Player, _run.Armor, _run.MaxArmor, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
+            UpdateWeaponHud();
             _ui.SetSticks(default, default);
             _store.Save(_profile);
         }
@@ -1065,11 +1140,19 @@ namespace JabaSurvivol.Gameplay
 
         private void RefreshStats()
         {
-            _weapon = WeaponUpgradeService.GetEffectiveStats(_profile, _profile.EquippedWeapon);
+            var weaponId = _run != null && !_run.IsGameOver
+                ? _run.CurrentWeapon
+                : _profile.EquippedWeapon;
+            _weapon = WeaponUpgradeService.GetEffectiveStats(_profile, weaponId);
             _stats = StatAggregation.Compute(
                 _profile,
                 _weapon,
                 ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor));
+
+            if (_run != null)
+            {
+                _run.ApplyAmmoStats(_stats.AmmoCapacityMultiplier, _stats.ReloadSpeedMultiplier);
+            }
         }
 
         private bool CanAllocateSkillsNow()
@@ -1271,7 +1354,27 @@ namespace JabaSurvivol.Gameplay
             else
             {
                 _ui.UpdateHud(_run.Player, _run.Armor, _run.MaxArmor, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
+                UpdateWeaponHud();
             }
+        }
+
+        private void UpdateWeaponHud()
+        {
+            if (_ui == null || _run == null)
+            {
+                return;
+            }
+
+            var state = _run.CurrentWeaponState;
+            _ui.UpdateWeaponHud(
+                Localization.WeaponName(state.Id),
+                state.Magazine,
+                state.MagazineSize,
+                state.Reserve,
+                state.HasInfiniteReserve,
+                state.IsReloading,
+                state.ReloadRemaining,
+                state.ReloadDuration);
         }
 
         /// <summary>
