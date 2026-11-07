@@ -88,6 +88,7 @@ namespace JabaSurvivol.Gameplay
             ["character.status.allocated"] = "{0} RANK {1}",
             ["character.status.nopoints"] = "NO SKILL POINTS AVAILABLE",
             ["character.status.maxrank"] = "MAX RANK",
+            ["character.allocation.blocked"] = "ALLOCATION REQUIRES THE ARMORY, PAUSE MENU, OR ROUND END",
             ["character.branch.strength"] = "STRENGTH",
             ["character.branch.agility"] = "AGILITY",
             ["character.branch.survival"] = "SURVIVAL",

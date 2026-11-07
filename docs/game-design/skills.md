@@ -108,7 +108,9 @@ and temporary bonuses are combined.
 - Phone: three tabs, one per branch.
 - Tablet: three columns, one per branch.
 - Large touch targets, rank pips, and before/after stat previews.
-- Free respec between runs.
+- Inline previews replace long-press tooltips in the MVP.
+- Free respec between runs. Respec is a single tap in the MVP; a confirmation
+  step is deferred.
 - HUD: level, XP progress, available points, and level-up notification.
 - Active skill button with radial cooldown.
 

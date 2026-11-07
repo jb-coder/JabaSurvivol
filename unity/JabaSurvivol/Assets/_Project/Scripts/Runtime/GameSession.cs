@@ -68,6 +68,8 @@ namespace JabaSurvivol.Gameplay
 
         public bool CharacterSheetVisible => _ui != null && _ui.CharacterSheetVisible;
 
+        public bool LevelUpVisible => _ui != null && _ui.LevelUpVisible;
+
         public bool HudVisible => _ui != null && _ui.HudVisible;
 
         public float LastBulletDamageForTests { get; private set; }
@@ -577,9 +579,13 @@ namespace JabaSurvivol.Gameplay
             }
 
             RefreshStats();
-            var canRespec = _state == GameSessionState.MainMenu || _roundClearPending;
+            var canAllocate = (_ui.ArmoryVisible) ||
+                              _state == GameSessionState.Paused ||
+                              _roundClearPending;
+            var canRespec = _state == GameSessionState.MainMenu;
             _ui.ShowCharacterSheet(
                 _profile,
+                canAllocate,
                 canRespec,
                 _weapon,
                 ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor));
@@ -592,6 +598,12 @@ namespace JabaSurvivol.Gameplay
 
         private void HandleAllocateSkill(SkillNode node)
         {
+            if (!CanAllocateSkillsNow())
+            {
+                _ui.SetCharacterSheetStatus(Localization.Get("character.allocation.blocked"));
+                return;
+            }
+
             if (TryAllocateSkill(node))
             {
                 RefreshCharacterSheetUi();
@@ -632,9 +644,14 @@ namespace JabaSurvivol.Gameplay
         {
             if (_ui != null && _ui.CharacterSheetVisible)
             {
+                var canAllocate = (_ui.ArmoryVisible) ||
+                                  _state == GameSessionState.Paused ||
+                                  _roundClearPending;
+                var canRespec = _state == GameSessionState.MainMenu;
                 _ui.RefreshCharacterSheet(
                     _profile,
-                    CanRespecSkillsNow(),
+                    canAllocate,
+                    canRespec,
                     _weapon,
                     ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor));
             }
@@ -729,17 +746,14 @@ namespace JabaSurvivol.Gameplay
 
         private bool CanAllocateSkillsNow()
         {
-            return (_ui != null && (_ui.ArmoryVisible || _ui.CharacterSheetVisible)) ||
+            return (_ui != null && _ui.ArmoryVisible) ||
                    _state == GameSessionState.Paused ||
                    _roundClearPending;
         }
 
         private bool CanRespecSkillsNow()
         {
-            return (_ui != null &&
-                    (_ui.ArmoryVisible || _ui.CharacterSheetVisible) &&
-                    _state == GameSessionState.MainMenu) ||
-                   _roundClearPending;
+            return _state == GameSessionState.MainMenu;
         }
 
         private void ApplyStatsToRun()

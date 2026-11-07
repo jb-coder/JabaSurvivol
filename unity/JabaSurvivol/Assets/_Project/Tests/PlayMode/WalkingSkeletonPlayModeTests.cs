@@ -720,15 +720,14 @@ namespace JabaSurvivol.Tests.PlayMode
             yield return null;
             var session = _bootstrap.Session;
             session.Profile.AddXp(int.MaxValue);
+            session.Profile.AllocateSkill(SkillNode.Strength);
 
             session.ShowCharacterSheet();
             yield return null;
 
             Assert.That(session.CharacterSheetVisible, Is.True);
-            Assert.That(session.TryAllocateSkill(SkillNode.Strength), Is.True);
-            Assert.That(session.Profile.GetSkillRank(SkillNode.Strength), Is.EqualTo(1));
-            Assert.That(session.Profile.SkillPoints, Is.EqualTo(34));
-
+            Assert.That(session.TryAllocateSkill(SkillNode.Vitality), Is.False);
+            Assert.That(session.Profile.GetSkillRank(SkillNode.Vitality), Is.EqualTo(0));
             Assert.That(session.RespecSkills(), Is.EqualTo(1));
             Assert.That(session.Profile.GetSkillRank(SkillNode.Strength), Is.EqualTo(0));
             Assert.That(session.Profile.SkillPoints, Is.EqualTo(35));
@@ -736,6 +735,22 @@ namespace JabaSurvivol.Tests.PlayMode
             session.CloseCharacterSheet();
             yield return null;
             Assert.That(session.CharacterSheetVisible, Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator Character_sheet_allocation_is_available_from_the_armory()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddXp(int.MaxValue);
+            session.ShowArmory();
+            yield return null;
+
+            Assert.That(session.TryAllocateSkill(SkillNode.Strength), Is.True);
+            Assert.That(session.Profile.GetSkillRank(SkillNode.Strength), Is.EqualTo(1));
+            Assert.That(session.RespecSkills(), Is.EqualTo(1));
+            Assert.That(session.Profile.GetSkillRank(SkillNode.Strength), Is.EqualTo(0));
         }
 
         [UnityTest]
@@ -791,7 +806,8 @@ namespace JabaSurvivol.Tests.PlayMode
 
             Assert.That(session.CharacterSheetVisible, Is.True);
             Assert.That(session.TryAllocateSkill(SkillNode.Strength), Is.True);
-            Assert.That(session.RespecSkills(), Is.EqualTo(1));
+            Assert.That(session.RespecSkills(), Is.EqualTo(0));
+            Assert.That(session.Profile.GetSkillRank(SkillNode.Strength), Is.EqualTo(1));
 
             session.CloseCharacterSheet();
             yield return null;
@@ -800,6 +816,33 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(session.SelectRoundReward(0), Is.True);
             yield return null;
             Assert.That(session.Run.Round, Is.EqualTo(2));
+        }
+
+        [UnityTest]
+        public IEnumerator Level_up_notification_is_visible_over_round_end()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.Xp = 90;
+            session.StartRun();
+            var budget = session.SpawnBudget;
+
+            for (var i = 0; i < budget; i++)
+            {
+                session.DamageZombieForTests(100000f);
+                yield return null;
+
+                if (i < budget - 1)
+                {
+                    session.SpawnZombieForTests();
+                    yield return null;
+                }
+            }
+
+            Assert.That(session.Profile.Level, Is.EqualTo(2));
+            Assert.That(session.RoundClearPending, Is.True);
+            Assert.That(session.LevelUpVisible, Is.True);
         }
 
         [UnityTest]
