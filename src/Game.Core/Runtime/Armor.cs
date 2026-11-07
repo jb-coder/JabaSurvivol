@@ -25,7 +25,8 @@ namespace JabaSurvivol.Core
             int unlockCost,
             int upgradeBaseCost,
             int upgradeCostPerTier,
-            int maxUpgradeTier)
+            int maxUpgradeTier,
+            float upgradeEffectPerTier)
         {
             if (absorbAmount < 0)
             {
@@ -52,12 +53,18 @@ namespace JabaSurvivol.Core
                 throw new ArgumentOutOfRangeException(nameof(maxUpgradeTier));
             }
 
+            if (upgradeEffectPerTier < 0f)
+            {
+                throw new ArgumentOutOfRangeException(nameof(upgradeEffectPerTier));
+            }
+
             Tier = tier;
             AbsorbAmount = absorbAmount;
             UnlockCost = unlockCost;
             UpgradeBaseCost = upgradeBaseCost;
             UpgradeCostPerTier = upgradeCostPerTier;
             MaxUpgradeTier = maxUpgradeTier;
+            UpgradeEffectPerTier = upgradeEffectPerTier;
         }
 
         public ArmorTier Tier { get; }
@@ -71,6 +78,8 @@ namespace JabaSurvivol.Core
         public int UpgradeCostPerTier { get; }
 
         public int MaxUpgradeTier { get; }
+
+        public float UpgradeEffectPerTier { get; }
 
         public bool CanUpgrade => MaxUpgradeTier > 0;
 
@@ -132,10 +141,10 @@ namespace JabaSurvivol.Core
     {
         private static readonly ArmorDefinition[] Armors =
         {
-            new ArmorDefinition(ArmorTier.None, absorbAmount: 0, unlockCost: 0, upgradeBaseCost: 0, upgradeCostPerTier: 0, maxUpgradeTier: 0),
-            new ArmorDefinition(ArmorTier.Light, absorbAmount: 25, unlockCost: 0, upgradeBaseCost: 100, upgradeCostPerTier: 50, maxUpgradeTier: 5),
-            new ArmorDefinition(ArmorTier.Medium, absorbAmount: 50, unlockCost: 800, upgradeBaseCost: 200, upgradeCostPerTier: 100, maxUpgradeTier: 5),
-            new ArmorDefinition(ArmorTier.Heavy, absorbAmount: 90, unlockCost: 1600, upgradeBaseCost: 350, upgradeCostPerTier: 175, maxUpgradeTier: 5)
+            new ArmorDefinition(ArmorTier.None, absorbAmount: 0, unlockCost: 0, upgradeBaseCost: 0, upgradeCostPerTier: 0, maxUpgradeTier: 0, upgradeEffectPerTier: 0f),
+            new ArmorDefinition(ArmorTier.Light, absorbAmount: 25, unlockCost: 0, upgradeBaseCost: 100, upgradeCostPerTier: 50, maxUpgradeTier: 5, upgradeEffectPerTier: 0.10f),
+            new ArmorDefinition(ArmorTier.Medium, absorbAmount: 50, unlockCost: 800, upgradeBaseCost: 200, upgradeCostPerTier: 100, maxUpgradeTier: 5, upgradeEffectPerTier: 0.10f),
+            new ArmorDefinition(ArmorTier.Heavy, absorbAmount: 90, unlockCost: 1600, upgradeBaseCost: 350, upgradeCostPerTier: 175, maxUpgradeTier: 5, upgradeEffectPerTier: 0.10f)
         };
 
         public static System.Collections.Generic.IReadOnlyList<ArmorDefinition> All => Armors;
@@ -282,7 +291,7 @@ namespace JabaSurvivol.Core
             if (definition.MaxUpgradeTier > 0)
             {
                 absorb = (int)Math.Round(
-                    definition.AbsorbAmount * (1f + (0.10f * upgradeTier)),
+                    definition.AbsorbAmount * (1f + (definition.UpgradeEffectPerTier * upgradeTier)),
                     MidpointRounding.AwayFromZero);
             }
 

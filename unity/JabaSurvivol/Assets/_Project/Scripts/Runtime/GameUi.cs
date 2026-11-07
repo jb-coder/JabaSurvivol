@@ -878,11 +878,11 @@ namespace JabaSurvivol.Gameplay
                 };
             }
 
-            var armorTiers = new[] { ArmorTier.None, ArmorTier.Light, ArmorTier.Medium, ArmorTier.Heavy };
-            armorRows = new ArmorRow[armorTiers.Length];
-            for (var i = 0; i < armorTiers.Length; i++)
+            var armors = ArmorCatalog.All;
+            armorRows = new ArmorRow[armors.Count];
+            for (var i = 0; i < armors.Count; i++)
             {
-                var armorTier = armorTiers[i];
+                var armorTier = armors[i].Tier;
                 var rowImage = UiFactory.CreateImage(
                     armorPanel.transform,
                     $"Armor {armorTier}",

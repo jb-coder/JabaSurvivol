@@ -145,6 +145,27 @@ public sealed class ArmorTests
     }
 
     [Fact]
+    public void Armor_plates_have_no_effect_without_equipped_armor()
+    {
+        var run = new RunState(GameBalance.PlayerMaxHealth);
+
+        Assert.Equal(0, run.AddArmor(10));
+        Assert.Equal(0, run.Armor);
+        Assert.Equal(0, run.MaxArmor);
+    }
+
+    [Fact]
+    public void Fractional_damage_absorbs_whole_armor_points()
+    {
+        var run = new RunState(GameBalance.PlayerMaxHealth, maxArmor: 10);
+
+        Assert.False(run.DamagePlayer(5.7f));
+
+        Assert.Equal(5, run.Armor);
+        Assert.Equal(GameBalance.PlayerMaxHealth - 0.7f, run.Player.Health, 3);
+    }
+
+    [Fact]
     public void Restart_resets_armor_condition_but_keeps_profile_armor()
     {
         var profile = new Profile();

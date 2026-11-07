@@ -150,27 +150,24 @@ namespace JabaSurvivol.Core
         }
 
         /// <summary>
-        /// Adds free, drop-based armor condition. When armor is equipped the
-        /// repair is capped at the maximum condition; with no armor equipped
-        /// the plates provide temporary run armor.
+        /// Adds free, drop-based armor condition. Only equipped armor can be
+        /// repaired; with no armor equipped the plates have no effect.
         /// </summary>
         public int AddArmor(int amount)
         {
-            if (amount <= 0)
+            if (amount <= 0 || MaxArmor <= 0)
             {
                 return 0;
             }
 
-            var applied = MaxArmor > 0
-                ? Math.Min(amount, Math.Max(0, MaxArmor - Armor))
-                : amount;
+            var applied = Math.Min(amount, Math.Max(0, MaxArmor - Armor));
             Armor = SafeAdd(Armor, applied);
             return applied;
         }
 
         /// <summary>
-        /// Applies damage to the player, absorbing it with armor first, and
-        /// returns true when the run ends.
+        /// Applies damage to the player, absorbing whole armor points first,
+        /// and returns true when the run ends.
         /// </summary>
         public bool DamagePlayer(float amount)
         {
@@ -180,10 +177,10 @@ namespace JabaSurvivol.Core
             }
 
             var remaining = Math.Max(0f, amount);
-            if (remaining > 0f && Armor > 0)
+            if (remaining >= 1f && Armor > 0)
             {
-                var absorbed = Math.Min((float)Armor, remaining);
-                Armor = Math.Max(0, Armor - (int)Math.Ceiling(absorbed));
+                var absorbed = (int)Math.Min((float)Armor, remaining);
+                Armor = Math.Max(0, Armor - absorbed);
                 remaining -= absorbed;
             }
 

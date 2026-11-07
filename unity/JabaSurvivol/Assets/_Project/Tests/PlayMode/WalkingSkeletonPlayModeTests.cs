@@ -549,6 +549,35 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(session.Run.Armor, Is.EqualTo(50));
         }
 
+        [UnityTest]
+        public IEnumerator Armor_plates_repair_run_condition_but_not_without_armor()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddSupplies(800);
+            session.TryPurchaseArmor(ArmorTier.Medium);
+            session.TryEquipArmor(ArmorTier.Medium);
+            session.StartRun();
+            yield return null;
+
+            session.ApplyDamage(20f);
+            Assert.That(session.Run.Armor, Is.EqualTo(30));
+            Assert.That(session.Run.AddArmor(10), Is.EqualTo(10));
+            Assert.That(session.Run.Armor, Is.EqualTo(40));
+            Assert.That(session.Run.AddArmor(100), Is.EqualTo(10));
+            Assert.That(session.Run.Armor, Is.EqualTo(50));
+
+            session.ReturnToMenu();
+            session.TryEquipArmor(ArmorTier.None);
+            session.StartRun();
+            yield return null;
+
+            Assert.That(session.Run.MaxArmor, Is.EqualTo(0));
+            Assert.That(session.Run.AddArmor(10), Is.EqualTo(0));
+            Assert.That(session.Run.Armor, Is.EqualTo(0));
+        }
+
         private static GameBootstrap CreateBootstrap()
         {
             var gameObject = new GameObject("Test Bootstrap");
