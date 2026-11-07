@@ -344,6 +344,29 @@ namespace JabaSurvivol.Core
             ArmorStats armorStats,
             TemporaryStatModifiers? temporary = null)
         {
+            return ComputeInternal(profile, weaponStats, armorStats, temporary, applyCaps: true);
+        }
+
+        /// <summary>
+        /// Computes the same values without applying the documented caps. Used
+        /// by the balance simulation to detect over-cap builds.
+        /// </summary>
+        public static CharacterStats ComputeRaw(
+            Profile profile,
+            WeaponStats weaponStats,
+            ArmorStats armorStats,
+            TemporaryStatModifiers? temporary = null)
+        {
+            return ComputeInternal(profile, weaponStats, armorStats, temporary, applyCaps: false);
+        }
+
+        private static CharacterStats ComputeInternal(
+            Profile profile,
+            WeaponStats weaponStats,
+            ArmorStats armorStats,
+            TemporaryStatModifiers? temporary,
+            bool applyCaps)
+        {
             if (profile is null)
             {
                 throw new ArgumentNullException(nameof(profile));
@@ -359,28 +382,25 @@ namespace JabaSurvivol.Core
             var engineering = profile.GetSkillRank(SkillNode.Engineering);
 
             var maxHealth = GameBalance.PlayerMaxHealth + (vitality * 10f) + temporary.MaxHealthBonus;
-            var moveBonus = Math.Min(
-                StatCaps.MoveSpeedBonus,
-                (speed * 0.02f) + temporary.MoveSpeedBonus);
-            var damageBonus = Math.Min(
-                StatCaps.DamageBonus,
-                (strength * 0.03f) + temporary.DamageBonus);
+            var moveBonus = (speed * 0.02f) + temporary.MoveSpeedBonus;
+            var damageBonus = (strength * 0.03f) + temporary.DamageBonus;
             var baseWeaponDamage = WeaponCatalog.GetStats(weaponStats.Id).Damage;
             var upgradeMultiplier = baseWeaponDamage <= 0f
                 ? 1f
                 : weaponStats.Damage / baseWeaponDamage;
-            var damageMultiplier = Math.Min(
-                1f + StatCaps.DamageBonus,
-                upgradeMultiplier * (1f + damageBonus));
-            var criticalChance = Math.Min(
-                StatCaps.CriticalChance,
-                (precision * 0.01f) + temporary.CriticalChanceBonus);
-            var headshotBonus = Math.Min(
-                StatCaps.HeadshotBonus,
-                (precision * 0.05f) + temporary.HeadshotBonusBonus);
-            var armor = Math.Min(
-                StatCaps.Armor,
-                armorStats.AbsorbAmount + (endurance * 5) + temporary.ArmorBonus);
+            var damageMultiplier = upgradeMultiplier * (1f + damageBonus);
+            var criticalChance = (precision * 0.01f) + temporary.CriticalChanceBonus;
+            var headshotBonus = (precision * 0.05f) + temporary.HeadshotBonusBonus;
+            var armor = armorStats.AbsorbAmount + (endurance * 5) + temporary.ArmorBonus;
+
+            if (applyCaps)
+            {
+                moveBonus = Math.Min(StatCaps.MoveSpeedBonus, moveBonus);
+                damageMultiplier = Math.Min(1f + StatCaps.DamageBonus, damageMultiplier);
+                criticalChance = Math.Min(StatCaps.CriticalChance, criticalChance);
+                headshotBonus = Math.Min(StatCaps.HeadshotBonus, headshotBonus);
+                armor = Math.Min(StatCaps.Armor, armor);
+            }
 
             return new CharacterStats(
                 maxHealth,

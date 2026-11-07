@@ -9,23 +9,46 @@ builder.AppendLine("# JabaSurvivol balance simulation");
 builder.AppendLine();
 builder.AppendLine($"- Seed: {report.Seed}");
 builder.AppendLine($"- Rounds: {report.Rounds.Count}");
-builder.AppendLine($"- Total supplies: {report.TotalSupplies}");
+builder.AppendLine($"- Total supplies earned: {report.TotalSuppliesEarned}");
+builder.AppendLine($"- Total supplies spent: {report.TotalSuppliesSpent}");
+builder.AppendLine($"- Supplies remaining: {report.TotalSupplies}");
 builder.AppendLine($"- Total XP: {report.TotalXp}");
 builder.AppendLine($"- Final level: {report.FinalLevel}");
-builder.AppendLine($"- Final skill points: {report.FinalSkillPoints}");
+builder.AppendLine($"- Available skill points: {report.FinalSkillPoints}");
 builder.AppendLine($"- Outliers: {report.Outliers.Count}");
 builder.AppendLine();
-builder.AppendLine("| Round | Budget | Zombie HP | Speed | Damage | Shots | Kill s | Round s | Supplies | XP | Reward | Cumulative supplies | Cumulative XP | Level | SP |");
-builder.AppendLine("|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|---:|");
+
+builder.AppendLine("## Rounds");
+builder.AppendLine();
+builder.AppendLine("| Round | Budget | Zombie HP | Speed | Damage | Weapon | DMG/shot | Shots | Kill s | Round s | Supplies | XP | Reward | Remaining | Spent | Level | SP |");
+builder.AppendLine("|---:|---:|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|---:|");
 
 foreach (var round in report.Rounds)
 {
     builder.AppendLine(
         $"| {round.Round} | {round.SpawnBudget} | " +
         $"{Format(round.ZombieHealth)} | {Format(round.ZombieSpeed)} | {Format(round.ZombieDamage)} | " +
-        $"{round.ShotsToKill} | {Format(round.KillSeconds)} | {Format(round.RoundSeconds)} | " +
+        $"{round.Build.Weapon} | {Format(round.Build.DamagePerShot)} | {round.ShotsToKill} | " +
+        $"{Format(round.KillSeconds)} | {Format(round.RoundSeconds)} | " +
         $"{round.SuppliesEarned} | {round.XpEarned} | {round.Reward.Type} +{round.Reward.Amount} | " +
-        $"{round.CumulativeSupplies} | {round.CumulativeXp} | {round.Level} | {round.SkillPoints} |");
+        $"{round.CumulativeSupplies} | {round.Build.SuppliesSpent} | {round.Level} | {round.SkillPoints} |");
+}
+
+builder.AppendLine();
+builder.AppendLine("## Build");
+builder.AppendLine();
+builder.AppendLine("| Round | Weapon | Unlocks | DMG | RATE | MAG | RELOAD | Armor | Tier absorb | Total armor | STR | VIT | SPD | PRC | END | ENG | TUR |");
+builder.AppendLine("|---:|---|---|---:|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|");
+
+foreach (var round in report.Rounds)
+{
+    var build = round.Build;
+    builder.AppendLine(
+        $"| {round.Round} | {build.Weapon} | {UnlockSummary(build)} | " +
+        $"{build.DamageTier} | {build.FireRateTier} | {build.MagazineTier} | {build.ReloadTier} | " +
+        $"{build.Armor} | {build.ArmorTierAbsorb} | {build.TotalArmor} | {build.StrengthRank} | {build.VitalityRank} | " +
+        $"{build.SpeedRank} | {build.PrecisionRank} | {build.EnduranceRank} | " +
+        $"{build.EngineeringRank} | {build.TurretRank} |");
 }
 
 builder.AppendLine();
@@ -52,6 +75,11 @@ File.WriteAllText(outputPath, builder.ToString());
 Console.Write(builder.ToString());
 Console.WriteLine();
 Console.WriteLine($"Report written to {outputPath}.");
+
+static string UnlockSummary(BuildSnapshot build)
+{
+    return $"SMG {(build.HasSmg ? "Y" : "N")} / SG {(build.HasShotgun ? "Y" : "N")} / RIFLE {(build.HasRifle ? "Y" : "N")} / LMG {(build.HasLmg ? "Y" : "N")}";
+}
 
 static string Format(float value)
 {
