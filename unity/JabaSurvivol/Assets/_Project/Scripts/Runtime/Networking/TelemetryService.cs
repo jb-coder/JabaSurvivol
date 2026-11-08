@@ -156,9 +156,11 @@ namespace JabaSurvivol.Gameplay
 
                     var body = BuildEnvelope(batch);
                     var sent = false;
+                    var lastStatus = 0;
                     for (var attempt = 0; attempt < 3 && !sent; attempt++)
                     {
                         var status = await SendAsync(body, _accessToken(), cancellationToken);
+                        lastStatus = status;
                         if (status == 200)
                         {
                             sent = true;
@@ -178,6 +180,19 @@ namespace JabaSurvivol.Gameplay
 
                     if (!sent)
                     {
+                        if (lastStatus == 422)
+                        {
+                            lock (_sync)
+                            {
+                                foreach (var telemetryEvent in batch)
+                                {
+                                    _events.Remove(telemetryEvent);
+                                }
+                            }
+
+                            continue;
+                        }
+
                         return false;
                     }
 

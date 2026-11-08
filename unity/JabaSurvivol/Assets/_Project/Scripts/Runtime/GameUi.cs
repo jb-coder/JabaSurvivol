@@ -808,6 +808,8 @@ namespace JabaSurvivol.Gameplay
         public bool TelemetryVisibleForTests => _telemetryButton != null && _telemetryButton.gameObject.activeSelf;
 
         public string LeaderboardStatusForTests => _leaderboardStatusText?.text ?? string.Empty;
+
+        public string LeaderboardTextForTests => _leaderboardText?.text ?? string.Empty;
         public void SetCloudState(CloudSyncState state, string message)
         {
             if (_cloudStatusText == null)
@@ -1468,6 +1470,7 @@ namespace JabaSurvivol.Gameplay
                 onTelemetryToggle);
             UiFactory.Place(telemetryButton.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-40f, -32f), new Vector2(360f, 56f));
             telemetryLabel = telemetryButton.GetComponentInChildren<Text>();
+            telemetryButton.gameObject.SetActive(false);
 
             var controls = UiFactory.CreateText(root.transform, "Controls", Localization.Get("menu.controls"), 24, TextAnchor.MiddleCenter, new Color(0.55f, 0.62f, 0.72f));
             UiFactory.Place(controls.rectTransform, new Vector2(0.5f, 0.05f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300f, 36f));
@@ -1888,14 +1891,46 @@ namespace JabaSurvivol.Gameplay
                 new Color(0.85f, 0.8f, 0.5f));
             UiFactory.Place(status.rectTransform, new Vector2(0.5f, 0.83f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(1200f, 36f));
 
+            var viewportObject = new GameObject(
+                "Viewport",
+                typeof(RectTransform),
+                typeof(RectMask2D));
+            viewportObject.transform.SetParent(root.transform, false);
+            var viewport = viewportObject.GetComponent<RectTransform>();
+            UiFactory.Place(
+                viewport,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0f, -30f),
+                new Vector2(1900f, 700f));
+
+            var contentObject = new GameObject("Content", typeof(RectTransform));
+            contentObject.transform.SetParent(viewportObject.transform, false);
+            var content = contentObject.GetComponent<RectTransform>();
+            content.anchorMin = new Vector2(0f, 1f);
+            content.anchorMax = new Vector2(1f, 1f);
+            content.pivot = new Vector2(0.5f, 1f);
+            content.anchoredPosition = Vector2.zero;
+            content.sizeDelta = new Vector2(0f, 0f);
+            var fitter = contentObject.AddComponent<ContentSizeFitter>();
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
             entries = UiFactory.CreateText(
-                root.transform,
+                contentObject.transform,
                 "Entries",
                 string.Empty,
                 20,
                 TextAnchor.UpperLeft,
                 new Color(0.86f, 0.9f, 0.96f));
-            UiFactory.Place(entries.rectTransform, new Vector2(0.5f, 0.12f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(1700f, 740f));
+            UiFactory.Stretch(entries.rectTransform);
+            entries.verticalOverflow = VerticalWrapMode.Overflow;
+
+            var scroll = root.AddComponent<ScrollRect>();
+            scroll.viewport = viewport;
+            scroll.content = content;
+            scroll.horizontal = false;
+            scroll.vertical = true;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
 
             var close = UiFactory.CreateButton(
                 root.transform,

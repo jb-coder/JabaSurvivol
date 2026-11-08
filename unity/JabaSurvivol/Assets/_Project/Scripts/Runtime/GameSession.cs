@@ -72,7 +72,7 @@ namespace JabaSurvivol.Gameplay
         private RemoteConfigClient _remoteConfigClient;
         private bool _cloudSavesEnabled;
         private bool _cloudConfigLoaded;
-        private bool _leaderboardsEnabled = true;
+        private bool _leaderboardsEnabled;
         private bool _telemetryEnabled;
         private double _telemetrySampleRate;
         private ILeaderboardService _leaderboardService;
@@ -2007,8 +2007,6 @@ namespace JabaSurvivol.Gameplay
                 _telemetryService.Configure(_telemetryEnabled, _telemetrySampleRate);
                 _ui.SetTelemetry(_telemetryEnabled, _telemetryService.OptedIn);
                 _cloudConfigLoaded = true;
-                _leaderboardsEnabled = config?.leaderboardsEnabled ?? true;
-                _telemetryEnabled = config?.telemetryEnabled ?? false;
                 _cloudSaveService.Configure(_cloudSavesEnabled);
                 _ui.SetCloudControls(_accountService.State == AccountState.SignedIn, _cloudSavesEnabled);
                 _ui.SetCloudState(_cloudSaveService.State, null);
@@ -2049,6 +2047,8 @@ namespace JabaSurvivol.Gameplay
         public ITelemetryService TelemetryServiceForTests => _telemetryService;
 
         public string LeaderboardStatusForTests => _ui?.LeaderboardStatusForTests ?? string.Empty;
+
+        public string LeaderboardTextForTests => _ui?.LeaderboardTextForTests ?? string.Empty;
 
         public void BackupCloudForTests() => HandleCloudBackup();
 

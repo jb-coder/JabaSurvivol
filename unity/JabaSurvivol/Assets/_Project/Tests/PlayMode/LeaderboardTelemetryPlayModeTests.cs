@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -87,6 +88,71 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(_bootstrap.Session.LeaderboardStatusForTests, Does.Contain("NO RUNS YET"));
         }
 
+        [UnityTest]
+        public IEnumerator Leaderboard_populated_board_renders_rank_and_stats()
+        {
+            var entries = new LeaderboardEntryDto[50];
+            for (var index = 0; index < entries.Length; index++)
+            {
+                entries[index] = new LeaderboardEntryDto
+                {
+                    rank = index + 1,
+                    username = $"Player{index + 1:00}",
+                    highestRound = 10 - (index % 10),
+                    totalKills = 1000 - index,
+                    durationSeconds = 100 + index,
+                    achievedAt = "2026-11-08T12:00:00Z"
+                };
+            }
+
+            _leaderboard.LoadResult = new LeaderboardResult { Success = true, Entries = entries };
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            yield return null;
+
+            _bootstrap.Session.ShowLeaderboardForTests();
+            yield return null;
+
+            var text = _bootstrap.Session.LeaderboardTextForTests;
+            Assert.That(text, Does.Contain("1. Player01"));
+            Assert.That(text, Does.Contain("50. Player50"));
+            Assert.That(text, Does.Contain("R10"));
+            Assert.That(text, Does.Contain("K1000"));
+            Assert.That(text, Does.Contain("100s"));
+        }
+
+        [UnityTest]
+        public IEnumerator Telemetry_queue_retries_in_play_mode()
+        {
+            var handler = new SequenceHandler(
+                HttpStatusCode.InternalServerError,
+                HttpStatusCode.InternalServerError,
+                HttpStatusCode.OK);
+            _telemetry.Dispose();
+            _telemetry = new TelemetryService(
+                () => "token",
+                _ => Task.FromResult(true),
+                _ => TimeSpan.Zero,
+                _ => true,
+                "http://localhost",
+                handler);
+            GameBootstrap.TelemetryServiceFactoryOverride = _ => _telemetry;
+            _telemetry.Configure(true, 1d);
+            _telemetry.SetOptIn(true);
+            _telemetry.Enqueue("run_start", "{\"startingRound\":1}");
+
+            var flushTask = _telemetry.FlushAsync(CancellationToken.None);
+            while (!flushTask.IsCompleted)
+            {
+                yield return null;
+            }
+
+            var flushed = flushTask.Result;
+
+            Assert.That(flushed, Is.True);
+            Assert.That(_telemetry.PendingCount, Is.EqualTo(0));
+            Assert.That(handler.CallCount, Is.EqualTo(3));
+        }
         [UnityTest]
         public IEnumerator Leaderboard_disabled_flag_shows_disabled_state()
         {
@@ -203,6 +269,29 @@ namespace JabaSurvivol.Tests.PlayMode
             }
         }
 
+        private sealed class SequenceHandler : HttpMessageHandler
+        {
+            private readonly Queue<HttpStatusCode> _statuses;
+
+            public SequenceHandler(params HttpStatusCode[] statuses)
+            {
+                _statuses = new Queue<HttpStatusCode>(statuses);
+            }
+
+            public int CallCount { get; private set; }
+
+            protected override Task<HttpResponseMessage> SendAsync(
+                HttpRequestMessage request,
+                CancellationToken cancellationToken)
+            {
+                CallCount++;
+                var status = _statuses.Count > 0 ? _statuses.Dequeue() : HttpStatusCode.OK;
+                return Task.FromResult(new HttpResponseMessage(status)
+                {
+                    Content = new StringContent("{}", Encoding.UTF8, "application/json")
+                });
+            }
+        }
         private sealed class OkHandler : HttpMessageHandler
         {
             protected override Task<HttpResponseMessage> SendAsync(
