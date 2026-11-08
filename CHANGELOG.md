@@ -21,6 +21,8 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Unity account panel with register, login, logout, loading, signed-out, signed-in, and offline states, plus ProblemDetails handling and one refresh-and-retry on `401`.
 - Access tokens kept in memory only; refresh tokens encrypted with Windows DPAPI or the Android Keystore and never written to `PlayerPrefs`.
 - Android INTERNET permission enabled, with cleartext HTTP limited to development emulator builds.
+- Unity cloud-save backup and restore with explicit revision conflicts, `409` handling, bounded upload retries, offline fallback, and sync at login, run end, and app pause.
+- Cloud save revision persisted additively in schema version 1 so older profiles remain compatible.
 
 ## [0.4.0] - 2026-11-08
 

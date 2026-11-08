@@ -14,6 +14,12 @@ namespace JabaSurvivol.Gameplay
 
         public static Func<IAccountService> AccountServiceFactoryOverride;
 
+        public static Func<IAccountService, ICloudSaveService> CloudSaveServiceFactoryOverride;
+
+        public static Func<RemoteConfigDto> RemoteConfigOverride;
+
+        public static bool OnlineDisabledForTests;
+
         public static GameBootstrap Instance { get; private set; }
 
         private Transform _worldRoot;
@@ -33,6 +39,7 @@ namespace JabaSurvivol.Gameplay
             Application.targetFrameRate = 60;
             ApiConfig.Initialize();
 #if DEVELOPMENT_BUILD
+            SeedDevelopmentSession();
             RunSecureStorageProbe();
 #endif
 
@@ -60,6 +67,7 @@ namespace JabaSurvivol.Gameplay
             if (pauseStatus)
             {
                 Session?.SaveNow();
+                Session?.SyncCloudNow();
             }
         }
 
@@ -78,6 +86,34 @@ namespace JabaSurvivol.Gameplay
             Session?.SaveNow();
             Instance = null;
         }
+
+#if DEVELOPMENT_BUILD
+        private static void SeedDevelopmentSession()
+        {
+            if (Application.platform != RuntimePlatform.Android)
+            {
+                return;
+            }
+
+            try
+            {
+                using var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+                using var activity = player.GetStatic<AndroidJavaObject>("currentActivity");
+                using var intent = activity.Call<AndroidJavaObject>("getIntent");
+                var token = intent?.Call<string>("getStringExtra", "seedRefreshToken");
+                if (!string.IsNullOrWhiteSpace(token))
+                {
+                    SecureTokenStore.CreateDefault().Save(token);
+                    Debug.Log("Development session seeded.");
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning("Development session seed failed: " + exception.GetType().Name);
+            }
+        }
+
+#endif
 
 #if DEVELOPMENT_BUILD
         private static void RunSecureStorageProbe()
