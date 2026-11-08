@@ -1,3 +1,6 @@
+using System.Globalization;
+using System.Threading.RateLimiting;
+using Game.Api.Leaderboards;
 using Game.Api.Saves;
 using Game.Data;
 using JabaSurvivol.Contracts;
@@ -21,6 +24,47 @@ builder.Services.AddDbContext<GameDbContext>(options =>
     options.UseNpgsql(connectionString, npgsql =>
         npgsql.MigrationsHistoryTable("__GameMigrationsHistory", GameDbContext.Schema)));
 
+var leaderboardPermitLimit = builder.Configuration.GetValue("RateLimiting:LeaderboardSubmitPermitLimit", 30);
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("leaderboard-submit", context =>
+    {
+        var partitionKey = context.User.TryGetAccountId(out var accountId)
+            ? accountId.ToString("N", CultureInfo.InvariantCulture)
+            : context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey,
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = Math.Max(1, leaderboardPermitLimit),
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            });
+    });
+
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        var response = context.HttpContext.Response;
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+        {
+            response.Headers.RetryAfter = Math.Ceiling(retryAfter.TotalSeconds)
+                .ToString(CultureInfo.InvariantCulture);
+        }
+
+        response.StatusCode = StatusCodes.Status429TooManyRequests;
+        await ApiProblem.Create(
+                StatusCodes.Status429TooManyRequests,
+                "rate_limited",
+                "Too many requests",
+                "Retry after the indicated delay.")
+            .ExecuteAsync(context.HttpContext)
+            .ConfigureAwait(false);
+    };
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -30,6 +74,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandler();
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseAuthorization();
 
 app.MapDefaultEndpoints();
@@ -43,6 +88,7 @@ app.MapGet(ApiRoutes.GameStatus, () => Results.Ok(new
 .WithName("GetGameStatus");
 
 app.MapSaveEndpoints();
+app.MapLeaderboardEndpoints();
 
 if (app.Configuration.GetValue("Database:Migrate", app.Environment.IsDevelopment()))
 {
