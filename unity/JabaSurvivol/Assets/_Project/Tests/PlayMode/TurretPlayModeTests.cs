@@ -128,6 +128,8 @@ namespace JabaSurvivol.Tests.PlayMode
             session.ApplyDamage(GameBalance.PlayerMaxHealth * 5f);
             yield return null;
             Assert.That(session.TurretVisible, Is.False);
+            Assert.That(session.TurretActive, Is.False);
+            Assert.That(session.ActiveSkillCooldownRemaining, Is.EqualTo(0f));
 
             session.RestartRun();
             yield return null;
@@ -135,6 +137,29 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(session.TurretActive, Is.False);
             Assert.That(session.TurretVisible, Is.False);
             Assert.That(session.ActiveSkillCooldownRemaining, Is.EqualTo(0f));
+        }
+
+        [UnityTest]
+        public IEnumerator Turret_only_fires_at_targets_in_range()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.SetSkillRank(SkillNode.Turret, 5);
+            session.StartRun();
+            yield return null;
+            session.SetZombiePositionForTests(new Vector2(GameBalance.TurretRange + 1f, 0f));
+            Assert.That(session.ActivateActiveSkillForTests(), Is.True);
+            yield return null;
+            yield return null;
+
+            Assert.That(session.TurretShotsFiredForTests, Is.EqualTo(0));
+
+            session.SetZombiePositionForTests(new Vector2(2f, 0f));
+            yield return null;
+            yield return null;
+
+            Assert.That(session.TurretShotsFiredForTests, Is.GreaterThan(0));
         }
 
         private static GameBootstrap CreateBootstrap()

@@ -451,6 +451,7 @@ namespace JabaSurvivol.Core
             if (!Player.IsAlive)
             {
                 IsGameOver = true;
+                _activeSkill.Reset();
                 _round.Fail();
             }
 

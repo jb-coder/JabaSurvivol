@@ -96,7 +96,7 @@ namespace JabaSurvivol.Core
             }
 
             damage = Stats.TurretDamage;
-            FireTimer = GameBalance.TurretFireInterval;
+            FireTimer = Stats.TurretFireInterval;
             return true;
         }
 

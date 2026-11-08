@@ -100,6 +100,14 @@ namespace JabaSurvivol.Gameplay
 
         public float ZombieHealthForTests => _zombie?.Health ?? 0f;
 
+        public void SetZombiePositionForTests(Vector2 position)
+        {
+            if (_zombieActor != null)
+            {
+                _zombieActor.GameObject.transform.position = position;
+            }
+        }
+
         public WeaponStats EquippedWeaponStats => _weapon;
 
         public ArmorTier EquippedArmor => _profile?.EquippedArmor ?? ArmorTier.None;
@@ -1458,7 +1466,7 @@ namespace JabaSurvivol.Gameplay
                     _turretObject.SetActive(true);
                 }
 
-                if (skill.TryConsumeShot(out var damage) && TryGetTurretTarget(out var target))
+                if (TryGetTurretTarget(out var target) && skill.TryConsumeShot(out var damage))
                 {
                     var direction = target - _turretPosition;
                     if (direction.sqrMagnitude > 0.0001f)
@@ -1493,16 +1501,18 @@ namespace JabaSurvivol.Gameplay
 
         private bool TryGetTurretTarget(out Vector2 target)
         {
+            var rangeSquared = GameBalance.TurretRange * GameBalance.TurretRange;
+
             if (_run.BossActive && _bossObject != null)
             {
                 target = _bossObject.transform.position;
-                return true;
+                return (target - _turretPosition).sqrMagnitude <= rangeSquared;
             }
 
             if (_zombieActive && _zombieActor != null)
             {
                 target = _zombieActor.GameObject.transform.position;
-                return true;
+                return (target - _turretPosition).sqrMagnitude <= rangeSquared;
             }
 
             target = Vector2.zero;

@@ -21,6 +21,7 @@ public sealed class ActiveSkillTests
         Assert.Equal(8f, rankOne.TurretDamage, precision: 3);
         Assert.Equal(8f, rankOne.TurretDuration, precision: 3);
         Assert.Equal(19f, rankOne.CooldownSeconds, precision: 3);
+        Assert.Equal(0.5f, rankOne.TurretFireInterval, precision: 3);
         Assert.Equal(16f, rankFive.TurretDamage, precision: 3);
         Assert.Equal(16f, rankFive.TurretDuration, precision: 3);
         Assert.Equal(15f, rankFive.CooldownSeconds, precision: 3);
@@ -48,7 +49,7 @@ public sealed class ActiveSkillTests
         Assert.Equal(turret.Stats.TurretDamage, first, precision: 3);
         Assert.False(turret.TryConsumeShot(out _));
 
-        turret.Tick(GameBalance.TurretFireInterval);
+        turret.Tick(turret.Stats.TurretFireInterval);
         Assert.True(turret.TryConsumeShot(out var second));
         Assert.Equal(first, second, precision: 3);
     }
@@ -113,6 +114,23 @@ public sealed class ActiveSkillTests
 
         run.Restart();
 
+        Assert.False(run.ActiveSkill.IsActive);
+        Assert.Equal(0f, run.ActiveSkill.CooldownRemaining);
+        Assert.Equal(0f, run.ActiveSkill.ActiveRemaining);
+    }
+
+    [Fact]
+    public void Death_resets_turret_state()
+    {
+        var profile = new Profile();
+        profile.SetSkillRank(SkillNode.Turret, 1);
+        var run = new RunState(GameBalance.PlayerMaxHealth, profile: profile);
+        run.TryActivateActiveSkill();
+        run.TickActiveSkill(1f);
+
+        run.DamagePlayer(GameBalance.PlayerMaxHealth * 2f);
+
+        Assert.True(run.IsGameOver);
         Assert.False(run.ActiveSkill.IsActive);
         Assert.Equal(0f, run.ActiveSkill.CooldownRemaining);
         Assert.Equal(0f, run.ActiveSkill.ActiveRemaining);

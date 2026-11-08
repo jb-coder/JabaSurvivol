@@ -24,8 +24,8 @@ namespace JabaSurvivol.Core
     }
 
     /// <summary>
-    /// One passive or active skill node. Nodes without stat fields are
-    /// activation-based and remain data-only until their system lands.
+    /// One passive or active skill node. Active nodes expose rank-scaled
+    /// activation data through <see cref="SkillActivationStats"/>.
     /// </summary>
     public sealed class SkillNodeDefinition
     {
@@ -53,7 +53,8 @@ namespace JabaSurvivol.Core
             float baseAreaRadius = 0f,
             float baseDashDistance = 0f,
             float baseTurretDamage = 0f,
-            float baseTurretDuration = 0f)
+            float baseTurretDuration = 0f,
+            float baseTurretFireInterval = 0f)
         {
             if (maxRanks <= 0)
             {
@@ -84,6 +85,7 @@ namespace JabaSurvivol.Core
             BaseDashDistance = baseDashDistance;
             BaseTurretDamage = baseTurretDamage;
             BaseTurretDuration = baseTurretDuration;
+            BaseTurretFireInterval = baseTurretFireInterval;
         }
 
         public SkillNode Node { get; }
@@ -134,6 +136,8 @@ namespace JabaSurvivol.Core
 
         public float BaseTurretDuration { get; }
 
+        public float BaseTurretFireInterval { get; }
+
         /// <summary>
         /// Per-rank activation data for active nodes. Passive nodes return
         /// zero values and a zero cooldown.
@@ -147,13 +151,15 @@ namespace JabaSurvivol.Core
                 BaseDashDistance + (DashDistancePerRank * clampedRank),
                 BaseTurretDamage + (TurretDamagePerRank * clampedRank),
                 BaseTurretDuration + (TurretDurationPerRank * clampedRank),
-                Math.Max(0f, BaseCooldownSeconds - (CooldownReductionPerRank * clampedRank)));
+                Math.Max(0f, BaseCooldownSeconds - (CooldownReductionPerRank * clampedRank)),
+                BaseTurretFireInterval);
         }
     }
 
     /// <summary>
-    /// Rank-scaled activation values for Shockwave, Dash, and Turret. The
-    /// activation systems themselves are delivered in later milestones.
+    /// Rank-scaled activation values for Shockwave, Dash, and Turret. Turret
+    /// activation is implemented; Shockwave and Dash activation are later
+    /// scope.
     /// </summary>
     public readonly struct SkillActivationStats
     {
@@ -163,7 +169,8 @@ namespace JabaSurvivol.Core
             float dashDistance,
             float turretDamage,
             float turretDuration,
-            float cooldownSeconds)
+            float cooldownSeconds,
+            float turretFireInterval)
         {
             AreaDamage = areaDamage;
             AreaRadius = areaRadius;
@@ -171,6 +178,7 @@ namespace JabaSurvivol.Core
             TurretDamage = turretDamage;
             TurretDuration = turretDuration;
             CooldownSeconds = cooldownSeconds;
+            TurretFireInterval = turretFireInterval;
         }
 
         public float AreaDamage { get; }
@@ -184,6 +192,8 @@ namespace JabaSurvivol.Core
         public float TurretDuration { get; }
 
         public float CooldownSeconds { get; }
+
+        public float TurretFireInterval { get; }
     }
 
     /// <summary>
@@ -247,7 +257,8 @@ namespace JabaSurvivol.Core
                 turretDamagePerRank: 2f,
                 turretDurationPerRank: 2f,
                 baseTurretDamage: 6f,
-                baseTurretDuration: 6f)
+                baseTurretDuration: 6f,
+                baseTurretFireInterval: 0.5f)
         };
 
         public static IReadOnlyList<SkillNodeDefinition> All => Nodes;

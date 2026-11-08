@@ -49,6 +49,23 @@ namespace JabaSurvivol.Tests.EditMode
         }
 
         [Test]
+        public void Death_resets_turret_state()
+        {
+            var profile = new Profile();
+            profile.SetSkillRank(SkillNode.Turret, 2);
+            var run = new RunState(GameBalance.PlayerMaxHealth, profile: profile);
+            run.TryActivateActiveSkill();
+            run.TickActiveSkill(1f);
+
+            run.DamagePlayer(GameBalance.PlayerMaxHealth * 2f);
+
+            Assert.That(run.IsGameOver, Is.True);
+            Assert.That(run.ActiveSkill.IsActive, Is.False);
+            Assert.That(run.ActiveSkill.CooldownRemaining, Is.EqualTo(0f));
+            Assert.That(run.ActiveSkill.ActiveRemaining, Is.EqualTo(0f));
+        }
+
+        [Test]
         public void Restart_resets_turret_state()
         {
             var profile = new Profile();
