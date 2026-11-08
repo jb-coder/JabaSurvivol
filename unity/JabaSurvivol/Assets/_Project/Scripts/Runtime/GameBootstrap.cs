@@ -18,6 +18,8 @@ namespace JabaSurvivol.Gameplay
 
         public static Func<RemoteConfigDto> RemoteConfigOverride;
 
+        public static bool OnlineDisabledForTests;
+
         public static GameBootstrap Instance { get; private set; }
 
         private Transform _worldRoot;

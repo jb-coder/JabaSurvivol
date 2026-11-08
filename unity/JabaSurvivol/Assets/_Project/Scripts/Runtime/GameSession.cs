@@ -70,9 +70,11 @@ namespace JabaSurvivol.Gameplay
         private CancellationTokenSource _accountCancellation;
         private ICloudSaveService _cloudSaveService;
         private RemoteConfigClient _remoteConfigClient;
-        private bool _cloudSavesEnabled = true;
+        private bool _cloudSavesEnabled;
+        private bool _cloudConfigLoaded;
         private bool _leaderboardsEnabled = true;
         private bool _telemetryEnabled;
+        private readonly SemaphoreSlim _cloudActionGate = new(1, 1);
 
         public Profile Profile => _profile;
 
@@ -279,12 +281,13 @@ namespace JabaSurvivol.Gameplay
                 HandleCloudUseCloud,
                 HandleCloudKeepLocal);
 
-            _accountService = accountService ?? AccountService.CreateDefault();
+            _accountService = accountService ?? CreateDefaultAccountService();
             _accountService.StateChanged += HandleAccountStateChanged;
             _cloudSaveService = cloudSaveService ??
                 GameBootstrap.CloudSaveServiceFactoryOverride?.Invoke(_accountService) ??
                 CreateCloudSaveService();
             _cloudSaveService.StateChanged += HandleCloudStateChanged;
+            _cloudSaveService.Configure(false);
             _remoteConfigClient = new RemoteConfigClient(ApiConfig.BaseUrl);
             _accountCancellation = new CancellationTokenSource();
             _ui.SetAccountState(_accountService.State, _accountService.Username);
@@ -1790,6 +1793,18 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
+        private static IAccountService CreateDefaultAccountService()
+        {
+            if (GameBootstrap.OnlineDisabledForTests && GameBootstrap.AccountServiceFactoryOverride == null)
+            {
+                return new AccountService(
+                    new AuthApiClient(ApiConfig.BaseUrl),
+                    new InMemorySecureTokenStore());
+            }
+
+            return AccountService.CreateDefault();
+        }
+
         private ICloudSaveService CreateCloudSaveService()
         {
             var api = new CloudSaveApiClient(
@@ -1805,9 +1820,15 @@ namespace JabaSurvivol.Gameplay
         {
             try
             {
-                var config = GameBootstrap.RemoteConfigOverride?.Invoke() ??
-                    await _remoteConfigClient.GetAsync(_accountCancellation.Token);
-                _cloudSavesEnabled = config?.cloudSavesEnabled ?? true;
+                var config = GameBootstrap.RemoteConfigOverride?.Invoke();
+                if (config is null && GameBootstrap.OnlineDisabledForTests)
+                {
+                    config = new RemoteConfigDto { cloudSavesEnabled = false, leaderboardsEnabled = false, telemetryEnabled = false };
+                }
+
+                config ??= await _remoteConfigClient.GetAsync(_accountCancellation.Token);
+                _cloudSavesEnabled = config?.cloudSavesEnabled ?? false;
+                _cloudConfigLoaded = true;
                 _leaderboardsEnabled = config?.leaderboardsEnabled ?? true;
                 _telemetryEnabled = config?.telemetryEnabled ?? false;
                 _cloudSaveService.Configure(_cloudSavesEnabled);
@@ -1845,8 +1866,15 @@ namespace JabaSurvivol.Gameplay
         {
             if (_cloudSaveService == null ||
                 _accountCancellation == null ||
+                !_cloudConfigLoaded ||
                 !_cloudSavesEnabled ||
+                !_cloudSaveService.Enabled ||
                 _accountService.State != AccountState.SignedIn)
+            {
+                return;
+            }
+
+            if (!await _cloudActionGate.WaitAsync(0))
             {
                 return;
             }
@@ -1863,6 +1891,10 @@ namespace JabaSurvivol.Gameplay
             catch (Exception)
             {
                 _ui?.SetCloudState(CloudSyncState.Offline, null);
+            }
+            finally
+            {
+                _cloudActionGate.Release();
             }
         }
 
@@ -1894,9 +1926,10 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
-            _ui.SetCloudState(CloudSyncState.Syncing, null);
+            await _cloudActionGate.WaitAsync(_accountCancellation.Token);
             try
             {
+                _ui.SetCloudState(CloudSyncState.Syncing, null);
                 var result = await action(_profile, _accountCancellation.Token);
                 ApplyCloudResult(result);
             }
@@ -1907,6 +1940,10 @@ namespace JabaSurvivol.Gameplay
             catch (Exception)
             {
                 _ui.SetCloudState(CloudSyncState.Offline, null);
+            }
+            finally
+            {
+                _cloudActionGate.Release();
             }
         }
 
@@ -2074,7 +2111,7 @@ namespace JabaSurvivol.Gameplay
         {
             _ui?.SetAccountState(state, _accountService?.Username ?? string.Empty);
             _ui?.SetCloudControls(state == AccountState.SignedIn, _cloudSavesEnabled);
-            if (state == AccountState.SignedIn)
+            if (state == AccountState.SignedIn && _cloudConfigLoaded)
             {
                 _ = SyncCloudAsync();
             }
@@ -2107,6 +2144,7 @@ namespace JabaSurvivol.Gameplay
             _accountCancellation?.Cancel();
             _accountCancellation?.Dispose();
             _accountCancellation = null;
+            _cloudActionGate.Dispose();
             _accountService = null;
         }
         public void SaveNow()

@@ -748,7 +748,11 @@ namespace JabaSurvivol.Gameplay
             var visible = signedIn && enabled;
             _cloudBackupButton.gameObject.SetActive(visible);
             _cloudRestoreButton.gameObject.SetActive(visible);
-            if (!visible)
+            if (!enabled)
+            {
+                SetCloudState(CloudSyncState.Disabled, null);
+            }
+            else if (!signedIn)
             {
                 SetCloudState(CloudSyncState.SignedOut, null);
             }
