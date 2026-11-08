@@ -201,6 +201,24 @@ public sealed class BffRoutingTests
         Assert.Empty(factory.Forwarder.Requests);
     }
 
+    [Theory]
+    [InlineData("DELETE", "/api/v1/game/saves/primary")]
+    [InlineData("GET", "/api/v1/identity/logout")]
+    [InlineData("GET", "/api/v1/telemetry/events")]
+    public async Task Undocumented_methods_on_protected_routes_are_not_forwarded(string method, string path)
+    {
+        using var factory = new BffFactory().ApplyEnvironment();
+        using var client = factory.CreateAuthenticatedClient(Guid.NewGuid());
+        using var request = new HttpRequestMessage(new HttpMethod(method), path);
+
+        var response = await client.SendAsync(request);
+
+        Assert.True(
+            response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.MethodNotAllowed,
+            $"Expected 404 or 405, got {(int)response.StatusCode}.");
+        Assert.Empty(factory.Forwarder.Requests);
+    }
+
     [Fact]
     public async Task Per_account_rate_limit_returns_429()
     {

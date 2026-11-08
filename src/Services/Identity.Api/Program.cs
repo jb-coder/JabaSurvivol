@@ -69,7 +69,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     // Identity is reachable only through the BFF, which forwards the client IP.
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    options.KnownNetworks.Clear();
+    options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
 });
 

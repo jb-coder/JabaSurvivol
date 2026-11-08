@@ -61,7 +61,7 @@ public static class ReverseProxyConfiguration
         {
             RouteId = routeId,
             ClusterId = clusterId,
-            Match = new RouteMatch { Path = path },
+            Match = new RouteMatch { Path = path, Methods = methods },
             AuthorizationPolicy = AuthenticatedPolicy
         };
     }

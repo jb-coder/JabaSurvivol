@@ -17,7 +17,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     // The BFF is reachable only through the cluster ingress, which sets the client IP.
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    options.KnownNetworks.Clear();
+    options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
 });
 builder.Services.AddSingleton<BffRateLimiter>();
