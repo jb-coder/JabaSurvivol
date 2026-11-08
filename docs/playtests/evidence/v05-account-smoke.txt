@@ -1,7 +1,7 @@
 # v0.5.0 Android account UI smoke evidence
 
 - Date: 2026-11-08
-- Build: `JabaSurvivol-emulator-0.5.0-account.apk`
+- Build: `JabaSurvivol-emulator-0.5.0-account.apk` (file name only; the app version is still `0.4.0` until the release branch bump)
 - Package: `com.jabasurvivol.game`
 - Version: `0.4.0` (version code `4`; the release branch bumps to `0.5.0`)
 - Min API: 26
@@ -22,8 +22,10 @@
 6. Repeated the main menu and account panel checks on the tablet override.
 7. Checked logcat for `FATAL EXCEPTION`, `AndroidRuntime` crash, unhandled
    exception, and `NullReferenceException`. None were present.
-8. Confirmed the development probe reports `SecureTokenStore probe: ok`, which
-   exercises Android Keystore AES-GCM save, load, compare, and clear.
+8. Performed a clean uninstall and reinstall, then confirmed the development
+   probe reports `SecureTokenStore probe: ok provider=AndroidKeyStore`
+   using the isolated `jaba_survivol_probe` alias. This exercises Android
+   Keystore key generation, AES-GCM save, load, compare, and clear.
 
 ## APK checks
 

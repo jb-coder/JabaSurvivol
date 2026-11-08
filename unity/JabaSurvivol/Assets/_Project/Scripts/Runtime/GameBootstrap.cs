@@ -82,13 +82,22 @@ namespace JabaSurvivol.Gameplay
 #if DEVELOPMENT_BUILD
         private static void RunSecureStorageProbe()
         {
+            if (Application.platform != RuntimePlatform.Android)
+            {
+                return;
+            }
+
             try
             {
-                var store = SecureTokenStore.CreateDefault();
-                store.Save("probe-token");
-                var restored = store.Load() == "probe-token";
-                store.Clear();
-                Debug.Log("SecureTokenStore probe: " + (restored ? "ok" : "failed"));
+                var probePath = System.IO.Path.Combine(Application.persistentDataPath, "probe-session.bin");
+                var probe = new AndroidKeystoreTokenStore(probePath, "jaba_survivol_probe");
+                probe.ResetKey();
+                probe.Clear();
+                probe.Save("probe-token");
+                var restored = probe.Load() == "probe-token";
+                probe.Clear();
+                probe.ResetKey();
+                Debug.Log("SecureTokenStore probe: " + (restored ? "ok" : "failed") + " provider=AndroidKeyStore alias=jaba_survivol_probe");
             }
             catch (Exception exception)
             {

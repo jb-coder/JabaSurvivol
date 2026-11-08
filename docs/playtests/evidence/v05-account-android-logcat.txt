@@ -1,2 +1,2 @@
-11-08 18:37:01.794 23479 23539 I Unity   : ApplicationInfo 'com.jabasurvivol.game', Version '0.4.0', Min API Level '26', Target API Level '36'
-11-08 18:37:47.026 23479 23539 I Unity   : SecureTokenStore probe: ok
+11-08 19:03:57.237 25411 25447 I Unity   : ApplicationInfo 'com.jabasurvivol.game', Version '0.4.0', Min API Level '26', Target API Level '36'
+11-08 19:04:45.793 25411 25447 I Unity   : SecureTokenStore probe: ok provider=AndroidKeyStore alias=jaba_survivol_probe

@@ -219,10 +219,20 @@ namespace JabaSurvivol.Gameplay
 
     public sealed class AndroidKeystoreTokenStore : FileSecureTokenStore
     {
-        private const string KeyAlias = "jaba_survivol_refresh_token";
+        private const string DefaultKeyAlias = "jaba_survivol_refresh_token";
+        private readonly string _keyAlias;
 
-        public AndroidKeystoreTokenStore(string path) : base(path)
+        public AndroidKeystoreTokenStore(string path, string keyAlias = null) : base(path)
         {
+            _keyAlias = string.IsNullOrWhiteSpace(keyAlias) ? DefaultKeyAlias : keyAlias;
+        }
+
+        public void ResetKey()
+        {
+            using var keyStoreClass = new AndroidJavaClass("java.security.KeyStore");
+            using var keyStore = keyStoreClass.CallStatic<AndroidJavaObject>("getInstance", "AndroidKeyStore");
+            keyStore.Call("load", (AndroidJavaObject)null);
+            keyStore.Call("deleteEntry", _keyAlias);
         }
         private const int CipherEncryptMode = 1;
         private const int CipherDecryptMode = 2;
@@ -262,28 +272,28 @@ namespace JabaSurvivol.Gameplay
             return cipher.Call<byte[]>("doFinal", encrypted);
         }
 
-        private static AndroidJavaObject GetOrCreateKey()
+        private AndroidJavaObject GetOrCreateKey()
         {
             using var keyStoreClass = new AndroidJavaClass("java.security.KeyStore");
             using var keyStore = keyStoreClass.CallStatic<AndroidJavaObject>("getInstance", "AndroidKeyStore");
             keyStore.Call("load", (AndroidJavaObject)null);
 
-            if (!keyStore.Call<bool>("containsAlias", KeyAlias))
+            if (!keyStore.Call<bool>("containsAlias", _keyAlias))
             {
                 using var builder = new AndroidJavaObject(
                     "android.security.keystore.KeyGenParameterSpec$Builder",
-                    KeyAlias,
+                    _keyAlias,
                     3);
                 builder.Call<AndroidJavaObject>("setBlockModes", new object[] { new[] { "GCM" } });
                 builder.Call<AndroidJavaObject>("setEncryptionPaddings", new object[] { new[] { "NoPadding" } });
                 builder.Call<AndroidJavaObject>("setKeySize", 256);
                 using var spec = builder.Call<AndroidJavaObject>("build");
-                using var generator = new AndroidJavaClass("javax.crypto.KeyGenerator").CallStatic<AndroidJavaObject>("getInstance", "AES");
+                using var generator = new AndroidJavaClass("javax.crypto.KeyGenerator").CallStatic<AndroidJavaObject>("getInstance", "AES", "AndroidKeyStore");
                 generator.Call("init", spec);
                 generator.Call<AndroidJavaObject>("generateKey");
             }
 
-            return keyStore.Call<AndroidJavaObject>("getKey", KeyAlias, new char[0]);
+            return keyStore.Call<AndroidJavaObject>("getKey", _keyAlias, new char[0]);
         }
 
         private static AndroidJavaObject CreateCipher()
