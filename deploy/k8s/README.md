@@ -22,6 +22,12 @@ overlays/
     ingress.yaml
 ```
 
+## Prerequisites
+
+Provision the cluster with `docs/setup/oracle.md`: one Oracle Always Free A1
+VM (2 OCPU, 12 GB), k3s with Traefik, cert-manager, local-path storage,
+metrics-server, SOPS/age, and a GHCR pull secret.
+
 ## Secret contract
 
 Create the `jabasurvivol-secrets` Secret through SOPS or the deployment
