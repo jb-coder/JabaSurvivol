@@ -7,6 +7,7 @@ using Game.Data;
 using JabaSurvivol.Contracts;
 using JabaSurvivol.Security;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,8 +29,8 @@ builder.Services.AddDbContext<GameDbContext>(options =>
 var leaderboardPermitLimit = builder.Configuration.GetValue("RateLimiting:LeaderboardSubmitPermitLimit", 30);
 builder.Services.AddOptions<RemoteConfigOptions>()
     .Bind(builder.Configuration.GetSection(RemoteConfigOptions.SectionName))
-    .Validate(options => options.IsValid(out _), "RemoteConfig contains invalid values.")
     .ValidateOnStart();
+builder.Services.AddSingleton<IValidateOptions<RemoteConfigOptions>, RemoteConfigOptionsValidator>();
 
 builder.Services.AddRateLimiter(options =>
 {

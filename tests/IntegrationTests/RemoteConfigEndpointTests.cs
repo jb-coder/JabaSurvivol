@@ -94,7 +94,7 @@ public sealed class RemoteConfigEndpointTests(PostgresFixture fixture) : IAsyncL
             using var factory = new GameApiFactory(connectionString).ApplyEnvironment();
 
             var exception = Assert.ThrowsAny<Exception>(() => factory.CreateClient());
-            Assert.Contains("RemoteConfig", exception.ToString(), StringComparison.Ordinal);
+            Assert.Contains("RemoteConfig:TelemetrySampleRate", exception.ToString(), StringComparison.Ordinal);
         }
         finally
         {
@@ -138,7 +138,7 @@ public sealed class RemoteConfigEndpointTests(PostgresFixture fixture) : IAsyncL
             using var factory = new GameApiFactory(connectionString).ApplyEnvironment();
 
             var exception = Assert.ThrowsAny<Exception>(() => factory.CreateClient());
-            Assert.Contains("RemoteConfig", exception.ToString(), StringComparison.Ordinal);
+            Assert.Contains("RemoteConfig:MinimumClientVersion", exception.ToString(), StringComparison.Ordinal);
         }
         finally
         {
