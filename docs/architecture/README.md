@@ -2,6 +2,8 @@
 
 - `adr/`: architecture decision records.
 - `adr/0005-shared-core-upm-package.md`: shared core source as a local UPM package.
+- `adr/0006-backend-and-cloud-mvp.md`: v0.5.0 trust boundaries, public routes,
+  event envelope, save revision contract, and remote-config shape.
 - `c4/`: reserved for C4 diagrams and context maps.
 
 Current target:
