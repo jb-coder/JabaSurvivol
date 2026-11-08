@@ -5,6 +5,7 @@ using Identity.Api.Data;
 using Identity.Api.Endpoints;
 using JabaSurvivol.Contracts;
 using JabaSurvivol.Security;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,6 +65,14 @@ builder.Services.AddRateLimiter(options =>
     };
 });
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    // Identity is reachable only through the BFF, which forwards the client IP.
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -71,6 +80,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseForwardedHeaders();
 app.UseExceptionHandler();
 app.UseRateLimiter();
 app.UseAuthentication();
