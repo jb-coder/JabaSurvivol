@@ -41,6 +41,15 @@ public sealed class BalanceSimulationTests
             Assert.Equal(first.Rounds[i].Build.ReloadTier, second.Rounds[i].Build.ReloadTier);
             Assert.Equal(first.Rounds[i].Build.StrengthRank, second.Rounds[i].Build.StrengthRank);
             Assert.Equal(first.Rounds[i].Build.VitalityRank, second.Rounds[i].Build.VitalityRank);
+            Assert.Equal(first.Rounds[i].Content.Walkers, second.Rounds[i].Content.Walkers);
+            Assert.Equal(first.Rounds[i].Content.Runners, second.Rounds[i].Content.Runners);
+            Assert.Equal(first.Rounds[i].Content.Brutes, second.Rounds[i].Content.Brutes);
+            Assert.Equal(first.Rounds[i].Ammo.Shots, second.Rounds[i].Ammo.Shots);
+            Assert.Equal(first.Rounds[i].Ammo.Reloads, second.Rounds[i].Ammo.Reloads);
+            Assert.Equal(first.Rounds[i].Ammo.Switches, second.Rounds[i].Ammo.Switches);
+            Assert.Equal(first.Rounds[i].Skills.Selected, second.Rounds[i].Skills.Selected);
+            Assert.Equal(first.Rounds[i].Skills.TurretUptime, second.Rounds[i].Skills.TurretUptime);
+            Assert.Equal(first.Rounds[i].TotalShots, second.Rounds[i].TotalShots);
         }
     }
 
@@ -150,6 +159,42 @@ public sealed class BalanceSimulationTests
 
         Assert.True(boss.IsBoss);
         Assert.True(boss.Content.BossSeconds > 0f);
+        Assert.True(boss.SuppliesEarned >= 1000);
+        Assert.True(boss.XpEarned >= 500);
+    }
+
+    [Fact]
+    public void Run_flags_trivial_elites_level_cap_and_missing_unlocks()
+    {
+        var maxed = new Profile { Level = 30, Supplies = 10000 };
+        maxed.UnlockWeapon(WeaponId.Rifle);
+        maxed.EquipWeapon(WeaponId.Rifle);
+        for (var tier = 1; tier <= 5; tier++)
+        {
+            maxed.SetWeaponUpgradeTier(WeaponId.Rifle, WeaponUpgradeStat.Damage, tier);
+        }
+
+        maxed.SetSkillRank(SkillNode.Strength, 5);
+
+        var elite = BalanceSimulation.Run(new BalanceSimulationOptions
+        {
+            MaxRound = 5,
+            StartingProfile = maxed
+        });
+        var levelCap = BalanceSimulation.Run(new BalanceSimulationOptions
+        {
+            MaxRound = 1,
+            StartingProfile = new Profile { Level = 30 }
+        });
+        var missing = BalanceSimulation.Run(new BalanceSimulationOptions
+        {
+            MaxRound = 1,
+            StartingProfile = new Profile()
+        });
+
+        Assert.Contains(elite.Outliers, outlier => outlier.Contains("elite encounter is trivial", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(levelCap.Outliers, outlier => outlier.Contains("Level cap", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(missing.Outliers, outlier => outlier.Contains("No weapon unlock", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -165,13 +210,31 @@ public sealed class BalanceSimulationTests
     }
 
     [Fact]
-    public void Run_flags_unreachable_synergies_for_the_default_build()
+    public void Run_flags_unreachable_synergies_for_a_short_run()
     {
-        var report = BalanceSimulation.Run();
+        var report = BalanceSimulation.Run(new BalanceSimulationOptions
+        {
+            MaxRound = 1,
+            StartingProfile = new Profile()
+        });
 
         Assert.Contains(
             report.Outliers,
             outlier => outlier.Contains("synergy", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Run_reports_ammo_crates_and_archetype_mix()
+    {
+        var report = BalanceSimulation.Run();
+        var fourth = report.Rounds[3];
+        var tenth = report.Rounds[^1];
+
+        Assert.Contains(report.Rounds, round => round.Reward.Type == RoundRewardType.AmmoCrate);
+        Assert.True(fourth.Content.Runners > 0);
+        Assert.True(fourth.Content.Brutes > 0);
+        Assert.True(tenth.IsBoss);
+        Assert.True(tenth.TotalShots >= tenth.ShotsToKill);
     }
 
     [Fact]

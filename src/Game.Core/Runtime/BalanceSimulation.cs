@@ -170,14 +170,20 @@ namespace JabaSurvivol.Core
     /// </summary>
     public readonly struct RoundAmmo
     {
-        public RoundAmmo(int shots, int reloads, float reloadSeconds, int switches, float pressure, int leftoverReserveBonus)
+        public RoundAmmo(
+            int shots,
+            int reloads,
+            float reloadSeconds,
+            int switches,
+            float pressure,
+            bool starved)
         {
             Shots = shots;
             Reloads = reloads;
             ReloadSeconds = reloadSeconds;
             Switches = switches;
             Pressure = pressure;
-            LeftoverReserveBonus = leftoverReserveBonus;
+            Starved = starved;
         }
 
         public int Shots { get; }
@@ -190,7 +196,7 @@ namespace JabaSurvivol.Core
 
         public float Pressure { get; }
 
-        public int LeftoverReserveBonus { get; }
+        public bool Starved { get; }
     }
 
     /// <summary>
@@ -245,6 +251,7 @@ namespace JabaSurvivol.Core
             bool isElite,
             bool isBoss,
             int shotsToKill,
+            int totalShots,
             float killSeconds,
             float roundSeconds,
             int suppliesEarned,
@@ -267,6 +274,7 @@ namespace JabaSurvivol.Core
             IsElite = isElite;
             IsBoss = isBoss;
             ShotsToKill = shotsToKill;
+            TotalShots = totalShots;
             KillSeconds = killSeconds;
             RoundSeconds = roundSeconds;
             SuppliesEarned = suppliesEarned;
@@ -297,6 +305,8 @@ namespace JabaSurvivol.Core
         public bool IsBoss { get; }
 
         public int ShotsToKill { get; }
+
+        public int TotalShots { get; }
 
         public float KillSeconds { get; }
 
@@ -430,6 +440,8 @@ namespace JabaSurvivol.Core
                 var runners = 0;
                 var brutes = 0;
                 var maxHealth = 0f;
+                var maxSpeed = 0f;
+                var maxDamage = 0f;
                 var totalShots = 0;
                 for (var i = 0; i < plan.Count; i++)
                 {
@@ -449,6 +461,8 @@ namespace JabaSurvivol.Core
 
                     var enemy = definition.GetEncounter(archetype);
                     maxHealth = Math.Max(maxHealth, enemy.MaxHealth);
+                    maxSpeed = Math.Max(maxSpeed, enemy.MoveSpeed);
+                    maxDamage = Math.Max(maxDamage, enemy.ContactDamage);
                     totalShots += Math.Max(
                         1,
                         (int)Math.Ceiling(enemy.MaxHealth / build.DamagePerShot));
@@ -516,14 +530,26 @@ namespace JabaSurvivol.Core
 
                 for (var i = 0; i < budget; i++)
                 {
-                    var kill = run.RegisterKill(ZombieArchetype.Walker);
+                    var archetype = i < plan.Count ? plan[i] : ZombieArchetype.Walker;
+                    var kill = run.RegisterKill(archetype);
                     suppliesEarned += kill.Supplies;
                     xpEarned += kill.Xp;
                     profile.AddSupplies(kill.Supplies);
                     profile.AddXp(kill.Xp);
                 }
 
-                var reward = SelectReward(RoundRewardModel.GenerateOptions(round, options.Seed));
+                if (definition.IsBoss && run.TrySpawnBoss())
+                {
+                    if (run.ApplyBossDamage(run.Boss!.MaxHealth, out var bossReward))
+                    {
+                        suppliesEarned += bossReward.Supplies;
+                        xpEarned += bossReward.Xp;
+                        profile.AddSupplies(bossReward.Supplies);
+                        profile.AddXp(bossReward.Xp);
+                    }
+                }
+
+                var reward = SelectReward(RoundRewardModel.GenerateOptions(round, options.Seed), round);
                 var rewardResult = RoundRewardModel.Apply(reward, profile, run);
                 suppliesEarned += rewardResult.Supplies;
                 xpEarned += rewardResult.Xp;
@@ -539,11 +565,12 @@ namespace JabaSurvivol.Core
                     round,
                     budget,
                     maxHealth,
-                    encounter.MoveSpeed,
-                    encounter.ContactDamage,
+                    maxSpeed,
+                    maxDamage,
                     definition.IsElite,
                     definition.IsBoss,
                     shotsToKill,
+                    totalShots,
                     killSeconds,
                     roundSeconds,
                     suppliesEarned,
@@ -561,7 +588,7 @@ namespace JabaSurvivol.Core
                         ammo.ReloadSeconds,
                         ammo.Switches,
                         ammo.Pressure,
-                        ammo.LeftoverReserveBonus),
+                        ammo.Starved),
                     new RoundSkills(
                         selected,
                         turretUptime,
@@ -576,9 +603,9 @@ namespace JabaSurvivol.Core
                     outliers.Add($"Round {round} is trivial: one shot kills a zombie.");
                 }
 
-                if (definition.IsElite && roundSeconds < 2f)
+                if (definition.IsElite && shotsToKill <= 10)
                 {
-                    outliers.Add($"Round {round} elite encounter is too short: {roundSeconds:0.0} seconds.");
+                    outliers.Add($"Round {round} elite encounter is trivial: {shotsToKill} shots per enemy.");
                 }
 
                 if (definition.IsBoss && bossSeconds < options.BossMinimumSeconds)
@@ -591,7 +618,7 @@ namespace JabaSurvivol.Core
                     outliers.Add($"Boss is too hard: {bossSeconds:0.0} seconds is above {options.BossMaximumSeconds:0.0}.");
                 }
 
-                if (ammo.Pressure > options.AmmoPressureThreshold)
+                if (ammo.Pressure > options.AmmoPressureThreshold || ammo.Starved)
                 {
                     outliers.Add(
                         $"Round {round} is ammo-starved: {ammo.Pressure:0.00} reload pressure exceeds {options.AmmoPressureThreshold:0.00}.");
@@ -687,6 +714,7 @@ namespace JabaSurvivol.Core
             var reloads = 0;
             var switches = 0;
             var reloadSeconds = 0f;
+            var starved = false;
 
             while (shots < totalShots)
             {
@@ -713,6 +741,7 @@ namespace JabaSurvivol.Core
                 if (loadout.SwitchNext())
                 {
                     switches++;
+                    starved = true;
                     continue;
                 }
 
@@ -723,7 +752,7 @@ namespace JabaSurvivol.Core
                 ? 1f
                 : (shots * build.FireInterval) + 1f;
             var pressure = Math.Clamp(reloadSeconds / roundSeconds, 0f, 1f);
-            return new AmmoSimulation(shots, reloads, reloadSeconds, switches, pressure);
+            return new AmmoSimulation(shots, reloads, reloadSeconds, switches, pressure, starved);
         }
 
         private readonly struct AmmoSimulation
@@ -733,13 +762,15 @@ namespace JabaSurvivol.Core
                 int reloads,
                 float reloadSeconds,
                 int switches,
-                float pressure)
+                float pressure,
+                bool starved)
             {
                 Shots = shots;
                 Reloads = reloads;
                 ReloadSeconds = reloadSeconds;
                 Switches = switches;
                 Pressure = pressure;
+                Starved = starved;
             }
 
             public int Shots { get; }
@@ -752,7 +783,7 @@ namespace JabaSurvivol.Core
 
             public float Pressure { get; }
 
-            public int LeftoverReserveBonus => 0;
+            public bool Starved { get; }
         }
 
         private static void ProgressBuild(Profile profile, int round, ref int suppliesSpent)
@@ -1057,19 +1088,19 @@ namespace JabaSurvivol.Core
             return false;
         }
 
-        private static RoundRewardOption SelectReward(RoundRewardOption[] options)
+        private static RoundRewardOption SelectReward(RoundRewardOption[] options, int round)
         {
-            for (var i = 0; i < options.Length; i++)
+            var desired = (round % 4) switch
             {
-                if (options[i].Type == RoundRewardType.Supplies)
-                {
-                    return options[i];
-                }
-            }
+                0 => RoundRewardType.AmmoCrate,
+                1 => RoundRewardType.Supplies,
+                2 => RoundRewardType.Xp,
+                _ => RoundRewardType.ArmorPlate
+            };
 
             for (var i = 0; i < options.Length; i++)
             {
-                if (options[i].Type == RoundRewardType.Xp)
+                if (options[i].Type == desired)
                 {
                     return options[i];
                 }

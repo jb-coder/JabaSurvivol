@@ -20,15 +20,15 @@ builder.AppendLine();
 
 builder.AppendLine("## Rounds");
 builder.AppendLine();
-builder.AppendLine("| Round | Budget | Mix W/R/B | Zombie HP | Speed | Damage | Weapon | DMG/shot | Shots | Kill s | Round s | Ammo s | Reloads | Switches | Supplies | XP | Reward | Remaining | Spent | Level | SP |");
-builder.AppendLine("|---:|---:|---|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|---:|");
+builder.AppendLine("| Round | Budget | Mix W/R/B | Max HP | Max speed | Max damage | Weapon | DMG/shot | Shots/enemy | Total shots | Kill s | Round s | Ammo s | Reloads | Switches | Supplies | XP | Reward | Remaining | Spent | Level | SP |");
+builder.AppendLine("|---:|---:|---|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|---:|");
 
 foreach (var round in report.Rounds)
 {
     builder.AppendLine(
         $"| {round.Round} | {round.SpawnBudget} | {round.Content.Walkers}/{round.Content.Runners}/{round.Content.Brutes} | " +
         $"{Format(round.ZombieHealth)} | {Format(round.ZombieSpeed)} | {Format(round.ZombieDamage)} | " +
-        $"{round.Build.Weapon} | {Format(round.Build.DamagePerShot)} | {round.ShotsToKill} | " +
+        $"{round.Build.Weapon} | {Format(round.Build.DamagePerShot)} | {round.ShotsToKill} | {round.TotalShots} | " +
         $"{Format(round.KillSeconds)} | {Format(round.RoundSeconds)} | " +
         $"{Format(round.Ammo.ReloadSeconds)} | {round.Ammo.Reloads} | {round.Ammo.Switches} | " +
         $"{round.SuppliesEarned} | {round.XpEarned} | {round.Reward.Type} +{round.Reward.Amount} | " +
