@@ -3,8 +3,8 @@
 - Date: 2026-11-07
 - Emulator: Android 15 (API 35), x86_64 Google Play system image, `jaba_survivol_api35`
 - Device profile: phone 1080 x 2340 at 440 dpi; tablet display override 2560 x 1600 at 320 dpi
-- Production APK: `JabaSurvivol-0.4.0-55.apk` (ARM64), 32,385,689 bytes, SHA-256 `B500207BDE7287EA5597E2286DEB9D5804324EEA3D9F3963B03369297F75069F`
-- Emulator APK: `JabaSurvivol-0.4.0-55-emulator.apk` (ARM64 + x86_64), 59,125,997 bytes, SHA-256 `92E8FBAE42AEA3F803DFD41AE0C18D7F60E4C590F1A46D874428745C71F19B74`
+- Production APK: `JabaSurvivol-0.4.0-55.apk` (ARM64), 32,384,681 bytes, SHA-256 `AC3D2215679F1AC803D65E4A2D14B2B5CA661D7387351A162A04421068737A38`
+- Emulator APK: `JabaSurvivol-0.4.0-55-emulator.apk` (ARM64 + x86_64), 59,122,277 bytes, SHA-256 `EC9891369F3BDE884ED7DA93AD5A8D8A4795E196937FCF55B1E856467BB56BD5`
 - Activity: `com.jabasurvivol.game/com.unity3d.player.UnityPlayerActivity`
 - Result: the HUD shows the equipped weapon, magazine, reserve, reload bar, reload button, and switch button on phone and tablet layouts
 - Fatal search: no `FATAL EXCEPTION`, `AndroidRuntime` crash, unhandled exception, or `NullReferenceException` in the app process log

@@ -71,9 +71,13 @@ namespace JabaSurvivol.Gameplay
 
         public int Magazine => _run?.Magazine ?? 0;
 
+        public int MagazineSize => _run?.CurrentWeaponState.MagazineSize ?? 0;
+
         public int Reserve => _run?.Reserve ?? 0;
 
         public bool IsReloading => _run?.IsReloading ?? false;
+
+        public float CurrentReloadDuration => _run?.CurrentWeaponState.ReloadDuration ?? 0f;
 
         public WeaponStats EquippedWeaponStats => _weapon;
 
@@ -1128,7 +1132,10 @@ namespace JabaSurvivol.Gameplay
         /// </summary>
         public WeaponUpgradePurchaseResult TryPurchaseWeaponUpgrade(WeaponUpgradeStat stat)
         {
-            var result = WeaponUpgradeService.TryPurchase(_profile, _profile.EquippedWeapon, stat);
+            var weaponId = _run != null && !_run.IsGameOver
+                ? _run.CurrentWeapon
+                : _profile.EquippedWeapon;
+            var result = WeaponUpgradeService.TryPurchase(_profile, weaponId, stat);
             if (result == WeaponUpgradePurchaseResult.Purchased)
             {
                 RefreshStats();
@@ -1151,6 +1158,7 @@ namespace JabaSurvivol.Gameplay
 
             if (_run != null)
             {
+                _run.RefreshWeaponStats(_profile);
                 _run.ApplyAmmoStats(_stats.AmmoCapacityMultiplier, _stats.ReloadSpeedMultiplier);
             }
         }

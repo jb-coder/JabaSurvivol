@@ -168,7 +168,6 @@ public sealed class WeaponLoadoutTests
             {
             }
 
-            Assert.True(run.StartReload());
             run.TickWeapons(1000f);
         }
 

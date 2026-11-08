@@ -76,20 +76,34 @@ namespace JabaSurvivol.Tests.PlayMode
             _bootstrap = CreateBootstrap();
             yield return null;
             var session = _bootstrap.Session;
-            session.StartRun();
-            yield return null;
-
-            while (session.Magazine > 0)
+            var previousScale = Time.timeScale;
+            Time.timeScale = 20f;
+            try
             {
-                session.FireForTests();
+                session.SetInputForTests(new ScriptedInput
+                {
+                    Frame = new InputFrame { Aim = Vector2.right, FireHeld = true }
+                });
+                session.StartRun();
                 yield return null;
-            }
 
-            Assert.That(session.Magazine, Is.EqualTo(0));
-            var bulletsBefore = session.ActiveBullets;
-            session.FireForTests();
-            yield return null;
-            Assert.That(session.ActiveBullets, Is.LessThanOrEqualTo(bulletsBefore));
+                var sawReloading = false;
+                for (var i = 0; i < 120; i++)
+                {
+                    yield return null;
+                    if (session.IsReloading)
+                    {
+                        sawReloading = true;
+                    }
+                }
+
+                Assert.That(sawReloading, Is.True);
+                Assert.That(session.Magazine, Is.GreaterThan(0));
+            }
+            finally
+            {
+                Time.timeScale = previousScale;
+            }
         }
 
         [UnityTest]
@@ -164,10 +178,50 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(session.IsReloading, Is.False);
         }
 
+        [UnityTest]
+        public IEnumerator Mid_run_upgrade_updates_reload_and_magazine_capacity()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddSupplies(2000);
+            session.StartRun();
+            yield return null;
+            session.PauseGame();
+            yield return null;
+
+            var reloadBefore = session.CurrentReloadDuration;
+            var magazineBefore = session.MagazineSize;
+
+            Assert.That(
+                session.TryPurchaseWeaponUpgrade(WeaponUpgradeStat.ReloadSpeed),
+                Is.EqualTo(WeaponUpgradePurchaseResult.Purchased));
+            Assert.That(session.CurrentReloadDuration, Is.LessThan(reloadBefore));
+
+            Assert.That(
+                session.TryPurchaseWeaponUpgrade(WeaponUpgradeStat.MagazineSize),
+                Is.EqualTo(WeaponUpgradePurchaseResult.Purchased));
+            Assert.That(session.MagazineSize, Is.GreaterThan(magazineBefore));
+
+            session.ResumeGame();
+            yield return null;
+            Assert.That(session.State, Is.EqualTo(GameSessionState.Playing));
+        }
+
         private static GameBootstrap CreateBootstrap()
         {
             var gameObject = new GameObject("Test Bootstrap");
             return gameObject.AddComponent<GameBootstrap>();
+        }
+
+        private sealed class ScriptedInput : IGameInput
+        {
+            public InputFrame Frame;
+
+            public InputFrame Read(Vector2 playerWorldPosition)
+            {
+                return Frame;
+            }
         }
     }
 }

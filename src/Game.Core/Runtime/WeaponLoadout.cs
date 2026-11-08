@@ -314,5 +314,23 @@ namespace JabaSurvivol.Core
                 _states[i].UpdateMultipliers(ammoCapacityMultiplier, reloadSpeedMultiplier);
             }
         }
+
+        /// <summary>
+        /// Re-reads permanent upgrades for every weapon. Ammunition already in
+        /// the run is preserved.
+        /// </summary>
+        public void RefreshStats(Profile profile)
+        {
+            if (profile is null)
+            {
+                throw new ArgumentNullException(nameof(profile));
+            }
+
+            for (var i = 0; i < _states.Length; i++)
+            {
+                _states[i].UpdateStats(
+                    WeaponUpgradeService.GetEffectiveStats(profile, _states[i].Id));
+            }
+        }
     }
 }

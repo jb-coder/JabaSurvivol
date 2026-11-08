@@ -286,11 +286,23 @@ namespace JabaSurvivol.Core
 
         /// <summary>
         /// Consumes one round from the current weapon. Returns false when the
-        /// magazine is empty or the weapon is reloading.
+        /// magazine is empty or the weapon is reloading. An empty magazine
+        /// starts a reload automatically.
         /// </summary>
         public bool TryFireCurrentWeapon()
         {
-            return !IsGameOver && Loadout.TryFireCurrent();
+            if (IsGameOver)
+            {
+                return false;
+            }
+
+            if (Loadout.TryFireCurrent())
+            {
+                return true;
+            }
+
+            Loadout.StartReload();
+            return false;
         }
 
         /// <summary>
@@ -335,6 +347,15 @@ namespace JabaSurvivol.Core
         public void ApplyAmmoStats(float ammoCapacityMultiplier, float reloadSpeedMultiplier)
         {
             Loadout.UpdateMultipliers(ammoCapacityMultiplier, reloadSpeedMultiplier);
+        }
+
+        /// <summary>
+        /// Re-reads permanent weapon upgrades for every loadout weapon while
+        /// preserving the current run's magazines and reserves.
+        /// </summary>
+        public void RefreshWeaponStats(Profile profile)
+        {
+            Loadout.RefreshStats(profile);
         }
 
         /// <summary>
