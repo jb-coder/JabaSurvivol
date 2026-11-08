@@ -127,6 +127,8 @@ namespace JabaSurvivol.Gameplay
 
         public bool SynergyTextVisible => _ui != null && _ui.SynergyTextVisible;
 
+        public string SynergyTextForTests => _ui?.SynergyTextForTests ?? string.Empty;
+
         public bool LevelUpVisible => _ui != null && _ui.LevelUpVisible;
 
         public bool HudVisible => _ui != null && _ui.HudVisible;
@@ -587,10 +589,7 @@ namespace JabaSurvivol.Gameplay
             }
 
             _weapon = _run.CurrentWeaponState.Stats;
-            _stats = StatAggregation.Compute(
-                _profile,
-                _weapon,
-                ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor));
+            RefreshStats();
             _fireCooldown = 0f;
             return true;
         }

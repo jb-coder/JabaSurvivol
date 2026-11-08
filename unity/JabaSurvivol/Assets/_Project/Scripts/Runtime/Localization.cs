@@ -107,7 +107,7 @@ namespace JabaSurvivol.Gameplay
             ["synergy.ghost.name"] = "GHOST",
             ["synergy.bastion.name"] = "BASTION",
             ["synergy.active"] = "{0} ACTIVE",
-            ["synergy.inactive"] = "{0} {1}/{2} + {3}/{4}",
+            ["synergy.inactive"] = "{0} {1} {2}/{3} + {4} {5}/{6}",
             ["character.branch.strength"] = "STRENGTH",
             ["character.branch.agility"] = "AGILITY",
             ["character.branch.survival"] = "SURVIVAL",

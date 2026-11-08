@@ -118,6 +118,21 @@ public sealed class SynergyTests
         Assert.Equal(0f, run.Synergy.OutOfCombatSeconds);
     }
 
+    [Fact]
+    public void Death_resets_synergy_timers()
+    {
+        var profile = CreateGhostProfile();
+        var run = new RunState(GameBalance.PlayerMaxHealth, profile: profile);
+        run.Synergy.OnKill(profile);
+        run.TickSynergies(0.5f);
+
+        run.DamagePlayer(GameBalance.PlayerMaxHealth * 2f);
+
+        Assert.True(run.IsGameOver);
+        Assert.False(run.Synergy.GhostActive);
+        Assert.Equal(0f, run.Synergy.OutOfCombatSeconds);
+    }
+
     private static Profile CreateBerserkerProfile()
     {
         var profile = new Profile();

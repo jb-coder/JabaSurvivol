@@ -622,6 +622,8 @@ namespace JabaSurvivol.Gameplay
         public bool SynergyTextVisible => _characterSynergyText != null &&
                                           !string.IsNullOrEmpty(_characterSynergyText.text);
 
+        public string SynergyTextForTests => _characterSynergyText?.text ?? string.Empty;
+
         public bool LevelUpVisible => _levelUpText != null && _levelUpText.gameObject.activeSelf;
 
         public void ShowCharacterSheet(Profile profile, bool canAllocate, bool canRespec, WeaponStats weapon, ArmorStats armor)
@@ -779,8 +781,10 @@ namespace JabaSurvivol.Gameplay
                         Localization.Format(
                             "synergy.inactive",
                             name,
+                            Localization.SkillName(definition.NodeA),
                             profile.GetSkillRank(definition.NodeA),
                             definition.RankA,
+                            Localization.SkillName(definition.NodeB),
                             profile.GetSkillRank(definition.NodeB),
                             definition.RankB));
                 }

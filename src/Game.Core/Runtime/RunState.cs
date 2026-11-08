@@ -495,6 +495,8 @@ namespace JabaSurvivol.Core
             {
                 IsGameOver = true;
                 _activeSkill.Reset();
+                _synergy.Reset();
+                _bastionArmorAccumulator = 0f;
                 _round.Fail();
             }
 

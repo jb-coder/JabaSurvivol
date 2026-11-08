@@ -119,6 +119,32 @@ namespace JabaSurvivol.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator Berserker_survives_a_weapon_switch()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.Level = 30;
+            session.Profile.UnlockWeapon(WeaponId.Smg);
+            session.Profile.EquipWeapon(WeaponId.Smg);
+            session.Profile.SetSkillRank(SkillNode.Strength, 3);
+            session.Profile.SetSkillRank(SkillNode.Vitality, 3);
+            session.StartRun();
+            yield return null;
+
+            session.ApplyDamage(session.Run.Player.MaxHealth * 0.6f);
+            yield return null;
+            var multiplier = session.Stats.WeaponDamageMultiplier;
+
+            Assert.That(session.SwitchWeapon(), Is.True);
+            yield return null;
+
+            Assert.That(
+                session.Stats.WeaponDamageMultiplier,
+                Is.EqualTo(multiplier).Within(0.001f));
+        }
+
+        [UnityTest]
         public IEnumerator Character_sheet_shows_synergy_status()
         {
             _bootstrap = CreateBootstrap();
@@ -132,6 +158,9 @@ namespace JabaSurvivol.Tests.PlayMode
 
             Assert.That(session.CharacterSheetVisible, Is.True);
             Assert.That(session.SynergyTextVisible, Is.True);
+            Assert.That(session.SynergyTextForTests, Does.Contain("BERSERKER ACTIVE"));
+            Assert.That(session.SynergyTextForTests, Does.Contain("SPEED"));
+            Assert.That(session.SynergyTextForTests, Does.Contain("PRECISION"));
         }
 
         private static GameBootstrap CreateBootstrap()
