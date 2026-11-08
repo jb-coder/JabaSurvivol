@@ -17,6 +17,7 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Public read-only remote config with minimum client version, operational flags, sample rate, ETag support, conservative cache headers, and startup validation that rejects invalid values.
 - Authenticated telemetry ingestion with 1-100 event batches, 64 KiB request and 4 KiB payload limits, typed allowlists, timestamp windows, per-account idempotency, and no PII.
 - Telemetry worker aggregation into idempotent daily totals with 30-day raw-event retention.
+- BFF public boundary with YARP routing, JWT validation, per-IP and per-account rate limits, correlation IDs, safe ProblemDetails on authentication and upstream failures, and no public route to internal status endpoints.
 
 ## [0.4.0] - 2026-11-08
 
