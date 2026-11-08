@@ -1,8 +1,9 @@
 using Game.Data;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Telemetry.Worker;
 
-var builder = Host.CreateApplicationBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 builder.Services.Configure<TelemetryWorkerOptions>(
@@ -20,5 +21,6 @@ builder.Services.AddDbContext<TelemetryDbContext>(options =>
 builder.Services.AddScoped<TelemetryAggregationService>();
 builder.Services.AddHostedService<TelemetryWorker>();
 
-var host = builder.Build();
-host.Run();
+var app = builder.Build();
+app.MapDefaultEndpoints();
+app.Run();

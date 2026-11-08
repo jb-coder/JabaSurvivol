@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: jabasurvivol
+resources:
+  - ../../base
+  - ingress.yaml
+images:
+  - name: identity-api
+    newName: ghcr.io/jb-coder/jabasurvivol/identity-api
+    newTag: 0.5.0
+  - name: game-api
+    newName: ghcr.io/jb-coder/jabasurvivol/game-api
+    newTag: 0.5.0
+  - name: bff
+    newName: ghcr.io/jb-coder/jabasurvivol/bff
+    newTag: 0.5.0
+  - name: telemetry-worker
+    newName: ghcr.io/jb-coder/jabasurvivol/telemetry-worker
+    newTag: 0.5.0
+  - name: postgres
+    newName: postgres
+    newTag: 17-alpine
