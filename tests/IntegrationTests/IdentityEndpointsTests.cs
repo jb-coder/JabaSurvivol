@@ -4,8 +4,11 @@ using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using Identity.Api.Data;
 using JabaSurvivol.Contracts;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
@@ -190,6 +193,52 @@ public sealed class IdentityEndpointsTests(PostgresFixture fixture) : IAsyncLife
         Assert.NotEqual(second.AccountId, me.AccountId);
     }
 
+    [Fact]
+    public async Task Unauthenticated_and_invalid_token_requests_return_problem_details()
+    {
+        using var client = _factory.CreateClient();
+
+        var anonymous = await client.GetAsync(ApiRoutes.IdentityMe);
+        Assert.Equal(HttpStatusCode.Unauthorized, anonymous.StatusCode);
+        Assert.Equal("unauthorized", await ReadCodeAsync(anonymous));
+
+        using var invalidRequest = new HttpRequestMessage(HttpMethod.Get, ApiRoutes.IdentityMe);
+        invalidRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "not-a-token");
+        var invalid = await client.SendAsync(invalidRequest);
+        Assert.Equal(HttpStatusCode.Unauthorized, invalid.StatusCode);
+        Assert.Equal("unauthorized", await ReadCodeAsync(invalid));
+
+        var anonymousLogout = await client.PostAsJsonAsync(
+            ApiRoutes.IdentityLogout,
+            new LogoutRequest { RefreshToken = "unused" });
+        Assert.Equal(HttpStatusCode.Unauthorized, anonymousLogout.StatusCode);
+        Assert.Equal("unauthorized", await ReadCodeAsync(anonymousLogout));
+    }
+
+    [Fact]
+    public async Task Expired_refresh_token_is_rejected()
+    {
+        using var client = _factory.CreateClient();
+        await RegisterAsync(client, "ExpiredRefresh", "Password1");
+        var login = await LoginAsync(client, "ExpiredRefresh", "Password1");
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var database = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+            var session = await database.RefreshSessions
+                .OrderByDescending(candidate => candidate.CreatedAt)
+                .FirstAsync();
+            session.ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(-1);
+            await database.SaveChangesAsync();
+        }
+
+        var response = await client.PostAsJsonAsync(
+            ApiRoutes.IdentityRefresh,
+            new RefreshRequest { RefreshToken = login.RefreshToken });
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Equal("unauthorized", await ReadCodeAsync(response));
+    }
+
     private static async Task<AccountResponse> RegisterAsync(HttpClient client, string userName, string password)
     {
         var response = await client.PostAsJsonAsync(
@@ -236,7 +285,7 @@ public sealed class IdentityEndpointsTests(PostgresFixture fixture) : IAsyncLife
         return document.RootElement.GetProperty(claim).GetInt64();
     }
 
-    private static string CreateAccessToken(Guid accountId, DateTime expires)
+    private string CreateAccessToken(Guid accountId, DateTime expires)
     {
         var descriptor = new SecurityTokenDescriptor
         {
@@ -250,7 +299,7 @@ public sealed class IdentityEndpointsTests(PostgresFixture fixture) : IAsyncLife
                 new Claim("username", "ExpiredUser")
             ]),
             SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(IdentityApiFactory.SigningKey)),
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_factory.SigningKey)),
                 SecurityAlgorithms.HmacSha256)
         };
 

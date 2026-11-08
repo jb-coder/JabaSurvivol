@@ -7,8 +7,12 @@ public sealed class IdentityDbContextFactory : IDesignTimeDbContextFactory<Ident
 {
     public IdentityDbContext CreateDbContext(string[] args)
     {
-        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__Database")
-            ?? "Host=localhost;Database=jabasurvivol;Username=postgres;Password=postgres";
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__Database");
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException(
+                "Set ConnectionStrings__Database before running Entity Framework design-time commands.");
+        }
 
         var options = new DbContextOptionsBuilder<IdentityDbContext>()
             .UseNpgsql(connectionString, npgsql =>

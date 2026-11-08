@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Identity.Api.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -10,7 +11,7 @@ namespace JabaSurvivol.IntegrationTests;
 public sealed class IdentityApiFactory(string connectionString, int authPermitLimit = 1_000)
     : WebApplicationFactory<Identity.Api.IdentityApiMarker>
 {
-    public const string SigningKey = "integration-test-signing-key-0123456789abcdef";
+    public string SigningKey { get; } = "jaba-integration-" + Convert.ToBase64String(RandomNumberGenerator.GetBytes(48));
     public const string Issuer = "JabaSurvivol.Tests";
     public const string Audience = "JabaSurvivol.Tests";
 
