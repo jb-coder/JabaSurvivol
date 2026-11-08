@@ -18,6 +18,10 @@ namespace JabaSurvivol.Gameplay
 
         public static Func<RemoteConfigDto> RemoteConfigOverride;
 
+        public static Func<IAccountService, ILeaderboardService> LeaderboardServiceFactoryOverride;
+
+        public static Func<IAccountService, ITelemetryService> TelemetryServiceFactoryOverride;
+
         public static bool OnlineDisabledForTests;
 
         public static GameBootstrap Instance { get; private set; }
@@ -68,6 +72,7 @@ namespace JabaSurvivol.Gameplay
             {
                 Session?.SaveNow();
                 Session?.SyncCloudNow();
+                Session?.FlushTelemetryNow();
             }
         }
 

@@ -74,6 +74,12 @@ namespace JabaSurvivol.Gameplay
         private bool _cloudConfigLoaded;
         private bool _leaderboardsEnabled = true;
         private bool _telemetryEnabled;
+        private double _telemetrySampleRate;
+        private ILeaderboardService _leaderboardService;
+        private ITelemetryService _telemetryService;
+        private Guid _currentRunId;
+        private DateTime _runStartedAt;
+        private bool _runSubmitted;
         private readonly SemaphoreSlim _cloudActionGate = new(1, 1);
 
         public Profile Profile => _profile;
@@ -233,7 +239,9 @@ namespace JabaSurvivol.Gameplay
             IGameInput input,
             Transform worldRoot,
             IAccountService accountService = null,
-            ICloudSaveService cloudSaveService = null)
+            ICloudSaveService cloudSaveService = null,
+            ILeaderboardService leaderboardService = null,
+            ITelemetryService telemetryService = null)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _input = input ?? throw new ArgumentNullException(nameof(input));
@@ -279,7 +287,10 @@ namespace JabaSurvivol.Gameplay
                 HandleCloudBackup,
                 HandleCloudRestore,
                 HandleCloudUseCloud,
-                HandleCloudKeepLocal);
+                HandleCloudKeepLocal,
+                ShowLeaderboard,
+                ToggleTelemetry,
+                HideLeaderboard);
 
             _accountService = accountService ?? CreateDefaultAccountService();
             _accountService.StateChanged += HandleAccountStateChanged;
@@ -288,6 +299,12 @@ namespace JabaSurvivol.Gameplay
                 CreateCloudSaveService();
             _cloudSaveService.StateChanged += HandleCloudStateChanged;
             _cloudSaveService.Configure(false);
+            _leaderboardService = leaderboardService ??
+                GameBootstrap.LeaderboardServiceFactoryOverride?.Invoke(_accountService) ??
+                CreateLeaderboardService();
+            _telemetryService = telemetryService ??
+                GameBootstrap.TelemetryServiceFactoryOverride?.Invoke(_accountService) ??
+                CreateTelemetryService();
             _remoteConfigClient = new RemoteConfigClient(ApiConfig.BaseUrl);
             _accountCancellation = new CancellationTokenSource();
             _ui.SetAccountState(_accountService.State, _accountService.Username);
@@ -873,6 +890,9 @@ namespace JabaSurvivol.Gameplay
             _profile.RecordRunEnd(_run);
             _store.Save(_profile);
             _ = SyncCloudAsync();
+            TrySubmitRun();
+            EnqueueTelemetry("run_end", $"{{\"highestRound\":{_run.Round},\"totalKills\":{_run.Kills},\"durationSeconds\":{RunDurationSeconds()}}}");
+            _ = FlushTelemetryAsync();
 
             _state = GameSessionState.Victory;
             _zombieActive = false;
@@ -932,6 +952,9 @@ namespace JabaSurvivol.Gameplay
             _weapon = _run.CurrentWeaponState.Stats;
             _runSuppliesEarned = 0;
             _runXpEarned = 0;
+            _currentRunId = Guid.NewGuid();
+            _runStartedAt = DateTime.UtcNow;
+            _runSubmitted = false;
             _roundClearPending = false;
             _roundRewardOptions = null;
             _spreadSequence = 0;
@@ -972,6 +995,7 @@ namespace JabaSurvivol.Gameplay
                 _run.ActiveSkill.ActiveFraction);
             _ui.SetSticks(default, default);
             _store.Save(_profile);
+            EnqueueTelemetry("run_start", $"{{\"startingRound\":{startingRound}}}");
         }
 
         public void RestartRun()
@@ -991,6 +1015,7 @@ namespace JabaSurvivol.Gameplay
             _ui.SetSticks(default, default);
             _store.Save(_profile);
             _ = SyncCloudAsync();
+            _ = FlushTelemetryAsync();
         }
 
         public void ResumeGame()
@@ -1235,6 +1260,7 @@ namespace JabaSurvivol.Gameplay
         {
             _ui.ShowLevelUp(_profile.Level);
             _levelUpRemaining = GameBalance.LevelUpNotificationSeconds;
+            EnqueueTelemetry("level_up", $"{{\"level\":{_profile.Level}}}");
         }
 
         private void HandleArmoryAction(WeaponId weaponId)
@@ -1807,6 +1833,151 @@ namespace JabaSurvivol.Gameplay
             return AccountService.CreateDefault();
         }
 
+        private ILeaderboardService CreateLeaderboardService()
+        {
+            return new LeaderboardService(
+                () => _accountService?.AccessToken,
+                token => _accountService != null
+                    ? _accountService.RefreshAsync(token)
+                    : Task.FromResult(false),
+                () => _leaderboardsEnabled,
+                ApiConfig.BaseUrl);
+        }
+
+        private ITelemetryService CreateTelemetryService()
+        {
+            return new TelemetryService(
+                () => _accountService?.AccessToken,
+                token => _accountService != null
+                    ? _accountService.RefreshAsync(token)
+                    : Task.FromResult(false),
+                baseUrl: ApiConfig.BaseUrl);
+        }
+
+        private void ShowLeaderboard()
+        {
+            _ui?.ShowLeaderboard();
+            if (!_leaderboardsEnabled)
+            {
+                _ui?.SetLeaderboardStatus(Localization.Get("leaderboard.disabled"));
+                return;
+            }
+
+            _ = LoadLeaderboardAsync();
+        }
+
+        private void HideLeaderboard()
+        {
+            _ui?.HideLeaderboard();
+        }
+
+        private async Task LoadLeaderboardAsync()
+        {
+            try
+            {
+                _ui.SetLeaderboardStatus(Localization.Get("leaderboard.loading"));
+                var result = await _leaderboardService.LoadAsync(_accountCancellation.Token);
+                if (result.Success)
+                {
+                    _ui.SetLeaderboardEntries(result.Entries);
+                }
+                else
+                {
+                    _ui.SetLeaderboardStatus(result.ErrorMessage);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            catch (Exception)
+            {
+                _ui.SetLeaderboardStatus(Localization.Get("leaderboard.error"));
+            }
+        }
+
+        private void ToggleTelemetry()
+        {
+            if (!_telemetryEnabled || _telemetryService == null)
+            {
+                return;
+            }
+
+            _telemetryService.SetOptIn(!_telemetryService.OptedIn);
+            _ui.SetTelemetry(true, _telemetryService.OptedIn);
+            if (_telemetryService.OptedIn)
+            {
+                _ = FlushTelemetryAsync();
+            }
+        }
+
+        private void EnqueueTelemetry(string eventType, string payloadJson)
+        {
+            _telemetryService?.Enqueue(eventType, payloadJson);
+        }
+
+        private async Task FlushTelemetryAsync()
+        {
+            if (_telemetryService == null || !_telemetryService.OptedIn)
+            {
+                return;
+            }
+
+            try
+            {
+                await _telemetryService.FlushAsync(_accountCancellation.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            catch (Exception)
+            {
+                // Telemetry never blocks gameplay.
+            }
+        }
+
+        private int RunDurationSeconds()
+        {
+            if (_runStartedAt == default)
+            {
+                return 1;
+            }
+
+            return Math.Max(1, (int)(DateTime.UtcNow - _runStartedAt).TotalSeconds);
+        }
+
+        private void TrySubmitRun()
+        {
+            if (_runSubmitted || _run == null || !_leaderboardsEnabled)
+            {
+                return;
+            }
+
+            _runSubmitted = true;
+            _ = SubmitRunAsync(_run.Round, _run.Kills, RunDurationSeconds());
+        }
+
+        private async Task SubmitRunAsync(int highestRound, int totalKills, int durationSeconds)
+        {
+            try
+            {
+                await _leaderboardService.SubmitAsync(
+                    _currentRunId,
+                    highestRound,
+                    totalKills,
+                    durationSeconds,
+                    _accountCancellation.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            catch (Exception)
+            {
+                // Leaderboard submission is non-blocking.
+            }
+        }
         private ICloudSaveService CreateCloudSaveService()
         {
             var api = new CloudSaveApiClient(
@@ -1830,6 +2001,11 @@ namespace JabaSurvivol.Gameplay
 
                 config ??= await _remoteConfigClient.GetAsync(_accountCancellation.Token);
                 _cloudSavesEnabled = config?.cloudSavesEnabled ?? false;
+                _leaderboardsEnabled = config?.leaderboardsEnabled ?? false;
+                _telemetryEnabled = config?.telemetryEnabled ?? false;
+                _telemetrySampleRate = config?.telemetrySampleRate ?? 0d;
+                _telemetryService.Configure(_telemetryEnabled, _telemetrySampleRate);
+                _ui.SetTelemetry(_telemetryEnabled, _telemetryService.OptedIn);
                 _cloudConfigLoaded = true;
                 _leaderboardsEnabled = config?.leaderboardsEnabled ?? true;
                 _telemetryEnabled = config?.telemetryEnabled ?? false;
@@ -1855,6 +2031,24 @@ namespace JabaSurvivol.Gameplay
         {
             _ = SyncCloudAsync();
         }
+
+        public void FlushTelemetryNow() => _ = FlushTelemetryAsync();
+
+        public void ShowLeaderboardForTests() => ShowLeaderboard();
+
+        public void ToggleTelemetryForTests() => ToggleTelemetry();
+
+        public bool TelemetryOptedInForTests => _telemetryService != null && _telemetryService.OptedIn;
+
+        public int TelemetryPendingForTests => _telemetryService?.PendingCount ?? 0;
+
+        public bool LeaderboardVisibleForTests => _ui != null && _ui.LeaderboardVisibleForTests;
+
+        public bool TelemetryVisibleForTests => _ui != null && _ui.TelemetryVisibleForTests;
+
+        public ITelemetryService TelemetryServiceForTests => _telemetryService;
+
+        public string LeaderboardStatusForTests => _ui?.LeaderboardStatusForTests ?? string.Empty;
 
         public void BackupCloudForTests() => HandleCloudBackup();
 
@@ -2147,6 +2341,17 @@ namespace JabaSurvivol.Gameplay
             _accountCancellation?.Dispose();
             _accountCancellation = null;
             _cloudActionGate.Dispose();
+            if (_leaderboardService is IDisposable leaderboardDisposable)
+            {
+                leaderboardDisposable.Dispose();
+            }
+
+            if (_telemetryService is IDisposable telemetryDisposable)
+            {
+                telemetryDisposable.Dispose();
+            }
+
+            _remoteConfigClient?.Dispose();
             _accountService = null;
         }
         public void SaveNow()
@@ -2202,6 +2407,7 @@ namespace JabaSurvivol.Gameplay
             _runSuppliesEarned += reward.Supplies;
             _runXpEarned += reward.Xp;
             _store.Save(_profile);
+            EnqueueTelemetry("zombie_kill", $"{{\"round\":{_run.Round},\"archetype\":\"{archetype.ToString().ToLowerInvariant()}\"}}");
 
             if (reward.CompletedRound)
             {
@@ -2344,6 +2550,9 @@ namespace JabaSurvivol.Gameplay
             _profile.RecordRunEnd(_run);
             _store.Save(_profile);
             _ = SyncCloudAsync();
+            TrySubmitRun();
+            EnqueueTelemetry("run_end", $"{{\"highestRound\":{_run.Round},\"totalKills\":{_run.Kills},\"durationSeconds\":{RunDurationSeconds()}}}");
+            _ = FlushTelemetryAsync();
             _ui.ShowGameOver(_run.Round, _run.Kills, _runSuppliesEarned);
         }
 

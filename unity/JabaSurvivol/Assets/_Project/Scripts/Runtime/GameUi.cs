@@ -74,6 +74,11 @@ namespace JabaSurvivol.Gameplay
         private readonly Button _cloudRestoreButton;
         private readonly GameObject _cloudConflictPanel;
         private readonly Text _cloudConflictText;
+        private readonly GameObject _leaderboardPanel;
+        private readonly Text _leaderboardStatusText;
+        private readonly Text _leaderboardText;
+        private readonly Button _telemetryButton;
+        private readonly Text _telemetryLabel;
         private Text _mainMenuAccountState;
         private readonly Button _characterRespecButton;
         private readonly Text _characterRespecLabel;
@@ -153,7 +158,10 @@ namespace JabaSurvivol.Gameplay
             System.Action onCloudBackup,
             System.Action onCloudRestore,
             System.Action onCloudUseCloud,
-            System.Action onCloudKeepLocal)
+            System.Action onCloudKeepLocal,
+            System.Action onLeaderboard,
+            System.Action onTelemetryToggle,
+            System.Action onLeaderboardClose)
         {
             var canvasObject = UiFactory.CreateCanvas("JabaSurvivol UI", parent);
 
@@ -163,7 +171,16 @@ namespace JabaSurvivol.Gameplay
             UiFactory.Stretch(_safeArea);
             safeAreaObject.AddComponent<SafeAreaFitter>();
 
-            _mainMenu = BuildMainMenu(onStart, onArmory, onCharacterSheet, onAccount, out _mainMenuAccountState);
+            _mainMenu = BuildMainMenu(
+                onStart,
+                onArmory,
+                onCharacterSheet,
+                onAccount,
+                onLeaderboard,
+                onTelemetryToggle,
+                out _mainMenuAccountState,
+                out _telemetryButton,
+                out _telemetryLabel);
             _hud = BuildHud(onPause, onReload, onSwitchWeapon, onActiveSkill, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
             _roundModifierText = FindText(_hud, "Round Modifier");
             _weaponText = FindText(_hud, "Weapon");
@@ -179,7 +196,7 @@ namespace JabaSurvivol.Gameplay
             _bossHealthFill = FindImage(_hud, "Boss Health Fill");
             _pausePanel = BuildPausePanel(onResume, onMenu, onArmory, onCharacterSheet);
             _gameOverPanel = BuildGameOverPanel(onRestart, onMenu, out _gameOverSummary);
-            _victoryPanel = BuildVictoryPanel(onRestart, onMenu, out _victorySummary);
+            _victoryPanel = BuildVictoryPanel(onRestart, onMenu, onLeaderboard, out _victorySummary);
             _roundEndPanel = BuildRoundEndPanel(
                 onRewardSelected,
                 onCharacterSheet,
@@ -242,6 +259,10 @@ namespace JabaSurvivol.Gameplay
                 onCloudUseCloud,
                 onCloudKeepLocal,
                 out _cloudConflictText);
+            _leaderboardPanel = BuildLeaderboardPanel(
+                onLeaderboardClose,
+                out _leaderboardStatusText,
+                out _leaderboardText);
 
             _selectActiveButtons = new Button[3];
             _selectActiveLabels = new Text[3];
@@ -285,6 +306,7 @@ namespace JabaSurvivol.Gameplay
             HideArmory();
             HideCharacterSheet();
             HideAccount();
+            HideLeaderboard();
             _progressText.text = Localization.Format(
                 "menu.progress",
                 profile.Supplies,
@@ -303,6 +325,7 @@ namespace JabaSurvivol.Gameplay
             HideArmory();
             HideCharacterSheet();
             HideAccount();
+            HideLeaderboard();
             _lastHealth = int.MinValue;
             _lastMaxHealth = int.MinValue;
             _lastArmor = int.MinValue;
@@ -731,6 +754,60 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
+        public void ShowLeaderboard()
+        {
+            _leaderboardPanel.SetActive(true);
+        }
+
+        public void HideLeaderboard()
+        {
+            _leaderboardPanel.SetActive(false);
+        }
+
+        public void SetLeaderboardStatus(string message)
+        {
+            _leaderboardStatusText.text = message ?? string.Empty;
+        }
+
+        public void SetLeaderboardEntries(LeaderboardEntryDto[] entries)
+        {
+            if (entries == null || entries.Length == 0)
+            {
+                _leaderboardText.text = string.Empty;
+                SetLeaderboardStatus(Localization.Get("leaderboard.empty"));
+                return;
+            }
+
+            var builder = new StringBuilder();
+            foreach (var entry in entries)
+            {
+                builder.Append(entry.rank)
+                    .Append(". ")
+                    .Append(entry.username)
+                    .Append("   R")
+                    .Append(entry.highestRound)
+                    .Append("   K")
+                    .Append(entry.totalKills)
+                    .Append("   ")
+                    .Append(entry.durationSeconds)
+                    .AppendLine("s");
+            }
+
+            _leaderboardText.text = builder.ToString();
+            SetLeaderboardStatus(string.Empty);
+        }
+
+        public void SetTelemetry(bool available, bool enabled)
+        {
+            _telemetryButton.gameObject.SetActive(available);
+            _telemetryLabel.text = Localization.Get(enabled ? "telemetry.on" : "telemetry.off");
+        }
+
+        public bool LeaderboardVisibleForTests => _leaderboardPanel != null && _leaderboardPanel.activeSelf;
+
+        public bool TelemetryVisibleForTests => _telemetryButton != null && _telemetryButton.gameObject.activeSelf;
+
+        public string LeaderboardStatusForTests => _leaderboardStatusText?.text ?? string.Empty;
         public void SetCloudState(CloudSyncState state, string message)
         {
             if (_cloudStatusText == null)
@@ -1346,7 +1423,11 @@ namespace JabaSurvivol.Gameplay
             System.Action onArmory,
             System.Action onCharacterSheet,
             System.Action onAccount,
-            out Text accountStateText)
+            System.Action onLeaderboard,
+            System.Action onTelemetryToggle,
+            out Text accountStateText,
+            out Button telemetryButton,
+            out Text telemetryLabel)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Main Menu", new Color(0.012f, 0.018f, 0.03f, 0.98f));
             var root = panel.gameObject;
@@ -1373,8 +1454,20 @@ namespace JabaSurvivol.Gameplay
             var character = UiFactory.CreateButton(root.transform, "Skills", Localization.Get("character.open"), 32, onCharacterSheet);
             UiFactory.Place(character.GetComponent<RectTransform>(), new Vector2(0.5f, 0.22f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 76f));
 
-            var account = UiFactory.CreateButton(root.transform, "Account", Localization.Get("account.open"), 32, onAccount);
-            UiFactory.Place(account.GetComponent<RectTransform>(), new Vector2(0.5f, 0.13f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 76f));
+            var leaderboard = UiFactory.CreateButton(root.transform, "Leaderboard", Localization.Get("leaderboard.open"), 28, onLeaderboard);
+            UiFactory.Place(leaderboard.GetComponent<RectTransform>(), new Vector2(0.5f, 0.13f), new Vector2(0.5f, 0.5f), new Vector2(-190f, 0f), new Vector2(340f, 76f));
+
+            var account = UiFactory.CreateButton(root.transform, "Account", Localization.Get("account.open"), 28, onAccount);
+            UiFactory.Place(account.GetComponent<RectTransform>(), new Vector2(0.5f, 0.13f), new Vector2(0.5f, 0.5f), new Vector2(190f, 0f), new Vector2(340f, 76f));
+
+            telemetryButton = UiFactory.CreateButton(
+                root.transform,
+                "Telemetry",
+                Localization.Get("telemetry.off"),
+                22,
+                onTelemetryToggle);
+            UiFactory.Place(telemetryButton.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-40f, -32f), new Vector2(360f, 56f));
+            telemetryLabel = telemetryButton.GetComponentInChildren<Text>();
 
             var controls = UiFactory.CreateText(root.transform, "Controls", Localization.Get("menu.controls"), 24, TextAnchor.MiddleCenter, new Color(0.55f, 0.62f, 0.72f));
             UiFactory.Place(controls.rectTransform, new Vector2(0.5f, 0.05f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300f, 36f));
@@ -1764,7 +1857,61 @@ namespace JabaSurvivol.Gameplay
             return root;
         }
 
-        private GameObject BuildVictoryPanel(System.Action onNextRun, System.Action onMenu, out Text summary)
+        private GameObject BuildLeaderboardPanel(
+            System.Action onClose,
+            out Text status,
+            out Text entries)
+        {
+            var panel = UiFactory.CreatePanel(
+                _safeArea,
+                "Leaderboard Panel",
+                new Color(0.008f, 0.012f, 0.022f, 1f));
+            var root = panel.gameObject;
+            root.SetActive(false);
+
+            var title = UiFactory.CreateText(
+                root.transform,
+                "Title",
+                Localization.Get("leaderboard.title"),
+                52,
+                TextAnchor.MiddleCenter,
+                new Color(0.4f, 0.95f, 1f));
+            title.fontStyle = FontStyle.Bold;
+            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.9f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(1100f, 70f));
+
+            status = UiFactory.CreateText(
+                root.transform,
+                "Status",
+                string.Empty,
+                24,
+                TextAnchor.MiddleCenter,
+                new Color(0.85f, 0.8f, 0.5f));
+            UiFactory.Place(status.rectTransform, new Vector2(0.5f, 0.83f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(1200f, 36f));
+
+            entries = UiFactory.CreateText(
+                root.transform,
+                "Entries",
+                string.Empty,
+                20,
+                TextAnchor.UpperLeft,
+                new Color(0.86f, 0.9f, 0.96f));
+            UiFactory.Place(entries.rectTransform, new Vector2(0.5f, 0.12f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(1700f, 740f));
+
+            var close = UiFactory.CreateButton(
+                root.transform,
+                "Close",
+                Localization.Get("account.close"),
+                26,
+                onClose);
+            UiFactory.Place(close.GetComponent<RectTransform>(), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-40f, 28f), new Vector2(220f, 64f));
+
+            return root;
+        }
+        private GameObject BuildVictoryPanel(
+            System.Action onNextRun,
+            System.Action onMenu,
+            System.Action onLeaderboard,
+            out Text summary)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Victory Panel", new Color(0.01f, 0.045f, 0.03f, 0.97f));
             var root = panel.gameObject;
@@ -1783,7 +1930,10 @@ namespace JabaSurvivol.Gameplay
             UiFactory.Place(next.GetComponent<RectTransform>(), new Vector2(0.5f, 0.34f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 104f));
 
             var menu = UiFactory.CreateButton(root.transform, "Menu", Localization.Get("victory.menu"), 30, onMenu);
-            UiFactory.Place(menu.GetComponent<RectTransform>(), new Vector2(0.5f, 0.21f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 88f));
+            UiFactory.Place(menu.GetComponent<RectTransform>(), new Vector2(0.5f, 0.21f), new Vector2(0.5f, 0.5f), new Vector2(-190f, 0f), new Vector2(340f, 88f));
+
+            var leaderboard = UiFactory.CreateButton(root.transform, "Leaderboard", Localization.Get("leaderboard.open"), 28, onLeaderboard);
+            UiFactory.Place(leaderboard.GetComponent<RectTransform>(), new Vector2(0.5f, 0.21f), new Vector2(0.5f, 0.5f), new Vector2(190f, 0f), new Vector2(340f, 88f));
 
             root.SetActive(false);
             return root;

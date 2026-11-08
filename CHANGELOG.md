@@ -23,6 +23,8 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Android INTERNET permission enabled, with cleartext HTTP limited to development emulator builds.
 - Unity cloud-save backup and restore with explicit revision conflicts, `409` handling, bounded upload retries, offline fallback, and sync at login, run end, and app pause.
 - Cloud save revision persisted additively in schema version 1 so older profiles remain compatible.
+- Unity highest-round leaderboard panel from the main menu and victory screen, with run submission, idempotent retries, and non-blocking failures.
+- Opt-in telemetry with a persistent toggle, allowlisted event queue, batched retries, and remote-config gating that defaults to off.
 
 ## [0.4.0] - 2026-11-08
 
