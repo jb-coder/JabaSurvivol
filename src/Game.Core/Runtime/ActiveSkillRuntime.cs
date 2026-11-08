@@ -123,9 +123,12 @@ namespace JabaSurvivol.Core
                 throw new ArgumentOutOfRangeException(nameof(node));
             }
 
+            var previousCooldown = CooldownRemaining;
             Node = node;
-            Reset();
+            ActiveRemaining = 0f;
+            FireTimer = 0f;
             UpdateRank(rank);
+            CooldownRemaining = previousCooldown;
         }
 
         public void Reset()

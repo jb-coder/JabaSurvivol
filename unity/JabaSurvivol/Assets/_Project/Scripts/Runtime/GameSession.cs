@@ -48,7 +48,7 @@ namespace JabaSurvivol.Gameplay
         private BulletPool _bullets;
         private GameSessionState _state;
         private Vector2 _aimDirection = Vector2.right;
-        private Vector2 _lastMoveDirection = Vector2.right;
+        private Vector2 _lastMoveDirection = Vector2.zero;
         private float _fireCooldown;
         private float _contactCooldown;
         private float _respawnCooldown;
@@ -456,6 +456,10 @@ namespace JabaSurvivol.Gameplay
                     out var clampedX,
                     out var clampedY);
                 _playerObject.transform.position = new Vector3(clampedX, clampedY, 0f);
+            }
+            else
+            {
+                _lastMoveDirection = Vector2.zero;
             }
 
             if (frame.Aim.sqrMagnitude > 0.0001f)
@@ -886,7 +890,7 @@ namespace JabaSurvivol.Gameplay
             _playerObject.SetActive(true);
             _playerObject.transform.position = Vector3.zero;
             _aimDirection = Vector2.right;
-            _lastMoveDirection = Vector2.right;
+            _lastMoveDirection = Vector2.zero;
             _aimPivot.localRotation = Quaternion.identity;
             _fireCooldown = 0f;
             _contactCooldown = 0f;
@@ -1130,7 +1134,16 @@ namespace JabaSurvivol.Gameplay
             return true;
         }
 
-        private void HandleRespecSkills()        {
+        /// <summary>
+        /// Test hook that presses the character-sheet active-skill button.
+        /// </summary>
+        public bool ClickSelectActiveSkillButtonForTests(SkillNode node)
+        {
+            return _ui != null && _ui.ClickSelectActiveSkillForTests(node);
+        }
+
+        private void HandleRespecSkills()
+        {
             var refunded = RespecSkills();
             if (refunded > 0)
             {
@@ -1593,7 +1606,7 @@ namespace JabaSurvivol.Gameplay
             }
 
             var skill = _run.ActiveSkill;
-            if (skill.IsActive)
+            if (skill.Node == SkillNode.Turret && skill.IsActive)
             {
                 if (!_turretObject.activeSelf)
                 {

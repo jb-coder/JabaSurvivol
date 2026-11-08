@@ -110,4 +110,26 @@ public sealed class ActiveSkillSelectionTests
         Assert.Equal(0f, run.ActiveSkill.CooldownRemaining);
         Assert.Equal(SkillNode.Shockwave, profile.ActiveSkill);
     }
+
+    [Fact]
+    public void Switching_active_skills_preserves_the_running_cooldown()
+    {
+        var profile = new Profile();
+        profile.SetSkillRank(SkillNode.Turret, 1);
+        profile.SetSkillRank(SkillNode.Dash, 1);
+        profile.SetActiveSkill(SkillNode.Turret);
+        var run = new RunState(GameBalance.PlayerMaxHealth, profile: profile);
+
+        Assert.True(run.TryActivateActiveSkill());
+        run.TickActiveSkill(1f);
+        var cooldown = run.ActiveSkill.CooldownRemaining;
+        Assert.True(cooldown > 0f);
+
+        profile.SetActiveSkill(SkillNode.Dash);
+        run.RefreshActiveSkill(profile);
+
+        Assert.Equal(SkillNode.Dash, run.ActiveSkill.Node);
+        Assert.Equal(cooldown, run.ActiveSkill.CooldownRemaining, precision: 3);
+        Assert.False(run.TryActivateActiveSkill());
+    }
 }

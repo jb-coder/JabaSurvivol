@@ -92,6 +92,28 @@ namespace JabaSurvivol.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator Dash_uses_the_aim_direction_when_stationary_and_does_not_deploy_a_turret()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.SetSkillRank(SkillNode.Dash, 1);
+            session.Profile.SetActiveSkill(SkillNode.Dash);
+            session.SetInputForTests(new ScriptedInput
+            {
+                Frame = new InputFrame { Aim = Vector2.left }
+            });
+            session.StartRun();
+            yield return null;
+
+            Assert.That(session.ActivateActiveSkillForTests(), Is.True);
+            yield return null;
+
+            Assert.That(session.PlayerPosition.x, Is.LessThan(0f));
+            Assert.That(session.TurretVisible, Is.False);
+        }
+
+        [UnityTest]
         public IEnumerator Active_skill_selection_works_from_the_character_sheet()
         {
             _bootstrap = CreateBootstrap();
@@ -102,13 +124,21 @@ namespace JabaSurvivol.Tests.PlayMode
             session.ShowCharacterSheet();
             yield return null;
 
-            Assert.That(session.TrySelectActiveSkill(SkillNode.Dash), Is.True);
+            Assert.That(session.ClickSelectActiveSkillButtonForTests(SkillNode.Dash), Is.True);
             Assert.That(session.Profile.ActiveSkill, Is.EqualTo(SkillNode.Dash));
 
             session.CloseCharacterSheet();
             session.SaveNow();
             yield return null;
-            Assert.That(File.Exists(_path), Is.True);
+
+            UnityEngine.Object.DestroyImmediate(_bootstrap.gameObject);
+            _bootstrap = null;
+            yield return null;
+
+            _bootstrap = CreateBootstrap();
+            yield return null;
+
+            Assert.That(_bootstrap.Session.Profile.ActiveSkill, Is.EqualTo(SkillNode.Dash));
         }
 
         [UnityTest]
@@ -128,6 +158,16 @@ namespace JabaSurvivol.Tests.PlayMode
         {
             var gameObject = new GameObject("Test Bootstrap");
             return gameObject.AddComponent<GameBootstrap>();
+        }
+
+        private sealed class ScriptedInput : IGameInput
+        {
+            public InputFrame Frame;
+
+            public InputFrame Read(Vector2 playerWorldPosition)
+            {
+                return Frame;
+            }
         }
     }
 }

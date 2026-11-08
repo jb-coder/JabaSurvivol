@@ -359,6 +359,29 @@ namespace JabaSurvivol.Gameplay
                 : string.Empty;
         }
 
+        /// <summary>
+        /// Test hook that presses a character-sheet active-skill button.
+        /// </summary>
+        public bool ClickSelectActiveSkillForTests(SkillNode node)
+        {
+            var index = node switch
+            {
+                SkillNode.Shockwave => 0,
+                SkillNode.Dash => 1,
+                SkillNode.Turret => 2,
+                _ => -1
+            };
+
+            if (index < 0 || _selectActiveButtons[index] == null ||
+                !_selectActiveButtons[index].interactable)
+            {
+                return false;
+            }
+
+            _selectActiveButtons[index].onClick.Invoke();
+            return true;
+        }
+
         public bool RoundModifierVisible => _roundModifierText != null &&
                                             !string.IsNullOrEmpty(_roundModifierText.text);
 
@@ -657,7 +680,7 @@ namespace JabaSurvivol.Gameplay
                 _selectActiveLabels[i].color = selected
                     ? new Color(0.45f, 0.95f, 0.7f)
                     : Color.white;
-                _selectActiveButtons[i].interactable = canAllocate && rank > 0 && !selected;
+                _selectActiveButtons[i].interactable = (canAllocate || canRespec) && rank > 0 && !selected;
             }
         }
 
@@ -1647,10 +1670,10 @@ namespace JabaSurvivol.Gameplay
                     () => onSelectActive?.Invoke(node));
                 UiFactory.Place(
                     select.GetComponent<RectTransform>(),
-                    new Vector2(0.22f + (i * 0.28f), 0.1f),
+                    new Vector2(0.22f + (i * 0.28f), 0.145f),
                     new Vector2(0.5f, 0.5f),
                     Vector2.zero,
-                    new Vector2(290f, 56f));
+                    new Vector2(280f, 54f));
             }
 
             root.SetActive(false);
