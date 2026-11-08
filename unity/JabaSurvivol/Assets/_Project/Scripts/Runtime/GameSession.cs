@@ -68,6 +68,11 @@ namespace JabaSurvivol.Gameplay
         private bool _lastGhostActive;
         private IAccountService _accountService;
         private CancellationTokenSource _accountCancellation;
+        private ICloudSaveService _cloudSaveService;
+        private RemoteConfigClient _remoteConfigClient;
+        private bool _cloudSavesEnabled = true;
+        private bool _leaderboardsEnabled = true;
+        private bool _telemetryEnabled;
 
         public Profile Profile => _profile;
 
@@ -225,7 +230,8 @@ namespace JabaSurvivol.Gameplay
             ProfileStore store,
             IGameInput input,
             Transform worldRoot,
-            IAccountService accountService = null)
+            IAccountService accountService = null,
+            ICloudSaveService cloudSaveService = null)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _input = input ?? throw new ArgumentNullException(nameof(input));
@@ -267,13 +273,23 @@ namespace JabaSurvivol.Gameplay
                 HandleAccountRegister,
                 HandleAccountLogin,
                 HandleAccountLogout,
-                HideAccount);
+                HideAccount,
+                HandleCloudBackup,
+                HandleCloudRestore,
+                HandleCloudUseCloud,
+                HandleCloudKeepLocal);
 
             _accountService = accountService ?? AccountService.CreateDefault();
             _accountService.StateChanged += HandleAccountStateChanged;
+            _cloudSaveService = cloudSaveService ??
+                GameBootstrap.CloudSaveServiceFactoryOverride?.Invoke(_accountService) ??
+                CreateCloudSaveService();
+            _cloudSaveService.StateChanged += HandleCloudStateChanged;
+            _remoteConfigClient = new RemoteConfigClient(ApiConfig.BaseUrl);
             _accountCancellation = new CancellationTokenSource();
             _ui.SetAccountState(_accountService.State, _accountService.Username);
             _ = InitializeAccountAsync();
+            _ = InitializeCloudAsync();
 
             _state = GameSessionState.MainMenu;
             _ui.ShowMainMenu(_profile);
@@ -970,6 +986,7 @@ namespace JabaSurvivol.Gameplay
             _ui.ShowPaused(true);
             _ui.SetSticks(default, default);
             _store.Save(_profile);
+            _ = SyncCloudAsync();
         }
 
         public void ResumeGame()
@@ -1773,7 +1790,174 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
+        private ICloudSaveService CreateCloudSaveService()
+        {
+            var api = new CloudSaveApiClient(
+                () => _accountService?.AccessToken,
+                token => _accountService != null
+                    ? _accountService.RefreshAsync(token)
+                    : Task.FromResult(false),
+                ApiConfig.BaseUrl);
+            return new CloudSaveService(api, _store, _accountService);
+        }
+
+        private async Task InitializeCloudAsync()
+        {
+            try
+            {
+                var config = GameBootstrap.RemoteConfigOverride?.Invoke() ??
+                    await _remoteConfigClient.GetAsync(_accountCancellation.Token);
+                _cloudSavesEnabled = config?.cloudSavesEnabled ?? true;
+                _leaderboardsEnabled = config?.leaderboardsEnabled ?? true;
+                _telemetryEnabled = config?.telemetryEnabled ?? false;
+                _cloudSaveService.Configure(_cloudSavesEnabled);
+                _ui.SetCloudControls(_accountService.State == AccountState.SignedIn, _cloudSavesEnabled);
+                _ui.SetCloudState(_cloudSaveService.State, null);
+                if (_accountService.State == AccountState.SignedIn)
+                {
+                    await SyncCloudAsync();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            catch (Exception)
+            {
+                _ui?.SetCloudState(CloudSyncState.Offline, null);
+            }
+        }
+
+        public void SyncCloudNow()
+        {
+            _ = SyncCloudAsync();
+        }
+
+        public void BackupCloudForTests() => HandleCloudBackup();
+
+        public void RestoreCloudForTests() => HandleCloudRestore();
+
+        public void UseCloudForTests() => HandleCloudUseCloud();
+
+        public void KeepLocalForTests() => HandleCloudKeepLocal();
+
+        private async Task SyncCloudAsync()
+        {
+            if (_cloudSaveService == null ||
+                _accountCancellation == null ||
+                !_cloudSavesEnabled ||
+                _accountService.State != AccountState.SignedIn)
+            {
+                return;
+            }
+
+            try
+            {
+                var result = await _cloudSaveService.SyncAsync(_profile, _accountCancellation.Token);
+                ApplyCloudResult(result);
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            catch (Exception)
+            {
+                _ui?.SetCloudState(CloudSyncState.Offline, null);
+            }
+        }
+
+        private async void HandleCloudBackup()
+        {
+            await RunCloudAction((profile, token) => _cloudSaveService.BackupAsync(profile, token));
+        }
+
+        private async void HandleCloudRestore()
+        {
+            await RunCloudAction((profile, token) => _cloudSaveService.RestoreAsync(profile, token));
+        }
+
+        private async void HandleCloudUseCloud()
+        {
+            await RunCloudAction((profile, token) => _cloudSaveService.UseCloudAsync(profile, token));
+        }
+
+        private async void HandleCloudKeepLocal()
+        {
+            await RunCloudAction((profile, token) => _cloudSaveService.KeepLocalAsync(profile, token));
+        }
+
+        private async Task RunCloudAction(
+            Func<Profile, CancellationToken, Task<CloudSyncResult>> action)
+        {
+            if (_cloudSaveService == null || _accountCancellation == null)
+            {
+                return;
+            }
+
+            _ui.SetCloudState(CloudSyncState.Syncing, null);
+            try
+            {
+                var result = await action(_profile, _accountCancellation.Token);
+                ApplyCloudResult(result);
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            catch (Exception)
+            {
+                _ui.SetCloudState(CloudSyncState.Offline, null);
+            }
+        }
+
+        private void ApplyCloudResult(CloudSyncResult result)
+        {
+            _ui.SetCloudState(result.State, result.Message);
+            if (result.RestoredProfile != null)
+            {
+                ApplyRestoredProfile(result.RestoredProfile);
+            }
+
+            if (result.Conflict)
+            {
+                _ui.ShowCloudConflict(BuildCloudConflictDetails());
+            }
+            else if (result.State != CloudSyncState.Conflict)
+            {
+                _ui.HideCloudConflict();
+            }
+        }
+
+        private void ApplyRestoredProfile(Profile restored)
+        {
+            _profile = restored;
+            _profile.Validate();
+            _store.Save(_profile);
+            _weapon = WeaponUpgradeService.GetEffectiveStats(_profile, _profile.EquippedWeapon);
+            _stats = StatAggregation.Compute(
+                _profile,
+                _weapon,
+                ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor));
+            _ui.ShowMainMenu(_profile);
+            _ui.SetAccountState(_accountService.State, _accountService.Username);
+            _ui.SetCloudControls(_accountService.State == AccountState.SignedIn, _cloudSavesEnabled);
+        }
+
+        private string BuildCloudConflictDetails()
+        {
+            return Localization.Format(
+                "cloud.conflict.details",
+                _profile.CloudSaveRevision,
+                _cloudSaveService.CloudRevision,
+                _cloudSaveService.CloudUpdatedAt);
+        }
         public IAccountService AccountServiceForTests => _accountService;
+
+        public ICloudSaveService CloudSaveServiceForTests => _cloudSaveService;
+
+        public string CloudStatusForTests => _ui?.CloudStatusForTests ?? string.Empty;
+
+        public bool CloudConflictVisibleForTests => _ui != null && _ui.CloudConflictVisibleForTests;
 
         public bool AccountPanelVisibleForTests => _ui != null && _ui.AccountPanelVisibleForTests;
 
@@ -1793,8 +1977,7 @@ namespace JabaSurvivol.Gameplay
 
         private void ShowAccount()
         {
-            if (_ui == null ||
-                (_state != GameSessionState.MainMenu && _state != GameSessionState.Paused))
+            if (_ui == null || _state != GameSessionState.MainMenu)
             {
                 return;
             }
@@ -1890,6 +2073,24 @@ namespace JabaSurvivol.Gameplay
         private void HandleAccountStateChanged(AccountState state)
         {
             _ui?.SetAccountState(state, _accountService?.Username ?? string.Empty);
+            _ui?.SetCloudControls(state == AccountState.SignedIn, _cloudSavesEnabled);
+            if (state == AccountState.SignedIn)
+            {
+                _ = SyncCloudAsync();
+            }
+        }
+
+        private void HandleCloudStateChanged(CloudSyncState state)
+        {
+            _ui?.SetCloudState(state, null);
+            if (state == CloudSyncState.Conflict)
+            {
+                _ui?.ShowCloudConflict(BuildCloudConflictDetails());
+            }
+            else if (state != CloudSyncState.Syncing)
+            {
+                _ui?.HideCloudConflict();
+            }
         }
 
         private void OnDestroy()
@@ -2102,6 +2303,7 @@ namespace JabaSurvivol.Gameplay
 
             _profile.RecordRunEnd(_run);
             _store.Save(_profile);
+            _ = SyncCloudAsync();
             _ui.ShowGameOver(_run.Round, _run.Kills, _runSuppliesEarned);
         }
 

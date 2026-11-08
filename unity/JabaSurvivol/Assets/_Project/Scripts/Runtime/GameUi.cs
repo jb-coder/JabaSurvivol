@@ -69,6 +69,11 @@ namespace JabaSurvivol.Gameplay
         private readonly Button _accountRegisterButton;
         private readonly Button _accountLoginButton;
         private readonly Button _accountLogoutButton;
+        private readonly Text _cloudStatusText;
+        private readonly Button _cloudBackupButton;
+        private readonly Button _cloudRestoreButton;
+        private readonly GameObject _cloudConflictPanel;
+        private readonly Text _cloudConflictText;
         private Text _mainMenuAccountState;
         private readonly Button _characterRespecButton;
         private readonly Text _characterRespecLabel;
@@ -144,7 +149,11 @@ namespace JabaSurvivol.Gameplay
             System.Action<string, string> onRegister,
             System.Action<string, string> onLogin,
             System.Action onLogout,
-            System.Action onAccountClose)
+            System.Action onAccountClose,
+            System.Action onCloudBackup,
+            System.Action onCloudRestore,
+            System.Action onCloudUseCloud,
+            System.Action onCloudKeepLocal)
         {
             var canvasObject = UiFactory.CreateCanvas("JabaSurvivol UI", parent);
 
@@ -217,13 +226,22 @@ namespace JabaSurvivol.Gameplay
                 onLogin,
                 onLogout,
                 onAccountClose,
+                onCloudBackup,
+                onCloudRestore,
                 out _accountStateText,
                 out _accountStatusText,
                 out _accountUsername,
                 out _accountPassword,
                 out _accountRegisterButton,
                 out _accountLoginButton,
-                out _accountLogoutButton);
+                out _accountLogoutButton,
+                out _cloudStatusText,
+                out _cloudBackupButton,
+                out _cloudRestoreButton);
+            _cloudConflictPanel = BuildCloudConflictPanel(
+                onCloudUseCloud,
+                onCloudKeepLocal,
+                out _cloudConflictText);
 
             _selectActiveButtons = new Button[3];
             _selectActiveLabels = new Text[3];
@@ -706,8 +724,64 @@ namespace JabaSurvivol.Gameplay
             _accountRegisterButton.gameObject.SetActive(showCredentials);
             _accountLoginButton.gameObject.SetActive(showCredentials);
             _accountLogoutButton.gameObject.SetActive(signedIn);
+            if (!signedIn)
+            {
+                SetCloudControls(false, false);
+                HideCloudConflict();
+            }
         }
 
+        public void SetCloudState(CloudSyncState state, string message)
+        {
+            if (_cloudStatusText == null)
+            {
+                return;
+            }
+
+            _cloudStatusText.text = string.IsNullOrWhiteSpace(message)
+                ? Localization.Get(CloudStateKey(state))
+                : message;
+        }
+
+        public void SetCloudControls(bool signedIn, bool enabled)
+        {
+            var visible = signedIn && enabled;
+            _cloudBackupButton.gameObject.SetActive(visible);
+            _cloudRestoreButton.gameObject.SetActive(visible);
+            if (!visible)
+            {
+                SetCloudState(CloudSyncState.SignedOut, null);
+            }
+        }
+
+        public void ShowCloudConflict(string details)
+        {
+            _cloudConflictText.text = details;
+            _cloudConflictPanel.SetActive(true);
+        }
+
+        public void HideCloudConflict()
+        {
+            _cloudConflictPanel.SetActive(false);
+        }
+
+        public string CloudStatusForTests => _cloudStatusText?.text ?? string.Empty;
+
+        public bool CloudConflictVisibleForTests => _cloudConflictPanel != null && _cloudConflictPanel.activeSelf;
+
+        private static string CloudStateKey(CloudSyncState state)
+        {
+            return state switch
+            {
+                CloudSyncState.Disabled => "cloud.disabled",
+                CloudSyncState.SignedOut => "cloud.signedout",
+                CloudSyncState.Syncing => "cloud.syncing",
+                CloudSyncState.Synced => "cloud.synced",
+                CloudSyncState.Conflict => "cloud.conflict",
+                CloudSyncState.Offline => "cloud.offline",
+                _ => "cloud.idle"
+            };
+        }
         public void SetAccountBusy(bool busy)
         {
             _accountRegisterButton.interactable = !busy;
@@ -1304,18 +1378,72 @@ namespace JabaSurvivol.Gameplay
             return root;
         }
 
+        private GameObject BuildCloudConflictPanel(
+            System.Action onUseCloud,
+            System.Action onKeepLocal,
+            out Text details)
+        {
+            var panel = UiFactory.CreatePanel(
+                _safeArea,
+                "Cloud Conflict",
+                new Color(0.008f, 0.012f, 0.022f, 1f));
+            var root = panel.gameObject;
+            root.SetActive(false);
+
+            var title = UiFactory.CreateText(
+                root.transform,
+                "Title",
+                Localization.Get("cloud.conflict.title"),
+                52,
+                TextAnchor.MiddleCenter,
+                new Color(1f, 0.78f, 0.35f));
+            title.fontStyle = FontStyle.Bold;
+            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.75f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(1100f, 80f));
+
+            details = UiFactory.CreateText(
+                root.transform,
+                "Details",
+                string.Empty,
+                26,
+                TextAnchor.MiddleCenter,
+                new Color(0.82f, 0.86f, 0.94f));
+            UiFactory.Place(details.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1200f, 220f));
+
+            var useCloud = UiFactory.CreateButton(
+                root.transform,
+                "Use Cloud",
+                Localization.Get("cloud.useCloud"),
+                28,
+                onUseCloud);
+            UiFactory.Place(useCloud.GetComponent<RectTransform>(), new Vector2(0.5f, 0.25f), new Vector2(0.5f, 0.5f), new Vector2(-210f, 0f), new Vector2(380f, 72f));
+
+            var keepLocal = UiFactory.CreateButton(
+                root.transform,
+                "Keep Local",
+                Localization.Get("cloud.keepLocal"),
+                28,
+                onKeepLocal);
+            UiFactory.Place(keepLocal.GetComponent<RectTransform>(), new Vector2(0.5f, 0.25f), new Vector2(0.5f, 0.5f), new Vector2(210f, 0f), new Vector2(380f, 72f));
+
+            return root;
+        }
         private GameObject BuildAccountPanel(
             System.Action<string, string> onRegister,
             System.Action<string, string> onLogin,
             System.Action onLogout,
             System.Action onClose,
+            System.Action onCloudBackup,
+            System.Action onCloudRestore,
             out Text stateText,
             out Text statusText,
             out InputField username,
             out InputField password,
             out Button registerButton,
             out Button loginButton,
-            out Button logoutButton)
+            out Button logoutButton,
+            out Text cloudStatus,
+            out Button cloudBackup,
+            out Button cloudRestore)
         {
             var panel = UiFactory.CreatePanel(
                 _safeArea,
@@ -1384,6 +1512,31 @@ namespace JabaSurvivol.Gameplay
                 30,
                 onLogout);
             UiFactory.Place(logoutButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.23f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(340f, 72f));
+
+            cloudStatus = UiFactory.CreateText(
+                root.transform,
+                "Cloud Status",
+                Localization.Get("cloud.signedout"),
+                22,
+                TextAnchor.MiddleCenter,
+                new Color(0.55f, 0.85f, 0.75f));
+            UiFactory.Place(cloudStatus.rectTransform, new Vector2(0.5f, 0.15f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f, 40f));
+
+            cloudBackup = UiFactory.CreateButton(
+                root.transform,
+                "Cloud Backup",
+                Localization.Get("cloud.backup"),
+                26,
+                onCloudBackup);
+            UiFactory.Place(cloudBackup.GetComponent<RectTransform>(), new Vector2(0.5f, 0.07f), new Vector2(0.5f, 0.5f), new Vector2(-190f, 0f), new Vector2(340f, 64f));
+
+            cloudRestore = UiFactory.CreateButton(
+                root.transform,
+                "Cloud Restore",
+                Localization.Get("cloud.restore"),
+                26,
+                onCloudRestore);
+            UiFactory.Place(cloudRestore.GetComponent<RectTransform>(), new Vector2(0.5f, 0.07f), new Vector2(0.5f, 0.5f), new Vector2(190f, 0f), new Vector2(340f, 64f));
 
             var close = UiFactory.CreateButton(
                 root.transform,

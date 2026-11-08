@@ -24,6 +24,29 @@ namespace JabaSurvivol.Gameplay
 
         public string FilePath => _path;
 
+        public static string Serialize(Profile profile)
+        {
+            if (profile == null)
+            {
+                throw new ArgumentNullException(nameof(profile));
+            }
+
+            profile.Validate();
+            return JsonUtility.ToJson(profile, true);
+        }
+
+        public void SaveFromJson(string json)
+        {
+            var profile = JsonUtility.FromJson<Profile>(json);
+            if (profile == null)
+            {
+                throw new InvalidOperationException("The cloud save document is not a valid profile.");
+            }
+
+            profile.Validate();
+            Save(profile);
+        }
+
         public Profile Load()
         {
             if (!File.Exists(_path))
