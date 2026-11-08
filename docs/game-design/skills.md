@@ -25,12 +25,10 @@ The curve is configurable and will be validated with simulations.
 ## Skill tree
 
 The nine nodes are data-driven in `SkillCatalog`. Each node has five ranks.
-Turret activation is delivered in this milestone. Shockwave and Dash rank data
-is included, but their activation systems are delivered in a later milestone.
+Turret, Dash, and Shockwave activation are delivered in this milestone.
 
 Shockwave, Dash, and Turret store per-rank activation values: area damage and
-radius, dash distance, turret damage and duration, and cooldown reduction. The
-activation systems consume those values as they land.
+radius, dash distance, turret damage and duration, and cooldown reduction.
 
 ### Turret activation
 
@@ -43,6 +41,31 @@ activation systems consume those values as they land.
 - Turret state is run-only and resets on death or a new run.
 - The HUD shows a touch active-skill button with a radial cooldown, plus a
   keyboard fallback on Space.
+
+### Dash activation
+
+- Rank 1: 3 unit distance, 5.5 second cooldown, 0.25 second invulnerability.
+- Rank 5: 5 unit distance, 3.5 second cooldown, 0.25 second invulnerability.
+- Dash moves in the movement direction, or the aim direction when the player is
+  standing still.
+- Damage is ignored while the dash invulnerability window is active.
+- Dash state is run-only and resets on death or a new run.
+
+### Shockwave activation
+
+- Rank 1: 40 area damage, 2.0 radius, 9 second cooldown.
+- Rank 5: 80 area damage, 3.0 radius, 5 second cooldown.
+- Shockwave resolves instantly around the player, damages every enemy in range,
+  and knocks surviving zombies away.
+- Shockwave state is run-only and resets on death or a new run.
+
+### Active skill selection
+
+- The player selects one allocated active skill from the armory or character
+  sheet.
+- Zero-rank skills cannot be selected or activated.
+- The selection persists in the profile and applies to the next activation.
+- Selecting a different skill replaces the previous active skill.
 
 ### Strength
 

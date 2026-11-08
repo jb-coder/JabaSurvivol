@@ -48,6 +48,7 @@ namespace JabaSurvivol.Gameplay
         private BulletPool _bullets;
         private GameSessionState _state;
         private Vector2 _aimDirection = Vector2.right;
+        private Vector2 _lastMoveDirection = Vector2.right;
         private float _fireCooldown;
         private float _contactCooldown;
         private float _respawnCooldown;
@@ -234,6 +235,7 @@ namespace JabaSurvivol.Gameplay
                 () => ReloadWeapon(),
                 () => SwitchWeapon(),
                 () => ActivateActiveSkill(),
+                HandleSelectActiveSkill,
                 index => SelectRoundReward(index),
                 ShowArmory,
                 HandleArmoryAction,
@@ -443,6 +445,7 @@ namespace JabaSurvivol.Gameplay
             if (frame.Move.sqrMagnitude > 0.0001f)
             {
                 var current = (Vector2)_playerObject.transform.position;
+                _lastMoveDirection = frame.Move.normalized;
                 var next = current + (frame.Move * (_stats.MoveSpeed * deltaTime));
                 CombatMath.ClampToArena(
                     next.x,
@@ -883,6 +886,7 @@ namespace JabaSurvivol.Gameplay
             _playerObject.SetActive(true);
             _playerObject.transform.position = Vector3.zero;
             _aimDirection = Vector2.right;
+            _lastMoveDirection = Vector2.right;
             _aimPivot.localRotation = Quaternion.identity;
             _fireCooldown = 0f;
             _contactCooldown = 0f;
@@ -1087,8 +1091,46 @@ namespace JabaSurvivol.Gameplay
                         : "character.status.nopoints"));
         }
 
-        private void HandleRespecSkills()
+        private void HandleSelectActiveSkill(SkillNode node)
         {
+            if (!TrySelectActiveSkill(node))
+            {
+                _ui.SetCharacterSheetStatus(Localization.Get("character.active.blocked"));
+                return;
+            }
+
+            _ui.SetCharacterSheetStatus(
+                Localization.Format("character.active.status", Localization.SkillName(node)));
+        }
+
+        /// <summary>
+        /// Selects an allocated active skill from the armory or character
+        /// sheet. The choice is stored in the profile.
+        /// </summary>
+        public bool TrySelectActiveSkill(SkillNode node)
+        {
+            if (!CanSelectActiveSkillNow() || !_profile.SetActiveSkill(node))
+            {
+                return false;
+            }
+
+            _run?.RefreshActiveSkill(_profile);
+            _store.Save(_profile);
+            RefreshCharacterSheetUi();
+            if (_run != null)
+            {
+                _ui.UpdateActiveSkillHud(
+                    _run.ActiveSkill.Node,
+                    _run.ActiveSkill.Rank,
+                    _run.ActiveSkill.CanActivate,
+                    _run.ActiveSkill.CooldownFraction,
+                    _run.ActiveSkill.ActiveFraction);
+            }
+
+            return true;
+        }
+
+        private void HandleRespecSkills()        {
             var refunded = RespecSkills();
             if (refunded > 0)
             {
@@ -1222,6 +1264,13 @@ namespace JabaSurvivol.Gameplay
         private bool CanAllocateSkillsNow()
         {
             return (_ui != null && _ui.ArmoryVisible) ||
+                   _state == GameSessionState.Paused ||
+                   _roundClearPending;
+        }
+
+        private bool CanSelectActiveSkillNow()
+        {
+            return (_ui != null && (_ui.ArmoryVisible || _ui.CharacterSheetVisible)) ||
                    _state == GameSessionState.Paused ||
                    _roundClearPending;
         }
@@ -1411,6 +1460,11 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
+            if (_run.ActiveSkill.Node == SkillNode.Dash && _run.ActiveSkill.IsActive)
+            {
+                return;
+            }
+
             if (_run.DamagePlayer(amount))
             {
                 EndRun();
@@ -1437,16 +1491,98 @@ namespace JabaSurvivol.Gameplay
                 return false;
             }
 
-            _turretPosition = (Vector2)_playerObject.transform.position;
-            _turretObject.transform.position = _turretPosition;
-            _turretObject.SetActive(true);
+            var skill = _run.ActiveSkill;
+            var playerPosition = (Vector2)_playerObject.transform.position;
+            switch (skill.Node)
+            {
+                case SkillNode.Turret:
+                    _turretPosition = playerPosition;
+                    _turretObject.transform.position = _turretPosition;
+                    _turretObject.SetActive(true);
+                    break;
+
+                case SkillNode.Dash:
+                    ActivateDash(skill.Stats, playerPosition);
+                    break;
+
+                case SkillNode.Shockwave:
+                    ActivateShockwave(skill.Stats, playerPosition);
+                    break;
+            }
+
             _ui.UpdateActiveSkillHud(
-                _run.ActiveSkill.Node,
-                _run.ActiveSkill.Rank,
-                _run.ActiveSkill.CanActivate,
-                _run.ActiveSkill.CooldownFraction,
-                _run.ActiveSkill.ActiveFraction);
+                skill.Node,
+                skill.Rank,
+                skill.CanActivate,
+                skill.CooldownFraction,
+                skill.ActiveFraction);
             return true;
+        }
+
+        private void ActivateDash(SkillActivationStats stats, Vector2 playerPosition)
+        {
+            var direction = _lastMoveDirection.sqrMagnitude > 0.0001f
+                ? _lastMoveDirection
+                : _aimDirection;
+            var next = playerPosition + (direction * stats.DashDistance);
+            CombatMath.ClampToArena(
+                next.x,
+                next.y,
+                GameBalance.ArenaHalfWidth,
+                GameBalance.ArenaHalfHeight,
+                GameBalance.PlayerRadius,
+                out var clampedX,
+                out var clampedY);
+            _playerObject.transform.position = new Vector3(clampedX, clampedY, 0f);
+            _deathEffects.Spawn(playerPosition, new Color(0.45f, 0.95f, 1f), 0.9f);
+        }
+
+        private void ActivateShockwave(SkillActivationStats stats, Vector2 playerPosition)
+        {
+            if (_zombieActive && _zombieActor != null)
+            {
+                var zombiePosition = (Vector2)_zombieActor.GameObject.transform.position;
+                var delta = zombiePosition - playerPosition;
+                if (delta.magnitude <= stats.AreaRadius + _zombieStats.Radius)
+                {
+                    if (_zombie.ApplyDamage(stats.AreaDamage))
+                    {
+                        OnZombieKilled();
+                    }
+                    else if (delta.sqrMagnitude > 0.0001f)
+                    {
+                        var knocked = zombiePosition +
+                                      (delta.normalized * GameBalance.ShockwaveKnockbackDistance);
+                        CombatMath.ClampToArena(
+                            knocked.x,
+                            knocked.y,
+                            GameBalance.ArenaHalfWidth,
+                            GameBalance.ArenaHalfHeight,
+                            _zombieStats.Radius,
+                            out var knockedX,
+                            out var knockedY);
+                        _zombieActor.GameObject.transform.position = new Vector2(knockedX, knockedY);
+                    }
+                }
+            }
+
+            if (_run.BossActive && _bossObject != null)
+            {
+                var bossPosition = (Vector2)_bossObject.transform.position;
+                var bossRadius = BossCatalog.BossDefinition.SlamRadius * 0.35f;
+                if ((bossPosition - playerPosition).magnitude <= stats.AreaRadius + bossRadius)
+                {
+                    if (_run.ApplyBossDamage(stats.AreaDamage, out var reward))
+                    {
+                        OnBossKilled(reward);
+                    }
+                }
+            }
+
+            _deathEffects.Spawn(
+                playerPosition,
+                new Color(0.4f, 0.9f, 1f),
+                Mathf.Max(0.5f, stats.AreaRadius * 2f));
         }
 
         private void UpdateTurret(float deltaTime)

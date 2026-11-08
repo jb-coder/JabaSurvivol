@@ -40,6 +40,8 @@ namespace JabaSurvivol.Gameplay
         private readonly Button _activeSkillButton;
         private readonly Image _activeSkillCooldown;
         private readonly Text _activeSkillLabel;
+        private readonly Button[] _selectActiveButtons;
+        private readonly Text[] _selectActiveLabels;
         private readonly Text _gameOverSummary;
         private readonly Text _victorySummary;
         private readonly Text _bossNameText;
@@ -115,6 +117,7 @@ namespace JabaSurvivol.Gameplay
             System.Action onReload,
             System.Action onSwitchWeapon,
             System.Action onActiveSkill,
+            System.Action<SkillNode> onSelectActiveSkill,
             System.Action<int> onRewardSelected,
             System.Action onArmory,
             System.Action<WeaponId> onArmoryAction,
@@ -180,6 +183,7 @@ namespace JabaSurvivol.Gameplay
             _characterSheet = BuildCharacterSheet(
                 onAllocateSkill,
                 onRespecSkills,
+                onSelectActiveSkill,
                 onCharacterSheetClose,
                 out _characterLevelText,
                 out _characterPointsText,
@@ -191,6 +195,16 @@ namespace JabaSurvivol.Gameplay
                 out _characterTabLabels,
                 out _characterBranchPanels,
                 out _characterNodeRows);
+
+            _selectActiveButtons = new Button[3];
+            _selectActiveLabels = new Text[3];
+            var activeNodes = new[] { SkillNode.Shockwave, SkillNode.Dash, SkillNode.Turret };
+            for (var i = 0; i < activeNodes.Length; i++)
+            {
+                var selectButton = FindGameObject(_characterSheet, $"Select {activeNodes[i]}");
+                _selectActiveButtons[i] = selectButton?.GetComponent<Button>();
+                _selectActiveLabels[i] = selectButton?.GetComponentInChildren<Text>();
+            }
 
             _levelUpText = UiFactory.CreateText(
                 _safeArea,
@@ -629,6 +643,22 @@ namespace JabaSurvivol.Gameplay
 
             _characterRespecButton.interactable = canRespec && profile.GetSpentSkillPoints() > 0;
             _characterRespecLabel.text = Localization.Get("character.respec");
+
+            var selectNodes = new[] { SkillNode.Shockwave, SkillNode.Dash, SkillNode.Turret };
+            for (var i = 0; i < _selectActiveButtons.Length; i++)
+            {
+                var node = selectNodes[i];
+                var rank = profile.GetSkillRank(node);
+                var selected = profile.ActiveSkill == node;
+                var name = Localization.SkillName(node);
+                _selectActiveLabels[i].text = selected
+                    ? Localization.Format("character.active.selected", name)
+                    : name;
+                _selectActiveLabels[i].color = selected
+                    ? new Color(0.45f, 0.95f, 0.7f)
+                    : Color.white;
+                _selectActiveButtons[i].interactable = canAllocate && rank > 0 && !selected;
+            }
         }
 
         public void SetCharacterSheetStatus(string status)
@@ -1398,6 +1428,7 @@ namespace JabaSurvivol.Gameplay
         private GameObject BuildCharacterSheet(
             System.Action<SkillNode> onAllocate,
             System.Action onRespec,
+            System.Action<SkillNode> onSelectActive,
             System.Action onClose,
             out Text levelText,
             out Text pointsText,
@@ -1603,6 +1634,24 @@ namespace JabaSurvivol.Gameplay
                 TextAnchor.MiddleCenter,
                 new Color(1f, 0.75f, 0.42f));
             UiFactory.Place(statusText.rectTransform, new Vector2(0.5f, 0.025f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1100f, 36f));
+
+            var selectNodes = new[] { SkillNode.Shockwave, SkillNode.Dash, SkillNode.Turret };
+            for (var i = 0; i < selectNodes.Length; i++)
+            {
+                var node = selectNodes[i];
+                var select = UiFactory.CreateButton(
+                    root.transform,
+                    $"Select {node}",
+                    Localization.SkillName(node),
+                    20,
+                    () => onSelectActive?.Invoke(node));
+                UiFactory.Place(
+                    select.GetComponent<RectTransform>(),
+                    new Vector2(0.22f + (i * 0.28f), 0.1f),
+                    new Vector2(0.5f, 0.5f),
+                    Vector2.zero,
+                    new Vector2(290f, 56f));
+            }
 
             root.SetActive(false);
             return root;

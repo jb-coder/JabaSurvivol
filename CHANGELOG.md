@@ -23,6 +23,9 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Turret active skill with rank gating, deploy duration, target acquisition, rank-scaled damage, and cooldown.
 - Active-skill HUD button with radial cooldown and Space keyboard fallback.
 - Run-only active-skill state that resets on death and new runs.
+- Dash active skill with rank-scaled distance, cooldown, and a brief invulnerability window.
+- Shockwave active skill with rank-scaled area damage, radius, cooldown, and zombie knockback.
+- Active-skill selection from the armory or character sheet with persistent profile storage and zero-rank gating.
 ## [0.3.0] - 2026-11-07
 
 ### Added

@@ -1,0 +1,14 @@
+# v0.4.0 Slice 57 Android Smoke Test
+
+- Date: 2026-11-08
+- Emulator: Android 15 (API 35), x86_64 Google Play system image, `jaba_survivol_api35`
+- Device profile: phone 1080 x 2340 at 440 dpi; tablet display override 2560 x 1600 at 320 dpi
+- Production APK: `JabaSurvivol-0.4.0-57.apk` (ARM64), 32,395,345 bytes, SHA-256 `B8BE47C35814E3606CA62BE68E6CDD329C3A1746B2E421CC963B8B3AD8DBA8AC`
+- Emulator APK: `JabaSurvivol-0.4.0-57-emulator.apk` (ARM64 + x86_64), 59,140,673 bytes, SHA-256 `362D4E95D8FA0C1E205AF4E359F6DFCAC7528031DB19B9B4113D3B4B4B537502`
+- Activity: `com.jabasurvivol.game/com.unity3d.player.UnityPlayerActivity`
+- Result: main menu and active round rendered on phone and tablet layouts
+- Fatal search: no `FATAL EXCEPTION`, `AndroidRuntime` crash, unhandled exception, or `NullReferenceException` in the app process log
+- Evidence: `v04-57-phone.png`, `v04-57-tablet.png`, `v04-57-playing.png`
+
+Dash, Shockwave, the invulnerability window, knockback, and active-skill
+selection are covered by the PlayMode suite.

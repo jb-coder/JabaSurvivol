@@ -74,6 +74,9 @@ The HUD shows the elite modifier for the whole round. Elite state is run-only an
 - The selected active skill uses its allocated rank.
 - Rank zero locks activation.
 - Turret deploys at the player's position, lasts for its rank-scaled duration, fires at the nearest enemy in range, and then enters its rank-scaled cooldown.
+- Dash moves the player, grants a brief invulnerability window, and uses a rank-scaled distance and cooldown.
+- Shockwave deals rank-scaled area damage and knockback around the player and uses a rank-scaled cooldown.
+- The player selects the active skill from the armory or character sheet; the selection persists and zero-rank skills cannot be selected.
 - The HUD active-skill button shows a radial cooldown and the keyboard fallback is Space.
 - Active-skill state is run-only and resets on death or a new run.
 
