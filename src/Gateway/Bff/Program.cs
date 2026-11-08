@@ -1,6 +1,7 @@
 using Bff;
 using JabaSurvivol.Contracts;
 using JabaSurvivol.Security;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,13 @@ builder.Services.AddJabaJwtAuthentication(builder.Configuration);
 builder.Services.AddAuthorization(options =>
     options.AddPolicy(ReverseProxyConfiguration.AuthenticatedPolicy, policy =>
         policy.RequireAuthenticatedUser()));
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    // The BFF is reachable only through the cluster ingress, which sets the client IP.
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 builder.Services.AddSingleton<BffRateLimiter>();
 
 builder.Services
@@ -27,9 +35,10 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseForwardedHeaders();
 app.UseExceptionHandler();
-app.UseAuthentication();
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseAuthentication();
 app.UseMiddleware<BffRateLimitMiddleware>();
 app.UseAuthorization();
 

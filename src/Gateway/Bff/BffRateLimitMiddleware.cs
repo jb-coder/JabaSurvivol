@@ -34,20 +34,25 @@ public sealed class BffRateLimitMiddleware(RequestDelegate next, BffRateLimiter 
     {
         var value = path.Value ?? string.Empty;
 
-        if (value.StartsWith("/api/v1/identity/", StringComparison.Ordinal))
-        {
-            return BffRateLimiter.AuthenticationPolicy;
-        }
-
-        if (value.StartsWith("/api/v1/game/saves", StringComparison.Ordinal) ||
-            value.StartsWith("/api/v1/telemetry", StringComparison.Ordinal) ||
-            value.Equals("/api/v1/game/leaderboards/highest-round/runs", StringComparison.Ordinal))
+        if (value.Equals("/api/v1/identity/me", StringComparison.OrdinalIgnoreCase))
         {
             return BffRateLimiter.AccountPolicy;
         }
 
-        if (value.Equals("/api/v1/game/config", StringComparison.Ordinal) ||
-            value.Equals("/api/v1/game/leaderboards/highest-round", StringComparison.Ordinal))
+        if (value.StartsWith("/api/v1/identity/", StringComparison.OrdinalIgnoreCase))
+        {
+            return BffRateLimiter.AuthenticationPolicy;
+        }
+
+        if (value.StartsWith("/api/v1/game/saves", StringComparison.OrdinalIgnoreCase) ||
+            value.StartsWith("/api/v1/telemetry", StringComparison.OrdinalIgnoreCase) ||
+            value.Equals("/api/v1/game/leaderboards/highest-round/runs", StringComparison.OrdinalIgnoreCase))
+        {
+            return BffRateLimiter.AccountPolicy;
+        }
+
+        if (value.Equals("/api/v1/game/config", StringComparison.OrdinalIgnoreCase) ||
+            value.Equals("/api/v1/game/leaderboards/highest-round", StringComparison.OrdinalIgnoreCase))
         {
             return BffRateLimiter.IpPolicy;
         }

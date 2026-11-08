@@ -25,6 +25,17 @@ public sealed class BffRateLimiter(TimeProvider timeProvider, IConfiguration con
         };
 
         var now = timeProvider.GetUtcNow();
+        if (_windows.Count > 10_000)
+        {
+            foreach (var entry in _windows)
+            {
+                if (entry.Value.ResetAt <= now)
+                {
+                    _windows.TryRemove(entry.Key, out _);
+                }
+            }
+        }
+
         var compositeKey = $"{policy}|{partitionKey}";
         var window = _windows.AddOrUpdate(
             compositeKey,

@@ -12,22 +12,24 @@ public static class ReverseProxyConfiguration
     {
         return
         [
-            AnonymousRoute("identity-register", "/api/v1/identity/register", IdentityCluster),
-            AnonymousRoute("identity-login", "/api/v1/identity/login", IdentityCluster),
-            AnonymousRoute("identity-refresh", "/api/v1/identity/refresh", IdentityCluster),
-            ProtectedRoute("identity-logout", "/api/v1/identity/logout", IdentityCluster),
-            ProtectedRoute("identity-me", "/api/v1/identity/me", IdentityCluster),
-            AnonymousRoute("game-config", "/api/v1/game/config", GameCluster),
-            ProtectedRoute("game-saves", "/api/v1/game/saves/{**catch-all}", GameCluster),
+            AnonymousRoute("identity-register", "/api/v1/identity/register", IdentityCluster, "POST"),
+            AnonymousRoute("identity-login", "/api/v1/identity/login", IdentityCluster, "POST"),
+            AnonymousRoute("identity-refresh", "/api/v1/identity/refresh", IdentityCluster, "POST"),
+            ProtectedRoute("identity-logout", "/api/v1/identity/logout", IdentityCluster, "POST"),
+            ProtectedRoute("identity-me", "/api/v1/identity/me", IdentityCluster, "GET"),
+            AnonymousRoute("game-config", "/api/v1/game/config", GameCluster, "GET"),
+            ProtectedRoute("game-saves", "/api/v1/game/saves/primary", GameCluster, "GET", "PUT"),
             ProtectedRoute(
                 "leaderboard-submit",
                 "/api/v1/game/leaderboards/highest-round/runs",
-                GameCluster),
+                GameCluster,
+                "POST"),
             AnonymousRoute(
                 "leaderboard-top",
                 "/api/v1/game/leaderboards/highest-round",
-                GameCluster),
-            ProtectedRoute("telemetry-events", "/api/v1/telemetry/{**catch-all}", GameCluster)
+                GameCluster,
+                "GET"),
+            ProtectedRoute("telemetry-events", "/api/v1/telemetry/events", GameCluster, "POST")
         ];
     }
 
@@ -43,17 +45,17 @@ public static class ReverseProxyConfiguration
         ];
     }
 
-    private static RouteConfig AnonymousRoute(string routeId, string path, string clusterId)
+    private static RouteConfig AnonymousRoute(string routeId, string path, string clusterId, params string[] methods)
     {
         return new RouteConfig
         {
             RouteId = routeId,
             ClusterId = clusterId,
-            Match = new RouteMatch { Path = path }
+            Match = new RouteMatch { Path = path, Methods = methods }
         };
     }
 
-    private static RouteConfig ProtectedRoute(string routeId, string path, string clusterId)
+    private static RouteConfig ProtectedRoute(string routeId, string path, string clusterId, params string[] methods)
     {
         return new RouteConfig
         {

@@ -149,6 +149,130 @@ public sealed class BffRoutingTests
         Assert.Empty(factory.Forwarder.Requests);
     }
 
+    [Theory]
+    [InlineData("POST", "/api/v1/identity/register", "identity-api", false)]
+    [InlineData("POST", "/api/v1/identity/login", "identity-api", false)]
+    [InlineData("POST", "/api/v1/identity/refresh", "identity-api", false)]
+    [InlineData("POST", "/api/v1/identity/logout", "identity-api", true)]
+    [InlineData("GET", "/api/v1/identity/me", "identity-api", true)]
+    [InlineData("GET", "/api/v1/game/config", "game-api", false)]
+    [InlineData("GET", "/api/v1/game/saves/primary", "game-api", true)]
+    [InlineData("PUT", "/api/v1/game/saves/primary", "game-api", true)]
+    [InlineData("POST", "/api/v1/game/leaderboards/highest-round/runs", "game-api", true)]
+    [InlineData("GET", "/api/v1/game/leaderboards/highest-round", "game-api", false)]
+    [InlineData("POST", "/api/v1/telemetry/events", "game-api", true)]
+    public async Task Documented_routes_forward_to_the_expected_upstream(
+        string method,
+        string path,
+        string host,
+        bool authenticated)
+    {
+        using var factory = new BffFactory().ApplyEnvironment();
+        using var client = authenticated
+            ? factory.CreateAuthenticatedClient(Guid.NewGuid())
+            : factory.CreateClient();
+        using var request = new HttpRequestMessage(new HttpMethod(method), path);
+        if (method is "POST" or "PUT")
+        {
+            request.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+        }
+
+        var response = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var recorded = Assert.Single(factory.Forwarder.Requests);
+        Assert.Equal(host, recorded.Host);
+        Assert.Equal(path, recorded.Path);
+        Assert.Equal(method, recorded.Method);
+    }
+
+    [Theory]
+    [InlineData("GET", "/api/v1/game/saves/other")]
+    [InlineData("POST", "/api/v1/telemetry/other")]
+    public async Task Undocumented_subpaths_are_not_forwarded(string method, string path)
+    {
+        using var factory = new BffFactory().ApplyEnvironment();
+        using var client = factory.CreateAuthenticatedClient(Guid.NewGuid());
+        using var request = new HttpRequestMessage(new HttpMethod(method), path);
+
+        var response = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Empty(factory.Forwarder.Requests);
+    }
+
+    [Fact]
+    public async Task Per_account_rate_limit_returns_429()
+    {
+        using var factory = new BffFactory(accountPermitLimit: 2).ApplyEnvironment();
+        using var client = factory.CreateAuthenticatedClient(Guid.NewGuid());
+        var payload = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+
+        Assert.Equal(HttpStatusCode.OK, (await client.PutAsync(ApiRoutes.CloudSavePrimary, payload)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await client.PutAsync(ApiRoutes.CloudSavePrimary, new StringContent("{}", System.Text.Encoding.UTF8, "application/json"))).StatusCode);
+        var response = await client.PutAsync(ApiRoutes.CloudSavePrimary, new StringContent("{}", System.Text.Encoding.UTF8, "application/json"));
+
+        Assert.Equal((HttpStatusCode)429, response.StatusCode);
+        Assert.Equal("rate_limited", await ReadCodeAsync(response));
+    }
+
+    [Fact]
+    public async Task Per_ip_config_rate_limit_returns_429()
+    {
+        using var factory = new BffFactory(ipPermitLimit: 2).ApplyEnvironment();
+        using var client = factory.CreateClient();
+
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync(ApiRoutes.GameConfig)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync(ApiRoutes.GameConfig)).StatusCode);
+        var response = await client.GetAsync(ApiRoutes.GameConfig);
+
+        Assert.Equal((HttpStatusCode)429, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Rate_limit_policy_matching_is_case_insensitive()
+    {
+        using var factory = new BffFactory(ipPermitLimit: 1).ApplyEnvironment();
+        using var client = factory.CreateClient();
+
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/API/v1/game/config")).StatusCode);
+        var response = await client.GetAsync("/API/v1/game/config");
+
+        Assert.Equal((HttpStatusCode)429, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Forwarded_client_ip_partitions_the_rate_limit()
+    {
+        using var factory = new BffFactory(ipPermitLimit: 1).ApplyEnvironment();
+        using var client = factory.CreateClient();
+
+        using var first = new HttpRequestMessage(HttpMethod.Get, ApiRoutes.GameConfig);
+        first.Headers.Add("X-Forwarded-For", "203.0.113.10");
+        Assert.Equal(HttpStatusCode.OK, (await client.SendAsync(first)).StatusCode);
+
+        using var second = new HttpRequestMessage(HttpMethod.Get, ApiRoutes.GameConfig);
+        second.Headers.Add("X-Forwarded-For", "203.0.113.11");
+        Assert.Equal(HttpStatusCode.OK, (await client.SendAsync(second)).StatusCode);
+
+        using var third = new HttpRequestMessage(HttpMethod.Get, ApiRoutes.GameConfig);
+        third.Headers.Add("X-Forwarded-For", "203.0.113.10");
+        Assert.Equal((HttpStatusCode)429, (await client.SendAsync(third)).StatusCode);
+    }
+
+    [Fact]
+    public async Task Me_uses_the_per_account_rate_limit()
+    {
+        using var factory = new BffFactory(accountPermitLimit: 1).ApplyEnvironment();
+        var firstAccount = Guid.NewGuid();
+        using var first = factory.CreateAuthenticatedClient(firstAccount);
+
+        Assert.Equal(HttpStatusCode.OK, (await first.GetAsync(ApiRoutes.IdentityMe)).StatusCode);
+        Assert.Equal((HttpStatusCode)429, (await first.GetAsync(ApiRoutes.IdentityMe)).StatusCode);
+
+        using var second = factory.CreateAuthenticatedClient(Guid.NewGuid());
+        Assert.Equal(HttpStatusCode.OK, (await second.GetAsync(ApiRoutes.IdentityMe)).StatusCode);
+    }
     private static async Task<string> ReadCodeAsync(HttpResponseMessage response)
     {
         using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
