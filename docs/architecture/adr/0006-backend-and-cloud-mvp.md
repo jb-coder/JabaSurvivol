@@ -83,7 +83,7 @@ The product rules constrain the design:
 - The board stores accepted runs and returns the best run per account.
 - Ordering is `highestRound` descending, `totalKills` descending,
   `durationSeconds` ascending, then `achievedAt` ascending. The final tiebreak
-  is deterministic by `runId`.
+  is deterministic by `runId` ascending.
 - `GET /api/v1/game/leaderboards/highest-round?limit=50` returns rank, username,
   highest round, total kills, duration, and achieved timestamp. The limit is
   capped at 100. No email, token, account identifier, or private data is
@@ -109,8 +109,9 @@ The product rules constrain the design:
   rejected.
 - Event IDs are unique per account. Duplicate events are counted in the
   response and ignored idempotently.
-- Raw events are stored in PostgreSQL and retained for 30 days by a cleanup
-  job in `Telemetry.Worker`.
+- Raw events are stored in PostgreSQL, in the `telemetry` schema owned by the
+  telemetry module, and retained for 30 days by a cleanup job in
+  `Telemetry.Worker`.
 - `Telemetry.Worker` produces idempotent daily aggregates for run count, kill
   count, boss defeats, level-ups, and average run duration. Aggregation is
   recomputed from raw events for the affected day, so retries and reruns do not
@@ -202,14 +203,16 @@ Payload allowlist:
 | `zombie_kill` | `round`, `archetype` (`walker`, `runner`, `brute`) |
 | `boss_defeat` | `round` |
 | `level_up` | `level` |
-| `reward_selection` | `round`, `rewardType` (`supplies`, `xp`, `ammo`, `armor`) |
+| `reward_selection` | `round`, `rewardType` (`supplies`, `xp`, `ammo_crate`, `armor_plate`) |
 | `weapon_switch` | `weapon` (`pistol`, `smg`, `shotgun`, `rifle`, `lmg`) |
 
 ### 8. Data ownership
 
-- Each module owns its PostgreSQL schema: `identity`, `game`, and `telemetry`
-  tables live in the `game` schema because the ingestion endpoint belongs to
-  the Game module while the worker consumes the same tables.
+- Each module owns its PostgreSQL schema: `identity` for accounts and refresh
+  sessions, `game` for saves and leaderboard runs, and `telemetry` for raw
+  events and daily aggregates. The telemetry ingestion endpoint is hosted by
+  `Game.Api`, but the telemetry module owns its schema and both `Game.Api` and
+  `Telemetry.Worker` use the same module data library.
 - Contracts never expose database entities. Public DTOs live in
   `src/Shared/Contracts`.
 - Migrations are additive and backward-compatible. Destructive migrations
@@ -258,6 +261,21 @@ Payload allowlist:
 - Server-side run simulation or replay validation.
 - RabbitMQ, multi-node clusters, autoscaling, and paid cloud resources.
 - PII, device identifiers, and third-party analytics SDKs.
+
+## Migration and follow-up actions
+
+- Add the Testcontainers PostgreSQL fixture and identity migrations in the
+  identity slice.
+- Add additive migrations for the `game` and `telemetry` schemas in their
+  slices.
+- Keep schema version `1` save compatibility. A future schema change adds a
+  backward-compatible reader before any writer emits a new version.
+- Revisit server-side run simulation before the leaderboard is used for
+  rewards or competitive seasons.
+- Revisit RabbitMQ only when a documented fan-out, delivery, or throughput need
+  exceeds the PostgreSQL boundary.
+- Revisit multi-replica services, connection pooling, and horizontal scaling
+  with a separate ADR.
 
 ## References
 

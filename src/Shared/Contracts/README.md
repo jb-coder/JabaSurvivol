@@ -15,6 +15,7 @@ Rules:
 
 | Method | Route | Auth |
 |---|---|---|
+| `GET` | `/api/v1/status` | Anonymous |
 | `POST` | `/api/v1/identity/register` | Anonymous |
 | `POST` | `/api/v1/identity/login` | Anonymous |
 | `POST` | `/api/v1/identity/refresh` | Anonymous |
@@ -30,7 +31,10 @@ Rules:
 The decisions behind these routes, including authentication, save revisions,
 leaderboard tiebreaks, telemetry retention, and remote-config scope, are
 recorded in
-[ADR-0006](../architecture/adr/0006-backend-and-cloud-mvp.md).
+[ADR-0006](../../../docs/architecture/adr/0006-backend-and-cloud-mvp.md).
 
-Clients send camelCase JSON. The backend accepts camelCase and treats field
-names case-insensitively at the boundary.
+Clients send camelCase JSON for API fields. The backend accepts camelCase and
+treats API field names case-insensitively at the boundary. The nested cloud-save
+`document` is the profile JSON document produced by the client save system; it
+is stored and returned unchanged after schema validation, so its existing
+field names remain compatible with schema version `1`.
