@@ -28,6 +28,7 @@
     <ProjectReference Include="..\..\src\Game.Core\JabaSurvivol.Core.csproj" />
     <ProjectReference Include="..\..\src\Services\Game.Api\Game.Api.csproj" />
     <ProjectReference Include="..\..\src\Services\Game.Data\JabaSurvivol.Game.Data.csproj" />
+    <ProjectReference Include="..\..\src\Services\Telemetry.Worker\Telemetry.Worker.csproj" />
     <ProjectReference Include="..\..\src\Services\Identity.Api\Identity.Api.csproj" />
     <ProjectReference Include="..\..\src\Gateway\Bff\Bff.csproj" />
   </ItemGroup>

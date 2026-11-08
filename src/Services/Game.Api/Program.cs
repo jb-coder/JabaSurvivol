@@ -3,6 +3,7 @@ using System.Threading.RateLimiting;
 using Game.Api.Configuration;
 using Game.Api.Leaderboards;
 using Game.Api.Saves;
+using Game.Api.Telemetry;
 using Game.Data;
 using JabaSurvivol.Contracts;
 using JabaSurvivol.Security;
@@ -25,6 +26,10 @@ var connectionString = builder.Configuration.GetConnectionString("Database")
 builder.Services.AddDbContext<GameDbContext>(options =>
     options.UseNpgsql(connectionString, npgsql =>
         npgsql.MigrationsHistoryTable("__GameMigrationsHistory", GameDbContext.Schema)));
+
+builder.Services.AddDbContext<TelemetryDbContext>(options =>
+    options.UseNpgsql(connectionString, npgsql =>
+        npgsql.MigrationsHistoryTable("__TelemetryMigrationsHistory", TelemetryDbContext.Schema)));
 
 var leaderboardPermitLimit = builder.Configuration.GetValue("RateLimiting:LeaderboardSubmitPermitLimit", 30);
 builder.Services.AddOptions<RemoteConfigOptions>()
@@ -96,6 +101,7 @@ app.MapGet(ApiRoutes.GameStatus, () => Results.Ok(new
 
 app.MapSaveEndpoints();
 app.MapRemoteConfigEndpoint();
+app.MapTelemetryEndpoints();
 app.MapLeaderboardEndpoints();
 
 if (app.Configuration.GetValue("Database:Migrate", app.Environment.IsDevelopment()))
@@ -103,6 +109,9 @@ if (app.Configuration.GetValue("Database:Migrate", app.Environment.IsDevelopment
     using var scope = app.Services.CreateScope();
     var database = scope.ServiceProvider.GetRequiredService<GameDbContext>();
     database.Database.Migrate();
+
+    var telemetry = scope.ServiceProvider.GetRequiredService<TelemetryDbContext>();
+    telemetry.Database.Migrate();
 }
 
 app.Run();
