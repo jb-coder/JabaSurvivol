@@ -45,6 +45,7 @@ namespace JabaSurvivol.Core
     {
         private readonly RoundState _round;
         private BossState? _boss;
+        private ActiveSkillRuntime _activeSkill;
 
         public RunState(
             float maxHealth,
@@ -74,6 +75,9 @@ namespace JabaSurvivol.Core
                 profile ?? new Profile(),
                 ammoCapacityMultiplier,
                 reloadSpeedMultiplier);
+            var activeNode = profile?.ActiveSkill ?? SkillNode.Turret;
+            var activeRank = profile?.GetSkillRank(activeNode) ?? 0;
+            _activeSkill = new ActiveSkillRuntime(activeNode, activeRank);
             _round = new RoundState(startingRound, seed);
             _round.Start();
         }
@@ -128,6 +132,11 @@ namespace JabaSurvivol.Core
         /// profile and resets on death or restart.
         /// </summary>
         public WeaponLoadout Loadout { get; }
+
+        /// <summary>
+        /// Run-only active skill state.
+        /// </summary>
+        public ActiveSkillRuntime ActiveSkill => _activeSkill;
 
         public WeaponId CurrentWeapon => Loadout.Current.Id;
 
@@ -359,6 +368,47 @@ namespace JabaSurvivol.Core
         }
 
         /// <summary>
+        /// Deploys the selected active skill when it is ready.
+        /// </summary>
+        public bool TryActivateActiveSkill()
+        {
+            return !IsGameOver && _activeSkill.TryActivate();
+        }
+
+        /// <summary>
+        /// Advances active-skill cooldown and duration timers.
+        /// </summary>
+        public void TickActiveSkill(float deltaTime)
+        {
+            if (!IsGameOver)
+            {
+                _activeSkill.Tick(deltaTime);
+            }
+        }
+
+        /// <summary>
+        /// Re-reads the selected active skill and its rank after allocation or
+        /// selection changes.
+        /// </summary>
+        public void RefreshActiveSkill(Profile profile)
+        {
+            if (profile is null)
+            {
+                throw new ArgumentNullException(nameof(profile));
+            }
+
+            var node = profile.ActiveSkill;
+            var rank = profile.GetSkillRank(node);
+            if (_activeSkill.Node == node)
+            {
+                _activeSkill.UpdateRank(rank);
+                return;
+            }
+
+            _activeSkill.SetNode(node, rank);
+        }
+
+        /// <summary>
         /// Adds free, drop-based armor condition. Only equipped armor can be
         /// repaired; with no armor equipped the plates have no effect.
         /// </summary>
@@ -415,6 +465,7 @@ namespace JabaSurvivol.Core
             Player.Reset();
             Kills = 0;
             Loadout.Reset();
+            _activeSkill.Reset();
             Armor = MaxArmor;
             IsGameOver = false;
             IsVictory = false;

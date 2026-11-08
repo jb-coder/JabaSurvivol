@@ -29,6 +29,7 @@ namespace JabaSurvivol.Gameplay
         public bool PausePressed;
         public bool ReloadPressed;
         public bool SwitchWeaponPressed;
+        public bool ActiveSkillPressed;
         public StickState MoveStick;
         public StickState AimStick;
     }

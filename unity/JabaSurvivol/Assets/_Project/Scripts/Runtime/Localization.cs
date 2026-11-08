@@ -32,6 +32,8 @@ namespace JabaSurvivol.Gameplay
             ["hud.ammo"] = "AMMO {0}/{1}   RESERVE {2}",
             ["hud.ammo.infinite"] = "AMMO {0}/{1}   RESERVE {2}",
             ["hud.reloading"] = "RELOADING",
+            ["hud.skill"] = "SKILL",
+            ["hud.skill.locked"] = "LOCKED",
             ["hud.elite"] = "ELITE ROUND - REWARDS x2",
             ["hud.boss"] = "BOSS",
             ["hud.boss.health"] = "BOSS {0}/{1}",

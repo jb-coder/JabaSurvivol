@@ -25,13 +25,24 @@ The curve is configurable and will be validated with simulations.
 ## Skill tree
 
 The nine nodes are data-driven in `SkillCatalog`. Each node has five ranks.
-Turret rank data is included, but turret activation is delivered in the
-active-skill milestone. Shockwave and Dash rank data is included, but their
-activation systems are also later scope.
+Turret activation is delivered in this milestone. Shockwave and Dash rank data
+is included, but their activation systems are delivered in a later milestone.
 
 Shockwave, Dash, and Turret store per-rank activation values: area damage and
 radius, dash distance, turret damage and duration, and cooldown reduction. The
-activation systems consume those values in later milestones.
+activation systems consume those values as they land.
+
+### Turret activation
+
+- Turret is the selected active skill by default.
+- Rank 1: 8 damage per shot, 8 second duration, 19 second cooldown.
+- Rank 5: 16 damage per shot, 16 second duration, 15 second cooldown.
+- The turret fires every 0.5 seconds at the nearest enemy within 8 units.
+- One turret can be deployed at a time. It cannot be redeployed while active or
+  while the cooldown is running.
+- Turret state is run-only and resets on death or a new run.
+- The HUD shows a touch active-skill button with a radial cooldown, plus a
+  keyboard fallback on Space.
 
 ### Strength
 

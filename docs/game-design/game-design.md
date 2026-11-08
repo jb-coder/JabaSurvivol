@@ -68,7 +68,16 @@ Elite rounds occur every fifth round, including round 5, and exclude the round 1
 
 The HUD shows the elite modifier for the whole round. Elite state is run-only and does not alter persistent progression rules.
 
-### Round 10 boss
+## Active skills
+
+- Turret is the default survival active skill.
+- The selected active skill uses its allocated rank.
+- Rank zero locks activation.
+- Turret deploys at the player's position, lasts for its rank-scaled duration, fires at the nearest enemy in range, and then enters its rank-scaled cooldown.
+- The HUD active-skill button shows a radial cooldown and the keyboard fallback is Space.
+- Active-skill state is run-only and resets on death or a new run.
+
+## Boss
 
 The Warden spawns only in round 10, after every regular enemy in the round has been killed. The round stays active until the boss dies.
 

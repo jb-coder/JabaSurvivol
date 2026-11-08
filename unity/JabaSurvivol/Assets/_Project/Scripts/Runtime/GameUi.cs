@@ -37,6 +37,9 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _ammoText;
         private readonly Text _reloadText;
         private readonly Image _reloadFill;
+        private readonly Button _activeSkillButton;
+        private readonly Image _activeSkillCooldown;
+        private readonly Text _activeSkillLabel;
         private readonly Text _gameOverSummary;
         private readonly Text _victorySummary;
         private readonly Text _bossNameText;
@@ -94,6 +97,11 @@ namespace JabaSurvivol.Gameplay
         private int _lastReserve = int.MinValue;
         private bool _lastInfiniteReserve;
         private bool _lastReloading;
+        private SkillNode _lastSkillNode = SkillNode.Turret;
+        private int _lastSkillRank = int.MinValue;
+        private bool _lastSkillReady;
+        private int _lastSkillCooldownPercent = int.MinValue;
+        private int _lastSkillActivePercent = int.MinValue;
         private bool _characterSheetTablet;
         private int _activeCharacterBranch;
 
@@ -106,6 +114,7 @@ namespace JabaSurvivol.Gameplay
             System.Action onResume,
             System.Action onReload,
             System.Action onSwitchWeapon,
+            System.Action onActiveSkill,
             System.Action<int> onRewardSelected,
             System.Action onArmory,
             System.Action<WeaponId> onArmoryAction,
@@ -127,12 +136,15 @@ namespace JabaSurvivol.Gameplay
             safeAreaObject.AddComponent<SafeAreaFitter>();
 
             _mainMenu = BuildMainMenu(onStart, onArmory, onCharacterSheet);
-            _hud = BuildHud(onPause, onReload, onSwitchWeapon, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
+            _hud = BuildHud(onPause, onReload, onSwitchWeapon, onActiveSkill, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
             _roundModifierText = FindText(_hud, "Round Modifier");
             _weaponText = FindText(_hud, "Weapon");
             _ammoText = FindText(_hud, "Ammo");
             _reloadText = FindText(_hud, "Reload Status");
             _reloadFill = FindImage(_hud, "Reload Fill");
+            _activeSkillButton = FindGameObject(_hud, "Active Skill Button")?.GetComponent<Button>();
+            _activeSkillCooldown = FindImage(_hud, "Active Skill Cooldown");
+            _activeSkillLabel = FindText(_hud, "Active Skill Label");
             _bossPanel = FindGameObject(_hud, "Boss Panel");
             _bossNameText = FindText(_hud, "Boss Name");
             _bossHealthText = FindText(_hud, "Boss Health Text");
@@ -245,6 +257,11 @@ namespace JabaSurvivol.Gameplay
             _lastReserve = int.MinValue;
             _lastInfiniteReserve = false;
             _lastReloading = false;
+            _lastSkillNode = SkillNode.Turret;
+            _lastSkillRank = int.MinValue;
+            _lastSkillReady = false;
+            _lastSkillCooldownPercent = int.MinValue;
+            _lastSkillActivePercent = int.MinValue;
             HideLevelUp();
             HideRoundEnd();
         }
@@ -380,6 +397,48 @@ namespace JabaSurvivol.Gameplay
             _reloadFill.fillAmount = reloading && reloadDuration > 0f
                 ? Mathf.Clamp01(1f - (reloadRemaining / reloadDuration))
                 : 0f;
+        }
+
+        /// <summary>
+        /// Updates the active skill button, label, and radial cooldown.
+        /// </summary>
+        public void UpdateActiveSkillHud(
+            SkillNode node,
+            int rank,
+            bool ready,
+            float cooldownFraction,
+            float activeFraction)
+        {
+            if (_activeSkillButton == null || _activeSkillCooldown == null || _activeSkillLabel == null)
+            {
+                return;
+            }
+
+            var cooldownPercent = Mathf.RoundToInt(Mathf.Clamp01(cooldownFraction) * 100f);
+            var activePercent = Mathf.RoundToInt(Mathf.Clamp01(activeFraction) * 100f);
+            if (node == _lastSkillNode &&
+                rank == _lastSkillRank &&
+                ready == _lastSkillReady &&
+                cooldownPercent == _lastSkillCooldownPercent &&
+                activePercent == _lastSkillActivePercent)
+            {
+                return;
+            }
+
+            _lastSkillNode = node;
+            _lastSkillRank = rank;
+            _lastSkillReady = ready;
+            _lastSkillCooldownPercent = cooldownPercent;
+            _lastSkillActivePercent = activePercent;
+
+            _activeSkillLabel.text = rank <= 0
+                ? Localization.Get("hud.skill.locked")
+                : Localization.SkillName(node);
+            _activeSkillButton.interactable = ready;
+            _activeSkillCooldown.fillAmount = Mathf.Clamp01(cooldownFraction);
+            _activeSkillCooldown.color = activeFraction > 0f
+                ? new Color(0.3f, 1f, 0.55f, 0.55f)
+                : new Color(0.02f, 0.02f, 0.03f, 0.78f);
         }
 
         public void ShowLevelUp(int level)
@@ -1044,6 +1103,7 @@ namespace JabaSurvivol.Gameplay
             System.Action onPause,
             System.Action onReload,
             System.Action onSwitchWeapon,
+            System.Action onActiveSkill,
             out Text healthText,
             out Text armorText,
             out Image healthFill,
@@ -1152,6 +1212,23 @@ namespace JabaSurvivol.Gameplay
 
             var switchWeapon = UiFactory.CreateButton(root.transform, "Switch Weapon", Localization.Get("hud.switch"), 22, onSwitchWeapon);
             UiFactory.Place(switchWeapon.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(100f, 84f), new Vector2(190f, 66f));
+
+            var activeSkill = UiFactory.CreateButton(root.transform, "Active Skill Button", Localization.Get("hud.skill"), 20, onActiveSkill);
+            UiFactory.Place(
+                activeSkill.GetComponent<RectTransform>(),
+                new Vector2(1f, 0f),
+                new Vector2(1f, 0f),
+                new Vector2(-170f, 330f),
+                new Vector2(130f, 130f));
+            var cooldown = UiFactory.CreateImage(activeSkill.transform, "Active Skill Cooldown", SpriteFactory.Ring, new Color(0.02f, 0.02f, 0.03f, 0.78f));
+            UiFactory.Stretch(cooldown.rectTransform);
+            cooldown.type = Image.Type.Filled;
+            cooldown.fillMethod = Image.FillMethod.Radial360;
+            cooldown.fillOrigin = (int)Image.Origin360.Top;
+            cooldown.fillAmount = 0f;
+            var skillLabel = activeSkill.GetComponentInChildren<Text>();
+            skillLabel.name = "Active Skill Label";
+            skillLabel.transform.SetAsLastSibling();
 
             var hint = UiFactory.CreateText(root.transform, "Controls Hint", Localization.Get("menu.controls"), 20, TextAnchor.MiddleCenter, new Color(0.48f, 0.56f, 0.66f));
             UiFactory.Place(hint.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 24f), new Vector2(1400f, 40f));

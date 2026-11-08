@@ -48,7 +48,12 @@ namespace JabaSurvivol.Core
             float areaRadiusPerRank = 0f,
             float dashDistancePerRank = 0f,
             float turretDamagePerRank = 0f,
-            float turretDurationPerRank = 0f)
+            float turretDurationPerRank = 0f,
+            float baseAreaDamage = 0f,
+            float baseAreaRadius = 0f,
+            float baseDashDistance = 0f,
+            float baseTurretDamage = 0f,
+            float baseTurretDuration = 0f)
         {
             if (maxRanks <= 0)
             {
@@ -74,6 +79,11 @@ namespace JabaSurvivol.Core
             DashDistancePerRank = dashDistancePerRank;
             TurretDamagePerRank = turretDamagePerRank;
             TurretDurationPerRank = turretDurationPerRank;
+            BaseAreaDamage = baseAreaDamage;
+            BaseAreaRadius = baseAreaRadius;
+            BaseDashDistance = baseDashDistance;
+            BaseTurretDamage = baseTurretDamage;
+            BaseTurretDuration = baseTurretDuration;
         }
 
         public SkillNode Node { get; }
@@ -114,6 +124,16 @@ namespace JabaSurvivol.Core
 
         public float TurretDurationPerRank { get; }
 
+        public float BaseAreaDamage { get; }
+
+        public float BaseAreaRadius { get; }
+
+        public float BaseDashDistance { get; }
+
+        public float BaseTurretDamage { get; }
+
+        public float BaseTurretDuration { get; }
+
         /// <summary>
         /// Per-rank activation data for active nodes. Passive nodes return
         /// zero values and a zero cooldown.
@@ -122,11 +142,11 @@ namespace JabaSurvivol.Core
         {
             var clampedRank = Math.Clamp(rank, 0, MaxRanks);
             return new SkillActivationStats(
-                AreaDamagePerRank * clampedRank,
-                AreaRadiusPerRank * clampedRank,
-                DashDistancePerRank * clampedRank,
-                TurretDamagePerRank * clampedRank,
-                TurretDurationPerRank * clampedRank,
+                BaseAreaDamage + (AreaDamagePerRank * clampedRank),
+                BaseAreaRadius + (AreaRadiusPerRank * clampedRank),
+                BaseDashDistance + (DashDistancePerRank * clampedRank),
+                BaseTurretDamage + (TurretDamagePerRank * clampedRank),
+                BaseTurretDuration + (TurretDurationPerRank * clampedRank),
                 Math.Max(0f, BaseCooldownSeconds - (CooldownReductionPerRank * clampedRank)));
         }
     }
@@ -202,7 +222,9 @@ namespace JabaSurvivol.Core
                 baseCooldownSeconds: 10f,
                 cooldownReductionPerRank: 1f,
                 areaDamagePerRank: 10f,
-                areaRadiusPerRank: 0.25f),
+                areaRadiusPerRank: 0.25f,
+                baseAreaDamage: 30f,
+                baseAreaRadius: 1.75f),
             new SkillNodeDefinition(SkillNode.Speed, SkillBranch.Agility, maxRanks: 5, moveSpeedBonusPerRank: 0.02f),
             new SkillNodeDefinition(SkillNode.Precision, SkillBranch.Agility, maxRanks: 5, criticalChancePerRank: 0.01f, headshotBonusPerRank: 0.05f),
             new SkillNodeDefinition(
@@ -211,7 +233,8 @@ namespace JabaSurvivol.Core
                 maxRanks: 5,
                 baseCooldownSeconds: 6f,
                 cooldownReductionPerRank: 0.5f,
-                dashDistancePerRank: 0.5f),
+                dashDistancePerRank: 0.5f,
+                baseDashDistance: 2.5f),
             new SkillNodeDefinition(SkillNode.Endurance, SkillBranch.Survival, maxRanks: 5, armorPerRank: 5),
             new SkillNodeDefinition(SkillNode.Engineering, SkillBranch.Survival, maxRanks: 5, reloadSpeedBonusPerRank: 0.05f, ammoCapacityBonusPerRank: 0.05f),
             new SkillNodeDefinition(
@@ -222,7 +245,9 @@ namespace JabaSurvivol.Core
                 baseCooldownSeconds: 20f,
                 cooldownReductionPerRank: 1f,
                 turretDamagePerRank: 2f,
-                turretDurationPerRank: 2f)
+                turretDurationPerRank: 2f,
+                baseTurretDamage: 6f,
+                baseTurretDuration: 6f)
         };
 
         public static IReadOnlyList<SkillNodeDefinition> All => Nodes;
