@@ -1,0 +1,11 @@
+# v0.4.0 Slice 55 Android Smoke Test
+
+- Date: 2026-11-07
+- Emulator: Android 15 (API 35), x86_64 Google Play system image, `jaba_survivol_api35`
+- Device profile: phone 1080 x 2340 at 440 dpi; tablet display override 2560 x 1600 at 320 dpi
+- Production APK: `JabaSurvivol-0.4.0-55.apk` (ARM64), 32,385,289 bytes, SHA-256 `B03824A38D5981AA164EEB0E2251AB05720097D673DFA614DD38FB79E9F96022`
+- Emulator APK: `JabaSurvivol-0.4.0-55-emulator.apk` (ARM64 + x86_64), 59,122,041 bytes, SHA-256 `0C84E7D39024A5382205BF56600908A229BA2008A6F894AACC3554035C7AB5FD`
+- Activity: `com.jabasurvivol.game/com.unity3d.player.UnityPlayerActivity`
+- Result: the HUD shows the equipped weapon, magazine, reserve, reload bar, reload button, and switch button on phone and tablet layouts
+- Fatal search: no `FATAL EXCEPTION`, `AndroidRuntime` crash, unhandled exception, or `NullReferenceException` in the app process log
+- Evidence: `v04-55-phone.png`, `v04-55-tablet.png`, `v04-55-playing.png`

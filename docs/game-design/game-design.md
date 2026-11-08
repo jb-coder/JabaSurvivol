@@ -90,6 +90,18 @@ The slam is telegraphed with an expanding red ring before it resolves. The boss 
 
 The victory screen shows the round, kills, supplies earned, and XP earned, with next-run and main-menu actions. Death during the boss round preserves all persistent progression and resets only the current run.
 
+## Ammunition
+
+- Each run tracks a magazine and reserve for every unlocked weapon.
+- The pistol has infinite reserve. Other weapons use their catalog reserve.
+- Firing consumes one round per trigger pull. The shotgun consumes one shell per trigger pull and fires its pellet spread.
+- Firing stops when the magazine is empty. The player reloads manually or the weapon reloads automatically on the next trigger pull.
+- Reload time uses the effective reload value from weapon upgrades and Engineering.
+- Engineering increases magazine capacity through the ammo capacity multiplier.
+- Switching weapons during a run preserves each weapon's magazine state.
+- Ammo crates refill every finite reserve for free and never consume persistent supplies.
+- Ammo is run-only. Death and a new run reset magazines and reserves.
+
 ## Rewards
 
 - Supplies.

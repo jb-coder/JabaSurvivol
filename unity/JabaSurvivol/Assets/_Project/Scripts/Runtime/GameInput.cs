@@ -27,6 +27,8 @@ namespace JabaSurvivol.Gameplay
         public Vector2 Aim;
         public bool FireHeld;
         public bool PausePressed;
+        public bool ReloadPressed;
+        public bool SwitchWeaponPressed;
         public StickState MoveStick;
         public StickState AimStick;
     }

@@ -41,6 +41,15 @@ source of truth for damage, fire rate, magazine size, reload time, range,
 projectile speed, reserve ammunition, pellet count, spread, and unlock cost.
 The pistol always starts unlocked and has infinite reserve.
 
+Each run creates a `WeaponLoadout` with one runtime state per unlocked weapon.
+The state stores the magazine, finite reserve, reload timer, and reload progress.
+Firing consumes one round per trigger pull; the shotgun consumes one shell and
+then resolves its pellet spread. Reload time is `reloadSeconds / reloadSpeedMultiplier`,
+where the multiplier includes Engineering and weapon reload upgrades. Engineering
+also scales magazine capacity through `AmmoCapacityMultiplier`. Ammo crates add
+to every finite reserve and never touch persistent supplies. Ammo is run-only and
+resets on death or a new run.
+
 The armory is available from the main menu and the pause menu. It spends
 persistent supplies to unlock weapons and equips owned weapons. Unlocks and the
 equipped weapon are stored in the profile and survive death.
