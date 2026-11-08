@@ -77,7 +77,7 @@ namespace JabaSurvivol.Tests.PlayMode
             yield return null;
             var session = _bootstrap.Session;
             var previousScale = Time.timeScale;
-            Time.timeScale = 20f;
+            Time.timeScale = 5f;
             try
             {
                 session.SetInputForTests(new ScriptedInput
@@ -88,17 +88,23 @@ namespace JabaSurvivol.Tests.PlayMode
                 yield return null;
 
                 var sawReloading = false;
-                for (var i = 0; i < 120; i++)
+                for (var i = 0; i < 240 && !sawReloading; i++)
                 {
                     yield return null;
-                    if (session.IsReloading)
-                    {
-                        sawReloading = true;
-                    }
+                    sawReloading = session.IsReloading;
                 }
 
                 Assert.That(sawReloading, Is.True);
-                Assert.That(session.Magazine, Is.GreaterThan(0));
+
+                var refilled = false;
+                for (var i = 0; i < 240 && !refilled; i++)
+                {
+                    yield return null;
+                    refilled = !session.IsReloading &&
+                               session.Magazine == session.MagazineSize;
+                }
+
+                Assert.That(refilled, Is.True);
             }
             finally
             {
@@ -206,6 +212,65 @@ namespace JabaSurvivol.Tests.PlayMode
             session.ResumeGame();
             yield return null;
             Assert.That(session.State, Is.EqualTo(GameSessionState.Playing));
+        }
+
+        [UnityTest]
+        public IEnumerator Armory_upgrade_targets_the_run_weapon_while_paused()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddSupplies(3000);
+            session.TryPurchaseWeapon(WeaponId.Smg);
+            session.TryEquipWeapon(WeaponId.Smg);
+            session.StartRun();
+            yield return null;
+            Assert.That(session.SwitchWeapon(), Is.True);
+            Assert.That(session.CurrentWeapon, Is.EqualTo(WeaponId.Pistol));
+
+            session.PauseGame();
+            yield return null;
+            session.ShowArmory();
+            yield return null;
+
+            Assert.That(
+                session.TryPurchaseWeaponUpgrade(WeaponUpgradeStat.ReloadSpeed),
+                Is.EqualTo(WeaponUpgradePurchaseResult.Purchased));
+            Assert.That(
+                session.Profile.GetWeaponUpgradeTier(WeaponId.Pistol, WeaponUpgradeStat.ReloadSpeed),
+                Is.EqualTo(1));
+            Assert.That(
+                session.Profile.GetWeaponUpgradeTier(WeaponId.Smg, WeaponUpgradeStat.ReloadSpeed),
+                Is.EqualTo(0));
+        }
+
+        [UnityTest]
+        public IEnumerator Armory_upgrade_after_returning_to_menu_uses_the_profile_weapon()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.Profile.AddSupplies(3000);
+            session.TryPurchaseWeapon(WeaponId.Smg);
+            session.TryEquipWeapon(WeaponId.Smg);
+            session.StartRun();
+            yield return null;
+            Assert.That(session.SwitchWeapon(), Is.True);
+            session.ReturnToMenu();
+            yield return null;
+
+            session.ShowArmory();
+            yield return null;
+
+            Assert.That(
+                session.TryPurchaseWeaponUpgrade(WeaponUpgradeStat.ReloadSpeed),
+                Is.EqualTo(WeaponUpgradePurchaseResult.Purchased));
+            Assert.That(
+                session.Profile.GetWeaponUpgradeTier(WeaponId.Smg, WeaponUpgradeStat.ReloadSpeed),
+                Is.EqualTo(1));
+            Assert.That(
+                session.Profile.GetWeaponUpgradeTier(WeaponId.Pistol, WeaponUpgradeStat.ReloadSpeed),
+                Is.EqualTo(0));
         }
 
         private static GameBootstrap CreateBootstrap()

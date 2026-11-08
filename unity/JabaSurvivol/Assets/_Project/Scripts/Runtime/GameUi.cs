@@ -494,7 +494,7 @@ namespace JabaSurvivol.Gameplay
 
         public bool HudVisible => _hud != null && _hud.activeSelf;
 
-        public void ShowArmory(Profile profile)
+        public void ShowArmory(Profile profile, WeaponId displayWeapon)
         {
             _mainMenu.SetActive(false);
             _hud.SetActive(false);
@@ -506,7 +506,7 @@ namespace JabaSurvivol.Gameplay
             _armoryPanel.SetActive(true);
             _armoryWeaponsPanel.SetActive(true);
             _armoryArmorPanel.SetActive(false);
-            RefreshArmory(profile);
+            RefreshArmory(profile, displayWeapon);
             SetArmoryStatus(string.Empty);
         }
 
@@ -765,7 +765,7 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
-        public void RefreshArmory(Profile profile)
+        public void RefreshArmory(Profile profile, WeaponId displayWeapon)
         {
             _armorySuppliesText.text = Localization.Format("armory.supplies", profile.Supplies);
 
@@ -804,13 +804,13 @@ namespace JabaSurvivol.Gameplay
 
             _armoryUpgradeTitle.text = Localization.Format(
                 "armory.upgrade.title",
-                Localization.WeaponName(profile.EquippedWeapon));
+                Localization.WeaponName(displayWeapon));
 
             for (var i = 0; i < _armoryUpgradeRows.Length; i++)
             {
                 var row = _armoryUpgradeRows[i];
-                var track = WeaponUpgradeCatalog.Get(profile.EquippedWeapon, row.Stat);
-                var tier = profile.GetWeaponUpgradeTier(profile.EquippedWeapon, row.Stat);
+                var track = WeaponUpgradeCatalog.Get(displayWeapon, row.Stat);
+                var tier = profile.GetWeaponUpgradeTier(displayWeapon, row.Stat);
                 row.Label.text = FormatUpgradeCard(track, tier);
                 row.Button.interactable = tier < track.MaxTier;
             }

@@ -941,8 +941,15 @@ namespace JabaSurvivol.Gameplay
             }
 
             _armoryReturnState = _state;
-            _ui.ShowArmory(_profile);
+            _ui.ShowArmory(_profile, ArmoryDisplayWeapon());
             _ui.SetSticks(default, default);
+        }
+
+        private WeaponId ArmoryDisplayWeapon()
+        {
+            return _state == GameSessionState.Paused && _run != null && !_run.IsGameOver
+                ? _run.CurrentWeapon
+                : _profile.EquippedWeapon;
         }
 
         public void CloseArmory()
@@ -1100,7 +1107,7 @@ namespace JabaSurvivol.Gameplay
                 }
             }
 
-            _ui.RefreshArmory(_profile);
+            _ui.RefreshArmory(_profile, ArmoryDisplayWeapon());
         }
 
         private void HandleArmoryUpgrade(WeaponUpgradeStat stat)
@@ -1112,7 +1119,7 @@ namespace JabaSurvivol.Gameplay
                     Localization.Format(
                         "armory.upgrade.purchased",
                         Localization.WeaponUpgradeStatName(stat),
-                        _profile.GetWeaponUpgradeTier(_profile.EquippedWeapon, stat)));
+                        _profile.GetWeaponUpgradeTier(ArmoryDisplayWeapon(), stat)));
             }
             else if (result == WeaponUpgradePurchaseResult.InsufficientSupplies)
             {
@@ -1123,18 +1130,16 @@ namespace JabaSurvivol.Gameplay
                 _ui.SetArmoryStatus(Localization.Get("armory.upgrade.maxed"));
             }
 
-            _ui.RefreshArmory(_profile);
+            _ui.RefreshArmory(_profile, ArmoryDisplayWeapon());
         }
 
         /// <summary>
-        /// Purchases the next permanent tier for the equipped weapon and
-        /// refreshes the effective combat stats.
+        /// Purchases the next permanent tier for the weapon displayed in the
+        /// armory and refreshes the effective combat stats.
         /// </summary>
         public WeaponUpgradePurchaseResult TryPurchaseWeaponUpgrade(WeaponUpgradeStat stat)
         {
-            var weaponId = _run != null && !_run.IsGameOver
-                ? _run.CurrentWeapon
-                : _profile.EquippedWeapon;
+            var weaponId = ArmoryDisplayWeapon();
             var result = WeaponUpgradeService.TryPurchase(_profile, weaponId, stat);
             if (result == WeaponUpgradePurchaseResult.Purchased)
             {
@@ -1258,7 +1263,7 @@ namespace JabaSurvivol.Gameplay
                 }
             }
 
-            _ui.RefreshArmory(_profile);
+            _ui.RefreshArmory(_profile, ArmoryDisplayWeapon());
         }
 
         private void HandleArmorUpgrade()
@@ -1280,7 +1285,7 @@ namespace JabaSurvivol.Gameplay
                 _ui.SetArmoryStatus(Localization.Get("armory.armor.maxed"));
             }
 
-            _ui.RefreshArmory(_profile);
+            _ui.RefreshArmory(_profile, ArmoryDisplayWeapon());
         }
 
         public ArmorPurchaseResult TryPurchaseArmor(ArmorTier tier)
