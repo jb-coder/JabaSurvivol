@@ -108,6 +108,11 @@ namespace JabaSurvivol.Gameplay
                 {
                     frame.SwitchWeaponPressed = true;
                 }
+
+                if (keyboard.spaceKey.wasPressedThisFrame)
+                {
+                    frame.ActiveSkillPressed = true;
+                }
             }
 
             var mouse = Mouse.current;

@@ -40,6 +40,11 @@ namespace JabaSurvivol.Gameplay
         private float _bossTelegraphRemaining;
         private float _bossAttackCooldown;
         private bool _bossEnraged;
+        private GameObject _turretObject;
+        private SpriteRenderer _turretRenderer;
+        private Transform _turretAimPivot;
+        private Vector2 _turretPosition;
+        private int _turretShotsFired;
         private BulletPool _bullets;
         private GameSessionState _state;
         private Vector2 _aimDirection = Vector2.right;
@@ -78,6 +83,30 @@ namespace JabaSurvivol.Gameplay
         public bool IsReloading => _run?.IsReloading ?? false;
 
         public float CurrentReloadDuration => _run?.CurrentWeaponState.ReloadDuration ?? 0f;
+
+        public bool TurretActive => _run?.ActiveSkill.IsActive ?? false;
+
+        public bool TurretVisible => _turretObject != null && _turretObject.activeSelf;
+
+        public int ActiveSkillRank => _run?.ActiveSkill.Rank ?? 0;
+
+        public float ActiveSkillCooldownRemaining => _run?.ActiveSkill.CooldownRemaining ?? 0f;
+
+        public float ActiveSkillCooldownFraction => _run?.ActiveSkill.CooldownFraction ?? 0f;
+
+        public bool ActiveSkillReady => _run?.ActiveSkill.CanActivate ?? false;
+
+        public int TurretShotsFiredForTests => _turretShotsFired;
+
+        public float ZombieHealthForTests => _zombie?.Health ?? 0f;
+
+        public void SetZombiePositionForTests(Vector2 position)
+        {
+            if (_zombieActor != null)
+            {
+                _zombieActor.GameObject.transform.position = position;
+            }
+        }
 
         public WeaponStats EquippedWeaponStats => _weapon;
 
@@ -204,6 +233,7 @@ namespace JabaSurvivol.Gameplay
                 ResumeGame,
                 () => ReloadWeapon(),
                 () => SwitchWeapon(),
+                () => ActivateActiveSkill(),
                 index => SelectRoundReward(index),
                 ShowArmory,
                 HandleArmoryAction,
@@ -294,6 +324,11 @@ namespace JabaSurvivol.Gameplay
                     SwitchWeapon();
                 }
 
+                if (frame.ActiveSkillPressed)
+                {
+                    ActivateActiveSkill();
+                }
+
                 UpdatePlaying(frame, Time.deltaTime);
                 _ui.SetSticks(frame.MoveStick, frame.AimStick);
             }
@@ -340,6 +375,8 @@ namespace JabaSurvivol.Gameplay
 
             _deathEffects.Update(deltaTime);
             _run.TickWeapons(deltaTime);
+            _run.TickActiveSkill(deltaTime);
+            UpdateTurret(deltaTime);
 
             if (_run.BossActive)
             {
@@ -858,12 +895,20 @@ namespace JabaSurvivol.Gameplay
             _bossTelegraphRemaining = 0f;
             _bossAttackCooldown = 0f;
             _bossEnraged = false;
+            _turretObject.SetActive(false);
+            _turretShotsFired = 0;
 
             SpawnZombie();
             _ui.ShowHud();
             _ui.SetRoundModifier(_run.RoundModel.Definition.IsElite);
             _ui.UpdateHud(_run.Player, _run.Armor, _run.MaxArmor, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
             UpdateWeaponHud();
+            _ui.UpdateActiveSkillHud(
+                _run.ActiveSkill.Node,
+                _run.ActiveSkill.Rank,
+                _run.ActiveSkill.CanActivate,
+                _run.ActiveSkill.CooldownFraction,
+                _run.ActiveSkill.ActiveFraction);
             _ui.SetSticks(default, default);
             _store.Save(_profile);
         }
@@ -917,6 +962,11 @@ namespace JabaSurvivol.Gameplay
             _zombieActors.ReturnAll();
             _deathEffects.Clear();
             _bullets.Clear();
+            if (_turretObject != null)
+            {
+                _turretObject.SetActive(false);
+            }
+
             if (_bossObject != null)
             {
                 _bossObject.SetActive(false);
@@ -1164,6 +1214,7 @@ namespace JabaSurvivol.Gameplay
             if (_run != null)
             {
                 _run.RefreshWeaponStats(_profile);
+                _run.RefreshActiveSkill(_profile);
                 _run.ApplyAmmoStats(_stats.AmmoCapacityMultiplier, _stats.ReloadSpeedMultiplier);
             }
         }
@@ -1369,6 +1420,111 @@ namespace JabaSurvivol.Gameplay
                 _ui.UpdateHud(_run.Player, _run.Armor, _run.MaxArmor, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
                 UpdateWeaponHud();
             }
+        }
+
+        /// <summary>
+        /// Deploys the selected active skill when it is ready.
+        /// </summary>
+        public bool ActivateActiveSkill()
+        {
+            if (_state != GameSessionState.Playing || _run == null)
+            {
+                return false;
+            }
+
+            if (!_run.TryActivateActiveSkill())
+            {
+                return false;
+            }
+
+            _turretPosition = (Vector2)_playerObject.transform.position;
+            _turretObject.transform.position = _turretPosition;
+            _turretObject.SetActive(true);
+            _ui.UpdateActiveSkillHud(
+                _run.ActiveSkill.Node,
+                _run.ActiveSkill.Rank,
+                _run.ActiveSkill.CanActivate,
+                _run.ActiveSkill.CooldownFraction,
+                _run.ActiveSkill.ActiveFraction);
+            return true;
+        }
+
+        private void UpdateTurret(float deltaTime)
+        {
+            if (_run == null || _turretObject == null)
+            {
+                return;
+            }
+
+            var skill = _run.ActiveSkill;
+            if (skill.IsActive)
+            {
+                if (!_turretObject.activeSelf)
+                {
+                    _turretPosition = (Vector2)_playerObject.transform.position;
+                    _turretObject.transform.position = _turretPosition;
+                    _turretObject.SetActive(true);
+                }
+
+                if (TryGetTurretTarget(out var target) && skill.TryConsumeShot(out var damage))
+                {
+                    var direction = target - _turretPosition;
+                    if (direction.sqrMagnitude > 0.0001f)
+                    {
+                        direction.Normalize();
+                        _turretAimPivot.localRotation = Quaternion.Euler(
+                            0f,
+                            0f,
+                            (Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg));
+                        _bullets.Spawn(
+                            _turretPosition,
+                            direction,
+                            GameBalance.TurretProjectileSpeed,
+                            GameBalance.TurretRange / GameBalance.TurretProjectileSpeed,
+                            damage);
+                        _turretShotsFired++;
+                    }
+                }
+            }
+            else if (_turretObject.activeSelf)
+            {
+                _turretObject.SetActive(false);
+            }
+
+            _ui.UpdateActiveSkillHud(
+                skill.Node,
+                skill.Rank,
+                skill.CanActivate,
+                skill.CooldownFraction,
+                skill.ActiveFraction);
+        }
+
+        private bool TryGetTurretTarget(out Vector2 target)
+        {
+            var rangeSquared = GameBalance.TurretRange * GameBalance.TurretRange;
+
+            if (_run.BossActive && _bossObject != null)
+            {
+                target = _bossObject.transform.position;
+                return (target - _turretPosition).sqrMagnitude <= rangeSquared;
+            }
+
+            if (_zombieActive && _zombieActor != null)
+            {
+                target = _zombieActor.GameObject.transform.position;
+                return (target - _turretPosition).sqrMagnitude <= rangeSquared;
+            }
+
+            target = Vector2.zero;
+            return false;
+        }
+
+        /// <summary>
+        /// Test hook that deploys the selected active skill.
+        /// </summary>
+        public bool ActivateActiveSkillForTests()
+        {
+            return ActivateActiveSkill();
         }
 
         private void UpdateWeaponHud()
@@ -1593,6 +1749,11 @@ namespace JabaSurvivol.Gameplay
             }
 
             _ui.HideBoss();
+            if (_turretObject != null)
+            {
+                _turretObject.SetActive(false);
+            }
+
             _profile.RecordRunEnd(_run);
             _store.Save(_profile);
             _ui.ShowGameOver(_run.Round, _run.Kills, _runSuppliesEarned);
@@ -1684,6 +1845,26 @@ namespace JabaSurvivol.Gameplay
             _bossTelegraphRenderer.color = new Color(1f, 0.25f, 0.2f, 0.4f);
             _bossTelegraphRenderer.sortingOrder = 12;
             _bossTelegraphRing.SetActive(false);
+
+            _turretObject = new GameObject("Turret");
+            _turretObject.transform.SetParent(_worldRoot, false);
+            _turretObject.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
+            _turretRenderer = _turretObject.AddComponent<SpriteRenderer>();
+            _turretRenderer.sprite = SpriteFactory.Circle;
+            _turretRenderer.color = new Color(0.35f, 1f, 0.72f);
+            _turretRenderer.sortingOrder = 22;
+
+            _turretAimPivot = new GameObject("Turret Barrel").transform;
+            _turretAimPivot.SetParent(_turretObject.transform, false);
+            var turretBarrel = new GameObject("Turret Barrel Visual");
+            turretBarrel.transform.SetParent(_turretAimPivot, false);
+            turretBarrel.transform.localPosition = new Vector3(0.32f, 0f, 0f);
+            turretBarrel.transform.localScale = new Vector3(0.44f, 0.13f, 1f);
+            var turretBarrelRenderer = turretBarrel.AddComponent<SpriteRenderer>();
+            turretBarrelRenderer.sprite = SpriteFactory.Square;
+            turretBarrelRenderer.color = new Color(0.9f, 1f, 0.94f);
+            turretBarrelRenderer.sortingOrder = 23;
+            _turretObject.SetActive(false);
 
             _bullets = new BulletPool(_worldRoot);
         }

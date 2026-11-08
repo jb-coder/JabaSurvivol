@@ -20,6 +20,9 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Manual and automatic reload with effective reload time from weapon upgrades and Engineering.
 - HUD weapon, ammo, reserve, and reload state, plus touch and keyboard reload and switch controls.
 - Ammo crates refill every finite reserve without spending persistent supplies.
+- Turret active skill with rank gating, deploy duration, target acquisition, rank-scaled damage, and cooldown.
+- Active-skill HUD button with radial cooldown and Space keyboard fallback.
+- Run-only active-skill state that resets on death and new runs.
 ## [0.3.0] - 2026-11-07
 
 ### Added
