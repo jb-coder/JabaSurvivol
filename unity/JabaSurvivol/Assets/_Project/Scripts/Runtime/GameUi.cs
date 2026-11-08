@@ -1,5 +1,6 @@
 using JabaSurvivol.Core;
 using System.Globalization;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -58,6 +59,7 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _characterLevelText;
         private readonly Text _characterPointsText;
         private readonly Text _characterStatsText;
+        private readonly Text _characterSynergyText;
         private readonly Text _characterStatusText;
         private readonly Button _characterRespecButton;
         private readonly Text _characterRespecLabel;
@@ -195,6 +197,7 @@ namespace JabaSurvivol.Gameplay
                 out _characterTabLabels,
                 out _characterBranchPanels,
                 out _characterNodeRows);
+            _characterSynergyText = FindText(_characterSheet, "Synergies");
 
             _selectActiveButtons = new Button[3];
             _selectActiveLabels = new Text[3];
@@ -616,6 +619,11 @@ namespace JabaSurvivol.Gameplay
 
         public bool CharacterSheetVisible => _characterSheet != null && _characterSheet.activeSelf;
 
+        public bool SynergyTextVisible => _characterSynergyText != null &&
+                                          !string.IsNullOrEmpty(_characterSynergyText.text);
+
+        public string SynergyTextForTests => _characterSynergyText?.text ?? string.Empty;
+
         public bool LevelUpVisible => _levelUpText != null && _levelUpText.gameObject.activeSelf;
 
         public void ShowCharacterSheet(Profile profile, bool canAllocate, bool canRespec, WeaponStats weapon, ArmorStats armor)
@@ -647,6 +655,7 @@ namespace JabaSurvivol.Gameplay
                 Profile.XpToNext(profile.Level));
             _characterPointsText.text = Localization.Format("character.points", profile.SkillPoints);
             _characterStatsText.text = FormatCharacterStats(stats);
+            _characterSynergyText.text = FormatSynergies(profile);
 
             for (var i = 0; i < _characterNodeRows.Length; i++)
             {
@@ -750,8 +759,51 @@ namespace JabaSurvivol.Gameplay
             return (value * 100f).ToString("0'%'", CultureInfo.InvariantCulture);
         }
 
-        private static string FormatCharacterStats(CharacterStats stats)
+        private static string FormatSynergies(Profile profile)
         {
+            var builder = new StringBuilder();
+            for (var i = 0; i < SynergyCatalog.All.Count; i++)
+            {
+                var definition = SynergyCatalog.All[i];
+                if (i > 0)
+                {
+                    builder.Append("   ");
+                }
+
+                var name = Localization.Get(SynergyNameKey(definition.Id));
+                if (SynergyCatalog.IsUnlocked(profile, definition.Id))
+                {
+                    builder.Append(Localization.Format("synergy.active", name));
+                }
+                else
+                {
+                    builder.Append(
+                        Localization.Format(
+                            "synergy.inactive",
+                            name,
+                            Localization.SkillName(definition.NodeA),
+                            profile.GetSkillRank(definition.NodeA),
+                            definition.RankA,
+                            Localization.SkillName(definition.NodeB),
+                            profile.GetSkillRank(definition.NodeB),
+                            definition.RankB));
+                }
+            }
+
+            return builder.ToString();
+        }
+
+        private static string SynergyNameKey(SynergyId id)
+        {
+            return id switch
+            {
+                SynergyId.Ghost => "synergy.ghost.name",
+                SynergyId.Bastion => "synergy.bastion.name",
+                _ => "synergy.berserker.name"
+            };
+        }
+
+        private static string FormatCharacterStats(CharacterStats stats)        {
             return Localization.Format(
                 "character.stats",
                 stats.MaxHealth.ToString("0", CultureInfo.InvariantCulture),
@@ -1634,6 +1686,20 @@ namespace JabaSurvivol.Gameplay
                 TextAnchor.MiddleCenter,
                 new Color(0.55f, 0.92f, 0.7f));
             UiFactory.Place(statsText.rectTransform, new Vector2(0.5f, 0.075f), new Vector2(0.5f, 0.5f), new Vector2(-100f, 0f), new Vector2(1300f, 36f));
+
+            var synergyText = UiFactory.CreateText(
+                root.transform,
+                "Synergies",
+                string.Empty,
+                18,
+                TextAnchor.MiddleCenter,
+                new Color(0.82f, 0.76f, 1f));
+            UiFactory.Place(
+                synergyText.rectTransform,
+                new Vector2(0.5f, 0.102f),
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                new Vector2(1500f, 24f));
 
             respecButton = UiFactory.CreateButton(
                 root.transform,

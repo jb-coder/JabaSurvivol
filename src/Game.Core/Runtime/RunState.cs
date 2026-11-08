@@ -44,8 +44,11 @@ namespace JabaSurvivol.Core
     public sealed class RunState
     {
         private readonly RoundState _round;
+        private readonly Profile _profile;
+        private readonly SynergyState _synergy = new SynergyState();
         private BossState? _boss;
         private ActiveSkillRuntime _activeSkill;
+        private float _bastionArmorAccumulator;
 
         public RunState(
             float maxHealth,
@@ -71,12 +74,13 @@ namespace JabaSurvivol.Core
             Seed = seed;
             MaxArmor = maxArmor;
             Armor = maxArmor;
+            _profile = profile ?? new Profile();
             Loadout = new WeaponLoadout(
-                profile ?? new Profile(),
+                _profile,
                 ammoCapacityMultiplier,
                 reloadSpeedMultiplier);
-            var activeNode = profile?.ActiveSkill ?? SkillNode.Turret;
-            var activeRank = profile?.GetSkillRank(activeNode) ?? 0;
+            var activeNode = _profile.ActiveSkill;
+            var activeRank = _profile.GetSkillRank(activeNode);
             _activeSkill = new ActiveSkillRuntime(activeNode, activeRank);
             _round = new RoundState(startingRound, seed);
             _round.Start();
@@ -137,6 +141,11 @@ namespace JabaSurvivol.Core
         /// Run-only active skill state.
         /// </summary>
         public ActiveSkillRuntime ActiveSkill => _activeSkill;
+
+        /// <summary>
+        /// Run-only synergy timers.
+        /// </summary>
+        public SynergyState Synergy => _synergy;
 
         public WeaponId CurrentWeapon => Loadout.Current.Id;
 
@@ -200,6 +209,7 @@ namespace JabaSurvivol.Core
 
             Kills++;
             LastKillArchetype = archetype;
+            _synergy.OnKill(_profile);
 
             var supplies = encounter.Supplies;
             var xp = encounter.Xp;
@@ -409,6 +419,34 @@ namespace JabaSurvivol.Core
         }
 
         /// <summary>
+        /// Advances synergy timers and applies Bastion armor regeneration.
+        /// Returns the whole armor points repaired this step.
+        /// </summary>
+        public int TickSynergies(float deltaTime)
+        {
+            if (IsGameOver)
+            {
+                return 0;
+            }
+
+            var regen = _synergy.Tick(deltaTime, _profile);
+            if (regen <= 0f)
+            {
+                return 0;
+            }
+
+            _bastionArmorAccumulator += regen;
+            var whole = (int)_bastionArmorAccumulator;
+            if (whole <= 0)
+            {
+                return 0;
+            }
+
+            _bastionArmorAccumulator -= whole;
+            return AddArmor(whole);
+        }
+
+        /// <summary>
         /// Adds free, drop-based armor condition. Only equipped armor can be
         /// repaired; with no armor equipped the plates have no effect.
         /// </summary>
@@ -436,6 +474,11 @@ namespace JabaSurvivol.Core
             }
 
             var remaining = Math.Max(0f, amount);
+            if (remaining > 0f)
+            {
+                _synergy.OnDamageTaken();
+            }
+
             if (remaining >= 1f && Armor > 0)
             {
                 var absorbed = (int)Math.Min((float)Armor, remaining);
@@ -452,6 +495,8 @@ namespace JabaSurvivol.Core
             {
                 IsGameOver = true;
                 _activeSkill.Reset();
+                _synergy.Reset();
+                _bastionArmorAccumulator = 0f;
                 _round.Fail();
             }
 
@@ -467,6 +512,8 @@ namespace JabaSurvivol.Core
             Kills = 0;
             Loadout.Reset();
             _activeSkill.Reset();
+            _synergy.Reset();
+            _bastionArmorAccumulator = 0f;
             Armor = MaxArmor;
             IsGameOver = false;
             IsVictory = false;

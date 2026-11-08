@@ -26,6 +26,8 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Dash active skill with rank-scaled distance, cooldown, and a brief invulnerability window.
 - Shockwave active skill with rank-scaled area damage, radius, cooldown, and zombie knockback.
 - Active-skill selection from the armory or character sheet with persistent profile storage and zero-rank gating.
+- Berserker, Ghost, and Bastion synergies derived from allocated ranks without extra skill points.
+- Character-sheet synergy status with active and requirement display.
 ## [0.3.0] - 2026-11-07
 
 ### Added

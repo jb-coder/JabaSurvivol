@@ -103,6 +103,17 @@ Delivered after the core loop is stable:
 
 Synergies do not cost extra points.
 
+Synergies are derived from the allocated ranks and are never stored as
+purchases:
+
+- Berserker activates while health is below 50% and adds 10% weapon damage.
+- Ghost activates for 2 seconds after a kill and adds 10% movement speed.
+- Bastion regenerates 2 armor per second after 5 seconds without taking damage.
+- The character sheet shows active synergies and the requirement progress for
+  inactive synergies.
+- Synergy modifiers are passed explicitly into stat aggregation, so repeated
+  aggregation does not double-apply them.
+
 ## Stat calculation
 
 ```text
