@@ -96,6 +96,20 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(_bootstrap.Session.AccountServiceForTests.State, Is.EqualTo(AccountState.Offline));
         }
         [UnityTest]
+        public IEnumerator Refresh_network_failure_through_account_service_shows_offline()
+        {
+            var store = new InMemorySecureTokenStore();
+            store.Save("refresh-token");
+            var service = new AccountService(new FailingRefreshAuthApiClient(), store);
+            GameBootstrap.AccountServiceFactoryOverride = () => service;
+
+            _bootstrap = CreateBootstrap();
+            yield return null;
+
+            Assert.That(service.State, Is.EqualTo(AccountState.Offline));
+            Assert.That(_bootstrap.Session.MainMenuAccountStateForTests, Does.Contain("OFFLINE"));
+        }
+        [UnityTest]
         public IEnumerator Starting_a_run_without_an_account_keeps_local_play_available()
         {
             _bootstrap = CreateBootstrap();
@@ -114,6 +128,20 @@ namespace JabaSurvivol.Tests.PlayMode
             return bootstrapObject.AddComponent<GameBootstrap>();
         }
 
+        private sealed class FailingRefreshAuthApiClient : IAuthApiClient
+        {
+            public Task<AuthResult> RegisterAsync(string username, string password, CancellationToken cancellationToken) =>
+                Task.FromResult(AuthResult.Failure(0, "network_error", "Unavailable.", true));
+
+            public Task<AuthResult> LoginAsync(string username, string password, CancellationToken cancellationToken) =>
+                Task.FromResult(AuthResult.Failure(0, "network_error", "Unavailable.", true));
+
+            public Task<AuthResult> RefreshAsync(string refreshToken, CancellationToken cancellationToken) =>
+                Task.FromResult(AuthResult.Failure(0, "network_error", "Unavailable.", true));
+
+            public Task<AuthResult> LogoutAsync(string accessToken, string refreshToken, CancellationToken cancellationToken) =>
+                Task.FromResult(AuthResult.Failure(0, "network_error", "Unavailable.", true));
+        }
         private sealed class FakeAccountService : IAccountService
         {
             public AccountState State { get; private set; } = AccountState.SignedOut;

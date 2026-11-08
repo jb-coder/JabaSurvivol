@@ -32,6 +32,9 @@ namespace JabaSurvivol.Gameplay
             Instance = this;
             Application.targetFrameRate = 60;
             ApiConfig.Initialize();
+#if DEVELOPMENT_BUILD
+            RunSecureStorageProbe();
+#endif
 
             var runtimeRoot = new GameObject("Runtime").transform;
             runtimeRoot.SetParent(transform, false);
@@ -75,6 +78,24 @@ namespace JabaSurvivol.Gameplay
             Session?.SaveNow();
             Instance = null;
         }
+
+#if DEVELOPMENT_BUILD
+        private static void RunSecureStorageProbe()
+        {
+            try
+            {
+                var store = SecureTokenStore.CreateDefault();
+                store.Save("probe-token");
+                var restored = store.Load() == "probe-token";
+                store.Clear();
+                Debug.Log("SecureTokenStore probe: " + (restored ? "ok" : "failed"));
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError("SecureTokenStore probe failed: " + exception);
+            }
+        }
+#endif
 
         private Camera CreateCamera(Transform parent)
         {

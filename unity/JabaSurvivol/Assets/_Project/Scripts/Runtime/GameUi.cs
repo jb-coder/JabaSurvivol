@@ -1320,7 +1320,7 @@ namespace JabaSurvivol.Gameplay
             var panel = UiFactory.CreatePanel(
                 _safeArea,
                 "Account Panel",
-                new Color(0.008f, 0.012f, 0.022f, 0.99f));
+                new Color(0.008f, 0.012f, 0.022f, 1f));
             var root = panel.gameObject;
             root.SetActive(false);
 

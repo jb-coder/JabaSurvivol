@@ -96,7 +96,15 @@ namespace JabaSurvivol.Gameplay
             File.WriteAllText(temporaryPath, Convert.ToBase64String(protectedBytes));
             if (File.Exists(_path))
             {
-                File.Replace(temporaryPath, _path, null);
+                try
+                {
+                    File.Replace(temporaryPath, _path, null);
+                }
+                catch (PlatformNotSupportedException)
+                {
+                    File.Copy(temporaryPath, _path, true);
+                    File.Delete(temporaryPath);
+                }
             }
             else
             {
@@ -223,7 +231,7 @@ namespace JabaSurvivol.Gameplay
 
         protected override byte[] Encrypt(byte[] plainText)
         {
-            using var cipher = new AndroidJavaObject("javax.crypto.Cipher", "AES/GCM/NoPadding");
+            using var cipher = CreateCipher();
             using var key = GetOrCreateKey();
             cipher.Call("init", CipherEncryptMode, key);
             var iv = cipher.Call<byte[]>("getIV");
@@ -247,7 +255,7 @@ namespace JabaSurvivol.Gameplay
             Buffer.BlockCopy(cipherText, 0, iv, 0, IvLength);
             Buffer.BlockCopy(cipherText, IvLength, encrypted, 0, encrypted.Length);
 
-            using var cipher = new AndroidJavaObject("javax.crypto.Cipher", "AES/GCM/NoPadding");
+            using var cipher = CreateCipher();
             using var key = GetOrCreateKey();
             using var spec = new AndroidJavaObject("javax.crypto.spec.GCMParameterSpec", GcmTagBits, iv);
             cipher.Call("init", CipherDecryptMode, key, spec);
@@ -266,16 +274,23 @@ namespace JabaSurvivol.Gameplay
                     "android.security.keystore.KeyGenParameterSpec$Builder",
                     KeyAlias,
                     3);
-                builder.Call<AndroidJavaObject>("setBlockModes", "GCM");
-                builder.Call<AndroidJavaObject>("setEncryptionPaddings", "NoPadding");
+                builder.Call<AndroidJavaObject>("setBlockModes", new object[] { new[] { "GCM" } });
+                builder.Call<AndroidJavaObject>("setEncryptionPaddings", new object[] { new[] { "NoPadding" } });
                 builder.Call<AndroidJavaObject>("setKeySize", 256);
                 using var spec = builder.Call<AndroidJavaObject>("build");
-                using var generator = new AndroidJavaObject("javax.crypto.KeyGenerator", "AES");
+                using var generator = new AndroidJavaClass("javax.crypto.KeyGenerator").CallStatic<AndroidJavaObject>("getInstance", "AES");
                 generator.Call("init", spec);
                 generator.Call<AndroidJavaObject>("generateKey");
             }
 
-            return keyStore.Call<AndroidJavaObject>("getKey", KeyAlias, (AndroidJavaObject)null);
+            return keyStore.Call<AndroidJavaObject>("getKey", KeyAlias, new char[0]);
         }
+
+        private static AndroidJavaObject CreateCipher()
+        {
+            using var cipherClass = new AndroidJavaClass("javax.crypto.Cipher");
+            return cipherClass.CallStatic<AndroidJavaObject>("getInstance", "AES/GCM/NoPadding");
+        }
+
     }
 }
