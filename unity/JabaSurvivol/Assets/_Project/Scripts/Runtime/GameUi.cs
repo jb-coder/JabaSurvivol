@@ -77,6 +77,7 @@ namespace JabaSurvivol.Gameplay
         private readonly GameObject _leaderboardPanel;
         private readonly Text _leaderboardStatusText;
         private readonly Text _leaderboardText;
+        private readonly RectTransform _leaderboardViewport;
         private readonly Button _telemetryButton;
         private readonly Text _telemetryLabel;
         private Text _mainMenuAccountState;
@@ -262,7 +263,8 @@ namespace JabaSurvivol.Gameplay
             _leaderboardPanel = BuildLeaderboardPanel(
                 onLeaderboardClose,
                 out _leaderboardStatusText,
-                out _leaderboardText);
+                out _leaderboardText,
+                out _leaderboardViewport);
 
             _selectActiveButtons = new Button[3];
             _selectActiveLabels = new Text[3];
@@ -794,6 +796,7 @@ namespace JabaSurvivol.Gameplay
             }
 
             _leaderboardText.text = builder.ToString();
+            LayoutRebuilder.ForceRebuildLayoutImmediate(_leaderboardText.rectTransform);
             SetLeaderboardStatus(string.Empty);
         }
 
@@ -810,6 +813,10 @@ namespace JabaSurvivol.Gameplay
         public string LeaderboardStatusForTests => _leaderboardStatusText?.text ?? string.Empty;
 
         public string LeaderboardTextForTests => _leaderboardText?.text ?? string.Empty;
+
+        public bool LeaderboardScrollableForTests =>
+            _leaderboardViewport != null &&
+            _leaderboardText.rectTransform.rect.height > _leaderboardViewport.rect.height;
         public void SetCloudState(CloudSyncState state, string message)
         {
             if (_cloudStatusText == null)
@@ -1863,7 +1870,8 @@ namespace JabaSurvivol.Gameplay
         private GameObject BuildLeaderboardPanel(
             System.Action onClose,
             out Text status,
-            out Text entries)
+            out Text entries,
+            out RectTransform viewport)
         {
             var panel = UiFactory.CreatePanel(
                 _safeArea,
@@ -1896,7 +1904,7 @@ namespace JabaSurvivol.Gameplay
                 typeof(RectTransform),
                 typeof(RectMask2D));
             viewportObject.transform.SetParent(root.transform, false);
-            var viewport = viewportObject.GetComponent<RectTransform>();
+            viewport = viewportObject.GetComponent<RectTransform>();
             UiFactory.Place(
                 viewport,
                 new Vector2(0.5f, 0.5f),
@@ -1904,30 +1912,26 @@ namespace JabaSurvivol.Gameplay
                 new Vector2(0f, -30f),
                 new Vector2(1900f, 700f));
 
-            var contentObject = new GameObject("Content", typeof(RectTransform));
-            contentObject.transform.SetParent(viewportObject.transform, false);
-            var content = contentObject.GetComponent<RectTransform>();
-            content.anchorMin = new Vector2(0f, 1f);
-            content.anchorMax = new Vector2(1f, 1f);
-            content.pivot = new Vector2(0.5f, 1f);
-            content.anchoredPosition = Vector2.zero;
-            content.sizeDelta = new Vector2(0f, 0f);
-            var fitter = contentObject.AddComponent<ContentSizeFitter>();
-            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
             entries = UiFactory.CreateText(
-                contentObject.transform,
+                viewportObject.transform,
                 "Entries",
                 string.Empty,
                 20,
                 TextAnchor.UpperLeft,
                 new Color(0.86f, 0.9f, 0.96f));
-            UiFactory.Stretch(entries.rectTransform);
+            var entriesRect = entries.rectTransform;
+            entriesRect.anchorMin = new Vector2(0f, 1f);
+            entriesRect.anchorMax = new Vector2(1f, 1f);
+            entriesRect.pivot = new Vector2(0.5f, 1f);
+            entriesRect.anchoredPosition = Vector2.zero;
+            entriesRect.sizeDelta = new Vector2(0f, 0f);
             entries.verticalOverflow = VerticalWrapMode.Overflow;
+            var fitter = entries.gameObject.AddComponent<ContentSizeFitter>();
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             var scroll = root.AddComponent<ScrollRect>();
             scroll.viewport = viewport;
-            scroll.content = content;
+            scroll.content = entriesRect;
             scroll.horizontal = false;
             scroll.vertical = true;
             scroll.movementType = ScrollRect.MovementType.Clamped;

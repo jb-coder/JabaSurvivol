@@ -119,6 +119,7 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(text, Does.Contain("R10"));
             Assert.That(text, Does.Contain("K1000"));
             Assert.That(text, Does.Contain("100s"));
+            Assert.That(_bootstrap.Session.LeaderboardScrollableForTests, Is.True);
         }
 
         [UnityTest]

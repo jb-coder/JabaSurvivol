@@ -2050,6 +2050,8 @@ namespace JabaSurvivol.Gameplay
 
         public string LeaderboardTextForTests => _ui?.LeaderboardTextForTests ?? string.Empty;
 
+        public bool LeaderboardScrollableForTests => _ui != null && _ui.LeaderboardScrollableForTests;
+
         public void BackupCloudForTests() => HandleCloudBackup();
 
         public void RestoreCloudForTests() => HandleCloudRestore();
