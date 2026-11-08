@@ -15,6 +15,8 @@ namespace JabaSurvivol.Editor
         {
             ProjectSetup.Configure();
             EditorUserBuildSettings.buildAppBundle = false;
+            EditorUserBuildSettings.development = false;
+            PlayerSettings.insecureHttpOption = InsecureHttpOption.NotAllowed;
             var output = GetOutputPath("-buildOutput", "artifacts/android/JabaSurvivol.apk");
             Build(BuildTarget.Android, output);
         }
@@ -27,6 +29,8 @@ namespace JabaSurvivol.Editor
         {
             ProjectSetup.Configure();
             EditorUserBuildSettings.buildAppBundle = false;
+            EditorUserBuildSettings.development = true;
+            PlayerSettings.insecureHttpOption = InsecureHttpOption.DevelopmentOnly;
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.X86_64;
             try
             {
@@ -36,6 +40,8 @@ namespace JabaSurvivol.Editor
             finally
             {
                 PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+                PlayerSettings.insecureHttpOption = InsecureHttpOption.NotAllowed;
+                EditorUserBuildSettings.development = false;
             }
         }
 

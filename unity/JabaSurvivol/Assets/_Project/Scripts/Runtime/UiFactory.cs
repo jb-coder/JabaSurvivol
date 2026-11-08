@@ -131,6 +131,52 @@ namespace JabaSurvivol.Gameplay
             return button;
         }
 
+        public static InputField CreateInputField(
+            Transform parent,
+            string name,
+            string placeholder,
+            int fontSize)
+        {
+            var inputObject = new GameObject(
+                name,
+                typeof(RectTransform),
+                typeof(Image),
+                typeof(InputField));
+            inputObject.transform.SetParent(parent, false);
+
+            var background = inputObject.GetComponent<Image>();
+            background.sprite = SpriteFactory.Square;
+            background.color = new Color(0.07f, 0.12f, 0.18f, 0.98f);
+            background.raycastTarget = true;
+
+            var input = inputObject.GetComponent<InputField>();
+            input.targetGraphic = background;
+            input.lineType = InputField.LineType.SingleLine;
+            input.contentType = InputField.ContentType.Standard;
+            input.characterLimit = 128;
+
+            var text = CreateText(inputObject.transform, "Text", string.Empty, fontSize, TextAnchor.MiddleLeft, Color.white);
+            text.supportRichText = false;
+            Stretch(text.rectTransform);
+            text.rectTransform.offsetMin = new Vector2(18f, 8f);
+            text.rectTransform.offsetMax = new Vector2(-18f, -8f);
+
+            var placeholderText = CreateText(
+                inputObject.transform,
+                "Placeholder",
+                placeholder,
+                fontSize,
+                TextAnchor.MiddleLeft,
+                new Color(0.55f, 0.62f, 0.72f, 0.8f));
+            placeholderText.supportRichText = false;
+            Stretch(placeholderText.rectTransform);
+            placeholderText.rectTransform.offsetMin = new Vector2(18f, 8f);
+            placeholderText.rectTransform.offsetMax = new Vector2(-18f, -8f);
+
+            input.textComponent = text;
+            input.placeholder = placeholderText;
+            return input;
+        }
         public static void Stretch(RectTransform rect)
         {
             rect.anchorMin = Vector2.zero;

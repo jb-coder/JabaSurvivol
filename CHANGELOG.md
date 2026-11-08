@@ -18,6 +18,9 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Authenticated telemetry ingestion with 1-100 event batches, 64 KiB request and 4 KiB payload limits, typed allowlists, timestamp windows, per-account idempotency, and no PII.
 - Telemetry worker aggregation into idempotent daily totals with 30-day raw-event retention.
 - BFF public boundary with YARP routing, JWT validation, per-IP and per-account rate limits, correlation IDs, safe ProblemDetails on authentication and upstream failures, and no public route to internal status endpoints.
+- Unity account panel with register, login, logout, loading, signed-out, signed-in, and offline states, plus ProblemDetails handling and one refresh-and-retry on `401`.
+- Access tokens kept in memory only; refresh tokens encrypted with Windows DPAPI or the Android Keystore and never written to `PlayerPrefs`.
+- Android INTERNET permission enabled, with cleartext HTTP limited to development emulator builds.
 
 ## [0.4.0] - 2026-11-08
 

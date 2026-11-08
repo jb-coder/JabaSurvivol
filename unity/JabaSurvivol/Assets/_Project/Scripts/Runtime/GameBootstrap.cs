@@ -1,3 +1,4 @@
+using System;
 using JabaSurvivol.Core;
 using UnityEngine;
 
@@ -10,6 +11,8 @@ namespace JabaSurvivol.Gameplay
     public sealed class GameBootstrap : MonoBehaviour
     {
         public static string SavePathOverride;
+
+        public static Func<IAccountService> AccountServiceFactoryOverride;
 
         public static GameBootstrap Instance { get; private set; }
 
@@ -28,6 +31,7 @@ namespace JabaSurvivol.Gameplay
 
             Instance = this;
             Application.targetFrameRate = 60;
+            ApiConfig.Initialize();
 
             var runtimeRoot = new GameObject("Runtime").transform;
             runtimeRoot.SetParent(transform, false);
@@ -41,7 +45,11 @@ namespace JabaSurvivol.Gameplay
             input.Initialize(_camera);
 
             Session = gameObject.AddComponent<GameSession>();
-            Session.Initialize(new ProfileStore(SavePathOverride), input, _worldRoot);
+            Session.Initialize(
+                new ProfileStore(SavePathOverride),
+                input,
+                _worldRoot,
+                AccountServiceFactoryOverride?.Invoke());
         }
 
         private void OnApplicationPause(bool pauseStatus)

@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using JabaSurvivol.Core;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -64,6 +66,8 @@ namespace JabaSurvivol.Gameplay
         private float _levelUpRemaining;
         private bool _lastBerserkerActive;
         private bool _lastGhostActive;
+        private IAccountService _accountService;
+        private CancellationTokenSource _accountCancellation;
 
         public Profile Profile => _profile;
 
@@ -217,7 +221,11 @@ namespace JabaSurvivol.Gameplay
             _input = input ?? throw new ArgumentNullException(nameof(input));
         }
 
-        public void Initialize(ProfileStore store, IGameInput input, Transform worldRoot)
+        public void Initialize(
+            ProfileStore store,
+            IGameInput input,
+            Transform worldRoot,
+            IAccountService accountService = null)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _input = input ?? throw new ArgumentNullException(nameof(input));
@@ -254,7 +262,18 @@ namespace JabaSurvivol.Gameplay
                 HandleAllocateSkill,
                 HandleRespecSkills,
                 CloseCharacterSheet,
-                CloseArmory);
+                CloseArmory,
+                ShowAccount,
+                HandleAccountRegister,
+                HandleAccountLogin,
+                HandleAccountLogout,
+                HideAccount);
+
+            _accountService = accountService ?? AccountService.CreateDefault();
+            _accountService.StateChanged += HandleAccountStateChanged;
+            _accountCancellation = new CancellationTokenSource();
+            _ui.SetAccountState(_accountService.State, _accountService.Username);
+            _ = InitializeAccountAsync();
 
             _state = GameSessionState.MainMenu;
             _ui.ShowMainMenu(_profile);
@@ -1754,6 +1773,141 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
+        public IAccountService AccountServiceForTests => _accountService;
+
+        public bool AccountPanelVisibleForTests => _ui != null && _ui.AccountPanelVisibleForTests;
+
+        public string AccountStatusForTests => _ui?.AccountStatusForTests ?? string.Empty;
+
+        public string MainMenuAccountStateForTests => _ui?.MainMenuAccountStateForTests ?? string.Empty;
+
+        public void ShowAccountForTests() => ShowAccount();
+
+        public void SubmitRegisterForTests(string username, string password) =>
+            HandleAccountRegister(username, password);
+
+        public void SubmitLoginForTests(string username, string password) =>
+            HandleAccountLogin(username, password);
+
+        public void LogoutForTests() => HandleAccountLogout();
+
+        private void ShowAccount()
+        {
+            if (_ui == null ||
+                (_state != GameSessionState.MainMenu && _state != GameSessionState.Paused))
+            {
+                return;
+            }
+
+            _ui.ShowAccount();
+            HandleAccountStateChanged(_accountService.State);
+        }
+
+        private void HideAccount()
+        {
+            _ui?.HideAccount();
+        }
+
+        private async void HandleAccountRegister(string username, string password)
+        {
+            await RunAccountAction(token => _accountService.RegisterAsync(username, password, token));
+        }
+
+        private async void HandleAccountLogin(string username, string password)
+        {
+            await RunAccountAction(token => _accountService.LoginAsync(username, password, token));
+        }
+
+        private async void HandleAccountLogout()
+        {
+            if (_accountService == null)
+            {
+                return;
+            }
+
+            _ui.SetAccountBusy(true);
+            try
+            {
+                await _accountService.LogoutAsync(_accountCancellation.Token);
+                _ui.SetAccountStatus(Localization.Get("account.state.signedout"));
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            finally
+            {
+                _ui.SetAccountBusy(false);
+                HandleAccountStateChanged(_accountService.State);
+            }
+        }
+
+        private async Task RunAccountAction(
+            Func<CancellationToken, Task<AccountActionResult>> action)
+        {
+            if (_accountService == null || _accountCancellation == null)
+            {
+                return;
+            }
+
+            _ui.SetAccountBusy(true);
+            try
+            {
+                var result = await action(_accountCancellation.Token);
+                _ui.SetAccountStatus(result.Message);
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            catch (Exception)
+            {
+                _ui.SetAccountStatus(Localization.Get("account.error.generic"));
+            }
+            finally
+            {
+                _ui.SetAccountBusy(false);
+                HandleAccountStateChanged(_accountService.State);
+            }
+        }
+
+        private async Task InitializeAccountAsync()
+        {
+            try
+            {
+                await _accountService.InitializeAsync(_accountCancellation.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            catch (Exception)
+            {
+                _ui?.SetAccountStatus(Localization.Get("account.error.network"));
+            }
+        }
+
+        private void HandleAccountStateChanged(AccountState state)
+        {
+            _ui?.SetAccountState(state, _accountService?.Username ?? string.Empty);
+        }
+
+        private void OnDestroy()
+        {
+            if (_accountService != null)
+            {
+                _accountService.StateChanged -= HandleAccountStateChanged;
+                if (_accountService is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+            }
+
+            _accountCancellation?.Cancel();
+            _accountCancellation?.Dispose();
+            _accountCancellation = null;
+            _accountService = null;
+        }
         public void SaveNow()
         {
             if (_store != null && _profile != null)
