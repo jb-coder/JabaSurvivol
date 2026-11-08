@@ -1,3 +1,4 @@
+using System;
 using JabaSurvivol.Core;
 using UnityEngine;
 
@@ -10,6 +11,8 @@ namespace JabaSurvivol.Gameplay
     public sealed class GameBootstrap : MonoBehaviour
     {
         public static string SavePathOverride;
+
+        public static Func<IAccountService> AccountServiceFactoryOverride;
 
         public static GameBootstrap Instance { get; private set; }
 
@@ -28,6 +31,10 @@ namespace JabaSurvivol.Gameplay
 
             Instance = this;
             Application.targetFrameRate = 60;
+            ApiConfig.Initialize();
+#if DEVELOPMENT_BUILD
+            RunSecureStorageProbe();
+#endif
 
             var runtimeRoot = new GameObject("Runtime").transform;
             runtimeRoot.SetParent(transform, false);
@@ -41,7 +48,11 @@ namespace JabaSurvivol.Gameplay
             input.Initialize(_camera);
 
             Session = gameObject.AddComponent<GameSession>();
-            Session.Initialize(new ProfileStore(SavePathOverride), input, _worldRoot);
+            Session.Initialize(
+                new ProfileStore(SavePathOverride),
+                input,
+                _worldRoot,
+                AccountServiceFactoryOverride?.Invoke());
         }
 
         private void OnApplicationPause(bool pauseStatus)
@@ -67,6 +78,33 @@ namespace JabaSurvivol.Gameplay
             Session?.SaveNow();
             Instance = null;
         }
+
+#if DEVELOPMENT_BUILD
+        private static void RunSecureStorageProbe()
+        {
+            if (Application.platform != RuntimePlatform.Android)
+            {
+                return;
+            }
+
+            try
+            {
+                var probePath = System.IO.Path.Combine(Application.persistentDataPath, "probe-session.bin");
+                var probe = new AndroidKeystoreTokenStore(probePath, "jaba_survivol_probe");
+                probe.ResetKey();
+                probe.Clear();
+                probe.Save("probe-token");
+                var restored = probe.Load() == "probe-token";
+                probe.Clear();
+                probe.ResetKey();
+                Debug.Log("SecureTokenStore probe: " + (restored ? "ok" : "failed") + " provider=AndroidKeyStore alias=jaba_survivol_probe");
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError("SecureTokenStore probe failed: " + exception);
+            }
+        }
+#endif
 
         private Camera CreateCamera(Transform parent)
         {

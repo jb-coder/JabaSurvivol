@@ -1,0 +1,51 @@
+# v0.5.0 Android account UI smoke evidence
+
+- Date: 2026-11-08
+- Build: `JabaSurvivol-emulator-0.5.0-account.apk` (file name only; the app version is still `0.4.0` until the release branch bump)
+- Package: `com.jabasurvivol.game`
+- Version: `0.4.0` (version code `4`; the release branch bumps to `0.5.0`)
+- Min API: 26
+- Target API: 36
+- Architectures: ARM64, x86_64
+- Emulator: `jaba_survivol_api35`, Android 15 API 35 x86_64
+- Phone layout: 1080x2340 @ 440 dpi
+- Tablet layout: 2560x1600 @ 320 dpi
+
+## Automated flow
+
+1. Installed the emulator APK with `adb install -r`.
+2. Launched `com.unity3d.player.UnityPlayerActivity`.
+3. Confirmed the main menu shows `NOT SIGNED IN - LOCAL PLAY ONLY`.
+4. Opened the account panel with a touch tap.
+5. Confirmed the account panel shows username, password, register, login, and
+   close controls on phone and tablet layouts.
+6. Repeated the main menu and account panel checks on the tablet override.
+7. Checked logcat for `FATAL EXCEPTION`, `AndroidRuntime` crash, unhandled
+   exception, and `NullReferenceException`. None were present.
+8. Performed a clean uninstall and reinstall, then confirmed the development
+   probe reports `SecureTokenStore probe: ok provider=AndroidKeyStore`
+   using the isolated `jaba_survivol_probe` alias. This exercises Android
+   Keystore key generation, AES-GCM save, load, compare, and clear.
+
+## APK checks
+
+```text
+aapt dump permissions
+uses-permission: name='android.permission.INTERNET'
+
+aapt dump badging
+package: name='com.jabasurvivol.game' versionCode='4' versionName='0.4.0'
+sdkVersion:'26'
+targetSdkVersion:'36'
+native-code: 'arm64-v8a' 'x86_64'
+```
+
+## Evidence files
+
+- `v05-account-phone-main.png`
+- `v05-account-phone-panel.png`
+- `v05-account-tablet-main.png`
+- `v05-account-tablet-panel.png`
+- `v05-account-android-logcat.txt`
+
+Automated verification only; no human playtest was performed.

@@ -15,6 +15,8 @@ namespace JabaSurvivol.Editor
         {
             ProjectSetup.Configure();
             EditorUserBuildSettings.buildAppBundle = false;
+            EditorUserBuildSettings.development = false;
+            PlayerSettings.insecureHttpOption = InsecureHttpOption.NotAllowed;
             var output = GetOutputPath("-buildOutput", "artifacts/android/JabaSurvivol.apk");
             Build(BuildTarget.Android, output);
         }
@@ -27,15 +29,19 @@ namespace JabaSurvivol.Editor
         {
             ProjectSetup.Configure();
             EditorUserBuildSettings.buildAppBundle = false;
+            EditorUserBuildSettings.development = true;
+            PlayerSettings.insecureHttpOption = InsecureHttpOption.DevelopmentOnly;
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.X86_64;
             try
             {
                 var output = GetOutputPath("-buildOutput", "artifacts/android/JabaSurvivol-emulator.apk");
-                Build(BuildTarget.Android, output);
+                Build(BuildTarget.Android, output, BuildOptions.Development);
             }
             finally
             {
                 PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+                PlayerSettings.insecureHttpOption = InsecureHttpOption.NotAllowed;
+                EditorUserBuildSettings.development = false;
             }
         }
 
@@ -53,7 +59,7 @@ namespace JabaSurvivol.Editor
             Build(BuildTarget.WebGL, output);
         }
 
-        private static void Build(BuildTarget target, string outputPath)
+        private static void Build(BuildTarget target, string outputPath, BuildOptions buildOptions = BuildOptions.None)
         {
             var directory = Path.GetDirectoryName(outputPath);
             if (!string.IsNullOrEmpty(directory))
@@ -66,7 +72,7 @@ namespace JabaSurvivol.Editor
                 scenes = new[] { ProjectSetup.MainScenePath },
                 locationPathName = outputPath,
                 target = target,
-                options = BuildOptions.None
+                options = buildOptions
             };
 
             var report = BuildPipeline.BuildPlayer(options);
