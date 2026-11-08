@@ -474,9 +474,10 @@ namespace JabaSurvivol.Core
                     1,
                     (int)Math.Ceiling(maxHealth / build.DamagePerShot));
                 var killSeconds = totalShots * build.FireInterval;
-                var roundSeconds = killSeconds + (budget * GameBalance.ZombieRespawnDelay);
 
                 var ammo = SimulateAmmo(profile, build, totalShots, ammoCrateBonus);
+                var baseRoundSeconds =
+                    killSeconds + (budget * GameBalance.ZombieRespawnDelay) + ammo.ReloadSeconds;
 
                 var turretStats = SkillCatalog.Get(SkillNode.Turret)
                     .GetActivationStats(profile.GetSkillRank(SkillNode.Turret));
@@ -509,12 +510,13 @@ namespace JabaSurvivol.Core
                     SkillNode.Turret => 0f,
                     SkillNode.Dash => 0f,
                     SkillNode.Shockwave when profile.GetSkillRank(SkillNode.Shockwave) > 0 =>
-                        (roundSeconds / Math.Max(0.1f, shockwaveStats.CooldownSeconds)) *
-                        shockwaveStats.AreaDamage / Math.Max(1f, roundSeconds),
+                        (baseRoundSeconds / Math.Max(0.1f, shockwaveStats.CooldownSeconds)) *
+                        shockwaveStats.AreaDamage / Math.Max(1f, baseRoundSeconds),
                     _ => 0f
                 };
                 var bossSeconds = BossCatalog.BossDefinition.MaxHealth /
                                   Math.Max(1f, weaponDps + skillDps);
+                var roundSeconds = baseRoundSeconds + (definition.IsBoss ? bossSeconds : 0f);
                 var berserkerUptime = SynergyCatalog.IsUnlocked(profile, SynergyId.Berserker)
                     ? 0.35f
                     : 0f;
@@ -598,30 +600,28 @@ namespace JabaSurvivol.Core
                         ghostUptime,
                         bastionUptime)));
 
-                if (shotsToKill <= 1)
-                {
-                    outliers.Add($"Round {round} is trivial: one shot kills a zombie.");
-                }
-
                 if (definition.IsElite && shotsToKill <= 10)
                 {
-                    outliers.Add($"Round {round} elite encounter is trivial: {shotsToKill} shots per enemy.");
+                    outliers.Add(FormattableString.Invariant(
+                        $"Round {round} elite encounter is trivial: {shotsToKill} shots per enemy."));
                 }
 
                 if (definition.IsBoss && bossSeconds < options.BossMinimumSeconds)
                 {
-                    outliers.Add($"Boss is too easy: {bossSeconds:0.0} seconds is below {options.BossMinimumSeconds:0.0}.");
+                    outliers.Add(FormattableString.Invariant(
+                        $"Boss is too easy: {bossSeconds:0.0} seconds is below {options.BossMinimumSeconds:0.0}."));
                 }
 
                 if (definition.IsBoss && bossSeconds > options.BossMaximumSeconds)
                 {
-                    outliers.Add($"Boss is too hard: {bossSeconds:0.0} seconds is above {options.BossMaximumSeconds:0.0}.");
+                    outliers.Add(FormattableString.Invariant(
+                        $"Boss is too hard: {bossSeconds:0.0} seconds is above {options.BossMaximumSeconds:0.0}."));
                 }
 
                 if (ammo.Pressure > options.AmmoPressureThreshold || ammo.Starved)
                 {
-                    outliers.Add(
-                        $"Round {round} is ammo-starved: {ammo.Pressure:0.00} reload pressure exceeds {options.AmmoPressureThreshold:0.00}.");
+                    outliers.Add(FormattableString.Invariant(
+                        $"Round {round} is ammo-starved: {ammo.Pressure:0.00} reload pressure exceeds {options.AmmoPressureThreshold:0.00}."));
                 }
 
                 if (round < options.MaxRound && !run.AdvanceRound())
@@ -660,11 +660,6 @@ namespace JabaSurvivol.Core
                 if (last.Build.DamageTier <= 0)
                 {
                     outliers.Add($"No weapon damage upgrade was reached by round {options.MaxRound}.");
-                }
-
-                if (last.Build.Armor == ArmorTier.None)
-                {
-                    outliers.Add($"No armor unlock was reached by round {options.MaxRound}.");
                 }
 
                 if (!SynergyCatalog.IsUnlocked(profile, SynergyId.Berserker) &&

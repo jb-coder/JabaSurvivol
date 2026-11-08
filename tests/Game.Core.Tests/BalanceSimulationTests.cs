@@ -1,5 +1,7 @@
 namespace JabaSurvivol.Core.Tests;
 
+using System.Globalization;
+
 public sealed class BalanceSimulationTests
 {
     [Fact]
@@ -164,6 +166,44 @@ public sealed class BalanceSimulationTests
     }
 
     [Fact]
+    public void Run_flags_ammo_starvation_with_finite_reserves()
+    {
+        var profile = new Profile();
+        profile.UnlockWeapon(WeaponId.Smg);
+        profile.EquipWeapon(WeaponId.Smg);
+
+        var report = BalanceSimulation.Run(new BalanceSimulationOptions
+        {
+            MaxRound = 5,
+            StartingProfile = profile
+        });
+
+        Assert.Contains(report.Rounds, round => round.Ammo.Starved);
+        Assert.Contains(report.Outliers, outlier => outlier.Contains("ammo-starved", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Run_formats_outliers_with_invariant_decimals()
+    {
+        var previous = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("es-ES");
+            var report = BalanceSimulation.Run(new BalanceSimulationOptions
+            {
+                BossMinimumSeconds = 1000f
+            });
+
+            Assert.Contains(report.Outliers, outlier => outlier.Contains("1000.0"));
+            Assert.DoesNotContain(report.Outliers, outlier => outlier.Contains("1000,0"));
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previous;
+        }
+    }
+
+    [Fact]
     public void Run_flags_trivial_elites_level_cap_and_missing_unlocks()
     {
         var maxed = new Profile { Level = 30, Supplies = 10000 };
@@ -195,6 +235,7 @@ public sealed class BalanceSimulationTests
         Assert.Contains(elite.Outliers, outlier => outlier.Contains("elite encounter is trivial", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(levelCap.Outliers, outlier => outlier.Contains("Level cap", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(missing.Outliers, outlier => outlier.Contains("No weapon unlock", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(missing.Outliers, outlier => outlier.Contains("No weapon damage upgrade", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -247,6 +288,9 @@ public sealed class BalanceSimulationTests
         Assert.DoesNotContain(report.Outliers, outlier => outlier.Contains("unreachable", StringComparison.OrdinalIgnoreCase));
         Assert.DoesNotContain(report.Outliers, outlier => outlier.Contains("runaway", StringComparison.OrdinalIgnoreCase));
         Assert.DoesNotContain(report.Outliers, outlier => outlier.Contains("cap", StringComparison.OrdinalIgnoreCase));
+        Assert.DoesNotContain(report.Outliers, outlier => outlier.Contains("Boss is too", StringComparison.OrdinalIgnoreCase));
+        Assert.DoesNotContain(report.Outliers, outlier => outlier.Contains("ammo-starved", StringComparison.OrdinalIgnoreCase));
+        Assert.DoesNotContain(report.Outliers, outlier => outlier.Contains("synergy", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
