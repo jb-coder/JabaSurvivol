@@ -63,5 +63,7 @@ namespace JabaSurvivol.Core
 
         public const float TurretRange = 8f;
         public const float TurretProjectileSpeed = 16f;
+        public const float DashInvulnerabilitySeconds = 0.25f;
+        public const float ShockwaveKnockbackDistance = 1.1f;
     }
 }

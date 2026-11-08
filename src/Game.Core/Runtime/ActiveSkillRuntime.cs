@@ -47,8 +47,8 @@ namespace JabaSurvivol.Core
             : Math.Clamp(ActiveRemaining / Stats.TurretDuration, 0f, 1f);
 
         /// <summary>
-        /// Deploys the turret. Returns false when the rank is zero, the skill
-        /// is active, or the cooldown has not finished.
+        /// Activates the selected skill. Turret and Dash have an active
+        /// duration; Shockwave resolves instantly and only starts cooldown.
         /// </summary>
         public bool TryActivate()
         {
@@ -57,10 +57,15 @@ namespace JabaSurvivol.Core
                 return false;
             }
 
-            ActiveRemaining = Stats.TurretDuration;
             CooldownRemaining = Stats.CooldownSeconds;
             FireTimer = 0f;
-            return IsActive;
+            ActiveRemaining = Node switch
+            {
+                SkillNode.Turret => Stats.TurretDuration,
+                SkillNode.Dash => GameBalance.DashInvulnerabilitySeconds,
+                _ => 0f
+            };
+            return true;
         }
 
         public void Tick(float deltaTime)
@@ -118,9 +123,12 @@ namespace JabaSurvivol.Core
                 throw new ArgumentOutOfRangeException(nameof(node));
             }
 
+            var previousCooldown = CooldownRemaining;
             Node = node;
-            Reset();
+            ActiveRemaining = 0f;
+            FireTimer = 0f;
             UpdateRank(rank);
+            CooldownRemaining = previousCooldown;
         }
 
         public void Reset()

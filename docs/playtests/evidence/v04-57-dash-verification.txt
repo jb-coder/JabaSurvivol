@@ -1,0 +1,30 @@
+# v0.4.0 Slice 57 Dash and Shockwave Verification
+
+Automated verification for Dash, Shockwave, and active-skill selection.
+
+## Core
+
+- Zero-rank and passive nodes cannot be selected.
+- Allocated active nodes can be selected and persist.
+- Validation falls back when the selected skill loses its rank.
+- Dash distance, cooldown, invulnerability, and rank scaling.
+- Shockwave damage, radius, cooldown, and instant resolution.
+- Selected skill survives death while run state resets.
+
+## EditMode
+
+- Selection gating and persistence.
+- Dash and Shockwave rank-scaled values.
+
+## PlayMode
+
+- Dash moves the player by the rank-scaled distance.
+- Dash ignores damage during its invulnerability window and takes damage after it.
+- Shockwave damages and knocks back a nearby zombie.
+- Active skill selection works from the character sheet and is saved.
+- Zero-rank active skills cannot be selected.
+
+## Android
+
+- ARM64 production APK and ARM64 + x86_64 emulator APK built.
+- Emulator smoke test passed on phone and tablet layouts.
