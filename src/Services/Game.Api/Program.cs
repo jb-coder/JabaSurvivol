@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Threading.RateLimiting;
+using Game.Api.Configuration;
 using Game.Api.Leaderboards;
 using Game.Api.Saves;
 using Game.Data;
@@ -25,6 +26,11 @@ builder.Services.AddDbContext<GameDbContext>(options =>
         npgsql.MigrationsHistoryTable("__GameMigrationsHistory", GameDbContext.Schema)));
 
 var leaderboardPermitLimit = builder.Configuration.GetValue("RateLimiting:LeaderboardSubmitPermitLimit", 30);
+builder.Services.AddOptions<RemoteConfigOptions>()
+    .Bind(builder.Configuration.GetSection(RemoteConfigOptions.SectionName))
+    .Validate(options => options.IsValid(out _), "RemoteConfig contains invalid values.")
+    .ValidateOnStart();
+
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -88,6 +94,7 @@ app.MapGet(ApiRoutes.GameStatus, () => Results.Ok(new
 .WithName("GetGameStatus");
 
 app.MapSaveEndpoints();
+app.MapRemoteConfigEndpoint();
 app.MapLeaderboardEndpoints();
 
 if (app.Configuration.GetValue("Database:Migrate", app.Environment.IsDevelopment()))

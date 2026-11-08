@@ -14,6 +14,7 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Revision-safe primary cloud save endpoints with ETag support, 1 MiB limits, schema validation, and `409` conflict responses that never overwrite newer data.
 - Game module PostgreSQL schema with an additive cloud-save migration and a unique account/slot constraint.
 - Highest-round leaderboard with idempotent run submission, bounds validation, best run per account, top-50 default query capped at 100, deterministic tiebreaks, and per-account submission rate limiting.
+- Public read-only remote config with minimum client version, operational flags, sample rate, ETag support, conservative cache headers, and startup validation that rejects invalid values.
 
 ## [0.4.0] - 2026-11-08
 
