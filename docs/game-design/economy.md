@@ -137,10 +137,10 @@ weapon upgrade tiers, armor tier and absorb, skill ranks, supplies earned,
 spent, and remaining, XP, level, and available skill points.
 
 It writes `artifacts/balance/rounds.md` with a fixed seed so CI and local runs
-produce the same report. Outliers cover trivial rounds, trivial elites, boss
-encounters that are too easy or too hard, ammo starvation, runaway supplies,
-unreachable upgrades, unreachable synergies, cap violations, and builds that
-never unlock a weapon, weapon damage upgrade, or armor tier.
+produce the same report. Outliers cover trivial elites, boss encounters that
+are too easy or too hard, ammo starvation, runaway supplies, unreachable
+upgrades, unreachable synergies, cap violations, and builds that never unlock a
+weapon or weapon damage upgrade.
 
 ## Premium currency
 

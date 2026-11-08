@@ -6,6 +6,8 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-08
+
 ### Added
 
 - Data-driven zombie catalog in `Game.Core` for Walker, Runner, and Brute with health, speed, contact damage, supplies, XP, and visual scale values.
@@ -31,6 +33,12 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Balance simulation coverage for Walker, Runner, Brute, elite, and boss content.
 - Balance simulation coverage for magazines, reserves, reloads, weapon switching, and ammo crate rewards.
 - Balance simulation coverage for Turret, Dash, Shockwave, and synergy uptime, with boss time-to-kill and new outliers.
+
+### Changed
+
+- Android version bumped to `0.4.0` with version code `4`.
+- Core package version bumped to `0.4.0`.
+
 ## [0.3.0] - 2026-11-07
 
 ### Added

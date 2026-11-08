@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace JabaSurvivol.Core
 {
     /// <summary>
-    /// Inputs for a deterministic, engine-free v0.3.0 balance simulation.
+    /// Inputs for a deterministic, engine-free v0.4.0 balance simulation.
     /// </summary>
     public sealed class BalanceSimulationOptions
     {
@@ -386,7 +386,7 @@ namespace JabaSurvivol.Core
     }
 
     /// <summary>
-    /// Headless v0.3.0 simulation. It uses the same weapon, upgrade, armor, and
+    /// Headless v0.4.0 simulation. It uses the same weapon, upgrade, armor, and
     /// skill rules as the game and never references Unity.
     /// </summary>
     public static class BalanceSimulation

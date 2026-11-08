@@ -1,0 +1,16 @@
+# v0.4.0 Android Smoke Test
+
+- Date: 2026-11-08
+- Emulator: Android 15 (API 35), x86_64 Google Play system image, `jaba_survivol_api35`
+- Device profile: phone 1080 x 2340 at 440 dpi; tablet display override 2560 x 1600 at 320 dpi
+- Production APK: `JabaSurvivol-0.4.0.apk` (ARM64), 32,411,473 bytes, SHA-256 `B8D200C6D96CB6AE5A94AD38EF68115AD184551F93F6D66F65601C3C179EDFC5`
+- Emulator APK: `JabaSurvivol-emulator-0.4.0.apk` (ARM64 + x86_64), 59,172,121 bytes, SHA-256 `079C048BF56BC1EDD6211F8DAEA9AEC73E8EF4767A6E1B551A9A4AF9D8993954`
+- Activity: `com.jabasurvivol.game/com.unity3d.player.UnityPlayerActivity`
+- Installed package: `com.jabasurvivol.game`, version `0.4.0`, version code `4`
+- Result: main menu, active round, and game-over state rendered on phone and tablet layouts
+- Fatal search: no `FATAL EXCEPTION`, `AndroidRuntime` crash, unhandled exception, or `NullReferenceException` in the app process log
+- Evidence: `v04-release-phone.png`, `v04-release-run.png`, `v04-release-tablet.png`, `v04-release-tablet-playing.png`, `v04-release-android-logcat.txt`
+
+Boss, active-skill, and synergy behavior is covered by the PlayMode suite.
+The production APK is ARM64-only; the emulator smoke test used the matching
+`0.4.0` / code `4` build with x86_64 support.
