@@ -18,6 +18,9 @@
   <Folder Name="/src/Shared/Contracts/">
     <Project Path="src/Shared/Contracts/JabaSurvivol.Contracts.csproj" />
   </Folder>
+  <Folder Name="/src/Shared/Security/">
+    <Project Path="src/Shared/Security/JabaSurvivol.Security.csproj" />
+  </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/ArchitectureTests/">
     <Project Path="tests/ArchitectureTests/JabaSurvivol.ArchitectureTests.csproj" />

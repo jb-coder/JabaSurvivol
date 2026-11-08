@@ -1,6 +1,10 @@
 <Project Sdk="Aspire.AppHost.Sdk/13.6.4">
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Services\Game.Api\Game.Api.csproj" />
     <ProjectReference Include="..\Services\Identity.Api\Identity.Api.csproj" />
     <ProjectReference Include="..\Services\Telemetry.Worker\Telemetry.Worker.csproj" />
