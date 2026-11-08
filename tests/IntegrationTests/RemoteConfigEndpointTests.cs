@@ -81,10 +81,13 @@ public sealed class RemoteConfigEndpointTests(PostgresFixture fixture) : IAsyncL
         Assert.DoesNotContain("accountId", names, StringComparer.OrdinalIgnoreCase);
     }
 
-    [Fact]
-    public async Task Invalid_sample_rate_prevents_startup()
+    [Theory]
+    [InlineData("2")]
+    [InlineData("NaN")]
+    [InlineData("Infinity")]
+    public async Task Invalid_sample_rate_prevents_startup(string sampleRate)
     {
-        Environment.SetEnvironmentVariable("RemoteConfig__TelemetrySampleRate", "2");
+        Environment.SetEnvironmentVariable("RemoteConfig__TelemetrySampleRate", sampleRate);
         try
         {
             var connectionString = await fixture.CreateDatabaseAsync("game_config_invalid_rate");
@@ -96,6 +99,32 @@ public sealed class RemoteConfigEndpointTests(PostgresFixture fixture) : IAsyncL
         finally
         {
             Environment.SetEnvironmentVariable("RemoteConfig__TelemetrySampleRate", null);
+        }
+    }
+
+    [Fact]
+    public async Task Etag_changes_when_configuration_changes()
+    {
+        using var client = _factory.CreateClient();
+        var first = await client.GetAsync(ApiRoutes.GameConfig);
+        var firstEtag = first.Headers.ETag?.Tag;
+        Assert.NotNull(firstEtag);
+
+        Environment.SetEnvironmentVariable("RemoteConfig__MaintenanceMode", "true");
+        try
+        {
+            var connectionString = await fixture.CreateDatabaseAsync("game_config_etag");
+            using var factory = new GameApiFactory(connectionString).ApplyEnvironment();
+            using var other = factory.CreateClient();
+            var second = await other.GetAsync(ApiRoutes.GameConfig);
+
+            Assert.Equal(HttpStatusCode.OK, second.StatusCode);
+            Assert.NotNull(second.Headers.ETag);
+            Assert.NotEqual(firstEtag, second.Headers.ETag.Tag);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("RemoteConfig__MaintenanceMode", null);
         }
     }
 

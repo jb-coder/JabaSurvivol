@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Options;
 
 namespace Game.Api.Configuration;
 
@@ -29,7 +30,7 @@ public sealed partial class RemoteConfigOptions
             return false;
         }
 
-        if (TelemetrySampleRate < 0d || TelemetrySampleRate > 1d)
+        if (!double.IsFinite(TelemetrySampleRate) || TelemetrySampleRate < 0d || TelemetrySampleRate > 1d)
         {
             error = $"RemoteConfig:TelemetrySampleRate must be between 0 and 1, but was {TelemetrySampleRate.ToString(CultureInfo.InvariantCulture)}.";
             return false;
@@ -39,6 +40,16 @@ public sealed partial class RemoteConfigOptions
         return true;
     }
 
-    [GeneratedRegex("^[0-9]+\\.[0-9]+\\.[0-9]+$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex("^[0-9]+\\.[0-9]+\\.[0-9]+\\z", RegexOptions.CultureInvariant)]
     private static partial Regex ClientVersionPattern();
+}
+
+public sealed class RemoteConfigOptionsValidator : IValidateOptions<RemoteConfigOptions>
+{
+    public ValidateOptionsResult Validate(string? name, RemoteConfigOptions options)
+    {
+        return options.IsValid(out var error)
+            ? ValidateOptionsResult.Success
+            : ValidateOptionsResult.Fail(error);
+    }
 }
