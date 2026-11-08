@@ -279,6 +279,25 @@ public sealed class BalanceSimulationTests
     }
 
     [Fact]
+    public void Starting_ammo_crate_bonus_changes_finite_reserve_outcomes()
+    {
+        var without = BalanceSimulation.Run(new BalanceSimulationOptions
+        {
+            MaxRound = 5,
+            StartingProfile = CreateSmgProfile()
+        });
+        var with = BalanceSimulation.Run(new BalanceSimulationOptions
+        {
+            MaxRound = 5,
+            StartingProfile = CreateSmgProfile(),
+            StartingAmmoCrateBonus = 1000
+        });
+
+        Assert.Contains(without.Rounds, round => round.Ammo.Starved);
+        Assert.DoesNotContain(with.Rounds, round => round.Ammo.Starved);
+    }
+
+    [Fact]
     public void Run_reports_no_outliers_for_the_default_balance()
     {
         var report = BalanceSimulation.Run();
@@ -318,5 +337,13 @@ public sealed class BalanceSimulationTests
             () => BalanceSimulation.Run(new BalanceSimulationOptions { StartingRound = 5, MaxRound = 4 }));
         Assert.Throws<ArgumentOutOfRangeException>(
             () => BalanceSimulation.Run(new BalanceSimulationOptions { MaxRound = GameBalance.MaxRound + 1 }));
+    }
+
+    private static Profile CreateSmgProfile()
+    {
+        var profile = new Profile();
+        profile.UnlockWeapon(WeaponId.Smg);
+        profile.EquipWeapon(WeaponId.Smg);
+        return profile;
     }
 }

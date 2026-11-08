@@ -23,6 +23,12 @@ namespace JabaSurvivol.Core
         public float AmmoPressureThreshold { get; set; } = 0.5f;
 
         /// <summary>
+        /// Optional starting reserve bonus used by tests to exercise ammo
+        /// crate effects without changing the default report.
+        /// </summary>
+        public int StartingAmmoCrateBonus { get; set; }
+
+        /// <summary>
         /// Optional profile used to exercise a specific ranked build. The
         /// simulation mutates this profile as it progresses.
         /// </summary>
@@ -427,7 +433,7 @@ namespace JabaSurvivol.Core
             var cumulativeXp = 0;
             var totalSuppliesEarned = 0;
             var suppliesSpent = 0;
-            var ammoCrateBonus = 0;
+            var ammoCrateBonus = options.StartingAmmoCrateBonus;
 
             for (var round = options.StartingRound; round <= options.MaxRound; round++)
             {
