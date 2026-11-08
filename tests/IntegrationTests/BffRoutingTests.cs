@@ -107,6 +107,22 @@ public sealed class BffRoutingTests
     }
 
     [Fact]
+    public async Task Unsafe_correlation_id_characters_are_removed()
+    {
+        using var factory = new BffFactory().ApplyEnvironment();
+        using var client = factory.CreateClient();
+        using var request = new HttpRequestMessage(HttpMethod.Get, ApiRoutes.GameConfig);
+        request.Headers.Add(CorrelationIdMiddleware.HeaderName, "<script>alert(1)</script>");
+
+        var response = await client.SendAsync(request);
+
+        var correlationId = response.Headers.GetValues(CorrelationIdMiddleware.HeaderName).Single();
+        Assert.DoesNotContain("<", correlationId, StringComparison.Ordinal);
+        Assert.DoesNotContain("(", correlationId, StringComparison.Ordinal);
+        Assert.Equal(correlationId, Assert.Single(factory.Forwarder.Requests).CorrelationId);
+    }
+
+    [Fact]
     public async Task Network_failure_maps_to_safe_problem_details()
     {
         using var factory = new BffFactory().ApplyEnvironment();

@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Bff;
 
 public sealed class CorrelationIdMiddleware(RequestDelegate next, ILogger<CorrelationIdMiddleware> logger)
@@ -6,11 +8,7 @@ public sealed class CorrelationIdMiddleware(RequestDelegate next, ILogger<Correl
 
     public async Task InvokeAsync(HttpContext context)
     {
-        var correlationId = context.Request.Headers[HeaderName].ToString();
-        if (string.IsNullOrWhiteSpace(correlationId) || correlationId.Length > 64)
-        {
-            correlationId = Guid.NewGuid().ToString("N");
-        }
+        var correlationId = Sanitize(context.Request.Headers[HeaderName].ToString());
 
         context.Items[HeaderName] = correlationId;
         context.Request.Headers[HeaderName] = correlationId;
@@ -24,5 +22,24 @@ public sealed class CorrelationIdMiddleware(RequestDelegate next, ILogger<Correl
         {
             await next(context);
         }
+    }
+
+    private static string Sanitize(string value)
+    {
+        var builder = new StringBuilder(Math.Min(value.Length, 64));
+        foreach (var character in value)
+        {
+            if (char.IsAsciiLetterOrDigit(character) || character is '-' or '_' or '.')
+            {
+                builder.Append(character);
+            }
+
+            if (builder.Length == 64)
+            {
+                break;
+            }
+        }
+
+        return builder.Length > 0 ? builder.ToString() : Guid.NewGuid().ToString("N");
     }
 }
