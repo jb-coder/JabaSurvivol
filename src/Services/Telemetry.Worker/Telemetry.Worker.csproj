@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Game.Core\JabaSurvivol.Core.csproj" />
     <ProjectReference Include="..\..\Shared\Contracts\JabaSurvivol.Contracts.csproj" />
+    <ProjectReference Include="..\Game.Data\JabaSurvivol.Game.Data.csproj" />
     <ProjectReference Include="..\..\ServiceDefaults\ServiceDefaults.csproj" />
   </ItemGroup>
 </Project>

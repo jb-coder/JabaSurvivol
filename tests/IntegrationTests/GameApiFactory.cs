@@ -50,6 +50,9 @@ public sealed class GameApiFactory(string connectionString, int leaderboardPermi
         using var scope = Services.CreateScope();
         var database = scope.ServiceProvider.GetRequiredService<GameDbContext>();
         await database.Database.MigrateAsync();
+
+        var telemetry = scope.ServiceProvider.GetRequiredService<TelemetryDbContext>();
+        await telemetry.Database.MigrateAsync();
     }
 
     public HttpClient CreateClientFor(Guid accountId, string userName = "GameTester")

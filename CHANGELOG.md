@@ -15,6 +15,8 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Game module PostgreSQL schema with an additive cloud-save migration and a unique account/slot constraint.
 - Highest-round leaderboard with idempotent run submission, bounds validation, best run per account, top-50 default query capped at 100, deterministic tiebreaks, and per-account submission rate limiting.
 - Public read-only remote config with minimum client version, operational flags, sample rate, ETag support, conservative cache headers, and startup validation that rejects invalid values.
+- Authenticated telemetry ingestion with 1-100 event batches, 64 KiB request and 4 KiB payload limits, typed allowlists, timestamp windows, per-account idempotency, and no PII.
+- Telemetry worker aggregation into idempotent daily totals with 30-day raw-event retention.
 
 ## [0.4.0] - 2026-11-08
 
