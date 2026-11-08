@@ -58,6 +58,50 @@ namespace JabaSurvivol.Game.Data.Migrations
 
                     b.ToTable("CloudSaves", "game");
                 });
+
+            modelBuilder.Entity("Game.Data.LeaderboardRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("AchievedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ClientVersion")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("DurationSeconds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("HighestRound")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("TotalKills")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId", "RunId")
+                        .IsUnique();
+
+                    b.HasIndex("HighestRound", "TotalKills", "DurationSeconds", "AchievedAt");
+
+                    b.ToTable("LeaderboardRuns", "game");
+                });
 #pragma warning restore 612, 618
         }
     }

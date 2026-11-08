@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace JabaSurvivol.IntegrationTests;
 
-public sealed class GameApiFactory(string connectionString) : WebApplicationFactory<GameApiMarker>
+public sealed class GameApiFactory(string connectionString, int leaderboardPermitLimit = 1_000) : WebApplicationFactory<GameApiMarker>
 {
     public const string Issuer = "JabaSurvivol.Tests";
     public const string Audience = "JabaSurvivol.Tests";
@@ -24,6 +24,7 @@ public sealed class GameApiFactory(string connectionString) : WebApplicationFact
         Environment.SetEnvironmentVariable("Jwt__Issuer", Issuer);
         Environment.SetEnvironmentVariable("Jwt__Audience", Audience);
         Environment.SetEnvironmentVariable("Database__Migrate", "false");
+        Environment.SetEnvironmentVariable("RateLimiting__LeaderboardSubmitPermitLimit", leaderboardPermitLimit.ToString());
         return this;
     }
 
@@ -38,7 +39,8 @@ public sealed class GameApiFactory(string connectionString) : WebApplicationFact
                 ["Jwt:SigningKey"] = SigningKey,
                 ["Jwt:Issuer"] = Issuer,
                 ["Jwt:Audience"] = Audience,
-                ["Database:Migrate"] = "false"
+                ["Database:Migrate"] = "false",
+                ["RateLimiting:LeaderboardSubmitPermitLimit"] = leaderboardPermitLimit.ToString()
             });
         });
     }
@@ -50,12 +52,12 @@ public sealed class GameApiFactory(string connectionString) : WebApplicationFact
         await database.Database.MigrateAsync();
     }
 
-    public HttpClient CreateClientFor(Guid accountId)
+    public HttpClient CreateClientFor(Guid accountId, string userName = "GameTester")
     {
         var client = CreateClient();
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
             "Bearer",
-            TestTokenFactory.Create(accountId, SigningKey, Issuer, Audience));
+            TestTokenFactory.Create(accountId, SigningKey, Issuer, Audience, userName: userName));
         return client;
     }
 }
@@ -67,7 +69,8 @@ public static class TestTokenFactory
         string signingKey,
         string issuer,
         string audience,
-        DateTime? expires = null)
+        DateTime? expires = null,
+        string userName = "GameTester")
     {
         var expiration = expires ?? DateTime.UtcNow.AddMinutes(15);
         var descriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
@@ -79,7 +82,7 @@ public static class TestTokenFactory
             Subject = new System.Security.Claims.ClaimsIdentity(
             [
                 new System.Security.Claims.Claim("sub", accountId.ToString()),
-                new System.Security.Claims.Claim("username", "GameTester")
+                new System.Security.Claims.Claim("username", userName)
             ]),
             SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
                 new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey)),
