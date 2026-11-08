@@ -3,8 +3,10 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using Game.Api.Saves;
 using JabaSurvivol.Contracts;
 using JabaSurvivol.Core;
+using Microsoft.AspNetCore.Http;
 
 namespace JabaSurvivol.IntegrationTests;
 
@@ -196,6 +198,16 @@ public sealed class CloudSaveEndpointTests(PostgresFixture fixture) : IAsyncLife
         Assert.Equal(6, firstGet.Document.GetProperty("HighestRound").GetInt32());
     }
 
+    [Fact]
+    public async Task Kestrel_body_limit_is_mapped_to_413_problem_details()
+    {
+        var read = await SaveBodyReader.ReadAsync(new ThrowingStream(), CancellationToken.None);
+
+        var problem = Assert.IsType<Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult>(read.Error);
+        Assert.Equal(StatusCodes.Status413PayloadTooLarge, problem.StatusCode);
+        Assert.Equal("payload_too_large", problem.ProblemDetails.Extensions["code"]);
+    }
+
     private static string ProfileJson(int highestRound)
     {
         var profile = new Profile
@@ -220,5 +232,49 @@ public sealed class CloudSaveEndpointTests(PostgresFixture fixture) : IAsyncLife
     {
         using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         return document.RootElement.GetProperty("code").GetString() ?? string.Empty;
+    }
+
+    private sealed class ThrowingStream : Stream
+    {
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => throw new NotSupportedException();
+        public override long Position
+        {
+            get => throw new NotSupportedException();
+            set => throw new NotSupportedException();
+        }
+
+        public override void Flush()
+        {
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            throw new BadHttpRequestException("The request body is too large.", StatusCodes.Status413PayloadTooLarge);
+        }
+
+        public override Task<int> ReadAsync(
+            byte[] buffer,
+            int offset,
+            int count,
+            CancellationToken cancellationToken)
+        {
+            throw new BadHttpRequestException("The request body is too large.", StatusCodes.Status413PayloadTooLarge);
+        }
+
+        public override ValueTask<int> ReadAsync(
+            Memory<byte> buffer,
+            CancellationToken cancellationToken = default)
+        {
+            throw new BadHttpRequestException("The request body is too large.", StatusCodes.Status413PayloadTooLarge);
+        }
+
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+
+        public override void SetLength(long value) => throw new NotSupportedException();
+
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
     }
 }

@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Text;
 using System.Text.Json;
 using Game.Data;
 using JabaSurvivol.Contracts;
@@ -73,21 +72,16 @@ public static class SaveEndpoints
             return ApiProblem.Unauthorized();
         }
 
-        string body;
-        using (var reader = new StreamReader(
-                   httpContext.Request.Body,
-                   Encoding.UTF8,
-                   detectEncodingFromByteOrderMarks: false,
-                   bufferSize: 8192,
-                   leaveOpen: true))
+        var readResult = await SaveBodyReader
+            .ReadAsync(httpContext.Request.Body, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (readResult.Error is not null)
         {
-            body = await reader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+            return readResult.Error;
         }
 
-        if (Encoding.UTF8.GetByteCount(body) > SaveContract.MaximumBodyBytes)
-        {
-            return PayloadTooLarge();
-        }
+        var body = readResult.Body!;
 
         JsonDocument document;
         try
@@ -248,15 +242,6 @@ public static class SaveEndpoints
                 ["currentRevision"] = currentRevision,
                 ["currentUpdatedAt"] = currentUpdatedAt?.ToString("O", CultureInfo.InvariantCulture)
             });
-    }
-
-    private static IResult PayloadTooLarge()
-    {
-        return ApiProblem.Create(
-            StatusCodes.Status413PayloadTooLarge,
-            "payload_too_large",
-            "Cloud save is too large",
-            $"The maximum request size is {SaveContract.MaximumBodyBytes} bytes.");
     }
 
     private static IResult InvalidSave(string detail)
