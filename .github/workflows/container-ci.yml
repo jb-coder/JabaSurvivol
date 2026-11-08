@@ -1,0 +1,76 @@
+name: container-ci
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "deploy/**"
+      - "Dockerfile"
+      - ".github/workflows/container-ci.yml"
+      - "Directory.Build.props"
+      - "Directory.Packages.props"
+      - "global.json"
+  push:
+    branches: [develop, main]
+    paths:
+      - "src/**"
+      - "deploy/**"
+      - "Dockerfile"
+      - ".github/workflows/container-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Render manifests
+        run: kubectl kustomize deploy/k8s/overlays/prod > rendered.yaml
+
+      - name: Validate manifests
+        run: |
+          docker run --rm -v "$PWD/rendered.yaml:/manifests/rendered.yaml" \
+            ghcr.io/yannh/kubeconform:v0.6.7 -strict -summary /manifests/rendered.yaml
+
+  images:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: identity-api
+            dockerfile: src/Services/Identity.Api/Dockerfile
+          - name: game-api
+            dockerfile: src/Services/Game.Api/Dockerfile
+          - name: bff
+            dockerfile: src/Gateway/Bff/Dockerfile
+          - name: telemetry-worker
+            dockerfile: src/Services/Telemetry.Worker/Dockerfile
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build ${{ matrix.name }}
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: false
+          load: true
+          tags: jabasurvivol/${{ matrix.name }}:${{ github.sha }}
+
+      - name: Scan ${{ matrix.name }}
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: jabasurvivol/${{ matrix.name }}:${{ github.sha }}
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH

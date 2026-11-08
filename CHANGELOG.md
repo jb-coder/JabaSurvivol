@@ -25,6 +25,8 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Cloud save revision persisted additively in schema version 1 so older profiles remain compatible.
 - Unity highest-round leaderboard panel from the main menu and victory screen, with run submission, idempotent retries, and non-blocking failures.
 - Opt-in telemetry with a persistent toggle, allowlisted event queue, batched retries, and remote-config gating that defaults to off.
+- Hardened multi-stage backend container images and Kustomize manifests for Identity, Game, Telemetry Worker, BFF, and PostgreSQL, with non-root containers, probes, resource budgets, network policies, and BFF-only ingress.
+- Container CI builds all four images, validates the rendered manifests, and scans images with Trivy.
 
 ## [0.4.0] - 2026-11-08
 

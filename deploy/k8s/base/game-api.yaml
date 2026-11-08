@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: game-api
+  namespace: jabasurvivol
+  labels: &labels
+    app.kubernetes.io/name: game-api
+    app.kubernetes.io/part-of: jabasurvivol
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: game-api
+  template:
+    metadata:
+      labels: *labels
+    spec:
+      serviceAccountName: jabasurvivol
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: game-api
+          image: game-api
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: jabasurvivol-config
+          env:
+            - name: ConnectionStrings__Database
+              valueFrom:
+                secretKeyRef:
+                  name: jabasurvivol-secrets
+                  key: database-connection-string
+            - name: Jwt__SigningKey
+              valueFrom:
+                secretKeyRef:
+                  name: jabasurvivol-secrets
+                  key: jwt-signing-key
+          resources:
+            requests:
+              cpu: 150m
+              memory: 384Mi
+            limits:
+              cpu: 700m
+              memory: 768Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: game-api
+  namespace: jabasurvivol
+  labels:
+    app.kubernetes.io/name: game-api
+    app.kubernetes.io/part-of: jabasurvivol
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: game-api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

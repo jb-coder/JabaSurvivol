@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jabasurvivol-config
+  namespace: jabasurvivol
+  labels:
+    app.kubernetes.io/part-of: jabasurvivol
+data:
+  ASPNETCORE_ENVIRONMENT: Production
+  Jwt__Issuer: JabaSurvivol
+  Jwt__Audience: JabaSurvivol
+  Jwt__AccessTokenMinutes: "15"
+  Jwt__RefreshTokenDays: "30"
+  Database__Migrate: "false"
+  RateLimiting__AuthPermitLimit: "10"
+  RateLimiting__AccountPermitLimit: "60"
+  RateLimiting__IpPermitLimit: "120"
+  RateLimiting__LeaderboardSubmitPermitLimit: "30"
+  RemoteConfig__Version: "1"
+  RemoteConfig__MinimumClientVersion: "0.5.0"
+  RemoteConfig__MaintenanceMode: "false"
+  RemoteConfig__CloudSavesEnabled: "true"
+  RemoteConfig__LeaderboardsEnabled: "true"
+  RemoteConfig__TelemetryEnabled: "false"
+  RemoteConfig__TelemetrySampleRate: "0.0"
+  Telemetry__WorkerIntervalSeconds: "60"
+  Telemetry__RetentionDays: "30"
+  Telemetry__AggregationLookbackDays: "2"

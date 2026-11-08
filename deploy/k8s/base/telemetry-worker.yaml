@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telemetry-worker
+  namespace: jabasurvivol
+  labels:
+    app.kubernetes.io/name: telemetry-worker
+    app.kubernetes.io/part-of: jabasurvivol
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: telemetry-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: telemetry-worker
+        app.kubernetes.io/part-of: jabasurvivol
+    spec:
+      serviceAccountName: jabasurvivol
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: telemetry-worker
+          image: telemetry-worker
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: jabasurvivol-config
+          env:
+            - name: ConnectionStrings__Database
+              valueFrom:
+                secretKeyRef:
+                  name: jabasurvivol-secrets
+                  key: database-connection-string
+          resources:
+            requests:
+              cpu: 100m
+              memory: 192Mi
+            limits:
+              cpu: 400m
+              memory: 384Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
