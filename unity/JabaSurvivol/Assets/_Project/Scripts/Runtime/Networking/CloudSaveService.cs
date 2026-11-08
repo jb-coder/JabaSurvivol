@@ -91,12 +91,12 @@ namespace JabaSurvivol.Gameplay
         {
             if (!Enabled)
             {
-                return Result(CloudSyncState.Disabled, "CLOUD SAVES DISABLED");
+                return Result(CloudSyncState.Disabled, Localization.Get("cloud.disabled"));
             }
 
             if (_account.State != AccountState.SignedIn || string.IsNullOrWhiteSpace(_account.AccessToken))
             {
-                return Result(CloudSyncState.SignedOut, "SIGN IN TO BACK UP");
+                return Result(CloudSyncState.SignedOut, Localization.Get("cloud.signedout"));
             }
 
             LocalRevision = profile.CloudSaveRevision;
@@ -108,11 +108,11 @@ namespace JabaSurvivol.Gameplay
                 case CloudSaveApiStatus.NotFound:
                     return await UploadAsync(profile, 0, cancellationToken);
                 case CloudSaveApiStatus.NetworkError:
-                    return Result(CloudSyncState.Offline, "CLOUD UNAVAILABLE - LOCAL SAVE KEPT");
+                    return Result(CloudSyncState.Offline, Localization.Get("cloud.offline"));
                 case CloudSaveApiStatus.Unauthorized:
-                    return Result(CloudSyncState.SignedOut, "SIGN IN TO BACK UP");
+                    return Result(CloudSyncState.SignedOut, Localization.Get("cloud.signedout"));
                 case CloudSaveApiStatus.Success when cloud.Save is null:
-                    return Result(CloudSyncState.Offline, "CLOUD UNAVAILABLE - LOCAL SAVE KEPT");
+                    return Result(CloudSyncState.Offline, Localization.Get("cloud.offline"));
                 case CloudSaveApiStatus.Success:
                     if (cloud.Save.revision == profile.CloudSaveRevision)
                     {
@@ -123,7 +123,7 @@ namespace JabaSurvivol.Gameplay
                 case CloudSaveApiStatus.Conflict:
                 case CloudSaveApiStatus.Error:
                 default:
-                    return Result(CloudSyncState.Offline, "CLOUD UNAVAILABLE - LOCAL SAVE KEPT");
+                    return Result(CloudSyncState.Offline, Localization.Get("cloud.offline"));
             }
         }
 
@@ -131,12 +131,12 @@ namespace JabaSurvivol.Gameplay
         {
             if (!Enabled)
             {
-                return Result(CloudSyncState.Disabled, "CLOUD SAVES DISABLED");
+                return Result(CloudSyncState.Disabled, Localization.Get("cloud.disabled"));
             }
 
             if (_account.State != AccountState.SignedIn || string.IsNullOrWhiteSpace(_account.AccessToken))
             {
-                return Result(CloudSyncState.SignedOut, "SIGN IN TO BACK UP");
+                return Result(CloudSyncState.SignedOut, Localization.Get("cloud.signedout"));
             }
 
             LocalRevision = profile.CloudSaveRevision;
@@ -148,12 +148,12 @@ namespace JabaSurvivol.Gameplay
         {
             if (!Enabled)
             {
-                return Result(CloudSyncState.Disabled, "CLOUD SAVES DISABLED");
+                return Result(CloudSyncState.Disabled, Localization.Get("cloud.disabled"));
             }
 
             if (_account.State != AccountState.SignedIn || string.IsNullOrWhiteSpace(_account.AccessToken))
             {
-                return Result(CloudSyncState.SignedOut, "SIGN IN TO RESTORE");
+                return Result(CloudSyncState.SignedOut, Localization.Get("cloud.signedout"));
             }
 
             SetState(CloudSyncState.Syncing);
@@ -161,10 +161,10 @@ namespace JabaSurvivol.Gameplay
             return cloud.Status switch
             {
                 CloudSaveApiStatus.Success when cloud.Save?.document is not null => ApplyRestore(cloud.Save),
-                CloudSaveApiStatus.NotFound => Result(CloudSyncState.Idle, "NO CLOUD SAVE FOUND"),
-                CloudSaveApiStatus.NetworkError => Result(CloudSyncState.Offline, "CLOUD UNAVAILABLE - LOCAL SAVE KEPT"),
-                CloudSaveApiStatus.Unauthorized => Result(CloudSyncState.SignedOut, "SIGN IN TO RESTORE"),
-                _ => Result(CloudSyncState.Offline, "CLOUD SAVE COULD NOT BE RESTORED")
+                CloudSaveApiStatus.NotFound => Result(CloudSyncState.Idle, Localization.Get("cloud.msg.nosave")),
+                CloudSaveApiStatus.NetworkError => Result(CloudSyncState.Offline, Localization.Get("cloud.offline")),
+                CloudSaveApiStatus.Unauthorized => Result(CloudSyncState.SignedOut, Localization.Get("cloud.signedout")),
+                _ => Result(CloudSyncState.Offline, Localization.Get("cloud.msg.restoreFailed"))
             };
         }
 
@@ -172,7 +172,7 @@ namespace JabaSurvivol.Gameplay
         {
             if (_conflict is null)
             {
-                return Result(CloudSyncState.Offline, "NO CLOUD CONFLICT TO RESOLVE");
+                return Result(CloudSyncState.Offline, Localization.Get("cloud.msg.noconflict"));
             }
 
             if (_conflict.document is null)
@@ -180,7 +180,7 @@ namespace JabaSurvivol.Gameplay
                 var fetched = await _api.GetAsync(cancellationToken);
                 if (fetched.Status != CloudSaveApiStatus.Success || fetched.Save?.document is null)
                 {
-                    return Result(CloudSyncState.Offline, "CLOUD SAVE COULD NOT BE LOADED");
+                    return Result(CloudSyncState.Offline, Localization.Get("cloud.msg.loadFailed"));
                 }
 
                 _conflict = fetched.Save;
@@ -193,7 +193,7 @@ namespace JabaSurvivol.Gameplay
         {
             if (_conflict is null)
             {
-                return Result(CloudSyncState.Offline, "NO CLOUD CONFLICT TO RESOLVE");
+                return Result(CloudSyncState.Offline, Localization.Get("cloud.msg.noconflict"));
             }
 
             SetState(CloudSyncState.Syncing);
@@ -215,7 +215,7 @@ namespace JabaSurvivol.Gameplay
                         _store.Save(profile);
                         LocalRevision = result.Save.revision;
                         _conflict = null;
-                        return Result(CloudSyncState.Synced, "BACKUP COMPLETE");
+                        return Result(CloudSyncState.Synced, Localization.Get("cloud.msg.backup"));
                     case CloudSaveApiStatus.Conflict:
                         var current = await _api.GetAsync(cancellationToken);
                         return SetConflict(current.Status == CloudSaveApiStatus.Success && current.Save is not null
@@ -226,18 +226,18 @@ namespace JabaSurvivol.Gameplay
                                 updatedAt = result.CurrentUpdatedAt
                             });
                     case CloudSaveApiStatus.Unauthorized:
-                        return Result(CloudSyncState.SignedOut, "SIGN IN TO BACK UP");
+                        return Result(CloudSyncState.SignedOut, Localization.Get("cloud.signedout"));
                     case CloudSaveApiStatus.NetworkError when attempt < 2:
                         await Task.Delay(_retryDelay(attempt), cancellationToken);
                         break;
                     case CloudSaveApiStatus.NetworkError:
-                        return Result(CloudSyncState.Offline, "CLOUD UNAVAILABLE - LOCAL SAVE KEPT");
+                        return Result(CloudSyncState.Offline, Localization.Get("cloud.offline"));
                     default:
-                        return Result(CloudSyncState.Offline, "BACKUP FAILED - LOCAL SAVE KEPT");
+                        return Result(CloudSyncState.Offline, Localization.Get("cloud.msg.backupFailed"));
                 }
             }
 
-            return Result(CloudSyncState.Offline, "CLOUD UNAVAILABLE - LOCAL SAVE KEPT");
+            return Result(CloudSyncState.Offline, Localization.Get("cloud.offline"));
         }
 
         private CloudSyncResult ApplyRestore(CloudSaveDto cloud)
@@ -252,7 +252,7 @@ namespace JabaSurvivol.Gameplay
             return new CloudSyncResult
             {
                 State = CloudSyncState.Synced,
-                Message = "CLOUD SAVE RESTORED",
+                Message = Localization.Get("cloud.msg.restored"),
                 RestoredProfile = restored
             };
         }
@@ -265,7 +265,7 @@ namespace JabaSurvivol.Gameplay
             {
                 State = CloudSyncState.Conflict,
                 Conflict = true,
-                Message = "LOCAL AND CLOUD SAVES DIFFER"
+                Message = Localization.Get("cloud.conflict")
             };
         }
 

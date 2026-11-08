@@ -872,6 +872,7 @@ namespace JabaSurvivol.Gameplay
             _runXpEarned += reward.Xp;
             _profile.RecordRunEnd(_run);
             _store.Save(_profile);
+            _ = SyncCloudAsync();
 
             _state = GameSessionState.Victory;
             _zombieActive = false;
@@ -1013,6 +1014,7 @@ namespace JabaSurvivol.Gameplay
                 }
 
                 _store.Save(_profile);
+                _ = SyncCloudAsync();
             }
 
             _state = GameSessionState.MainMenu;
