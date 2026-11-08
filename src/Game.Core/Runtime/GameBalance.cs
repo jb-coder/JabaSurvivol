@@ -43,6 +43,12 @@ namespace JabaSurvivol.Core
         public const int BossRound = 10;
         public const float RoundClearPauseSeconds = 0.75f;
 
+        public const float EliteHealthMultiplier = 1.5f;
+        public const float EliteDamageMultiplier = 1.25f;
+        public const float EliteRewardMultiplier = 2f;
+        public const int RunnerSpawnRound = 2;
+        public const int BruteSpawnRound = 4;
+
         public const int RoundRewardOptionCount = 3;
         public const int RoundRewardSuppliesBase = 50;
         public const int RoundRewardSuppliesPerRound = 25;
@@ -54,5 +60,10 @@ namespace JabaSurvivol.Core
         public const float StickDeadZone = 0.16f;
         public const float AimStickDeadZone = 0.2f;
         public const float LevelUpNotificationSeconds = 2.5f;
+
+        public const float TurretRange = 8f;
+        public const float TurretProjectileSpeed = 16f;
+        public const float DashInvulnerabilitySeconds = 0.25f;
+        public const float ShockwaveKnockbackDistance = 1.1f;
     }
 }

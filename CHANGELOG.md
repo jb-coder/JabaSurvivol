@@ -6,6 +6,39 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-08
+
+### Added
+
+- Data-driven zombie catalog in `Game.Core` for Walker, Runner, and Brute with health, speed, contact damage, supplies, XP, and visual scale values.
+- Deterministic round spawn composition generated from the run seed and round number, with Runners from round 2 and Brutes from round 4.
+- Elite rounds every fifth round with increased health, contact damage, and rewards, plus a HUD modifier.
+- Archetype-based kill rewards and a pooled zombie actor and death-effect system in Unity.
+- Round 10 boss encounter with a dedicated boss catalog, telegraphed slam attack, enrage phase, and boss HUD.
+- Boss spawn gate that keeps the final round active until the boss is defeated.
+- Victory state with run summary, next-run action, and main-menu action.
+- Boss death rewards, highest-round recording, and persistent-progression-safe death during the boss round.
+- Run-only weapon loadout with per-weapon magazines, finite reserves, reload timing, and weapon switching.
+- Manual and automatic reload with effective reload time from weapon upgrades and Engineering.
+- HUD weapon, ammo, reserve, and reload state, plus touch and keyboard reload and switch controls.
+- Ammo crates refill every finite reserve without spending persistent supplies.
+- Turret active skill with rank gating, deploy duration, target acquisition, rank-scaled damage, and cooldown.
+- Active-skill HUD button with radial cooldown and Space keyboard fallback.
+- Run-only active-skill state that resets on death and new runs.
+- Dash active skill with rank-scaled distance, cooldown, and a brief invulnerability window.
+- Shockwave active skill with rank-scaled area damage, radius, cooldown, and zombie knockback.
+- Active-skill selection from the armory or character sheet with persistent profile storage and zero-rank gating.
+- Berserker, Ghost, and Bastion synergies derived from allocated ranks without extra skill points.
+- Character-sheet synergy status with active and requirement display.
+- Balance simulation coverage for Walker, Runner, Brute, elite, and boss content.
+- Balance simulation coverage for magazines, reserves, reloads, weapon switching, and ammo crate rewards.
+- Balance simulation coverage for Turret, Dash, Shockwave, and synergy uptime, with boss time-to-kill and new outliers.
+
+### Changed
+
+- Android version bumped to `0.4.0` with version code `4`.
+- Core package version bumped to `0.4.0`.
+
 ## [0.3.0] - 2026-11-07
 
 ### Added

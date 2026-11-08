@@ -24,6 +24,7 @@ JabaSurvivol is a 2D top-down, round-based zombie survival game for Android phon
 - Ten rounds.
 - Armory from the main menu and pause menu.
 - Persistent supplies, XP, levels, skills, weapons, and armor.
+- Skill synergies derived from allocated ranks.
 - Local save.
 - Android APK builds for verification.
 - No co-op, payments, localization, or premium currency in the MVP.
@@ -41,10 +42,78 @@ JabaSurvivol is a 2D top-down, round-based zombie survival game for Android phon
 
 - Round spawn budget increases with the round number.
 - Zombie health, speed, and damage scale with the round.
-- Elite enemy every five rounds.
+- The spawn composition is deterministic from the run seed and round number.
+- Walker spawns from round 1, Runner from round 2, and Brute from round 4.
+- Elite enemy every five rounds, including round 5.
 - Boss at round 10.
 - Endless mode is considered after the MVP.
 - Round completion grants supplies and a choice of one of three rewards.
+
+### Zombie archetypes
+
+| Archetype | Health | Speed | Contact damage | Supplies | XP | Visual scale |
+|---|---:|---:|---:|---:|---:|---:|
+| Walker | 1.00x | 1.00x | 1.00x | 10 | 10 | 1.00 |
+| Runner | 0.70x | 1.70x | 0.80x | 15 | 15 | 0.82 |
+| Brute | 2.60x | 0.70x | 1.60x | 30 | 30 | 1.35 |
+
+Round scaling applies to the base round values before the archetype multipliers. The spawn plan guarantees at least one Runner in round 2 and later, and at least one Brute in round 4 and later, so mixed compositions appear as soon as the archetype unlocks.
+
+### Elite rounds
+
+Elite rounds occur every fifth round, including round 5, and exclude the round 10 boss. Every enemy in an elite round uses:
+
+- 1.50x health.
+- 1.25x contact damage.
+- 2.00x supplies and XP.
+
+The HUD shows the elite modifier for the whole round. Elite state is run-only and does not alter persistent progression rules.
+
+## Active skills
+
+- Turret is the default survival active skill.
+- The selected active skill uses its allocated rank.
+- Rank zero locks activation.
+- Turret deploys at the player's position, lasts for its rank-scaled duration, fires at the nearest enemy in range, and then enters its rank-scaled cooldown.
+- Dash moves the player, grants a brief invulnerability window, and uses a rank-scaled distance and cooldown.
+- Shockwave deals rank-scaled area damage and knockback around the player and uses a rank-scaled cooldown.
+- The player selects the active skill from the armory or character sheet; the selection persists and zero-rank skills cannot be selected.
+- The HUD active-skill button shows a radial cooldown and the keyboard fallback is Space.
+- Active-skill state is run-only and resets on death or a new run.
+
+## Boss
+
+The Warden spawns only in round 10, after every regular enemy in the round has been killed. The round stays active until the boss dies.
+
+| Value | Value |
+|---|---:|
+| Health | 2,400 |
+| Move speed | 1.15 |
+| Contact damage | 30 every 0.8 seconds |
+| Slam damage | 45 |
+| Slam radius | 2.6 |
+| Slam telegraph | 0.9 seconds |
+| Slam interval | 4.5 seconds |
+| Enrage threshold | 50% health |
+| Enraged slam interval | 0.6x normal |
+| Supplies | 1,000 |
+| XP | 500 |
+
+The slam is telegraphed with an expanding red ring before it resolves. The boss enrages below half health and slams more often. Defeating the boss awards its supplies and XP once, records round 10 as the highest round, and enters the victory state.
+
+The victory screen shows the round, kills, supplies earned, and XP earned, with next-run and main-menu actions. Death during the boss round preserves all persistent progression and resets only the current run.
+
+## Ammunition
+
+- Each run tracks a magazine and reserve for every unlocked weapon.
+- The pistol has infinite reserve. Other weapons use their catalog reserve.
+- Firing consumes one round per trigger pull. The shotgun consumes one shell per trigger pull and fires its pellet spread.
+- Firing stops when the magazine is empty. The player reloads manually or the weapon reloads automatically on the next trigger pull.
+- Reload time uses the effective reload value from weapon upgrades and Engineering.
+- Engineering increases magazine capacity through the ammo capacity multiplier.
+- Switching weapons during a run preserves each weapon's magazine state.
+- Ammo crates refill every finite reserve for free and never consume persistent supplies.
+- Ammo is run-only. Death and a new run reset magazines and reserves.
 
 ## Rewards
 

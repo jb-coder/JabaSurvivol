@@ -432,6 +432,26 @@ namespace JabaSurvivol.Core
         }
 
         /// <summary>
+        /// Selects an allocated active skill. Zero-rank skills cannot be
+        /// selected. The choice persists in the profile.
+        /// </summary>
+        public bool SetActiveSkill(SkillNode node)
+        {
+            if (!SkillCatalog.IsDefined(node) || GetSkillRank(node) <= 0)
+            {
+                return false;
+            }
+
+            if (!SkillCatalog.Get(node).IsActiveSlot)
+            {
+                return false;
+            }
+
+            ActiveSkill = node;
+            return true;
+        }
+
+        /// <summary>
         /// Refunds every allocated rank for free and returns the refunded
         /// point count.
         /// </summary>
@@ -743,10 +763,26 @@ namespace JabaSurvivol.Core
                 SkillPoints = earned;
             }
 
-            if (!SkillCatalog.IsDefined(ActiveSkill) || !SkillCatalog.Get(ActiveSkill).IsActiveSlot)
+            if (!SkillCatalog.IsDefined(ActiveSkill) ||
+                !SkillCatalog.Get(ActiveSkill).IsActiveSlot ||
+                GetSkillRank(ActiveSkill) <= 0)
             {
-                ActiveSkill = SkillNode.Turret;
+                ActiveSkill = PickDefaultActiveSkill();
             }
+        }
+
+        private SkillNode PickDefaultActiveSkill()
+        {
+            var activeNodes = new[] { SkillNode.Turret, SkillNode.Dash, SkillNode.Shockwave };
+            for (var i = 0; i < activeNodes.Length; i++)
+            {
+                if (GetSkillRank(activeNodes[i]) > 0)
+                {
+                    return activeNodes[i];
+                }
+            }
+
+            return SkillNode.Turret;
         }
 
         private void ClampSkillPoints()

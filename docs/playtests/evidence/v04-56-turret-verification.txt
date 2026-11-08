@@ -1,0 +1,34 @@
+# v0.4.0 Slice 56 Turret Verification
+
+Automated verification for the Turret active skill.
+
+## Core
+
+- Turret rank zero cannot activate.
+- Rank scaling for damage, duration, and cooldown.
+- Deployment starts duration and cooldown.
+- Turret fires on its 0.5 second interval.
+- Expiry returns the skill to cooldown.
+- Cooldown gates redeployment.
+- Run state uses the allocated rank and picks up rank changes.
+- Restart resets turret state.
+
+## EditMode
+
+- Rank gating and activation.
+- Rank-scaled damage and duration.
+- Expiry and cooldown gating.
+- Restart reset.
+
+## PlayMode
+
+- Zero-rank turret stays locked and is not deployed.
+- Ranked turret deploys, becomes visible, starts cooldown, and cannot redeploy while active.
+- Turret fires at the active zombie and kills it.
+- Death and a new run hide the turret and reset cooldown.
+
+## Android
+
+- ARM64 production APK and ARM64 + x86_64 emulator APK built.
+- Emulator smoke test passed on phone and tablet layouts.
+- The active-skill button is visible in `v04-56-playing.png`.

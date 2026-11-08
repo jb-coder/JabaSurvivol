@@ -1,0 +1,32 @@
+# v0.4.0 Slice 58 Synergy Verification
+
+Automated verification for the three skill synergies.
+
+## Core
+
+- Both prerequisite ranks are required for each synergy.
+- Berserker adds 10% damage below 50% health.
+- Repeated stat aggregation does not double-apply synergy modifiers.
+- Ghost grants 10% movement speed for 2 seconds after a kill.
+- Ghost does not activate without both ranks.
+- Bastion regenerates 2 armor per second after 5 seconds without damage.
+- Taking damage resets the Bastion delay.
+- Restart resets synergy timers.
+
+## EditMode
+
+- Prerequisite gating.
+- Ghost and Bastion run-only state and reset.
+
+## PlayMode
+
+- Berserker increases effective weapon damage below half health.
+- Ghost raises move speed after a kill and expires.
+- Bastion regenerates armor out of combat.
+- The character sheet shows synergy status.
+
+## Android
+
+- ARM64 production APK and ARM64 + x86_64 emulator APK built.
+- Emulator smoke test passed on phone and tablet layouts.
+- The synergy status row is visible in the character-sheet screenshots.

@@ -20,7 +20,10 @@ namespace JabaSurvivol.Tests.EditMode
         public void Persistent_rewards_are_saved_and_run_only_rewards_are_not()
         {
             var profile = new Profile();
-            var run = new RunState(GameBalance.PlayerMaxHealth);
+            profile.UnlockWeapon(WeaponId.Smg);
+            profile.EquipWeapon(WeaponId.Smg);
+            var run = new RunState(GameBalance.PlayerMaxHealth, profile: profile);
+            var initialReserve = run.Reserve;
 
             RoundRewardModel.Apply(new RoundRewardOption(RoundRewardType.Supplies, 75), profile, run);
             RoundRewardModel.Apply(new RoundRewardOption(RoundRewardType.Xp, 30), profile, run);
@@ -29,13 +32,15 @@ namespace JabaSurvivol.Tests.EditMode
                 profile,
                 run);
 
+            Assert.That(run.Reserve, Is.EqualTo(initialReserve + GameBalance.AmmoCrateAmount));
+
             run.DamagePlayer(GameBalance.PlayerMaxHealth * 2f);
             profile.RecordRunEnd(run);
             run.Restart();
 
             Assert.That(profile.Supplies, Is.EqualTo(75));
             Assert.That(profile.Xp, Is.EqualTo(30));
-            Assert.That(run.Ammo, Is.EqualTo(0));
+            Assert.That(run.Reserve, Is.EqualTo(initialReserve));
         }
 
         [Test]

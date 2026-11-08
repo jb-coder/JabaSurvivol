@@ -19,7 +19,7 @@ Initial balance targets:
 | Walker kill | 10 | 10 |
 | Runner kill | 15 | 15 |
 | Brute kill | 30 | 30 |
-| Elite kill | 250 | 100 |
+| Elite round kill | archetype value x2 | archetype value x2 |
 | Boss kill | 1,000 | 500 |
 | Round clear | 100 | 50 |
 | Run end bonus | 100 + 25 per round | 100 + 25 per round |
@@ -40,6 +40,15 @@ All values are data-driven and subject to simulation.
 source of truth for damage, fire rate, magazine size, reload time, range,
 projectile speed, reserve ammunition, pellet count, spread, and unlock cost.
 The pistol always starts unlocked and has infinite reserve.
+
+Each run creates a `WeaponLoadout` with one runtime state per unlocked weapon.
+The state stores the magazine, finite reserve, reload timer, and reload progress.
+Firing consumes one round per trigger pull; the shotgun consumes one shell and
+then resolves its pellet spread. Reload time is `reloadSeconds / reloadSpeedMultiplier`,
+where the multiplier includes Engineering and weapon reload upgrades. Engineering
+also scales magazine capacity through `AmmoCapacityMultiplier`. Ammo crates add
+to every finite reserve and never touch persistent supplies. Ammo is run-only and
+resets on death or a new run.
 
 The armory is available from the main menu and the pause menu. It spends
 persistent supplies to unlock weapons and equips owned weapons. Unlocks and the
@@ -105,9 +114,17 @@ Round values are data-driven in `GameBalance` and `RoundTable`:
 - Zombie speed: `1.9 * (1 + 0.04 * (round - 1))`, capped at 1.35x.
 - Zombie contact damage: `10 * (1 + 0.12 * (round - 1))`, from 10 to 20.8.
 - Round 5 is an elite round and round 10 is the boss round.
+- The round 10 boss spawns after the regular enemies are cleared and the round does not clear until it dies.
+- The boss has 2,400 health, 1.15 move speed, 30 contact damage every 0.8 seconds, and a telegraphed 45-damage slam with a 2.6 radius, 0.9-second telegraph, and 4.5-second interval.
+- The boss enrages below 50% health and uses a 0.6x slam interval while enraged.
+- Defeating the boss awards 1,000 supplies and 500 XP once and enters the victory state.
+- Archetype multipliers: Walker 1.00x/1.00x/1.00x, Runner 0.70x health and 1.70x speed, Brute 2.60x health, 0.70x speed, and 1.60x contact damage.
+- Elite rounds multiply health by 1.50x, contact damage by 1.25x, and supplies and XP by 2.00x.
+- Spawn composition is deterministic from the run seed and round number, with Runners from round 2 and Brutes from round 4.
 
 The headless simulation uses the same core rules and reports pacing, income,
-progression, build state, and outliers:
+progression, build state, enemy mix, ammunition pressure, active-skill uptime,
+synergy uptime, boss time-to-kill, and outliers:
 
 ```powershell
 dotnet run --project tools/BalanceSimulation/BalanceSimulation.csproj -c Release
@@ -120,9 +137,10 @@ weapon upgrade tiers, armor tier and absorb, skill ranks, supplies earned,
 spent, and remaining, XP, level, and available skill points.
 
 It writes `artifacts/balance/rounds.md` with a fixed seed so CI and local runs
-produce the same report. Outliers cover trivial rounds, runaway supplies,
-unreachable upgrade costs, builds that exceed the documented caps, and runs
-that never unlock a weapon, weapon damage upgrade, or armor tier.
+produce the same report. Outliers cover trivial elites, boss encounters that
+are too easy or too hard, ammo starvation, runaway supplies, unreachable
+upgrades, unreachable synergies, cap violations, and builds that never unlock a
+weapon or weapon damage upgrade.
 
 ## Premium currency
 

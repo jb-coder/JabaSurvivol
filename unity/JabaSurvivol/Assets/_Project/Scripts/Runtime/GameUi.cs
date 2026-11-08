@@ -1,5 +1,6 @@
 using JabaSurvivol.Core;
 using System.Globalization;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,6 +17,8 @@ namespace JabaSurvivol.Gameplay
         private readonly GameObject _hud;
         private readonly GameObject _pausePanel;
         private readonly GameObject _gameOverPanel;
+        private readonly GameObject _victoryPanel;
+        private readonly GameObject _bossPanel;
         private readonly GameObject _roundEndPanel;
         private readonly GameObject _armoryPanel;
         private readonly GameObject _armoryWeaponsPanel;
@@ -25,12 +28,26 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _healthText;
         private readonly Text _armorText;
         private readonly Text _roundText;
+        private readonly Text _roundModifierText;
         private readonly Text _enemiesText;
         private readonly Text _killsText;
         private readonly Text _suppliesText;
         private readonly Text _levelText;
         private readonly Text _levelUpText;
+        private readonly Text _weaponText;
+        private readonly Text _ammoText;
+        private readonly Text _reloadText;
+        private readonly Image _reloadFill;
+        private readonly Button _activeSkillButton;
+        private readonly Image _activeSkillCooldown;
+        private readonly Text _activeSkillLabel;
+        private readonly Button[] _selectActiveButtons;
+        private readonly Text[] _selectActiveLabels;
         private readonly Text _gameOverSummary;
+        private readonly Text _victorySummary;
+        private readonly Text _bossNameText;
+        private readonly Text _bossHealthText;
+        private readonly Image _bossHealthFill;
         private readonly Text _roundEndTitle;
         private readonly Text _roundEndSummary;
         private readonly Text _armorySuppliesText;
@@ -42,6 +59,7 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _characterLevelText;
         private readonly Text _characterPointsText;
         private readonly Text _characterStatsText;
+        private readonly Text _characterSynergyText;
         private readonly Text _characterStatusText;
         private readonly Button _characterRespecButton;
         private readonly Text _characterRespecLabel;
@@ -74,6 +92,20 @@ namespace JabaSurvivol.Gameplay
         private int _lastLevel = int.MinValue;
         private int _lastXp = int.MinValue;
         private int _lastSkillPoints = int.MinValue;
+        private int _lastBossHealth = int.MinValue;
+        private int _lastBossMaxHealth = int.MinValue;
+        private bool _lastBossEnraged;
+        private string _lastWeaponName = string.Empty;
+        private int _lastMagazine = int.MinValue;
+        private int _lastMagazineSize = int.MinValue;
+        private int _lastReserve = int.MinValue;
+        private bool _lastInfiniteReserve;
+        private bool _lastReloading;
+        private SkillNode _lastSkillNode = SkillNode.Turret;
+        private int _lastSkillRank = int.MinValue;
+        private bool _lastSkillReady;
+        private int _lastSkillCooldownPercent = int.MinValue;
+        private int _lastSkillActivePercent = int.MinValue;
         private bool _characterSheetTablet;
         private int _activeCharacterBranch;
 
@@ -84,6 +116,10 @@ namespace JabaSurvivol.Gameplay
             System.Action onMenu,
             System.Action onPause,
             System.Action onResume,
+            System.Action onReload,
+            System.Action onSwitchWeapon,
+            System.Action onActiveSkill,
+            System.Action<SkillNode> onSelectActiveSkill,
             System.Action<int> onRewardSelected,
             System.Action onArmory,
             System.Action<WeaponId> onArmoryAction,
@@ -105,9 +141,22 @@ namespace JabaSurvivol.Gameplay
             safeAreaObject.AddComponent<SafeAreaFitter>();
 
             _mainMenu = BuildMainMenu(onStart, onArmory, onCharacterSheet);
-            _hud = BuildHud(onPause, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
+            _hud = BuildHud(onPause, onReload, onSwitchWeapon, onActiveSkill, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
+            _roundModifierText = FindText(_hud, "Round Modifier");
+            _weaponText = FindText(_hud, "Weapon");
+            _ammoText = FindText(_hud, "Ammo");
+            _reloadText = FindText(_hud, "Reload Status");
+            _reloadFill = FindImage(_hud, "Reload Fill");
+            _activeSkillButton = FindGameObject(_hud, "Active Skill Button")?.GetComponent<Button>();
+            _activeSkillCooldown = FindImage(_hud, "Active Skill Cooldown");
+            _activeSkillLabel = FindText(_hud, "Active Skill Label");
+            _bossPanel = FindGameObject(_hud, "Boss Panel");
+            _bossNameText = FindText(_hud, "Boss Name");
+            _bossHealthText = FindText(_hud, "Boss Health Text");
+            _bossHealthFill = FindImage(_hud, "Boss Health Fill");
             _pausePanel = BuildPausePanel(onResume, onMenu, onArmory, onCharacterSheet);
             _gameOverPanel = BuildGameOverPanel(onRestart, onMenu, out _gameOverSummary);
+            _victoryPanel = BuildVictoryPanel(onRestart, onMenu, out _victorySummary);
             _roundEndPanel = BuildRoundEndPanel(
                 onRewardSelected,
                 onCharacterSheet,
@@ -136,6 +185,7 @@ namespace JabaSurvivol.Gameplay
             _characterSheet = BuildCharacterSheet(
                 onAllocateSkill,
                 onRespecSkills,
+                onSelectActiveSkill,
                 onCharacterSheetClose,
                 out _characterLevelText,
                 out _characterPointsText,
@@ -147,6 +197,17 @@ namespace JabaSurvivol.Gameplay
                 out _characterTabLabels,
                 out _characterBranchPanels,
                 out _characterNodeRows);
+            _characterSynergyText = FindText(_characterSheet, "Synergies");
+
+            _selectActiveButtons = new Button[3];
+            _selectActiveLabels = new Text[3];
+            var activeNodes = new[] { SkillNode.Shockwave, SkillNode.Dash, SkillNode.Turret };
+            for (var i = 0; i < activeNodes.Length; i++)
+            {
+                var selectButton = FindGameObject(_characterSheet, $"Select {activeNodes[i]}");
+                _selectActiveButtons[i] = selectButton?.GetComponent<Button>();
+                _selectActiveLabels[i] = selectButton?.GetComponentInChildren<Text>();
+            }
 
             _levelUpText = UiFactory.CreateText(
                 _safeArea,
@@ -174,6 +235,8 @@ namespace JabaSurvivol.Gameplay
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(false);
+            HideVictory();
+            HideBoss();
             HideRoundEnd();
             HideArmory();
             HideCharacterSheet();
@@ -190,6 +253,8 @@ namespace JabaSurvivol.Gameplay
             _hud.SetActive(true);
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(false);
+            HideVictory();
+            HideBoss();
             HideArmory();
             HideCharacterSheet();
             _lastHealth = int.MinValue;
@@ -203,6 +268,17 @@ namespace JabaSurvivol.Gameplay
             _lastLevel = int.MinValue;
             _lastXp = int.MinValue;
             _lastSkillPoints = int.MinValue;
+            _lastWeaponName = string.Empty;
+            _lastMagazine = int.MinValue;
+            _lastMagazineSize = int.MinValue;
+            _lastReserve = int.MinValue;
+            _lastInfiniteReserve = false;
+            _lastReloading = false;
+            _lastSkillNode = SkillNode.Turret;
+            _lastSkillRank = int.MinValue;
+            _lastSkillReady = false;
+            _lastSkillCooldownPercent = int.MinValue;
+            _lastSkillActivePercent = int.MinValue;
             HideLevelUp();
             HideRoundEnd();
         }
@@ -271,6 +347,140 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
+        /// <summary>
+        /// Shows the elite round modifier on the HUD.
+        /// </summary>
+        public void SetRoundModifier(bool isElite)
+        {
+            if (_roundModifierText == null)
+            {
+                return;
+            }
+
+            _roundModifierText.text = isElite
+                ? Localization.Get("hud.elite")
+                : string.Empty;
+        }
+
+        /// <summary>
+        /// Test hook that presses a character-sheet active-skill button.
+        /// </summary>
+        public bool ClickSelectActiveSkillForTests(SkillNode node)
+        {
+            var index = node switch
+            {
+                SkillNode.Shockwave => 0,
+                SkillNode.Dash => 1,
+                SkillNode.Turret => 2,
+                _ => -1
+            };
+
+            if (index < 0 || _selectActiveButtons[index] == null ||
+                !_selectActiveButtons[index].interactable)
+            {
+                return false;
+            }
+
+            _selectActiveButtons[index].onClick.Invoke();
+            return true;
+        }
+
+        public bool RoundModifierVisible => _roundModifierText != null &&
+                                            !string.IsNullOrEmpty(_roundModifierText.text);
+
+        /// <summary>
+        /// Updates the equipped weapon, magazine, reserve, and reload state.
+        /// Values are cached so steady-state frames do not allocate.
+        /// </summary>
+        public void UpdateWeaponHud(
+            string weaponName,
+            int magazine,
+            int magazineSize,
+            int reserve,
+            bool infiniteReserve,
+            bool reloading,
+            float reloadRemaining,
+            float reloadDuration)
+        {
+            if (_weaponText == null || _ammoText == null || _reloadText == null || _reloadFill == null)
+            {
+                return;
+            }
+
+            if (!string.Equals(weaponName, _lastWeaponName, System.StringComparison.Ordinal) ||
+                magazine != _lastMagazine ||
+                magazineSize != _lastMagazineSize ||
+                reserve != _lastReserve ||
+                infiniteReserve != _lastInfiniteReserve)
+            {
+                _lastWeaponName = weaponName;
+                _lastMagazine = magazine;
+                _lastMagazineSize = magazineSize;
+                _lastReserve = reserve;
+                _lastInfiniteReserve = infiniteReserve;
+                _weaponText.text = weaponName;
+                _ammoText.text = Localization.Format(
+                    infiniteReserve ? "hud.ammo.infinite" : "hud.ammo",
+                    magazine,
+                    magazineSize,
+                    infiniteReserve
+                        ? Localization.Get("armory.reserve.infinite")
+                        : reserve.ToString(CultureInfo.InvariantCulture));
+            }
+
+            if (reloading != _lastReloading)
+            {
+                _lastReloading = reloading;
+                _reloadText.text = reloading ? Localization.Get("hud.reloading") : string.Empty;
+            }
+
+            _reloadFill.fillAmount = reloading && reloadDuration > 0f
+                ? Mathf.Clamp01(1f - (reloadRemaining / reloadDuration))
+                : 0f;
+        }
+
+        /// <summary>
+        /// Updates the active skill button, label, and radial cooldown.
+        /// </summary>
+        public void UpdateActiveSkillHud(
+            SkillNode node,
+            int rank,
+            bool ready,
+            float cooldownFraction,
+            float activeFraction)
+        {
+            if (_activeSkillButton == null || _activeSkillCooldown == null || _activeSkillLabel == null)
+            {
+                return;
+            }
+
+            var cooldownPercent = Mathf.RoundToInt(Mathf.Clamp01(cooldownFraction) * 100f);
+            var activePercent = Mathf.RoundToInt(Mathf.Clamp01(activeFraction) * 100f);
+            if (node == _lastSkillNode &&
+                rank == _lastSkillRank &&
+                ready == _lastSkillReady &&
+                cooldownPercent == _lastSkillCooldownPercent &&
+                activePercent == _lastSkillActivePercent)
+            {
+                return;
+            }
+
+            _lastSkillNode = node;
+            _lastSkillRank = rank;
+            _lastSkillReady = ready;
+            _lastSkillCooldownPercent = cooldownPercent;
+            _lastSkillActivePercent = activePercent;
+
+            _activeSkillLabel.text = rank <= 0
+                ? Localization.Get("hud.skill.locked")
+                : Localization.SkillName(node);
+            _activeSkillButton.interactable = ready;
+            _activeSkillCooldown.fillAmount = Mathf.Clamp01(cooldownFraction);
+            _activeSkillCooldown.color = activeFraction > 0f
+                ? new Color(0.3f, 1f, 0.55f, 0.55f)
+                : new Color(0.02f, 0.02f, 0.03f, 0.78f);
+        }
+
         public void ShowLevelUp(int level)
         {
             _levelUpText.text = Localization.Format("hud.levelup", level);
@@ -296,28 +506,106 @@ namespace JabaSurvivol.Gameplay
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(true);
+            HideVictory();
+            HideBoss();
             HideRoundEnd();
             HideArmory();
             HideCharacterSheet();
             _gameOverSummary.text = Localization.Format("gameover.summary", round, kills, suppliesEarned);
         }
 
-        public bool ArmoryVisible => _armoryPanel != null && _armoryPanel.activeSelf;
-
-        public bool HudVisible => _hud != null && _hud.activeSelf;
-
-        public void ShowArmory(Profile profile)
+        public void ShowVictory(int round, int kills, int suppliesEarned, int xpEarned)
         {
             _mainMenu.SetActive(false);
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
             _gameOverPanel.SetActive(false);
+            HideBoss();
+            HideRoundEnd();
+            HideArmory();
+            HideCharacterSheet();
+            _victorySummary.text = Localization.Format("victory.summary", round, kills, suppliesEarned, xpEarned);
+            _victoryPanel.SetActive(true);
+        }
+
+        public bool VictoryVisible => _victoryPanel != null && _victoryPanel.activeSelf;
+
+        public void HideVictory()
+        {
+            if (_victoryPanel != null)
+            {
+                _victoryPanel.SetActive(false);
+            }
+        }
+
+        public bool BossVisible => _bossPanel != null && _bossPanel.activeSelf;
+
+        public void ShowBoss(string name)
+        {
+            if (_bossPanel == null)
+            {
+                return;
+            }
+
+            _bossNameText.text = name;
+            _lastBossHealth = int.MinValue;
+            _lastBossMaxHealth = int.MinValue;
+            _lastBossEnraged = false;
+            _bossPanel.SetActive(true);
+        }
+
+        public void UpdateBoss(float health, float maxHealth, bool enraged)
+        {
+            if (_bossHealthFill == null || _bossHealthText == null)
+            {
+                return;
+            }
+
+            var roundedHealth = Mathf.CeilToInt(health);
+            var roundedMaxHealth = Mathf.CeilToInt(maxHealth);
+            if (roundedHealth == _lastBossHealth &&
+                roundedMaxHealth == _lastBossMaxHealth &&
+                enraged == _lastBossEnraged)
+            {
+                return;
+            }
+
+            _lastBossHealth = roundedHealth;
+            _lastBossMaxHealth = roundedMaxHealth;
+            _lastBossEnraged = enraged;
+            var fraction = maxHealth <= 0f ? 0f : Mathf.Clamp01(health / maxHealth);
+            _bossHealthFill.fillAmount = fraction;
+            _bossHealthFill.color = enraged
+                ? new Color(1f, 0.28f, 0.22f)
+                : new Color(0.92f, 0.35f, 0.72f);
+            _bossHealthText.text = Localization.Format("hud.boss.health", roundedHealth, roundedMaxHealth);
+        }
+
+        public void HideBoss()
+        {
+            if (_bossPanel != null)
+            {
+                _bossPanel.SetActive(false);
+            }
+        }
+
+        public bool ArmoryVisible => _armoryPanel != null && _armoryPanel.activeSelf;
+
+        public bool HudVisible => _hud != null && _hud.activeSelf;
+
+        public void ShowArmory(Profile profile, WeaponId displayWeapon)
+        {
+            _mainMenu.SetActive(false);
+            _hud.SetActive(false);
+            _pausePanel.SetActive(false);
+            _gameOverPanel.SetActive(false);
+            HideVictory();
             HideRoundEnd();
             HideCharacterSheet();
             _armoryPanel.SetActive(true);
             _armoryWeaponsPanel.SetActive(true);
             _armoryArmorPanel.SetActive(false);
-            RefreshArmory(profile);
+            RefreshArmory(profile, displayWeapon);
             SetArmoryStatus(string.Empty);
         }
 
@@ -330,6 +618,11 @@ namespace JabaSurvivol.Gameplay
         }
 
         public bool CharacterSheetVisible => _characterSheet != null && _characterSheet.activeSelf;
+
+        public bool SynergyTextVisible => _characterSynergyText != null &&
+                                          !string.IsNullOrEmpty(_characterSynergyText.text);
+
+        public string SynergyTextForTests => _characterSynergyText?.text ?? string.Empty;
 
         public bool LevelUpVisible => _levelUpText != null && _levelUpText.gameObject.activeSelf;
 
@@ -362,6 +655,7 @@ namespace JabaSurvivol.Gameplay
                 Profile.XpToNext(profile.Level));
             _characterPointsText.text = Localization.Format("character.points", profile.SkillPoints);
             _characterStatsText.text = FormatCharacterStats(stats);
+            _characterSynergyText.text = FormatSynergies(profile);
 
             for (var i = 0; i < _characterNodeRows.Length; i++)
             {
@@ -381,6 +675,22 @@ namespace JabaSurvivol.Gameplay
 
             _characterRespecButton.interactable = canRespec && profile.GetSpentSkillPoints() > 0;
             _characterRespecLabel.text = Localization.Get("character.respec");
+
+            var selectNodes = new[] { SkillNode.Shockwave, SkillNode.Dash, SkillNode.Turret };
+            for (var i = 0; i < _selectActiveButtons.Length; i++)
+            {
+                var node = selectNodes[i];
+                var rank = profile.GetSkillRank(node);
+                var selected = profile.ActiveSkill == node;
+                var name = Localization.SkillName(node);
+                _selectActiveLabels[i].text = selected
+                    ? Localization.Format("character.active.selected", name)
+                    : name;
+                _selectActiveLabels[i].color = selected
+                    ? new Color(0.45f, 0.95f, 0.7f)
+                    : Color.white;
+                _selectActiveButtons[i].interactable = (canAllocate || canRespec) && rank > 0 && !selected;
+            }
         }
 
         public void SetCharacterSheetStatus(string status)
@@ -449,8 +759,51 @@ namespace JabaSurvivol.Gameplay
             return (value * 100f).ToString("0'%'", CultureInfo.InvariantCulture);
         }
 
-        private static string FormatCharacterStats(CharacterStats stats)
+        private static string FormatSynergies(Profile profile)
         {
+            var builder = new StringBuilder();
+            for (var i = 0; i < SynergyCatalog.All.Count; i++)
+            {
+                var definition = SynergyCatalog.All[i];
+                if (i > 0)
+                {
+                    builder.Append("   ");
+                }
+
+                var name = Localization.Get(SynergyNameKey(definition.Id));
+                if (SynergyCatalog.IsUnlocked(profile, definition.Id))
+                {
+                    builder.Append(Localization.Format("synergy.active", name));
+                }
+                else
+                {
+                    builder.Append(
+                        Localization.Format(
+                            "synergy.inactive",
+                            name,
+                            Localization.SkillName(definition.NodeA),
+                            profile.GetSkillRank(definition.NodeA),
+                            definition.RankA,
+                            Localization.SkillName(definition.NodeB),
+                            profile.GetSkillRank(definition.NodeB),
+                            definition.RankB));
+                }
+            }
+
+            return builder.ToString();
+        }
+
+        private static string SynergyNameKey(SynergyId id)
+        {
+            return id switch
+            {
+                SynergyId.Ghost => "synergy.ghost.name",
+                SynergyId.Bastion => "synergy.bastion.name",
+                _ => "synergy.berserker.name"
+            };
+        }
+
+        private static string FormatCharacterStats(CharacterStats stats)        {
             return Localization.Format(
                 "character.stats",
                 stats.MaxHealth.ToString("0", CultureInfo.InvariantCulture),
@@ -576,7 +929,7 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
-        public void RefreshArmory(Profile profile)
+        public void RefreshArmory(Profile profile, WeaponId displayWeapon)
         {
             _armorySuppliesText.text = Localization.Format("armory.supplies", profile.Supplies);
 
@@ -615,13 +968,13 @@ namespace JabaSurvivol.Gameplay
 
             _armoryUpgradeTitle.text = Localization.Format(
                 "armory.upgrade.title",
-                Localization.WeaponName(profile.EquippedWeapon));
+                Localization.WeaponName(displayWeapon));
 
             for (var i = 0; i < _armoryUpgradeRows.Length; i++)
             {
                 var row = _armoryUpgradeRows[i];
-                var track = WeaponUpgradeCatalog.Get(profile.EquippedWeapon, row.Stat);
-                var tier = profile.GetWeaponUpgradeTier(profile.EquippedWeapon, row.Stat);
+                var track = WeaponUpgradeCatalog.Get(displayWeapon, row.Stat);
+                var tier = profile.GetWeaponUpgradeTier(displayWeapon, row.Stat);
                 row.Label.text = FormatUpgradeCard(track, tier);
                 row.Button.interactable = tier < track.MaxTier;
             }
@@ -853,6 +1206,9 @@ namespace JabaSurvivol.Gameplay
 
         private GameObject BuildHud(
             System.Action onPause,
+            System.Action onReload,
+            System.Action onSwitchWeapon,
+            System.Action onActiveSkill,
             out Text healthText,
             out Text armorText,
             out Image healthFill,
@@ -897,6 +1253,34 @@ namespace JabaSurvivol.Gameplay
             enemiesText = UiFactory.CreateText(root.transform, "Enemies", string.Empty, 24, TextAnchor.MiddleCenter, new Color(0.95f, 0.72f, 0.42f));
             UiFactory.Place(enemiesText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -74f), new Vector2(420f, 40f));
 
+            var roundModifier = UiFactory.CreateText(root.transform, "Round Modifier", string.Empty, 24, TextAnchor.MiddleCenter, new Color(1f, 0.62f, 0.25f));
+            roundModifier.fontStyle = FontStyle.Bold;
+            UiFactory.Place(roundModifier.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -152f), new Vector2(700f, 40f));
+
+            var bossPanel = UiFactory.CreatePanel(root.transform, "Boss Panel", new Color(0.09f, 0.02f, 0.07f, 0.86f), blocksRaycasts: false);
+            UiFactory.Place(bossPanel, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -218f), new Vector2(860f, 92f));
+
+            var bossName = UiFactory.CreateText(bossPanel, "Boss Name", Localization.Get("boss.name"), 24, TextAnchor.MiddleCenter, new Color(1f, 0.64f, 0.88f));
+            bossName.fontStyle = FontStyle.Bold;
+            UiFactory.Place(bossName.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -18f), new Vector2(820f, 32f));
+
+            var bossHealthBackground = UiFactory.CreateImage(bossPanel, "Boss Health", SpriteFactory.Square, new Color(0.06f, 0.01f, 0.05f, 0.95f));
+            UiFactory.Place(bossHealthBackground.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 16f), new Vector2(800f, 34f));
+
+            var bossHealthFill = UiFactory.CreateImage(bossHealthBackground.transform, "Boss Health Fill", SpriteFactory.Square, new Color(0.92f, 0.35f, 0.72f));
+            UiFactory.Stretch(bossHealthFill.rectTransform);
+            bossHealthFill.rectTransform.offsetMin = new Vector2(3f, 3f);
+            bossHealthFill.rectTransform.offsetMax = new Vector2(-3f, -3f);
+            bossHealthFill.type = Image.Type.Filled;
+            bossHealthFill.fillMethod = Image.FillMethod.Horizontal;
+            bossHealthFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+
+            var bossHealthText = UiFactory.CreateText(bossHealthBackground.transform, "Boss Health Text", string.Empty, 18, TextAnchor.MiddleCenter, Color.white);
+            UiFactory.Stretch(bossHealthText.rectTransform);
+            bossHealthText.fontStyle = FontStyle.Bold;
+
+            bossPanel.gameObject.SetActive(false);
+
             killsText = UiFactory.CreateText(root.transform, "Kills", string.Empty, 22, TextAnchor.MiddleCenter, new Color(0.6f, 0.68f, 0.78f));
             UiFactory.Place(killsText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -112f), new Vector2(420f, 40f));
 
@@ -908,6 +1292,48 @@ namespace JabaSurvivol.Gameplay
 
             var pause = UiFactory.CreateButton(root.transform, "Pause", Localization.Get("hud.pause"), 28, onPause);
             UiFactory.Place(pause.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-30f, -30f), new Vector2(84f, 84f));
+
+            var weaponText = UiFactory.CreateText(root.transform, "Weapon", string.Empty, 22, TextAnchor.MiddleLeft, new Color(0.45f, 0.9f, 1f));
+            weaponText.fontStyle = FontStyle.Bold;
+            UiFactory.Place(weaponText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(40f, -128f), new Vector2(340f, 28f));
+
+            var ammoText = UiFactory.CreateText(root.transform, "Ammo", string.Empty, 24, TextAnchor.MiddleLeft, new Color(0.92f, 0.95f, 1f));
+            ammoText.fontStyle = FontStyle.Bold;
+            UiFactory.Place(ammoText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(40f, -158f), new Vector2(340f, 32f));
+
+            var reloadBackground = UiFactory.CreateImage(root.transform, "Reload", SpriteFactory.Square, new Color(0.05f, 0.07f, 0.1f, 0.9f));
+            UiFactory.Place(reloadBackground.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(40f, -196f), new Vector2(300f, 10f));
+            var reloadFill = UiFactory.CreateImage(reloadBackground.transform, "Reload Fill", SpriteFactory.Square, new Color(1f, 0.78f, 0.35f));
+            UiFactory.Stretch(reloadFill.rectTransform);
+            reloadFill.type = Image.Type.Filled;
+            reloadFill.fillMethod = Image.FillMethod.Horizontal;
+            reloadFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+
+            var reloadStatus = UiFactory.CreateText(root.transform, "Reload Status", string.Empty, 18, TextAnchor.MiddleLeft, new Color(1f, 0.78f, 0.35f));
+            UiFactory.Place(reloadStatus.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(40f, -222f), new Vector2(340f, 26f));
+
+            var reload = UiFactory.CreateButton(root.transform, "Reload Button", Localization.Get("hud.reload"), 22, onReload);
+            UiFactory.Place(reload.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-110f, 84f), new Vector2(190f, 66f));
+
+            var switchWeapon = UiFactory.CreateButton(root.transform, "Switch Weapon", Localization.Get("hud.switch"), 22, onSwitchWeapon);
+            UiFactory.Place(switchWeapon.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(100f, 84f), new Vector2(190f, 66f));
+
+            var activeSkill = UiFactory.CreateButton(root.transform, "Active Skill Button", Localization.Get("hud.skill"), 20, onActiveSkill);
+            UiFactory.Place(
+                activeSkill.GetComponent<RectTransform>(),
+                new Vector2(1f, 0f),
+                new Vector2(1f, 0f),
+                new Vector2(-170f, 330f),
+                new Vector2(130f, 130f));
+            var cooldown = UiFactory.CreateImage(activeSkill.transform, "Active Skill Cooldown", SpriteFactory.Ring, new Color(0.02f, 0.02f, 0.03f, 0.78f));
+            UiFactory.Stretch(cooldown.rectTransform);
+            cooldown.type = Image.Type.Filled;
+            cooldown.fillMethod = Image.FillMethod.Radial360;
+            cooldown.fillOrigin = (int)Image.Origin360.Top;
+            cooldown.fillAmount = 0f;
+            var skillLabel = activeSkill.GetComponentInChildren<Text>();
+            skillLabel.name = "Active Skill Label";
+            skillLabel.transform.SetAsLastSibling();
 
             var hint = UiFactory.CreateText(root.transform, "Controls Hint", Localization.Get("menu.controls"), 20, TextAnchor.MiddleCenter, new Color(0.48f, 0.56f, 0.66f));
             UiFactory.Place(hint.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 24f), new Vector2(1400f, 40f));
@@ -989,8 +1415,32 @@ namespace JabaSurvivol.Gameplay
             return root;
         }
 
-        private GameObject BuildRoundEndPanel(
-            System.Action<int> onSelect,
+        private GameObject BuildVictoryPanel(System.Action onNextRun, System.Action onMenu, out Text summary)
+        {
+            var panel = UiFactory.CreatePanel(_safeArea, "Victory Panel", new Color(0.01f, 0.045f, 0.03f, 0.97f));
+            var root = panel.gameObject;
+
+            var title = UiFactory.CreateText(root.transform, "Title", Localization.Get("victory.title"), 72, TextAnchor.MiddleCenter, new Color(0.45f, 1f, 0.62f));
+            title.fontStyle = FontStyle.Bold;
+            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.76f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1100f, 110f));
+
+            var subtitle = UiFactory.CreateText(root.transform, "Subtitle", Localization.Get("victory.subtitle"), 28, TextAnchor.MiddleCenter, new Color(0.8f, 0.92f, 0.86f));
+            UiFactory.Place(subtitle.rectTransform, new Vector2(0.5f, 0.64f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1100f, 60f));
+
+            summary = UiFactory.CreateText(root.transform, "Summary", string.Empty, 30, TextAnchor.MiddleCenter, new Color(0.9f, 0.96f, 0.92f));
+            UiFactory.Place(summary.rectTransform, new Vector2(0.5f, 0.52f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1100f, 120f));
+
+            var next = UiFactory.CreateButton(root.transform, "Next Run", Localization.Get("victory.next"), 36, onNextRun);
+            UiFactory.Place(next.GetComponent<RectTransform>(), new Vector2(0.5f, 0.34f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 104f));
+
+            var menu = UiFactory.CreateButton(root.transform, "Menu", Localization.Get("victory.menu"), 30, onMenu);
+            UiFactory.Place(menu.GetComponent<RectTransform>(), new Vector2(0.5f, 0.21f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 88f));
+
+            root.SetActive(false);
+            return root;
+        }
+
+        private GameObject BuildRoundEndPanel(            System.Action<int> onSelect,
             System.Action onCharacterSheet,
             out Text title,
             out Text summary,
@@ -1053,6 +1503,7 @@ namespace JabaSurvivol.Gameplay
         private GameObject BuildCharacterSheet(
             System.Action<SkillNode> onAllocate,
             System.Action onRespec,
+            System.Action<SkillNode> onSelectActive,
             System.Action onClose,
             out Text levelText,
             out Text pointsText,
@@ -1236,6 +1687,20 @@ namespace JabaSurvivol.Gameplay
                 new Color(0.55f, 0.92f, 0.7f));
             UiFactory.Place(statsText.rectTransform, new Vector2(0.5f, 0.075f), new Vector2(0.5f, 0.5f), new Vector2(-100f, 0f), new Vector2(1300f, 36f));
 
+            var synergyText = UiFactory.CreateText(
+                root.transform,
+                "Synergies",
+                string.Empty,
+                18,
+                TextAnchor.MiddleCenter,
+                new Color(0.82f, 0.76f, 1f));
+            UiFactory.Place(
+                synergyText.rectTransform,
+                new Vector2(0.5f, 0.102f),
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                new Vector2(1500f, 24f));
+
             respecButton = UiFactory.CreateButton(
                 root.transform,
                 "Respec",
@@ -1258,6 +1723,24 @@ namespace JabaSurvivol.Gameplay
                 TextAnchor.MiddleCenter,
                 new Color(1f, 0.75f, 0.42f));
             UiFactory.Place(statusText.rectTransform, new Vector2(0.5f, 0.025f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1100f, 36f));
+
+            var selectNodes = new[] { SkillNode.Shockwave, SkillNode.Dash, SkillNode.Turret };
+            for (var i = 0; i < selectNodes.Length; i++)
+            {
+                var node = selectNodes[i];
+                var select = UiFactory.CreateButton(
+                    root.transform,
+                    $"Select {node}",
+                    Localization.SkillName(node),
+                    20,
+                    () => onSelectActive?.Invoke(node));
+                UiFactory.Place(
+                    select.GetComponent<RectTransform>(),
+                    new Vector2(0.22f + (i * 0.28f), 0.145f),
+                    new Vector2(0.5f, 0.5f),
+                    Vector2.zero,
+                    new Vector2(280f, 54f));
+            }
 
             root.SetActive(false);
             return root;
@@ -1594,6 +2077,34 @@ namespace JabaSurvivol.Gameplay
                 if (text.name == name)
                 {
                     return text;
+                }
+            }
+
+            return null;
+        }
+
+        private static Image FindImage(GameObject root, string name)
+        {
+            var images = root.GetComponentsInChildren<Image>(true);
+            foreach (var image in images)
+            {
+                if (image.name == name)
+                {
+                    return image;
+                }
+            }
+
+            return null;
+        }
+
+        private static GameObject FindGameObject(GameObject root, string name)
+        {
+            var transforms = root.GetComponentsInChildren<Transform>(true);
+            foreach (var child in transforms)
+            {
+                if (child.name == name)
+                {
+                    return child.gameObject;
                 }
             }
 

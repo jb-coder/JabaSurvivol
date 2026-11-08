@@ -1,0 +1,11 @@
+# v0.4.0 Slice 56 Android Smoke Test
+
+- Date: 2026-11-08
+- Emulator: Android 15 (API 35), x86_64 Google Play system image, `jaba_survivol_api35`
+- Device profile: phone 1080 x 2340 at 440 dpi; tablet display override 2560 x 1600 at 320 dpi
+- Production APK: `JabaSurvivol-0.4.0-56.apk` (ARM64), 32,387,729 bytes, SHA-256 `B141CB53BF44EF7F25F51D11EE01E633F044486A098D5BDDDC88E25AB2EFF36C`
+- Emulator APK: `JabaSurvivol-0.4.0-56-emulator.apk` (ARM64 + x86_64), 59,134,565 bytes, SHA-256 `836C3117B41F50E32B92A9855DD84EDAAC2A760C8ED1CDCB874740F309C3AC08`
+- Activity: `com.jabasurvivol.game/com.unity3d.player.UnityPlayerActivity`
+- Result: the HUD shows the active-skill button with its locked state, plus the weapon, ammo, reload, and switch controls on phone and tablet layouts
+- Fatal search: no `FATAL EXCEPTION`, `AndroidRuntime` crash, unhandled exception, or `NullReferenceException` in the app process log
+- Evidence: `v04-56-phone.png`, `v04-56-tablet.png`, `v04-56-playing.png`

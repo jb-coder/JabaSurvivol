@@ -55,7 +55,10 @@ namespace JabaSurvivol.Tests.EditMode
         public void Death_fails_the_round_and_restart_restores_the_first_round()
         {
             var profile = new Profile { Supplies = 300, HighestRound = 4 };
-            var run = new RunState(GameBalance.PlayerMaxHealth);
+            profile.UnlockWeapon(WeaponId.Smg);
+            profile.EquipWeapon(WeaponId.Smg);
+            var run = new RunState(GameBalance.PlayerMaxHealth, profile: profile);
+            var initialReserve = run.Reserve;
             run.AddAmmo(3);
             run.AddArmor(1);
 
@@ -72,7 +75,7 @@ namespace JabaSurvivol.Tests.EditMode
             Assert.That(run.IsGameOver, Is.False);
             Assert.That(run.Round, Is.EqualTo(1));
             Assert.That(run.RoundModel.Phase, Is.EqualTo(RoundPhase.Active));
-            Assert.That(run.Ammo, Is.EqualTo(0));
+            Assert.That(run.Reserve, Is.EqualTo(initialReserve));
             Assert.That(run.Armor, Is.EqualTo(0));
         }
 
