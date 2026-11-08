@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Builder;
 using Game.Data;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Telemetry.Worker;
 
