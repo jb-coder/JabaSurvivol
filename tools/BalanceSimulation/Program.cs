@@ -20,25 +20,43 @@ builder.AppendLine();
 
 builder.AppendLine("## Rounds");
 builder.AppendLine();
-builder.AppendLine("| Round | Budget | Zombie HP | Speed | Damage | Weapon | DMG/shot | Shots | Kill s | Round s | Supplies | XP | Reward | Remaining | Spent | Level | SP |");
-builder.AppendLine("|---:|---:|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|---:|");
+builder.AppendLine("| Round | Budget | Mix W/R/B | Zombie HP | Speed | Damage | Weapon | DMG/shot | Shots | Kill s | Round s | Ammo s | Reloads | Switches | Supplies | XP | Reward | Remaining | Spent | Level | SP |");
+builder.AppendLine("|---:|---:|---|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|---:|");
 
 foreach (var round in report.Rounds)
 {
     builder.AppendLine(
-        $"| {round.Round} | {round.SpawnBudget} | " +
+        $"| {round.Round} | {round.SpawnBudget} | {round.Content.Walkers}/{round.Content.Runners}/{round.Content.Brutes} | " +
         $"{Format(round.ZombieHealth)} | {Format(round.ZombieSpeed)} | {Format(round.ZombieDamage)} | " +
         $"{round.Build.Weapon} | {Format(round.Build.DamagePerShot)} | {round.ShotsToKill} | " +
         $"{Format(round.KillSeconds)} | {Format(round.RoundSeconds)} | " +
+        $"{Format(round.Ammo.ReloadSeconds)} | {round.Ammo.Reloads} | {round.Ammo.Switches} | " +
         $"{round.SuppliesEarned} | {round.XpEarned} | {round.Reward.Type} +{round.Reward.Amount} | " +
         $"{round.CumulativeSupplies} | {round.Build.SuppliesSpent} | {round.Level} | {round.SkillPoints} |");
 }
 
 builder.AppendLine();
+builder.AppendLine("## Content");
+builder.AppendLine();
+builder.AppendLine("| Round | Walkers | Runners | Brutes | Elite | Boss | Boss TTK s | Ammo pressure | Selected skill | Turret % | Dash % | Shockwave % | Berserker % | Ghost % | Bastion % |");
+builder.AppendLine("|---:|---:|---:|---:|---|---|---:|---:|---|---:|---:|---:|---:|---:|---:|");
+
+foreach (var round in report.Rounds)
+{
+    builder.AppendLine(
+        $"| {round.Round} | {round.Content.Walkers} | {round.Content.Runners} | {round.Content.Brutes} | " +
+        $"{(round.IsElite ? "Y" : "-")} | {(round.IsBoss ? "Y" : "-")} | {Format(round.Content.BossSeconds)} | " +
+        $"{Format(round.Ammo.Pressure)} | {round.Skills.Selected} | " +
+        $"{FormatPercent(round.Skills.TurretUptime)} | {FormatPercent(round.Skills.DashUptime)} | " +
+        $"{FormatPercent(round.Skills.ShockwaveUptime)} | {FormatPercent(round.Skills.BerserkerUptime)} | " +
+        $"{FormatPercent(round.Skills.GhostUptime)} | {FormatPercent(round.Skills.BastionUptime)} |");
+}
+
+builder.AppendLine();
 builder.AppendLine("## Build");
 builder.AppendLine();
-builder.AppendLine("| Round | Weapon | Unlocks | DMG | RATE | MAG | RELOAD | Armor | Tier absorb | Total armor | STR | VIT | SPD | PRC | END | ENG | TUR |");
-builder.AppendLine("|---:|---|---|---:|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|");
+builder.AppendLine("| Round | Weapon | Unlocks | DMG | RATE | MAG | RELOAD | Armor | Tier absorb | Total armor | STR | VIT | SHK | SPD | PRC | DSH | END | ENG | TUR |");
+builder.AppendLine("|---:|---|---|---:|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|");
 
 foreach (var round in report.Rounds)
 {
@@ -47,8 +65,8 @@ foreach (var round in report.Rounds)
         $"| {round.Round} | {build.Weapon} | {UnlockSummary(build)} | " +
         $"{build.DamageTier} | {build.FireRateTier} | {build.MagazineTier} | {build.ReloadTier} | " +
         $"{build.Armor} | {build.ArmorTierAbsorb} | {build.TotalArmor} | {build.StrengthRank} | {build.VitalityRank} | " +
-        $"{build.SpeedRank} | {build.PrecisionRank} | {build.EnduranceRank} | " +
-        $"{build.EngineeringRank} | {build.TurretRank} |");
+        $"{build.ShockwaveRank} | {build.SpeedRank} | {build.PrecisionRank} | {build.DashRank} | " +
+        $"{build.EnduranceRank} | {build.EngineeringRank} | {build.TurretRank} |");
 }
 
 builder.AppendLine();
@@ -84,4 +102,9 @@ static string UnlockSummary(BuildSnapshot build)
 static string Format(float value)
 {
     return value.ToString("0.00", CultureInfo.InvariantCulture);
+}
+
+static string FormatPercent(float value)
+{
+    return (value * 100f).ToString("0", CultureInfo.InvariantCulture) + "%";
 }

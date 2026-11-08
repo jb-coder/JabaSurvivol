@@ -123,7 +123,8 @@ Round values are data-driven in `GameBalance` and `RoundTable`:
 - Spawn composition is deterministic from the run seed and round number, with Runners from round 2 and Brutes from round 4.
 
 The headless simulation uses the same core rules and reports pacing, income,
-progression, build state, and outliers:
+progression, build state, enemy mix, ammunition pressure, active-skill uptime,
+synergy uptime, boss time-to-kill, and outliers:
 
 ```powershell
 dotnet run --project tools/BalanceSimulation/BalanceSimulation.csproj -c Release
@@ -136,9 +137,10 @@ weapon upgrade tiers, armor tier and absorb, skill ranks, supplies earned,
 spent, and remaining, XP, level, and available skill points.
 
 It writes `artifacts/balance/rounds.md` with a fixed seed so CI and local runs
-produce the same report. Outliers cover trivial rounds, runaway supplies,
-unreachable upgrade costs, builds that exceed the documented caps, and runs
-that never unlock a weapon, weapon damage upgrade, or armor tier.
+produce the same report. Outliers cover trivial rounds, trivial elites, boss
+encounters that are too easy or too hard, ammo starvation, runaway supplies,
+unreachable upgrades, unreachable synergies, cap violations, and builds that
+never unlock a weapon, weapon damage upgrade, or armor tier.
 
 ## Premium currency
 

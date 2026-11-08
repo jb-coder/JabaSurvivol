@@ -108,6 +108,73 @@ public sealed class BalanceSimulationTests
     }
 
     [Fact]
+    public void Run_models_content_ammo_active_skills_and_synergies()
+    {
+        var profile = new Profile { Level = 30, Supplies = 5000 };
+        profile.SetSkillRank(SkillNode.Strength, 3);
+        profile.SetSkillRank(SkillNode.Vitality, 3);
+        profile.SetSkillRank(SkillNode.Speed, 3);
+        profile.SetSkillRank(SkillNode.Precision, 3);
+        profile.SetSkillRank(SkillNode.Endurance, 3);
+        profile.SetSkillRank(SkillNode.Engineering, 3);
+        profile.SetSkillRank(SkillNode.Turret, 3);
+        profile.SetSkillRank(SkillNode.Shockwave, 3);
+        profile.SetSkillRank(SkillNode.Dash, 3);
+        profile.ActiveSkill = SkillNode.Turret;
+
+        var report = BalanceSimulation.Run(new BalanceSimulationOptions
+        {
+            MaxRound = 1,
+            StartingProfile = profile
+        });
+        var round = report.Rounds[0];
+
+        Assert.Equal(
+            round.SpawnBudget,
+            round.Content.Walkers + round.Content.Runners + round.Content.Brutes);
+        Assert.True(round.Ammo.Shots > 0);
+        Assert.True(round.Skills.TurretUptime > 0f);
+        Assert.True(round.Skills.DashUptime > 0f);
+        Assert.True(round.Skills.ShockwaveUptime > 0f);
+        Assert.True(round.Skills.BerserkerUptime > 0f);
+        Assert.True(round.Skills.GhostUptime > 0f);
+        Assert.True(round.Skills.BastionUptime > 0f);
+        Assert.True(round.Content.BossSeconds > 0f);
+    }
+
+    [Fact]
+    public void Run_models_the_boss_in_round_ten()
+    {
+        var report = BalanceSimulation.Run();
+        var boss = report.Rounds[^1];
+
+        Assert.True(boss.IsBoss);
+        Assert.True(boss.Content.BossSeconds > 0f);
+    }
+
+    [Fact]
+    public void Run_flags_boss_and_ammo_outliers()
+    {
+        var easyBoss = BalanceSimulation.Run(new BalanceSimulationOptions { BossMinimumSeconds = 1000f });
+        var hardBoss = BalanceSimulation.Run(new BalanceSimulationOptions { BossMaximumSeconds = 1f });
+        var ammo = BalanceSimulation.Run(new BalanceSimulationOptions { AmmoPressureThreshold = 0f });
+
+        Assert.Contains(easyBoss.Outliers, outlier => outlier.Contains("Boss is too easy", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(hardBoss.Outliers, outlier => outlier.Contains("Boss is too hard", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(ammo.Outliers, outlier => outlier.Contains("ammo-starved", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Run_flags_unreachable_synergies_for_the_default_build()
+    {
+        var report = BalanceSimulation.Run();
+
+        Assert.Contains(
+            report.Outliers,
+            outlier => outlier.Contains("synergy", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public void Run_reports_no_outliers_for_the_default_balance()
     {
         var report = BalanceSimulation.Run();

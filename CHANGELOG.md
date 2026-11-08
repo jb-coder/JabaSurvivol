@@ -28,6 +28,9 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Active-skill selection from the armory or character sheet with persistent profile storage and zero-rank gating.
 - Berserker, Ghost, and Bastion synergies derived from allocated ranks without extra skill points.
 - Character-sheet synergy status with active and requirement display.
+- Balance simulation coverage for Walker, Runner, Brute, elite, and boss content.
+- Balance simulation coverage for magazines, reserves, reloads, weapon switching, and ammo crate rewards.
+- Balance simulation coverage for Turret, Dash, Shockwave, and synergy uptime, with boss time-to-kill and new outliers.
 ## [0.3.0] - 2026-11-07
 
 ### Added
