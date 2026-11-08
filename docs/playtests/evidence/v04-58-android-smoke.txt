@@ -1,0 +1,13 @@
+# v0.4.0 Slice 58 Android Smoke Test
+
+- Date: 2026-11-08
+- Emulator: Android 15 (API 35), x86_64 Google Play system image, `jaba_survivol_api35`
+- Device profile: phone 1080 x 2340 at 440 dpi; tablet display override 2560 x 1600 at 320 dpi
+- Production APK: `JabaSurvivol-0.4.0-58.apk` (ARM64), 32,401,069 bytes, SHA-256 `420403722D524BA5987338F1B268D495B7A2E716280F57EE49E86023CDA4ECBE`
+- Emulator APK: `JabaSurvivol-0.4.0-58-emulator.apk` (ARM64 + x86_64), 59,153,821 bytes, SHA-256 `4F54CE666DB60BE9A9A83077145E6844D40BD530A92F9501E29919E954044C39`
+- Activity: `com.jabasurvivol.game/com.unity3d.player.UnityPlayerActivity`
+- Result: the character sheet shows the Berserker, Ghost, and Bastion requirement row on phone and tablet layouts
+- Fatal search: no `FATAL EXCEPTION`, `AndroidRuntime` crash, unhandled exception, or `NullReferenceException` in the app process log
+- Evidence: `v04-58-skills-phone.png`, `v04-58-skills-tablet.png`
+
+Berserker, Ghost, and Bastion activation effects are covered by the PlayMode suite.

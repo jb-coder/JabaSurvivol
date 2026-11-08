@@ -62,6 +62,8 @@ namespace JabaSurvivol.Gameplay
         private GameSessionState _armoryReturnState;
         private int _spreadSequence;
         private float _levelUpRemaining;
+        private bool _lastBerserkerActive;
+        private bool _lastGhostActive;
 
         public Profile Profile => _profile;
 
@@ -101,6 +103,8 @@ namespace JabaSurvivol.Gameplay
 
         public float ZombieHealthForTests => _zombie?.Health ?? 0f;
 
+        public bool EnemySpawningEnabledForTests { get; set; } = true;
+
         public void SetZombiePositionForTests(Vector2 position)
         {
             if (_zombieActor != null)
@@ -120,6 +124,8 @@ namespace JabaSurvivol.Gameplay
         public bool ArmoryVisible => _ui != null && _ui.ArmoryVisible;
 
         public bool CharacterSheetVisible => _ui != null && _ui.CharacterSheetVisible;
+
+        public bool SynergyTextVisible => _ui != null && _ui.SynergyTextVisible;
 
         public bool LevelUpVisible => _ui != null && _ui.LevelUpVisible;
 
@@ -378,6 +384,8 @@ namespace JabaSurvivol.Gameplay
             _deathEffects.Update(deltaTime);
             _run.TickWeapons(deltaTime);
             _run.TickActiveSkill(deltaTime);
+            _run.TickSynergies(deltaTime);
+            UpdateSynergyStats();
             UpdateTurret(deltaTime);
 
             if (_run.BossActive)
@@ -592,6 +600,11 @@ namespace JabaSurvivol.Gameplay
             if (!_zombieActive)
             {
                 if (_run.IsGameOver || !_run.RoundModel.IsActive || _roundClearPending)
+                {
+                    return;
+                }
+
+                if (!EnemySpawningEnabledForTests)
                 {
                     return;
                 }
@@ -885,6 +898,8 @@ namespace JabaSurvivol.Gameplay
             _roundRewardOptions = null;
             _spreadSequence = 0;
             _levelUpRemaining = 0f;
+            _lastBerserkerActive = false;
+            _lastGhostActive = false;
             _state = GameSessionState.Playing;
 
             _playerObject.SetActive(true);
@@ -1261,10 +1276,18 @@ namespace JabaSurvivol.Gameplay
                 ? _run.CurrentWeapon
                 : _profile.EquippedWeapon;
             _weapon = WeaponUpgradeService.GetEffectiveStats(_profile, weaponId);
+            var healthFraction = _run != null && _run.Player.MaxHealth > 0f
+                ? _run.Player.Health / _run.Player.MaxHealth
+                : 1f;
+            var synergy = SynergyService.GetTemporaryModifiers(
+                _profile,
+                healthFraction,
+                _run?.Synergy.GhostActive ?? false);
             _stats = StatAggregation.Compute(
                 _profile,
                 _weapon,
-                ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor));
+                ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor),
+                synergy);
 
             if (_run != null)
             {
@@ -1676,8 +1699,29 @@ namespace JabaSurvivol.Gameplay
             return ActivateActiveSkill();
         }
 
-        private void UpdateWeaponHud()
+        private void UpdateSynergyStats()
         {
+            if (_run == null)
+            {
+                return;
+            }
+
+            var healthFraction = _run.Player.MaxHealth <= 0f
+                ? 0f
+                : _run.Player.Health / _run.Player.MaxHealth;
+            var berserker = _run.Synergy.BerserkerActive(_profile, healthFraction);
+            var ghost = _run.Synergy.GhostActive;
+            if (berserker == _lastBerserkerActive && ghost == _lastGhostActive)
+            {
+                return;
+            }
+
+            _lastBerserkerActive = berserker;
+            _lastGhostActive = ghost;
+            RefreshStats();
+        }
+
+        private void UpdateWeaponHud()        {
             if (_ui == null || _run == null)
             {
                 return;
