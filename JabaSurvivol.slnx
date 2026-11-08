@@ -11,6 +11,7 @@
   </Folder>
   <Folder Name="/src/Services/">
     <Project Path="src/Services/Game.Api/Game.Api.csproj" />
+    <Project Path="src/Services/Game.Data/JabaSurvivol.Game.Data.csproj" />
     <Project Path="src/Services/Identity.Api/Identity.Api.csproj" />
     <Project Path="src/Services/Telemetry.Worker/Telemetry.Worker.csproj" />
   </Folder>

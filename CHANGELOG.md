@@ -11,6 +11,8 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Username/password identity accounts with case-insensitive unique usernames, ASP.NET Core Identity password hashing, 15-minute JWT access tokens, and 30-day rotating refresh tokens stored as hashes.
 - Registration, login, refresh, logout, and current-account endpoints under `/api/v1/identity`, with strict per-IP rate limiting and ProblemDetails responses.
 - Reusable PostgreSQL Testcontainers fixture and identity integration tests that cover rotation, reuse revocation, logout, expiry, cross-account isolation, and rate limiting.
+- Revision-safe primary cloud save endpoints with ETag support, 1 MiB limits, schema validation, and `409` conflict responses that never overwrite newer data.
+- Game module PostgreSQL schema with an additive cloud-save migration and a unique account/slot constraint.
 
 ## [0.4.0] - 2026-11-08
 
