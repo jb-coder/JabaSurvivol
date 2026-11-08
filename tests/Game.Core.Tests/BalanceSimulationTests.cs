@@ -1,5 +1,7 @@
 namespace JabaSurvivol.Core.Tests;
 
+using System.Globalization;
+
 public sealed class BalanceSimulationTests
 {
     [Fact]
@@ -41,6 +43,15 @@ public sealed class BalanceSimulationTests
             Assert.Equal(first.Rounds[i].Build.ReloadTier, second.Rounds[i].Build.ReloadTier);
             Assert.Equal(first.Rounds[i].Build.StrengthRank, second.Rounds[i].Build.StrengthRank);
             Assert.Equal(first.Rounds[i].Build.VitalityRank, second.Rounds[i].Build.VitalityRank);
+            Assert.Equal(first.Rounds[i].Content.Walkers, second.Rounds[i].Content.Walkers);
+            Assert.Equal(first.Rounds[i].Content.Runners, second.Rounds[i].Content.Runners);
+            Assert.Equal(first.Rounds[i].Content.Brutes, second.Rounds[i].Content.Brutes);
+            Assert.Equal(first.Rounds[i].Ammo.Shots, second.Rounds[i].Ammo.Shots);
+            Assert.Equal(first.Rounds[i].Ammo.Reloads, second.Rounds[i].Ammo.Reloads);
+            Assert.Equal(first.Rounds[i].Ammo.Switches, second.Rounds[i].Ammo.Switches);
+            Assert.Equal(first.Rounds[i].Skills.Selected, second.Rounds[i].Skills.Selected);
+            Assert.Equal(first.Rounds[i].Skills.TurretUptime, second.Rounds[i].Skills.TurretUptime);
+            Assert.Equal(first.Rounds[i].TotalShots, second.Rounds[i].TotalShots);
         }
     }
 
@@ -108,6 +119,185 @@ public sealed class BalanceSimulationTests
     }
 
     [Fact]
+    public void Run_models_content_ammo_active_skills_and_synergies()
+    {
+        var profile = new Profile { Level = 30, Supplies = 5000 };
+        profile.SetSkillRank(SkillNode.Strength, 3);
+        profile.SetSkillRank(SkillNode.Vitality, 3);
+        profile.SetSkillRank(SkillNode.Speed, 3);
+        profile.SetSkillRank(SkillNode.Precision, 3);
+        profile.SetSkillRank(SkillNode.Endurance, 3);
+        profile.SetSkillRank(SkillNode.Engineering, 3);
+        profile.SetSkillRank(SkillNode.Turret, 3);
+        profile.SetSkillRank(SkillNode.Shockwave, 3);
+        profile.SetSkillRank(SkillNode.Dash, 3);
+        profile.ActiveSkill = SkillNode.Turret;
+
+        var report = BalanceSimulation.Run(new BalanceSimulationOptions
+        {
+            MaxRound = 1,
+            StartingProfile = profile
+        });
+        var round = report.Rounds[0];
+
+        Assert.Equal(
+            round.SpawnBudget,
+            round.Content.Walkers + round.Content.Runners + round.Content.Brutes);
+        Assert.True(round.Ammo.Shots > 0);
+        Assert.True(round.Skills.TurretUptime > 0f);
+        Assert.True(round.Skills.DashUptime > 0f);
+        Assert.True(round.Skills.ShockwaveUptime > 0f);
+        Assert.True(round.Skills.BerserkerUptime > 0f);
+        Assert.True(round.Skills.GhostUptime > 0f);
+        Assert.True(round.Skills.BastionUptime > 0f);
+        Assert.True(round.Content.BossSeconds > 0f);
+    }
+
+    [Fact]
+    public void Run_models_the_boss_in_round_ten()
+    {
+        var report = BalanceSimulation.Run();
+        var boss = report.Rounds[^1];
+
+        Assert.True(boss.IsBoss);
+        Assert.True(boss.Content.BossSeconds > 0f);
+        Assert.True(boss.SuppliesEarned >= 1000);
+        Assert.True(boss.XpEarned >= 500);
+    }
+
+    [Fact]
+    public void Run_flags_ammo_starvation_with_finite_reserves()
+    {
+        var profile = new Profile();
+        profile.UnlockWeapon(WeaponId.Smg);
+        profile.EquipWeapon(WeaponId.Smg);
+
+        var report = BalanceSimulation.Run(new BalanceSimulationOptions
+        {
+            MaxRound = 5,
+            StartingProfile = profile
+        });
+
+        Assert.Contains(report.Rounds, round => round.Ammo.Starved);
+        Assert.Contains(report.Outliers, outlier => outlier.Contains("ammo-starved", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Run_formats_outliers_with_invariant_decimals()
+    {
+        var previous = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("es-ES");
+            var report = BalanceSimulation.Run(new BalanceSimulationOptions
+            {
+                BossMinimumSeconds = 1000f
+            });
+
+            Assert.Contains(report.Outliers, outlier => outlier.Contains("1000.0"));
+            Assert.DoesNotContain(report.Outliers, outlier => outlier.Contains("1000,0"));
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previous;
+        }
+    }
+
+    [Fact]
+    public void Run_flags_trivial_elites_level_cap_and_missing_unlocks()
+    {
+        var maxed = new Profile { Level = 30, Supplies = 10000 };
+        maxed.UnlockWeapon(WeaponId.Rifle);
+        maxed.EquipWeapon(WeaponId.Rifle);
+        for (var tier = 1; tier <= 5; tier++)
+        {
+            maxed.SetWeaponUpgradeTier(WeaponId.Rifle, WeaponUpgradeStat.Damage, tier);
+        }
+
+        maxed.SetSkillRank(SkillNode.Strength, 5);
+
+        var elite = BalanceSimulation.Run(new BalanceSimulationOptions
+        {
+            MaxRound = 5,
+            StartingProfile = maxed
+        });
+        var levelCap = BalanceSimulation.Run(new BalanceSimulationOptions
+        {
+            MaxRound = 1,
+            StartingProfile = new Profile { Level = 30 }
+        });
+        var missing = BalanceSimulation.Run(new BalanceSimulationOptions
+        {
+            MaxRound = 1,
+            StartingProfile = new Profile()
+        });
+
+        Assert.Contains(elite.Outliers, outlier => outlier.Contains("elite encounter is trivial", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(levelCap.Outliers, outlier => outlier.Contains("Level cap", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(missing.Outliers, outlier => outlier.Contains("No weapon unlock", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(missing.Outliers, outlier => outlier.Contains("No weapon damage upgrade", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Run_flags_boss_and_ammo_outliers()
+    {
+        var easyBoss = BalanceSimulation.Run(new BalanceSimulationOptions { BossMinimumSeconds = 1000f });
+        var hardBoss = BalanceSimulation.Run(new BalanceSimulationOptions { BossMaximumSeconds = 1f });
+        var ammo = BalanceSimulation.Run(new BalanceSimulationOptions { AmmoPressureThreshold = 0f });
+
+        Assert.Contains(easyBoss.Outliers, outlier => outlier.Contains("Boss is too easy", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(hardBoss.Outliers, outlier => outlier.Contains("Boss is too hard", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(ammo.Outliers, outlier => outlier.Contains("ammo-starved", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Run_flags_unreachable_synergies_for_a_short_run()
+    {
+        var report = BalanceSimulation.Run(new BalanceSimulationOptions
+        {
+            MaxRound = 1,
+            StartingProfile = new Profile()
+        });
+
+        Assert.Contains(
+            report.Outliers,
+            outlier => outlier.Contains("synergy", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Run_reports_ammo_crates_and_archetype_mix()
+    {
+        var report = BalanceSimulation.Run();
+        var fourth = report.Rounds[3];
+        var tenth = report.Rounds[^1];
+
+        Assert.Contains(report.Rounds, round => round.Reward.Type == RoundRewardType.AmmoCrate);
+        Assert.True(fourth.Content.Runners > 0);
+        Assert.True(fourth.Content.Brutes > 0);
+        Assert.True(tenth.IsBoss);
+        Assert.True(tenth.TotalShots >= tenth.ShotsToKill);
+    }
+
+    [Fact]
+    public void Starting_ammo_crate_bonus_changes_finite_reserve_outcomes()
+    {
+        var without = BalanceSimulation.Run(new BalanceSimulationOptions
+        {
+            MaxRound = 5,
+            StartingProfile = CreateSmgProfile()
+        });
+        var with = BalanceSimulation.Run(new BalanceSimulationOptions
+        {
+            MaxRound = 5,
+            StartingProfile = CreateSmgProfile(),
+            StartingAmmoCrateBonus = 1000
+        });
+
+        Assert.Contains(without.Rounds, round => round.Ammo.Starved);
+        Assert.DoesNotContain(with.Rounds, round => round.Ammo.Starved);
+    }
+
+    [Fact]
     public void Run_reports_no_outliers_for_the_default_balance()
     {
         var report = BalanceSimulation.Run();
@@ -117,6 +307,9 @@ public sealed class BalanceSimulationTests
         Assert.DoesNotContain(report.Outliers, outlier => outlier.Contains("unreachable", StringComparison.OrdinalIgnoreCase));
         Assert.DoesNotContain(report.Outliers, outlier => outlier.Contains("runaway", StringComparison.OrdinalIgnoreCase));
         Assert.DoesNotContain(report.Outliers, outlier => outlier.Contains("cap", StringComparison.OrdinalIgnoreCase));
+        Assert.DoesNotContain(report.Outliers, outlier => outlier.Contains("Boss is too", StringComparison.OrdinalIgnoreCase));
+        Assert.DoesNotContain(report.Outliers, outlier => outlier.Contains("ammo-starved", StringComparison.OrdinalIgnoreCase));
+        Assert.DoesNotContain(report.Outliers, outlier => outlier.Contains("synergy", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -144,5 +337,13 @@ public sealed class BalanceSimulationTests
             () => BalanceSimulation.Run(new BalanceSimulationOptions { StartingRound = 5, MaxRound = 4 }));
         Assert.Throws<ArgumentOutOfRangeException>(
             () => BalanceSimulation.Run(new BalanceSimulationOptions { MaxRound = GameBalance.MaxRound + 1 }));
+    }
+
+    private static Profile CreateSmgProfile()
+    {
+        var profile = new Profile();
+        profile.UnlockWeapon(WeaponId.Smg);
+        profile.EquipWeapon(WeaponId.Smg);
+        return profile;
     }
 }

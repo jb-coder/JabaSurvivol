@@ -15,6 +15,24 @@ namespace JabaSurvivol.Core
         public int MaxRound { get; set; } = GameBalance.MaxRound;
 
         public int RunawaySupplyThreshold { get; set; } = 6000;
+
+        public float BossMinimumSeconds { get; set; } = 15f;
+
+        public float BossMaximumSeconds { get; set; } = 90f;
+
+        public float AmmoPressureThreshold { get; set; } = 0.5f;
+
+        /// <summary>
+        /// Optional starting reserve bonus used by tests to exercise ammo
+        /// crate effects without changing the default report.
+        /// </summary>
+        public int StartingAmmoCrateBonus { get; set; }
+
+        /// <summary>
+        /// Optional profile used to exercise a specific ranked build. The
+        /// simulation mutates this profile as it progresses.
+        /// </summary>
+        public Profile? StartingProfile { get; set; }
     }
 
     /// <summary>
@@ -42,6 +60,8 @@ namespace JabaSurvivol.Core
             int enduranceRank,
             int engineeringRank,
             int turretRank,
+            int shockwaveRank,
+            int dashRank,
             int suppliesSpent,
             float damagePerShot,
             float fireInterval,
@@ -67,6 +87,8 @@ namespace JabaSurvivol.Core
             EnduranceRank = enduranceRank;
             EngineeringRank = engineeringRank;
             TurretRank = turretRank;
+            ShockwaveRank = shockwaveRank;
+            DashRank = dashRank;
             SuppliesSpent = suppliesSpent;
             DamagePerShot = damagePerShot;
             FireInterval = fireInterval;
@@ -112,6 +134,10 @@ namespace JabaSurvivol.Core
 
         public int TurretRank { get; }
 
+        public int ShockwaveRank { get; }
+
+        public int DashRank { get; }
+
         public int SuppliesSpent { get; }
 
         public float DamagePerShot { get; }
@@ -121,6 +147,100 @@ namespace JabaSurvivol.Core
         public CharacterStats Stats { get; }
 
         public CharacterStats RawStats { get; }
+    }
+
+    /// <summary>
+    /// Enemy mix and boss time-to-kill for one round.
+    /// </summary>
+    public readonly struct RoundContent
+    {
+        public RoundContent(int walkers, int runners, int brutes, float bossSeconds)
+        {
+            Walkers = walkers;
+            Runners = runners;
+            Brutes = brutes;
+            BossSeconds = bossSeconds;
+        }
+
+        public int Walkers { get; }
+
+        public int Runners { get; }
+
+        public int Brutes { get; }
+
+        public float BossSeconds { get; }
+    }
+
+    /// <summary>
+    /// Ammunition pressure for one round.
+    /// </summary>
+    public readonly struct RoundAmmo
+    {
+        public RoundAmmo(
+            int shots,
+            int reloads,
+            float reloadSeconds,
+            int switches,
+            float pressure,
+            bool starved)
+        {
+            Shots = shots;
+            Reloads = reloads;
+            ReloadSeconds = reloadSeconds;
+            Switches = switches;
+            Pressure = pressure;
+            Starved = starved;
+        }
+
+        public int Shots { get; }
+
+        public int Reloads { get; }
+
+        public float ReloadSeconds { get; }
+
+        public int Switches { get; }
+
+        public float Pressure { get; }
+
+        public bool Starved { get; }
+    }
+
+    /// <summary>
+    /// Active-skill and synergy uptime for one round.
+    /// </summary>
+    public readonly struct RoundSkills
+    {
+        public RoundSkills(
+            SkillNode selected,
+            float turretUptime,
+            float dashUptime,
+            float shockwaveUptime,
+            float berserkerUptime,
+            float ghostUptime,
+            float bastionUptime)
+        {
+            Selected = selected;
+            TurretUptime = turretUptime;
+            DashUptime = dashUptime;
+            ShockwaveUptime = shockwaveUptime;
+            BerserkerUptime = berserkerUptime;
+            GhostUptime = ghostUptime;
+            BastionUptime = bastionUptime;
+        }
+
+        public SkillNode Selected { get; }
+
+        public float TurretUptime { get; }
+
+        public float DashUptime { get; }
+
+        public float ShockwaveUptime { get; }
+
+        public float BerserkerUptime { get; }
+
+        public float GhostUptime { get; }
+
+        public float BastionUptime { get; }
     }
 
     /// <summary>
@@ -137,6 +257,7 @@ namespace JabaSurvivol.Core
             bool isElite,
             bool isBoss,
             int shotsToKill,
+            int totalShots,
             float killSeconds,
             float roundSeconds,
             int suppliesEarned,
@@ -146,7 +267,10 @@ namespace JabaSurvivol.Core
             int cumulativeXp,
             int level,
             int skillPoints,
-            BuildSnapshot build)
+            BuildSnapshot build,
+            RoundContent content,
+            RoundAmmo ammo,
+            RoundSkills skills)
         {
             Round = round;
             SpawnBudget = spawnBudget;
@@ -156,6 +280,7 @@ namespace JabaSurvivol.Core
             IsElite = isElite;
             IsBoss = isBoss;
             ShotsToKill = shotsToKill;
+            TotalShots = totalShots;
             KillSeconds = killSeconds;
             RoundSeconds = roundSeconds;
             SuppliesEarned = suppliesEarned;
@@ -166,6 +291,9 @@ namespace JabaSurvivol.Core
             Level = level;
             SkillPoints = skillPoints;
             Build = build;
+            Content = content;
+            Ammo = ammo;
+            Skills = skills;
         }
 
         public int Round { get; }
@@ -183,6 +311,8 @@ namespace JabaSurvivol.Core
         public bool IsBoss { get; }
 
         public int ShotsToKill { get; }
+
+        public int TotalShots { get; }
 
         public float KillSeconds { get; }
 
@@ -203,6 +333,12 @@ namespace JabaSurvivol.Core
         public int SkillPoints { get; }
 
         public BuildSnapshot Build { get; }
+
+        public RoundContent Content { get; }
+
+        public RoundAmmo Ammo { get; }
+
+        public RoundSkills Skills { get; }
     }
 
     /// <summary>
@@ -271,7 +407,9 @@ namespace JabaSurvivol.Core
             SkillNode.Speed,
             SkillNode.Precision,
             SkillNode.Engineering,
-            SkillNode.Turret
+            SkillNode.Turret,
+            SkillNode.Shockwave,
+            SkillNode.Dash
         };
 
         public static BalanceSimulationReport Run(BalanceSimulationOptions? options = null)
@@ -288,13 +426,14 @@ namespace JabaSurvivol.Core
                 throw new ArgumentOutOfRangeException(nameof(options));
             }
 
-            var profile = new Profile();
-            var run = new RunState(GameBalance.PlayerMaxHealth, options.StartingRound, options.Seed);
+            var profile = options.StartingProfile ?? new Profile();
+            var run = new RunState(GameBalance.PlayerMaxHealth, options.StartingRound, options.Seed, 0, profile);
             var rounds = new List<RoundSimulation>();
             var outliers = new List<string>();
             var cumulativeXp = 0;
             var totalSuppliesEarned = 0;
             var suppliesSpent = 0;
+            var ammoCrateBonus = options.StartingAmmoCrateBonus;
 
             for (var round = options.StartingRound; round <= options.MaxRound; round++)
             {
@@ -302,42 +441,144 @@ namespace JabaSurvivol.Core
                 var build = CreateSnapshot(profile, suppliesSpent);
                 run.ApplyMaxStats(build.Stats.MaxHealth, build.Stats.Armor);
                 var definition = run.RoundModel.Definition;
+                var plan = run.RoundModel.SpawnPlan;
+                var walkers = 0;
+                var runners = 0;
+                var brutes = 0;
+                var maxHealth = 0f;
+                var maxSpeed = 0f;
+                var maxDamage = 0f;
+                var totalShots = 0;
+                for (var i = 0; i < plan.Count; i++)
+                {
+                    var archetype = plan[i];
+                    switch (archetype)
+                    {
+                        case ZombieArchetype.Runner:
+                            runners++;
+                            break;
+                        case ZombieArchetype.Brute:
+                            brutes++;
+                            break;
+                        default:
+                            walkers++;
+                            break;
+                    }
+
+                    var enemy = definition.GetEncounter(archetype);
+                    maxHealth = Math.Max(maxHealth, enemy.MaxHealth);
+                    maxSpeed = Math.Max(maxSpeed, enemy.MoveSpeed);
+                    maxDamage = Math.Max(maxDamage, enemy.ContactDamage);
+                    totalShots += Math.Max(
+                        1,
+                        (int)Math.Ceiling(enemy.MaxHealth / build.DamagePerShot));
+                }
+
                 var encounter = definition.GetEncounter(ZombieArchetype.Walker);
-                var budget = definition.SpawnBudget;
+                var budget = plan.Count;
                 var shotsToKill = Math.Max(
                     1,
-                    (int)Math.Ceiling(encounter.MaxHealth / build.DamagePerShot));
-                var killSeconds = shotsToKill * build.FireInterval;
-                var roundSeconds = budget * (killSeconds + GameBalance.ZombieRespawnDelay);
+                    (int)Math.Ceiling(maxHealth / build.DamagePerShot));
+                var killSeconds = totalShots * build.FireInterval;
+
+                var ammo = SimulateAmmo(profile, build, totalShots, ammoCrateBonus);
+                var baseRoundSeconds =
+                    killSeconds + (budget * GameBalance.ZombieRespawnDelay) + ammo.ReloadSeconds;
+
+                var turretStats = SkillCatalog.Get(SkillNode.Turret)
+                    .GetActivationStats(profile.GetSkillRank(SkillNode.Turret));
+                var dashStats = SkillCatalog.Get(SkillNode.Dash)
+                    .GetActivationStats(profile.GetSkillRank(SkillNode.Dash));
+                var shockwaveStats = SkillCatalog.Get(SkillNode.Shockwave)
+                    .GetActivationStats(profile.GetSkillRank(SkillNode.Shockwave));
+                var selected = profile.ActiveSkill;
+                var turretUptime = Uptime(
+                    profile.GetSkillRank(SkillNode.Turret),
+                    turretStats.TurretDuration,
+                    turretStats.CooldownSeconds);
+                var dashUptime = Uptime(
+                    profile.GetSkillRank(SkillNode.Dash),
+                    GameBalance.DashInvulnerabilitySeconds,
+                    dashStats.CooldownSeconds);
+                var shockwaveUptime = Uptime(
+                    profile.GetSkillRank(SkillNode.Shockwave),
+                    0.1f,
+                    shockwaveStats.CooldownSeconds);
+                var weaponDps = build.FireInterval <= 0f
+                    ? 0f
+                    : (build.DamagePerShot / build.FireInterval) * (1f - ammo.Pressure);
+                var skillDps = selected switch
+                {
+                    SkillNode.Turret when profile.GetSkillRank(SkillNode.Turret) > 0 =>
+                        turretStats.TurretFireInterval <= 0f
+                            ? 0f
+                            : (turretStats.TurretDamage / turretStats.TurretFireInterval) * turretUptime,
+                    SkillNode.Turret => 0f,
+                    SkillNode.Dash => 0f,
+                    SkillNode.Shockwave when profile.GetSkillRank(SkillNode.Shockwave) > 0 =>
+                        (baseRoundSeconds / Math.Max(0.1f, shockwaveStats.CooldownSeconds)) *
+                        shockwaveStats.AreaDamage / Math.Max(1f, baseRoundSeconds),
+                    _ => 0f
+                };
+                var bossSeconds = BossCatalog.BossDefinition.MaxHealth /
+                                  Math.Max(1f, weaponDps + skillDps);
+                var roundSeconds = baseRoundSeconds + (definition.IsBoss ? bossSeconds : 0f);
+                var berserkerUptime = SynergyCatalog.IsUnlocked(profile, SynergyId.Berserker)
+                    ? 0.35f
+                    : 0f;
+                var ghostUptime = SynergyCatalog.IsUnlocked(profile, SynergyId.Ghost)
+                    ? Math.Min(1f, (budget * 2f) / Math.Max(1f, roundSeconds))
+                    : 0f;
+                var bastionUptime = SynergyCatalog.IsUnlocked(profile, SynergyId.Bastion)
+                    ? 0.5f
+                    : 0f;
 
                 var suppliesEarned = 0;
                 var xpEarned = 0;
 
                 for (var i = 0; i < budget; i++)
                 {
-                    var kill = run.RegisterKill();
+                    var archetype = i < plan.Count ? plan[i] : ZombieArchetype.Walker;
+                    var kill = run.RegisterKill(archetype);
                     suppliesEarned += kill.Supplies;
                     xpEarned += kill.Xp;
                     profile.AddSupplies(kill.Supplies);
                     profile.AddXp(kill.Xp);
                 }
 
-                var reward = SelectReward(RoundRewardModel.GenerateOptions(round, options.Seed));
+                if (definition.IsBoss && run.TrySpawnBoss())
+                {
+                    if (run.ApplyBossDamage(run.Boss!.MaxHealth, out var bossReward))
+                    {
+                        suppliesEarned += bossReward.Supplies;
+                        xpEarned += bossReward.Xp;
+                        profile.AddSupplies(bossReward.Supplies);
+                        profile.AddXp(bossReward.Xp);
+                    }
+                }
+
+                var reward = SelectReward(RoundRewardModel.GenerateOptions(round, options.Seed), round);
                 var rewardResult = RoundRewardModel.Apply(reward, profile, run);
                 suppliesEarned += rewardResult.Supplies;
                 xpEarned += rewardResult.Xp;
+                if (reward.Type == RoundRewardType.AmmoCrate)
+                {
+                    ammoCrateBonus += reward.Amount;
+                }
+
                 cumulativeXp += xpEarned;
                 totalSuppliesEarned += suppliesEarned;
 
                 rounds.Add(new RoundSimulation(
                     round,
                     budget,
-                    encounter.MaxHealth,
-                    encounter.MoveSpeed,
-                    encounter.ContactDamage,
+                    maxHealth,
+                    maxSpeed,
+                    maxDamage,
                     definition.IsElite,
                     definition.IsBoss,
                     shotsToKill,
+                    totalShots,
                     killSeconds,
                     roundSeconds,
                     suppliesEarned,
@@ -347,11 +588,46 @@ namespace JabaSurvivol.Core
                     cumulativeXp,
                     profile.Level,
                     profile.SkillPoints,
-                    build));
+                    build,
+                    new RoundContent(walkers, runners, brutes, bossSeconds),
+                    new RoundAmmo(
+                        ammo.Shots,
+                        ammo.Reloads,
+                        ammo.ReloadSeconds,
+                        ammo.Switches,
+                        ammo.Pressure,
+                        ammo.Starved),
+                    new RoundSkills(
+                        selected,
+                        turretUptime,
+                        dashUptime,
+                        shockwaveUptime,
+                        berserkerUptime,
+                        ghostUptime,
+                        bastionUptime)));
 
-                if (shotsToKill <= 1)
+                if (definition.IsElite && shotsToKill <= 10)
                 {
-                    outliers.Add($"Round {round} is trivial: one shot kills a zombie.");
+                    outliers.Add(FormattableString.Invariant(
+                        $"Round {round} elite encounter is trivial: {shotsToKill} shots per enemy."));
+                }
+
+                if (definition.IsBoss && bossSeconds < options.BossMinimumSeconds)
+                {
+                    outliers.Add(FormattableString.Invariant(
+                        $"Boss is too easy: {bossSeconds:0.0} seconds is below {options.BossMinimumSeconds:0.0}."));
+                }
+
+                if (definition.IsBoss && bossSeconds > options.BossMaximumSeconds)
+                {
+                    outliers.Add(FormattableString.Invariant(
+                        $"Boss is too hard: {bossSeconds:0.0} seconds is above {options.BossMaximumSeconds:0.0}."));
+                }
+
+                if (ammo.Pressure > options.AmmoPressureThreshold || ammo.Starved)
+                {
+                    outliers.Add(FormattableString.Invariant(
+                        $"Round {round} is ammo-starved: {ammo.Pressure:0.00} reload pressure exceeds {options.AmmoPressureThreshold:0.00}."));
                 }
 
                 if (round < options.MaxRound && !run.AdvanceRound())
@@ -392,9 +668,11 @@ namespace JabaSurvivol.Core
                     outliers.Add($"No weapon damage upgrade was reached by round {options.MaxRound}.");
                 }
 
-                if (last.Build.Armor == ArmorTier.None)
+                if (!SynergyCatalog.IsUnlocked(profile, SynergyId.Berserker) &&
+                    !SynergyCatalog.IsUnlocked(profile, SynergyId.Ghost) &&
+                    !SynergyCatalog.IsUnlocked(profile, SynergyId.Bastion))
                 {
-                    outliers.Add($"No armor unlock was reached by round {options.MaxRound}.");
+                    outliers.Add($"No synergy was reachable by round {options.MaxRound}.");
                 }
 
                 AddCapOutliers(rounds, outliers);
@@ -406,6 +684,107 @@ namespace JabaSurvivol.Core
                 outliers.ToArray(),
                 totalSuppliesEarned,
                 suppliesSpent);
+        }
+
+        private static float Uptime(int rank, float duration, float cooldown)
+        {
+            if (rank <= 0 || duration <= 0f || cooldown <= 0f)
+            {
+                return 0f;
+            }
+
+            return Math.Min(1f, duration / cooldown);
+        }
+
+        private static AmmoSimulation SimulateAmmo(
+            Profile profile,
+            BuildSnapshot build,
+            int totalShots,
+            int ammoCrateBonus)
+        {
+            var loadout = new WeaponLoadout(
+                profile,
+                build.Stats.AmmoCapacityMultiplier,
+                build.Stats.ReloadSpeedMultiplier);
+            if (ammoCrateBonus > 0)
+            {
+                loadout.AddReserve(ammoCrateBonus);
+            }
+
+            var shots = 0;
+            var reloads = 0;
+            var switches = 0;
+            var reloadSeconds = 0f;
+            var starved = false;
+
+            while (shots < totalShots)
+            {
+                if (loadout.Current.IsReloading)
+                {
+                    var duration = loadout.Current.ReloadDuration;
+                    loadout.Tick(duration);
+                    reloads++;
+                    reloadSeconds += duration;
+                    continue;
+                }
+
+                if (loadout.TryFireCurrent())
+                {
+                    shots++;
+                    continue;
+                }
+
+                if (loadout.StartReload())
+                {
+                    continue;
+                }
+
+                if (loadout.SwitchNext())
+                {
+                    switches++;
+                    starved = true;
+                    continue;
+                }
+
+                break;
+            }
+
+            var roundSeconds = build.FireInterval <= 0f
+                ? 1f
+                : (shots * build.FireInterval) + 1f;
+            var pressure = Math.Clamp(reloadSeconds / roundSeconds, 0f, 1f);
+            return new AmmoSimulation(shots, reloads, reloadSeconds, switches, pressure, starved);
+        }
+
+        private readonly struct AmmoSimulation
+        {
+            public AmmoSimulation(
+                int shots,
+                int reloads,
+                float reloadSeconds,
+                int switches,
+                float pressure,
+                bool starved)
+            {
+                Shots = shots;
+                Reloads = reloads;
+                ReloadSeconds = reloadSeconds;
+                Switches = switches;
+                Pressure = pressure;
+                Starved = starved;
+            }
+
+            public int Shots { get; }
+
+            public int Reloads { get; }
+
+            public float ReloadSeconds { get; }
+
+            public int Switches { get; }
+
+            public float Pressure { get; }
+
+            public bool Starved { get; }
         }
 
         private static void ProgressBuild(Profile profile, int round, ref int suppliesSpent)
@@ -628,6 +1007,8 @@ namespace JabaSurvivol.Core
                 profile.GetSkillRank(SkillNode.Endurance),
                 profile.GetSkillRank(SkillNode.Engineering),
                 profile.GetSkillRank(SkillNode.Turret),
+                profile.GetSkillRank(SkillNode.Shockwave),
+                profile.GetSkillRank(SkillNode.Dash),
                 suppliesSpent,
                 damagePerShot,
                 weaponStats.FireInterval,
@@ -708,19 +1089,19 @@ namespace JabaSurvivol.Core
             return false;
         }
 
-        private static RoundRewardOption SelectReward(RoundRewardOption[] options)
+        private static RoundRewardOption SelectReward(RoundRewardOption[] options, int round)
         {
-            for (var i = 0; i < options.Length; i++)
+            var desired = (round % 4) switch
             {
-                if (options[i].Type == RoundRewardType.Supplies)
-                {
-                    return options[i];
-                }
-            }
+                0 => RoundRewardType.AmmoCrate,
+                1 => RoundRewardType.Supplies,
+                2 => RoundRewardType.Xp,
+                _ => RoundRewardType.ArmorPlate
+            };
 
             for (var i = 0; i < options.Length; i++)
             {
-                if (options[i].Type == RoundRewardType.Xp)
+                if (options[i].Type == desired)
                 {
                     return options[i];
                 }
