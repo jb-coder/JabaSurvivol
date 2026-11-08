@@ -2,7 +2,9 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Game.Api.Leaderboards;
+using Game.Data;
 using JabaSurvivol.Contracts;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace JabaSurvivol.IntegrationTests;
 
@@ -97,6 +99,64 @@ public sealed class LeaderboardEndpointTests(PostgresFixture fixture) : IAsyncLi
         Assert.NotNull(board);
         Assert.Equal(["Bravo", "Charlie", "Alpha"], board.Entries.Select(entry => entry.Username));
         Assert.Equal([1, 2, 3], board.Entries.Select(entry => entry.Rank));
+    }
+
+    [Fact]
+    public async Task Ordering_uses_round_then_kills_across_accounts()
+    {
+        using var alpha = _factory.CreateClientFor(Guid.NewGuid(), "Alpha");
+        using var bravo = _factory.CreateClientFor(Guid.NewGuid(), "Bravo");
+        using var charlie = _factory.CreateClientFor(Guid.NewGuid(), "Charlie");
+
+        await SubmitAsync(alpha, Guid.NewGuid(), 8, 10, 100, "0.5.0");
+        await SubmitAsync(bravo, Guid.NewGuid(), 7, 500, 100, "0.5.0");
+        await SubmitAsync(charlie, Guid.NewGuid(), 7, 600, 100, "0.5.0");
+
+        var board = await alpha.GetFromJsonAsync<LeaderboardResponse>(ApiRoutes.LeaderboardTop);
+
+        Assert.NotNull(board);
+        Assert.Equal(["Alpha", "Charlie", "Bravo"], board.Entries.Select(entry => entry.Username));
+        Assert.Equal([8, 7, 7], board.Entries.Select(entry => entry.HighestRound));
+        Assert.Equal([10, 600, 500], board.Entries.Select(entry => entry.TotalKills));
+        Assert.Equal([1, 2, 3], board.Entries.Select(entry => entry.Rank));
+    }
+
+    [Fact]
+    public async Task Limit_is_applied_and_capped_through_the_endpoint()
+    {
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var database = scope.ServiceProvider.GetRequiredService<GameDbContext>();
+            var now = DateTimeOffset.UtcNow;
+            for (var index = 0; index < LeaderboardContract.MaximumLimit + 1; index++)
+            {
+                database.LeaderboardRuns.Add(new LeaderboardRun
+                {
+                    Id = Guid.NewGuid(),
+                    AccountId = Guid.NewGuid(),
+                    RunId = Guid.NewGuid(),
+                    Username = $"Player{index:000}",
+                    HighestRound = (index % LeaderboardContract.MaximumHighestRound) + 1,
+                    TotalKills = index,
+                    DurationSeconds = 60 + index,
+                    ClientVersion = "0.5.0",
+                    AchievedAt = now.AddSeconds(index)
+                });
+            }
+
+            await database.SaveChangesAsync();
+        }
+
+        using var client = _factory.CreateClient();
+        var limited = await client.GetFromJsonAsync<LeaderboardResponse>($"{ApiRoutes.LeaderboardTop}?limit=2");
+        Assert.NotNull(limited);
+        Assert.Equal(2, limited.Entries.Count);
+        Assert.Equal([1, 2], limited.Entries.Select(entry => entry.Rank));
+
+        var capped = await client.GetFromJsonAsync<LeaderboardResponse>($"{ApiRoutes.LeaderboardTop}?limit=500");
+        Assert.NotNull(capped);
+        Assert.Equal(LeaderboardContract.MaximumLimit, capped.Entries.Count);
+        Assert.Equal(LeaderboardContract.MaximumLimit, capped.Entries[^1].Rank);
     }
 
     [Fact]
