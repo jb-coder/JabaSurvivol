@@ -1,0 +1,115 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrate
+  namespace: jabasurvivol
+  labels:
+    app.kubernetes.io/name: db-migrate
+    app.kubernetes.io/part-of: jabasurvivol
+spec:
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: db-migrate
+        app.kubernetes.io/part-of: jabasurvivol
+    spec:
+      restartPolicy: Never
+      serviceAccountName: jabasurvivol
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: identity-migrate
+          image: ghcr.io/jb-coder/jabasurvivol/identity-api:0.5.0
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: jabasurvivol-config
+          env:
+            - name: ConnectionStrings__Database
+              valueFrom:
+                secretKeyRef:
+                  name: jabasurvivol-secrets
+                  key: database-connection-string
+            - name: Jwt__SigningKey
+              valueFrom:
+                secretKeyRef:
+                  name: jabasurvivol-secrets
+                  key: jwt-signing-key
+            - name: Database__Migrate
+              value: "true"
+            - name: Database__MigrateOnly
+              value: "true"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 300m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+        - name: game-migrate
+          image: ghcr.io/jb-coder/jabasurvivol/game-api:0.5.0
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: jabasurvivol-config
+          env:
+            - name: ConnectionStrings__Database
+              valueFrom:
+                secretKeyRef:
+                  name: jabasurvivol-secrets
+                  key: database-connection-string
+            - name: Jwt__SigningKey
+              valueFrom:
+                secretKeyRef:
+                  name: jabasurvivol-secrets
+                  key: jwt-signing-key
+            - name: Database__Migrate
+              value: "true"
+            - name: Database__MigrateOnly
+              value: "true"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 400m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      containers:
+        - name: complete
+          image: busybox:1.36
+          command: ["true"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+      volumes:
+        - name: tmp
+          emptyDir: {}
