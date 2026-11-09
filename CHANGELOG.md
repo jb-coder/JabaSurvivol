@@ -27,6 +27,8 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Opt-in telemetry with a persistent toggle, allowlisted event queue, batched retries, and remote-config gating that defaults to off.
 - Hardened multi-stage backend container images and Kustomize manifests for Identity, Game, Telemetry Worker, BFF, and PostgreSQL, with non-root containers, probes, resource budgets, network policies, and BFF-only ingress.
 - Container CI builds all four images, validates the rendered manifests, and scans images with Trivy.
+- Gated ARM64 deploy workflow with immutable image digests, pre-migration backup, ordered migration Jobs, rollout probes, BFF smoke tests, and automatic rollback.
+- Identity and Game migration-only startup mode for Kubernetes migration Jobs.
 
 ## [0.4.0] - 2026-11-08
 

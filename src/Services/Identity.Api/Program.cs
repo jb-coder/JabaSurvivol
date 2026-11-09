@@ -98,11 +98,17 @@ app.MapGet(ApiRoutes.IdentityStatus, () => Results.Ok(new
 
 app.MapIdentityEndpoints();
 
-if (app.Configuration.GetValue("Database:Migrate", app.Environment.IsDevelopment()))
+var migrateOnly = app.Configuration.GetValue("Database:MigrateOnly", false);
+if (app.Configuration.GetValue("Database:Migrate", app.Environment.IsDevelopment()) || migrateOnly)
 {
     using var scope = app.Services.CreateScope();
     var database = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
     database.Database.Migrate();
+
+    if (migrateOnly)
+    {
+        return;
+    }
 }
 
 app.Run();

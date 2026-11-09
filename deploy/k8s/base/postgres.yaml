@@ -103,3 +103,19 @@ spec:
   resources:
     requests:
       storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-backup
+  namespace: jabasurvivol
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: jabasurvivol
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 5Gi
