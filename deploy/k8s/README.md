@@ -26,7 +26,8 @@ overlays/
 
 Provision the cluster with `docs/setup/oracle.md`: one Oracle Always Free A1
 VM (2 OCPU, 12 GB), k3s with Traefik, cert-manager, local-path storage,
-metrics-server, SOPS/age, and a GHCR pull secret.
+metrics-server, SOPS/age, and a GHCR pull secret named `ghcr-pull-secret` in the
+`jabasurvivol` namespace. The ServiceAccount references it.
 
 ## Secret contract
 
