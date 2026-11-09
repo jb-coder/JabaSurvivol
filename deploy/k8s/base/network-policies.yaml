@@ -92,6 +92,12 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: telemetry-worker
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: pre-migration-backup
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: db-migrate
       ports:
         - protocol: TCP
           port: 5432
@@ -106,7 +112,7 @@ spec:
     matchExpressions:
       - key: app.kubernetes.io/name
         operator: In
-        values: ["identity-api", "game-api", "telemetry-worker"]
+        values: ["identity-api", "game-api", "telemetry-worker", "pre-migration-backup", "db-migrate"]
   policyTypes:
     - Egress
   egress:
