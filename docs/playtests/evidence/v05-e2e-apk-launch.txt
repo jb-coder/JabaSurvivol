@@ -1,0 +1,2 @@
+Command: adb shell am start -n com.jabasurvivol.game/com.unity3d.player.UnityPlayerActivity --es apiBaseUrl http://10.0.2.2:5102 --es seedRefreshToken <redacted>
+Starting: Intent { cmp=com.jabasurvivol.game/com.unity3d.player.UnityPlayerActivity (has extras) }
