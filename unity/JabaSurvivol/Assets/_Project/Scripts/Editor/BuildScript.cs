@@ -31,6 +31,19 @@ namespace JabaSurvivol.Editor
             EditorUserBuildSettings.buildAppBundle = false;
             EditorUserBuildSettings.development = true;
             PlayerSettings.insecureHttpOption = InsecureHttpOption.DevelopmentOnly;
+            var previousVersion = PlayerSettings.bundleVersion;
+            var previousCode = PlayerSettings.Android.bundleVersionCode;
+            var versionOverride = GetArgument("-bundleVersion");
+            if (!string.IsNullOrWhiteSpace(versionOverride))
+            {
+                PlayerSettings.bundleVersion = versionOverride;
+            }
+
+            var codeOverride = GetArgument("-bundleVersionCode");
+            if (int.TryParse(codeOverride, out var versionCode))
+            {
+                PlayerSettings.Android.bundleVersionCode = versionCode;
+            }
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.X86_64;
             try
             {
@@ -42,6 +55,8 @@ namespace JabaSurvivol.Editor
                 PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
                 PlayerSettings.insecureHttpOption = InsecureHttpOption.NotAllowed;
                 EditorUserBuildSettings.development = false;
+                PlayerSettings.bundleVersion = previousVersion;
+                PlayerSettings.Android.bundleVersionCode = previousCode;
             }
         }
 

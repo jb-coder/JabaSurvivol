@@ -1,0 +1,1 @@
+No fatal app exceptions in the final emulator run.

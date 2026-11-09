@@ -1,0 +1,30 @@
+{
+  "register": 201,
+  "login": 200,
+  "refresh": 200,
+  "me": 200,
+  "save": 200,
+  "getSave": 200,
+  "staleConflict": 409,
+  "update": 200,
+  "leaderboardSubmit": 200,
+  "leaderboardDuplicate": 200,
+  "board": 200,
+  "boardContainsUser": true,
+  "telemetry": 200,
+  "telemetryAccepted": 2,
+  "telemetryDuplicates": 2,
+  "config": 200,
+  "configFlags": {
+    "version": 1,
+    "minimumClientVersion": "0.5.0",
+    "maintenanceMode": false,
+    "cloudSavesEnabled": true,
+    "leaderboardsEnabled": true,
+    "telemetryEnabled": true,
+    "telemetrySampleRate": 1
+  },
+  "telemetryAggregate": "1,0,2",
+  "logout": 204,
+  "refreshAfterLogout": 401
+}
