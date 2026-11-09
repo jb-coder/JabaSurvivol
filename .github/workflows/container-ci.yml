@@ -35,7 +35,7 @@ jobs:
         run: |
           docker run --rm -v "$PWD:/work" \
             ghcr.io/yannh/kubeconform:v0.6.7 -strict -summary \
-            /work/rendered.yaml /work/deploy/k8s/jobs/migration.yaml
+            /work/rendered.yaml /work/deploy/k8s/jobs/migration.yaml /work/deploy/k8s/jobs/backup.yaml
 
       - name: Test rollback ordering
         run: bash deploy/scripts/test-rollback.sh

@@ -14,14 +14,25 @@ on:
 permissions:
   contents: read
   packages: write
+  issues: write
 
 concurrency:
   group: deploy-production
   cancel-in-progress: false
 
 jobs:
+  dry-run:
+    if: ${{ vars.DEPLOY_ENABLED == 'true' && vars.AGENT_PAUSED != 'true' && vars.AGENT_DRY_RUN == 'true' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Report dry-run plan
+        run: |
+          echo "AGENT_DRY_RUN=true"
+          echo "Would build ARM64 images, back up PostgreSQL, run migrations, roll out digests, smoke-test the BFF, and enable rollback."
+
   deploy:
-    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
+    if: ${{ vars.DEPLOY_ENABLED == 'true' && vars.AGENT_PAUSED != 'true' && vars.AGENT_DRY_RUN != 'true' }}
     runs-on: ubuntu-latest
     environment: production
     env:
@@ -30,6 +41,13 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Verify deployment commit is on main
+        run: |
+          git fetch origin main --depth=1
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
 
       - name: Normalize version
         run: echo "VERSION=${VERSION#v}" >> "$GITHUB_ENV"
@@ -123,41 +141,37 @@ jobs:
 
       - name: Pre-migration backup
         run: |
-          kubectl -n jabasurvivol exec postgres-0 -- \
-            pg_dump -U postgres -d jabasurvivol -Fc > "backup-${VERSION}.dump"
-          test -s "backup-${VERSION}.dump"
-
-      - name: Upload pre-migration backup
-        uses: actions/upload-artifact@v7
-        with:
-          name: pre-migration-backup-${{ env.VERSION }}
-          path: backup-${{ env.VERSION }}.dump
-          retention-days: 7
-          if-no-files-found: error
+          kubectl -n jabasurvivol delete job pre-migration-backup --ignore-not-found
+          sed -i "s/__VERSION__/${VERSION}/g" deploy/k8s/jobs/backup.yaml
+          kubectl apply -f deploy/k8s/jobs/backup.yaml
+          kubectl -n jabasurvivol wait --for=condition=complete job/pre-migration-backup --timeout=300s
 
       - name: Run database migrations
+        env:
+          IDENTITY_IMAGE: ${{ env.REGISTRY_PREFIX }}/identity-api@${{ steps.identity.outputs.digest }}
+          GAME_IMAGE: ${{ env.REGISTRY_PREFIX }}/game-api@${{ steps.game.outputs.digest }}
         run: |
           kubectl -n jabasurvivol delete job db-migrate --ignore-not-found
-          sed -i "s/:0.5.0/:${VERSION}/g" deploy/k8s/jobs/migration.yaml
+          sed -i "s#__IDENTITY_IMAGE__#${IDENTITY_IMAGE}#g" deploy/k8s/jobs/migration.yaml
+          sed -i "s#__GAME_IMAGE__#${GAME_IMAGE}#g" deploy/k8s/jobs/migration.yaml
           kubectl apply -f deploy/k8s/jobs/migration.yaml
           if ! kubectl -n jabasurvivol wait --for=condition=complete job/db-migrate --timeout=300s; then
             kubectl -n jabasurvivol logs job/db-migrate --all-containers=true || true
             exit 1
           fi
 
-      - name: Apply application manifests
-        run: kubectl apply -k deploy/k8s/overlays/prod
-
-      - name: Roll out image digests
+      - name: Render manifests with image digests
+        id: render
         run: |
-          kubectl -n jabasurvivol set image deployment/identity-api \
-            "identity-api=${REGISTRY_PREFIX}/identity-api@${{ steps.identity.outputs.digest }}"
-          kubectl -n jabasurvivol set image deployment/game-api \
-            "game-api=${REGISTRY_PREFIX}/game-api@${{ steps.game.outputs.digest }}"
-          kubectl -n jabasurvivol set image deployment/telemetry-worker \
-            "telemetry-worker=${REGISTRY_PREFIX}/telemetry-worker@${{ steps.worker.outputs.digest }}"
-          kubectl -n jabasurvivol set image deployment/bff \
-            "bff=${REGISTRY_PREFIX}/bff@${{ steps.bff.outputs.digest }}"
+          kubectl kustomize deploy/k8s/overlays/prod > rendered.yaml
+          sed -i "s#${REGISTRY_PREFIX}/identity-api:0.5.0#${REGISTRY_PREFIX}/identity-api@${{ steps.identity.outputs.digest }}#g" rendered.yaml
+          sed -i "s#${REGISTRY_PREFIX}/game-api:0.5.0#${REGISTRY_PREFIX}/game-api@${{ steps.game.outputs.digest }}#g" rendered.yaml
+          sed -i "s#${REGISTRY_PREFIX}/telemetry-worker:0.5.0#${REGISTRY_PREFIX}/telemetry-worker@${{ steps.worker.outputs.digest }}#g" rendered.yaml
+          sed -i "s#${REGISTRY_PREFIX}/bff:0.5.0#${REGISTRY_PREFIX}/bff@${{ steps.bff.outputs.digest }}#g" rendered.yaml
+          echo "needed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Apply application manifests
+        run: kubectl apply -f rendered.yaml
 
       - name: Wait for rollout
         run: |
@@ -171,11 +185,27 @@ jobs:
           kubectl -n jabasurvivol port-forward svc/bff 18080:8080 > /tmp/port-forward.log 2>&1 &
           PORT_FORWARD_PID=$!
           trap 'kill $PORT_FORWARD_PID || true' EXIT
-          sleep 5
-          curl -fsS -o /dev/null -w "%{http_code}\n" http://127.0.0.1:18080/api/v1/status
-          curl -fsS -o /dev/null -w "%{http_code}\n" http://127.0.0.1:18080/health
-          curl -fsS -o /dev/null -w "%{http_code}\n" http://127.0.0.1:18080/alive
+          for _ in 1 2 3 4 5; do
+            if curl -fsS --max-time 10 -o /dev/null http://127.0.0.1:18080/alive; then
+              break
+            fi
+            sleep 4
+          done
+          curl -fsS --max-time 10 -o /dev/null http://127.0.0.1:18080/api/v1/status
+          curl -fsS --max-time 10 -o /dev/null http://127.0.0.1:18080/health
+          curl -fsS --max-time 10 -o /dev/null http://127.0.0.1:18080/alive
+          curl -fsS --max-time 10 http://127.0.0.1:18080/api/v1/game/config | grep -q minimumClientVersion
 
       - name: Roll back on failure
-        if: failure()
+        if: failure() && steps.render.outputs.needed == 'true'
         run: bash deploy/scripts/rollback.sh
+
+      - name: Open incident issue after rollback
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "Deployment failure: ${VERSION}" \
+            --body "The deploy-api workflow failed for ${VERSION}. Review the workflow run and the rollback evidence." \
+            --label agent:blocked || true

@@ -39,6 +39,10 @@ pipeline. Never commit plaintext values. Required keys:
 - `jwt-signing-key`: at least 32 characters, shared by Identity, Game, and BFF.
 - `postgres-password`: password for the `postgres` user.
 
+The deploy workflow also requires `KUBE_CONFIG_B64` in the `production`
+environment. Pre-migration dumps are written to the `postgres-backup` PVC and
+are never uploaded as public artifacts.
+
 ```text
 kubectl -n jabasurvivol create secret generic jabasurvivol-secrets \
   --from-literal=database-connection-string=... \

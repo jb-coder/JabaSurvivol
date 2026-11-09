@@ -18,7 +18,7 @@
 2. The workflow tests the solution and builds immutable ARM64 images tagged
    with the commit SHA and semantic version.
 3. Support manifests are applied, PostgreSQL is waited on, and a pre-migration
-   `pg_dump` is uploaded as a 7-day artifact.
+   `pg_dump` is written to the in-cluster `postgres-backup` PVC.
 4. `db-migrate` runs the Identity and Game/Telemetry migrations in order.
 5. Application manifests are applied and every Deployment is pinned to the
    image digest.
@@ -68,5 +68,7 @@ follow the approved restore procedure.
 ## Security
 
 - Never print kubeconfig, connection strings, JWT keys, or pod environment.
-- Deployment logs contain only resource names and HTTP status codes.
+- The workflow does not print kubeconfig, connection strings, JWT keys, or pod
+  environment. Migration failure logs may include EF migration IDs and table
+  names, but no secret values.
 - Rotate the JWT signing key and database password through the SOPS workflow.

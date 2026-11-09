@@ -23,7 +23,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: identity-migrate
-          image: ghcr.io/jb-coder/jabasurvivol/identity-api:0.5.0
+          image: __IDENTITY_IMAGE__
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
@@ -59,7 +59,7 @@ spec:
             - name: tmp
               mountPath: /tmp
         - name: game-migrate
-          image: ghcr.io/jb-coder/jabasurvivol/game-api:0.5.0
+          image: __GAME_IMAGE__
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
@@ -106,6 +106,8 @@ spec:
               cpu: 50m
               memory: 32Mi
           securityContext:
+            runAsUser: 65534
+            runAsGroup: 65534
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
