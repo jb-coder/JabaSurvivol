@@ -24,7 +24,8 @@
     "telemetryEnabled": true,
     "telemetrySampleRate": 1
   },
-  "telemetryAggregate": "1,0,2",
+  "telemetryAggregate": "2,0,4",
   "logout": 204,
-  "refreshAfterLogout": 401
+  "refreshAfterLogout": 401,
+  "capturedAt": "2026-11-09T01:37:56.9200392+00:00"
 }
