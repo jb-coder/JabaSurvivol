@@ -1,6 +1,6 @@
 # Filtered app logcat
 
-- Command: adb logcat -d --pid=<app pid> -v brief
+- Command: adb logcat -d --pid=11539 -v brief
 - Filter: FATAL EXCEPTION, AndroidRuntime, NullReferenceException, Unhandled Exception
 - Matches: 0
 
