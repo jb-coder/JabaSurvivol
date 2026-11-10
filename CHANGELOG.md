@@ -30,6 +30,10 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Gated ARM64 deploy workflow with immutable image digests, pre-migration backup, ordered migration Jobs, rollout probes, BFF smoke tests, and automatic rollback.
 - Identity and Game migration-only startup mode for Kubernetes migration Jobs.
 
+### Fixed
+
+- Local Aspire AppHost now waits for PostgreSQL and upstream services before starting dependent projects, so the identity, game, telemetry, and BFF resources stay running during local verification.
+
 ## [0.4.0] - 2026-11-08
 
 ### Added
