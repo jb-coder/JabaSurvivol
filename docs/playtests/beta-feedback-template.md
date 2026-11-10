@@ -1,7 +1,8 @@
 # Beta Feedback Template
 
-Copy this template into a message, issue, or beta record. Use English and remove
-secrets, account names, tokens, and save contents before sharing.
+Copy this template into the private beta channel. Use English and remove secrets,
+account names, tokens, device serials, and save contents before sharing. Do not
+post raw feedback to the public issue tracker.
 
 ## Tester and build
 
@@ -40,9 +41,12 @@ Rate each item from 1 (poor) to 5 (excellent).
 - Filtered `logcat` excerpt:
 - Redaction confirmed: yes or no
 
-## Consent
+## Consent and retention
 
-- I confirm this report contains no passwords, tokens, personal data, or save
-  contents.
-- I understand that my tester ID and feedback may be stored in the project issue
-  tracker for the duration of the beta.
+- I confirm this report contains no passwords, tokens, personal data, device
+  serials, or save contents beyond what the beta lead requested.
+- I understand that raw feedback and my tester ID stay in the private beta
+  channel, are used only for beta triage, and are deleted when the beta ends or
+  when I ask for deletion.
+- I understand that only a redacted, non-identifying summary may be committed to
+  the public repository.
