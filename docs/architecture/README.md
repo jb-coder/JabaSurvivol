@@ -4,6 +4,8 @@
 - `adr/0005-shared-core-upm-package.md`: shared core source as a local UPM package.
 - `adr/0006-backend-and-cloud-mvp.md`: v0.5.0 trust boundaries, public routes,
   event envelope, save revision contract, and remote-config shape.
+- `adr/0007-personal-beta-first.md`: personal five-person beta, local-first
+  infrastructure, deferred VPS, and payments last.
 - `c4/`: reserved for C4 diagrams and context maps.
 
 Current target:
