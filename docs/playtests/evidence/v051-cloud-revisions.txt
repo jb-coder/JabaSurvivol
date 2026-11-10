@@ -1,0 +1,10 @@
+Date: 2026-11-10
+Client: Android emulator, APK 0.5.0 (version code 5)
+Backend: local Aspire AppHost
+
+Conflict flow:
+
+1. Local revision 2, cloud revision 3. Chose Use Cloud.
+2. Local revision 3, cloud revision 4. Chose Keep Local.
+
+Cloud revision after Keep Local: 5.

@@ -1,0 +1,10 @@
+[2026-11-10 17:29:51.175] [INFO] [AppHost]       Resource postgres/postgres-kckbbfjk changed state: Starting -> Running
+[2026-11-10 17:29:51.174] [DBUG] [AppHost/ResourceNotificationService] Resource postgres/postgres-kckbbfjk changed state: Starting -> Running
+[2026-11-10 17:29:54.950] [INFO] [AppHost]       Resource telemetry-worker/telemetry-worker-uartgwvp changed state: Running
+[2026-11-10 17:29:54.950] [DBUG] [AppHost/ResourceNotificationService] Resource telemetry-worker/telemetry-worker-uartgwvp changed state: Running
+[2026-11-10 17:29:55.364] [INFO] [AppHost]       Resource game-api/game-api-vhsxasmh changed state: Running
+[2026-11-10 17:29:55.364] [DBUG] [AppHost/ResourceNotificationService] Resource game-api/game-api-vhsxasmh changed state: Running
+[2026-11-10 17:29:55.374] [INFO] [AppHost]       Resource identity-api/identity-api-vsmrntbu changed state: Running
+[2026-11-10 17:29:55.374] [DBUG] [AppHost/ResourceNotificationService] Resource identity-api/identity-api-vsmrntbu changed state: Running
+[2026-11-10 17:29:55.867] [INFO] [AppHost]       Resource bff/bff-drujpufj changed state: Running
+[2026-11-10 17:29:55.867] [DBUG] [AppHost/ResourceNotificationService] Resource bff/bff-drujpufj changed state: Running
