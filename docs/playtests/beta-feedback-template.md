@@ -48,5 +48,5 @@ Rate each item from 1 (poor) to 5 (excellent).
 - I understand that raw feedback and my tester ID stay in the private beta
   channel, are used only for beta triage, and are deleted when the beta ends or
   when I ask for deletion.
-- I understand that only a redacted, non-identifying summary may be committed to
-  the public repository.
+- I understand that only a redacted, non-identifying summary or evidence may be
+  committed to the public repository.
