@@ -1,0 +1,15 @@
+Date: 2026-11-10
+Backend: local Aspire AppHost, remote config override with telemetry enabled and sample rate 1
+Client: Android emulator, APK 0.5.0 (version code 5)
+
+The same tester disabled telemetry and completed another run. The telemetry tables were unchanged:
+
+run_start,1
+run_end,1
+
+Daily aggregate for the current date:
+
+RunCount,KillCount,EventCount
+1,0,2
+
+Conclusion: the opted-out run added no telemetry events.

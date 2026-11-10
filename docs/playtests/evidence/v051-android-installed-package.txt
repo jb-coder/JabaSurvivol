@@ -1,0 +1,4 @@
+
+    versionCode=5 minSdk=26 targetSdk=36
+    versionName=0.5.0
+

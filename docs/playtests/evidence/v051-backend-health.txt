@@ -1,0 +1,8 @@
+# BFF health and status against the local Aspire backend
+# GET http://localhost:5247/health
+200
+# GET http://localhost:5247/api/v1/status
+{"service":"bff","status":"ok","version":"v1"}
+# Telemetry daily aggregate query result
+RunCount,KillCount,EventCount
+1,0,2

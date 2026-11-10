@@ -1,0 +1,32 @@
+ACTIVITY MANAGER PROCESS EXIT INFO (dumpsys activity exit-info)
+Last Timestamp of Persistence Into Persistent Storage: 2026-11-10 19:00:11.638
+  package: com.jabasurvivol.game
+    Historical Process Exit for uid=10209
+        ApplicationExitInfo #0:
+          timestamp=2026-11-10 19:02:55.139 pid=10365 realUid=10209 packageUid=10209 definingUid=10209 user=0
+          process=com.jabasurvivol.game reason=10 (USER REQUESTED) subreason=21 (FORCE STOP) status=0
+          importance=100 pss=0.00 rss=378MB description=stop com.jabasurvivol.game due to from pid 10663 state=empty trace=null
+        ApplicationExitInfo #1:
+          timestamp=2026-11-10 18:58:27.103 pid=10081 realUid=10209 packageUid=10209 definingUid=10209 user=0
+          process=com.jabasurvivol.game reason=10 (USER REQUESTED) subreason=21 (FORCE STOP) status=0
+          importance=100 pss=0.00 rss=0.00 description=stop com.jabasurvivol.game due to from pid 10352 state=empty trace=null
+        ApplicationExitInfo #2:
+          timestamp=2026-11-10 18:52:27.238 pid=9830 realUid=10209 packageUid=10209 definingUid=10209 user=0
+          process=com.jabasurvivol.game reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=0.00 rss=0.00 description=stop com.jabasurvivol.game due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #3:
+          timestamp=2026-11-10 18:49:58.809 pid=9446 realUid=10209 packageUid=10209 definingUid=10209 user=0
+          process=com.jabasurvivol.game reason=10 (USER REQUESTED) subreason=21 (FORCE STOP) status=0
+          importance=100 pss=0.00 rss=0.00 description=stop com.jabasurvivol.game due to from pid 9815 state=empty trace=null
+        ApplicationExitInfo #4:
+          timestamp=2026-11-10 18:35:34.510 pid=9202 realUid=10209 packageUid=10209 definingUid=10209 user=0
+          process=com.jabasurvivol.game reason=10 (USER REQUESTED) subreason=21 (FORCE STOP) status=0
+          importance=100 pss=0.00 rss=0.00 description=stop com.jabasurvivol.game due to from pid 9431 state=empty trace=null
+        ApplicationExitInfo #5:
+          timestamp=2026-11-10 18:30:11.631 pid=8563 realUid=10209 packageUid=10209 definingUid=10209 user=0
+          process=com.jabasurvivol.game reason=10 (USER REQUESTED) subreason=21 (FORCE STOP) status=0
+          importance=100 pss=0.00 rss=391MB description=stop com.jabasurvivol.game due to from pid 9181 state=empty trace=null
+        ApplicationExitInfo #6:
+          timestamp=2026-11-10 18:18:34.504 pid=3460 realUid=10209 packageUid=10209 definingUid=10209 user=0
+          process=com.jabasurvivol.game reason=10 (USER REQUESTED) subreason=21 (FORCE STOP) status=0
+          importance=100 pss=0.00 rss=0.00 description=stop com.jabasurvivol.game due to from pid 8547 state=empty trace=null

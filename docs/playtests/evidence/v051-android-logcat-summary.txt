@@ -1,0 +1,7 @@
+Automated Android online-flow verification.
+APK: JabaSurvivol-emulator-0.5.0-v051.apk (versionName 0.5.0, versionCode 5).
+Device: Android 15 API 35 x86_64 emulator, phone 1080x2340 @ 440 dpi, tablet 2560x1600 @ 320 dpi.
+Crash buffer: empty.
+Exit info: only USER REQUESTED force stop and PACKAGE UPDATED entries; no ANR or crash reason.
+App log: no FATAL EXCEPTION, AndroidRuntime crash, unhandled exception, or NullReferenceException.
+Benign warnings: Unity JNI byte-array deprecation and secure-storage probe warnings; sign-in and token persistence still succeeded.
