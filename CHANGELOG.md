@@ -29,6 +29,7 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Container CI builds all four images, validates the rendered manifests, and scans images with Trivy.
 - Gated ARM64 deploy workflow with immutable image digests, pre-migration backup, ordered migration Jobs, rollout probes, BFF smoke tests, and automatic rollback.
 - Identity and Game migration-only startup mode for Kubernetes migration Jobs.
+- Procedural audio cues for hit, kill, level-up, reward, victory, and defeat, with a persistent pause-menu mute toggle.
 
 ### Changed
 

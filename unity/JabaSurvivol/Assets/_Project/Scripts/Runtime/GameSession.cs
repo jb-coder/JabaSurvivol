@@ -28,6 +28,7 @@ namespace JabaSurvivol.Gameplay
         private IGameInput _input;
         private Transform _worldRoot;
         private GameUi _ui;
+        private GameAudio _audio;
         private GameObject _playerObject;
         private Transform _aimPivot;
         private ZombieActor _zombieActor;
@@ -151,6 +152,19 @@ namespace JabaSurvivol.Gameplay
 
         public bool HudVisible => _ui != null && _ui.HudVisible;
 
+        public GameAudio AudioForTests => _audio;
+
+        public string SoundLabelForTests => _ui?.SoundLabelForTests ?? string.Empty;
+
+        /// <summary>
+        /// Test hook that flips the persistent sound preference and refreshes
+        /// the pause-menu label.
+        /// </summary>
+        public void ToggleSoundForTests()
+        {
+            ToggleSound();
+        }
+
         public float LastBulletDamageForTests { get; private set; }
 
         public Vector2 LastShotDirectionForTests { get; private set; }
@@ -258,6 +272,8 @@ namespace JabaSurvivol.Gameplay
 
             CreateActors();
 
+            _audio = gameObject.AddComponent<GameAudio>();
+
             _ui = new GameUi(
                 transform,
                 StartRun,
@@ -265,6 +281,7 @@ namespace JabaSurvivol.Gameplay
                 ReturnToMenu,
                 PauseGame,
                 ResumeGame,
+                ToggleSound,
                 () => ReloadWeapon(),
                 () => SwitchWeapon(),
                 () => ActivateActiveSkill(),
@@ -899,6 +916,7 @@ namespace JabaSurvivol.Gameplay
             _zombieActive = false;
             _playerObject.SetActive(false);
             _bullets.Clear();
+            _audio?.Play(GameAudioCue.Victory);
             _ui.HideBoss();
             _ui.ShowVictory(_run.Round, _run.Kills, _runSuppliesEarned, _runXpEarned);
         }
@@ -1013,10 +1031,17 @@ namespace JabaSurvivol.Gameplay
 
             _state = GameSessionState.Paused;
             _ui.ShowPaused(true);
+            _ui.SetSound(!_audio.IsMuted);
             _ui.SetSticks(default, default);
             _store.Save(_profile);
             _ = SyncCloudAsync();
             _ = FlushTelemetryAsync();
+        }
+
+        private void ToggleSound()
+        {
+            _audio.ToggleMute();
+            _ui?.SetSound(!_audio.IsMuted);
         }
 
         public void ResumeGame()
@@ -1260,6 +1285,7 @@ namespace JabaSurvivol.Gameplay
         private void ShowLevelUpNotification()
         {
             _ui.ShowLevelUp(_profile.Level);
+            _audio?.Play(GameAudioCue.LevelUp);
             _levelUpRemaining = GameBalance.LevelUpNotificationSeconds;
             EnqueueTelemetry("level_up", $"{{\"level\":{_profile.Level}}}");
         }
@@ -1567,6 +1593,8 @@ namespace JabaSurvivol.Gameplay
             {
                 return;
             }
+
+            _audio?.Play(GameAudioCue.Hit);
 
             if (_run.DamagePlayer(amount))
             {
@@ -2394,6 +2422,8 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
+            _audio?.Play(GameAudioCue.Kill);
+
             var archetype = _zombieStats.Archetype;
             var wasElite = _zombieStats.IsElite;
             var deathPosition = (Vector2)_zombieActor.GameObject.transform.position;
@@ -2468,6 +2498,7 @@ namespace JabaSurvivol.Gameplay
 
             _runSuppliesEarned += result.Supplies;
             _runXpEarned += result.Xp;
+            _audio?.Play(GameAudioCue.Reward);
             _store.Save(_profile);
             CompleteRoundClear();
             return true;
@@ -2559,6 +2590,7 @@ namespace JabaSurvivol.Gameplay
                 _turretObject.SetActive(false);
             }
 
+            _audio?.Play(GameAudioCue.Defeat);
             _profile.RecordRunEnd(_run);
             _store.Save(_profile);
             _ = SyncCloudAsync();

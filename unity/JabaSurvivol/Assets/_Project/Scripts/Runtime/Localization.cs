@@ -90,6 +90,8 @@ namespace JabaSurvivol.Gameplay
             ["pause.resume"] = "RESUME",
             ["pause.menu"] = "MAIN MENU",
             ["pause.armory"] = "ARMORY",
+            ["pause.sound.on"] = "SOUND: ON",
+            ["pause.sound.off"] = "SOUND: OFF",
             ["armory.title"] = "ARMORY",
             ["armory.close"] = "CLOSE",
             ["armory.supplies"] = "SUPPLIES {0}",

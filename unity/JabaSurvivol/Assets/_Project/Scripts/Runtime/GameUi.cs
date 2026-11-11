@@ -16,6 +16,7 @@ namespace JabaSurvivol.Gameplay
         private readonly GameObject _mainMenu;
         private readonly GameObject _hud;
         private readonly GameObject _pausePanel;
+        private readonly Text _pauseSoundLabel;
         private readonly GameObject _gameOverPanel;
         private readonly GameObject _victoryPanel;
         private readonly GameObject _bossPanel;
@@ -136,6 +137,7 @@ namespace JabaSurvivol.Gameplay
             System.Action onMenu,
             System.Action onPause,
             System.Action onResume,
+            System.Action onToggleSound,
             System.Action onReload,
             System.Action onSwitchWeapon,
             System.Action onActiveSkill,
@@ -195,7 +197,13 @@ namespace JabaSurvivol.Gameplay
             _bossNameText = FindText(_hud, "Boss Name");
             _bossHealthText = FindText(_hud, "Boss Health Text");
             _bossHealthFill = FindImage(_hud, "Boss Health Fill");
-            _pausePanel = BuildPausePanel(onResume, onMenu, onArmory, onCharacterSheet);
+            _pausePanel = BuildPausePanel(
+                onResume,
+                onMenu,
+                onArmory,
+                onCharacterSheet,
+                onToggleSound,
+                out _pauseSoundLabel);
             _gameOverPanel = BuildGameOverPanel(onRestart, onMenu, out _gameOverSummary);
             _victoryPanel = BuildVictoryPanel(onRestart, onMenu, onLeaderboard, out _victorySummary);
             _roundEndPanel = BuildRoundEndPanel(
@@ -570,6 +578,21 @@ namespace JabaSurvivol.Gameplay
         {
             _pausePanel.SetActive(visible);
         }
+
+        /// <summary>
+        /// Updates the pause-menu sound toggle label.
+        /// </summary>
+        public void SetSound(bool enabled)
+        {
+            if (_pauseSoundLabel == null)
+            {
+                return;
+            }
+
+            _pauseSoundLabel.text = Localization.Get(enabled ? "pause.sound.on" : "pause.sound.off");
+        }
+
+        public string SoundLabelForTests => _pauseSoundLabel?.text ?? string.Empty;
 
         public void ShowGameOver(int round, int kills, int suppliesEarned)
         {
@@ -1822,26 +1845,41 @@ namespace JabaSurvivol.Gameplay
             return baseImage;
         }
 
-        private GameObject BuildPausePanel(System.Action onResume, System.Action onMenu, System.Action onArmory, System.Action onCharacterSheet)
+        private GameObject BuildPausePanel(
+            System.Action onResume,
+            System.Action onMenu,
+            System.Action onArmory,
+            System.Action onCharacterSheet,
+            System.Action onToggleSound,
+            out Text soundLabel)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Pause Panel", new Color(0.01f, 0.02f, 0.03f, 0.9f));
             var root = panel.gameObject;
 
             var title = UiFactory.CreateText(root.transform, "Title", Localization.Get("pause.title"), 64, TextAnchor.MiddleCenter, new Color(0.5f, 0.95f, 1f));
             title.fontStyle = FontStyle.Bold;
-            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.68f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900f, 100f));
+            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.72f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900f, 100f));
 
             var resume = UiFactory.CreateButton(root.transform, "Resume", Localization.Get("pause.resume"), 32, onResume);
-            UiFactory.Place(resume.GetComponent<RectTransform>(), new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 84f));
+            UiFactory.Place(resume.GetComponent<RectTransform>(), new Vector2(0.5f, 0.55f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 84f));
 
             var armory = UiFactory.CreateButton(root.transform, "Armory", Localization.Get("pause.armory"), 28, onArmory);
-            UiFactory.Place(armory.GetComponent<RectTransform>(), new Vector2(0.5f, 0.40f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
+            UiFactory.Place(armory.GetComponent<RectTransform>(), new Vector2(0.5f, 0.44f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
 
             var character = UiFactory.CreateButton(root.transform, "Skills", Localization.Get("character.open"), 28, onCharacterSheet);
-            UiFactory.Place(character.GetComponent<RectTransform>(), new Vector2(0.5f, 0.29f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
+            UiFactory.Place(character.GetComponent<RectTransform>(), new Vector2(0.5f, 0.33f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
 
             var menu = UiFactory.CreateButton(root.transform, "Menu", Localization.Get("pause.menu"), 28, onMenu);
-            UiFactory.Place(menu.GetComponent<RectTransform>(), new Vector2(0.5f, 0.18f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
+            UiFactory.Place(menu.GetComponent<RectTransform>(), new Vector2(0.5f, 0.22f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
+
+            var sound = UiFactory.CreateButton(
+                root.transform,
+                "Sound Toggle",
+                Localization.Get("pause.sound.on"),
+                26,
+                onToggleSound);
+            UiFactory.Place(sound.GetComponent<RectTransform>(), new Vector2(0.5f, 0.11f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 72f));
+            soundLabel = sound.GetComponentInChildren<Text>();
 
             return root;
         }
