@@ -145,6 +145,13 @@ Everything else persists:
 - Armor unlocks.
 - Premium currency, when introduced.
 
+## Balance
+
+- The deterministic baseline and target ranges live in
+  `docs/game-design/balance/2026-11-11-v0.5.1-baseline.md`.
+- Balance targets are defined in `BalanceTargets` and enforced by
+  `BalanceSimulationTests`.
+
 ## Setting and art
 
 - Neon-lit urban survival.
