@@ -200,5 +200,50 @@ namespace JabaSurvivol.Tests.EditMode
             Assert.That(File.ReadAllText(_path), Does.Contain("\"Supplies\": 111"));
             Assert.That(File.Exists(_path + ".corrupt"), Is.True);
         }
+
+        [Test]
+        public void Load_recovers_from_backup_when_the_main_file_is_missing()
+        {
+            var store = new ProfileStore(_path);
+            store.Save(new Profile { Supplies = 111 });
+            store.Save(new Profile { Supplies = 222 });
+            File.Delete(_path);
+
+            var loaded = store.Load();
+
+            Assert.That(loaded.Supplies, Is.EqualTo(111));
+            Assert.That(File.Exists(_path), Is.True);
+            Assert.That(File.ReadAllText(_path), Does.Contain("\"Supplies\": 111"));
+        }
+
+        [Test]
+        public void Load_recovers_from_backup_when_the_main_file_is_empty()
+        {
+            var store = new ProfileStore(_path);
+            store.Save(new Profile { Supplies = 111 });
+            store.Save(new Profile { Supplies = 222 });
+            File.WriteAllText(_path, string.Empty);
+
+            var loaded = store.Load();
+
+            Assert.That(loaded.Supplies, Is.EqualTo(111));
+            Assert.That(File.ReadAllText(_path), Does.Contain("\"Supplies\": 111"));
+            Assert.That(File.Exists(_path + ".corrupt"), Is.True);
+        }
+
+        [Test]
+        public void Load_recovers_from_backup_when_the_main_file_parses_to_null()
+        {
+            var store = new ProfileStore(_path);
+            store.Save(new Profile { Supplies = 111 });
+            store.Save(new Profile { Supplies = 222 });
+            File.WriteAllText(_path, "null");
+
+            var loaded = store.Load();
+
+            Assert.That(loaded.Supplies, Is.EqualTo(111));
+            Assert.That(File.ReadAllText(_path), Does.Contain("\"Supplies\": 111"));
+            Assert.That(File.Exists(_path + ".corrupt"), Is.True);
+        }
     }
 }

@@ -72,6 +72,7 @@ namespace JabaSurvivol.Gameplay
         private RemoteConfigClient _remoteConfigClient;
         private bool _cloudSavesEnabled;
         private bool _cloudConfigLoaded;
+        private Guid? _cloudAccountId;
         private bool _leaderboardsEnabled;
         private bool _telemetryEnabled;
         private double _telemetrySampleRate;
@@ -2309,6 +2310,15 @@ namespace JabaSurvivol.Gameplay
         {
             _ui?.SetAccountState(state, _accountService?.Username ?? string.Empty);
             _ui?.SetCloudControls(state == AccountState.SignedIn, _cloudSavesEnabled);
+
+            var accountId = state == AccountState.SignedIn ? _accountService?.AccountId : null;
+            if (_cloudSaveService != null && (_cloudAccountId != accountId || state != AccountState.SignedIn))
+            {
+                _cloudSaveService.Reset();
+                _ui?.HideCloudConflict();
+                _cloudAccountId = accountId;
+            }
+
             if (state == AccountState.SignedIn && _cloudConfigLoaded)
             {
                 _ = SyncCloudAsync();
