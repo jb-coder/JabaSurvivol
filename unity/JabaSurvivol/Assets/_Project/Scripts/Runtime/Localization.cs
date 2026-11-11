@@ -19,6 +19,7 @@ namespace JabaSurvivol.Gameplay
             ["menu.armory"] = "ARMORY",
             ["menu.progress"] = "SUPPLIES {0}    LEVEL {1}    BEST ROUND {2}",
             ["menu.controls"] = "LEFT STICK MOVE    RIGHT STICK AIM & FIRE",
+            ["menu.build"] = "v{0} · {1}",
             ["account.open"] = "ACCOUNT",
             ["account.title"] = "ACCOUNT",
             ["account.username"] = "USERNAME",

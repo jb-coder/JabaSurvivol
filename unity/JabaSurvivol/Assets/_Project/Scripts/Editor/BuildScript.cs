@@ -13,6 +13,7 @@ namespace JabaSurvivol.Editor
     {
         public static void BuildAndroid()
         {
+            WriteBuildInfo();
             ProjectSetup.Configure();
             EditorUserBuildSettings.buildAppBundle = false;
             EditorUserBuildSettings.development = false;
@@ -27,6 +28,7 @@ namespace JabaSurvivol.Editor
         /// </summary>
         public static void BuildAndroidEmulator()
         {
+            WriteBuildInfo();
             ProjectSetup.Configure();
             EditorUserBuildSettings.buildAppBundle = false;
             EditorUserBuildSettings.development = true;
@@ -72,6 +74,66 @@ namespace JabaSurvivol.Editor
             ProjectSetup.Configure();
             var output = GetOutputPath("-buildOutput", "artifacts/webgl");
             Build(BuildTarget.WebGL, output);
+        }
+
+        private static void WriteBuildInfo()
+        {
+            var commit = RunGit("rev-parse --short HEAD");
+            if (string.IsNullOrWhiteSpace(commit))
+            {
+                commit = "dev";
+            }
+            else if (!string.IsNullOrWhiteSpace(RunGit("status --porcelain --untracked-files=no")))
+            {
+                commit += "-dirty";
+            }
+
+            var resources = Path.Combine(Application.dataPath, "Resources");
+            Directory.CreateDirectory(resources);
+            File.WriteAllText(Path.Combine(resources, "build-info.txt"), "commit=" + commit);
+
+            var apiBaseUrl = Environment.GetEnvironmentVariable("JABA_API_BASE_URL");
+            var apiPath = Path.Combine(resources, "api-base-url.txt");
+            if (string.IsNullOrWhiteSpace(apiBaseUrl))
+            {
+                if (File.Exists(apiPath))
+                {
+                    File.Delete(apiPath);
+                }
+            }
+            else
+            {
+                File.WriteAllText(apiPath, apiBaseUrl.Trim());
+            }
+        }
+
+        private static string RunGit(string arguments)
+        {
+            try
+            {
+                var startInfo = new System.Diagnostics.ProcessStartInfo("git", arguments)
+                {
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WorkingDirectory = Path.GetFullPath(Path.Combine(Application.dataPath, ".."))
+                };
+
+                using var process = System.Diagnostics.Process.Start(startInfo);
+                if (process == null)
+                {
+                    return string.Empty;
+                }
+
+                var output = process.StandardOutput.ReadToEnd().Trim();
+                process.WaitForExit();
+                return output;
+            }
+            catch (Exception)
+            {
+                return string.Empty;
+            }
         }
 
         private static void Build(BuildTarget target, string outputPath, BuildOptions buildOptions = BuildOptions.None)

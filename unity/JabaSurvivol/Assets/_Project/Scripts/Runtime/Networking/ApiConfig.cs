@@ -17,7 +17,13 @@ namespace JabaSurvivol.Gameplay
         public static void Initialize()
         {
             var overrideUrl = ReadOverride();
-            BaseUrl = Normalize(overrideUrl) ?? ProductionBaseUrl;
+            BaseUrl = Normalize(overrideUrl) ?? Normalize(ReadBakedUrl()) ?? ProductionBaseUrl;
+        }
+
+        private static string ReadBakedUrl()
+        {
+            var asset = Resources.Load<TextAsset>("api-base-url");
+            return asset == null ? null : asset.text;
         }
 
         private static string ReadOverride()

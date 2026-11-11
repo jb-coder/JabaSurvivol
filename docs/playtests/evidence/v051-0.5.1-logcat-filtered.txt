@@ -1,0 +1,3 @@
+Filtered app logcat for JabaSurvivol-0.5.1-emulator.apk (commit ab4198f)
+Filter: FATAL EXCEPTION, AndroidRuntime, ANR, NullReferenceException, Unhandled Exception
+Matches: 0
