@@ -40,6 +40,7 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - The profile store recovers persistent progression from the backup file when the main save is empty, unreadable, or missing, instead of returning a fresh profile.
 - A pending cloud-save conflict is cleared when the signed-in account changes, and in-flight cloud responses from the previous account are discarded, so one account can never apply another account's cloud document.
 - A local persistence failure during cloud backup or restore is reported as offline and never clears a pending conflict.
+- Upgraded the local Aspire AppHost SDK to 13.6.5 to remove a high-severity dependency advisory.
 
 ## [0.4.0] - 2026-11-08
 

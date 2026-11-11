@@ -1,0 +1,40 @@
+# Local beta log and evidence review
+
+- Date: 2026-11-11
+- Issue: #108
+- Scope: committed playtest evidence and the filtered Android app log
+
+## Scan
+
+```text
+Get-ChildItem docs/playtests/evidence -Include *.txt,*.json -Recurse |
+  Select-String 'eyJ|Bearer |refreshToken|accessToken|password|SigningKey|postgres://'
+```
+
+Matches were limited to:
+
+- `v05-account-smoke.txt`: UI label list that mentions the word password.
+- `v05-e2e-apk-launch.txt`: a `seedRefreshToken <redacted>` placeholder.
+
+No access token, refresh token, password value, signing key, or database
+connection string is present.
+
+## Save data
+
+- Synthetic test-account values (for example supplies 777 and best round 3)
+  appear in the save-recovery evidence. They belong to throwaway test accounts.
+- No real tester save, account name, device serial, or personal data is
+  committed.
+
+## Log review
+
+- `v051-android-logcat-filtered.txt` contains the filter and zero crash-class
+  matches.
+- `v051-android-logcat-summary.txt` records no fatal exception, AndroidRuntime
+  crash, unhandled exception, or NullReferenceException.
+- Server logs and evidence are redacted before commit.
+
+## Result
+
+The reviewed evidence contains no tokens, passwords, or personal data. The
+only save values are synthetic test-account values.

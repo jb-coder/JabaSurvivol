@@ -1,0 +1,38 @@
+# Local beta server log review
+
+- Date: 2026-11-11
+- Issue: #108
+- Scope: Identity.Api and Game.Api console logs from the local audit run
+
+## Sample
+
+The audit run started Identity.Api and Game.Api against a local throwaway
+PostgreSQL container. The captured logs were scanned for sensitive values.
+
+## Scan
+
+```text
+Select-String -Pattern 'Bearer |eyJ|refreshToken|accessToken|password|SigningKey|Host=127.0.0.1|postgres'
+```
+
+Matches:
+
+- Identity.Api logs contain Entity Framework SQL statements that reference the
+  `PasswordHash` column name. No password value, hash value, token, or signing
+  key appears.
+- Game.Api logs contain no match.
+
+No `Authorization` header, bearer token, refresh token, password value,
+signing key, or database connection string is present in the sampled logs.
+
+## Notes
+
+- Entity Framework SQL logging is enabled only in the Development environment.
+  Production log levels are Information and Warning and do not log SQL.
+- OpenTelemetry traces carry correlation identifiers, not credentials or save
+  documents.
+
+## Result
+
+The sampled server logs contain no tokens, passwords, signing keys, connection
+strings, or save documents.

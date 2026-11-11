@@ -3,6 +3,7 @@
 This directory stores automated verification reports and optional human playtest notes.
 
 - Beta plan: `v0.5.1-beta-plan.md`.
+- Beta security checklist: `v0.5.1-local-beta-security-checklist.md`.
 - Feedback template: `beta-feedback-template.md`.
 
 Each record includes:
