@@ -35,9 +35,6 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 ### Changed
 
 - Android and core package version bumped to `0.5.1` with version code `6`.
-
-### Changed
-
 - The balance simulation and guard tests now enforce the documented run length, round pacing, progression, boss, and ammo pressure target ranges from `BalanceTargets`.
 
 ### Fixed

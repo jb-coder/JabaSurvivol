@@ -78,10 +78,40 @@ namespace JabaSurvivol.Editor
 
         private static void WriteBuildInfo()
         {
-            var commit = "dev";
+            var commit = RunGit("rev-parse --short HEAD");
+            if (string.IsNullOrWhiteSpace(commit))
+            {
+                commit = "dev";
+            }
+            else if (!string.IsNullOrWhiteSpace(RunGit("status --porcelain")))
+            {
+                commit += "-dirty";
+            }
+
+            var resources = Path.Combine(Application.dataPath, "Resources");
+            Directory.CreateDirectory(resources);
+            File.WriteAllText(Path.Combine(resources, "build-info.txt"), "commit=" + commit);
+
+            var apiBaseUrl = Environment.GetEnvironmentVariable("JABA_API_BASE_URL");
+            var apiPath = Path.Combine(resources, "api-base-url.txt");
+            if (string.IsNullOrWhiteSpace(apiBaseUrl))
+            {
+                if (File.Exists(apiPath))
+                {
+                    File.Delete(apiPath);
+                }
+            }
+            else
+            {
+                File.WriteAllText(apiPath, apiBaseUrl.Trim());
+            }
+        }
+
+        private static string RunGit(string arguments)
+        {
             try
             {
-                var startInfo = new System.Diagnostics.ProcessStartInfo("git", "rev-parse --short HEAD")
+                var startInfo = new System.Diagnostics.ProcessStartInfo("git", arguments)
                 {
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -91,25 +121,19 @@ namespace JabaSurvivol.Editor
                 };
 
                 using var process = System.Diagnostics.Process.Start(startInfo);
-                if (process != null)
+                if (process == null)
                 {
-                    commit = process.StandardOutput.ReadToEnd().Trim();
-                    process.WaitForExit();
+                    return string.Empty;
                 }
+
+                var output = process.StandardOutput.ReadToEnd().Trim();
+                process.WaitForExit();
+                return output;
             }
             catch (Exception)
             {
-                commit = "dev";
+                return string.Empty;
             }
-
-            if (string.IsNullOrWhiteSpace(commit))
-            {
-                commit = "dev";
-            }
-
-            var resources = Path.Combine(Application.dataPath, "Resources");
-            Directory.CreateDirectory(resources);
-            File.WriteAllText(Path.Combine(resources, "build-info.txt"), "commit=" + commit);
         }
 
         private static void Build(BuildTarget target, string outputPath, BuildOptions buildOptions = BuildOptions.None)
