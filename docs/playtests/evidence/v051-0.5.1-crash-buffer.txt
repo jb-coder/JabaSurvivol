@@ -1,1 +1,1 @@
-No crash buffer entries for JabaSurvivol-0.5.1-emulator.apk.
+No crash buffer entries for JabaSurvivol-0.5.1-emulator.apk (commit ab4198f).

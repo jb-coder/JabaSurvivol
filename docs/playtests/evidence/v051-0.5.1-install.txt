@@ -5,4 +5,5 @@ adb shell dumpsys package com.jabasurvivol.game
 versionCode=6 minSdk=26 targetSdk=36
 versionName=0.5.1
 
-Main menu label: v0.5.1 · <commit>
+Build commit stamped in the APK: ab4198f
+Main menu label: v0.5.1 · ab4198f
