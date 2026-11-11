@@ -106,11 +106,11 @@ namespace JabaSurvivol.Tests.PlayMode
 
             Assert.That(session.SoundLabelForTests, Is.EqualTo("SOUND: ON"));
 
-            session.ToggleSoundForTests();
+            session.SoundButtonForTests.onClick.Invoke();
             Assert.That(session.SoundLabelForTests, Is.EqualTo("SOUND: OFF"));
             Assert.That(session.AudioForTests.IsMuted, Is.True);
 
-            session.ToggleSoundForTests();
+            session.SoundButtonForTests.onClick.Invoke();
             Assert.That(session.SoundLabelForTests, Is.EqualTo("SOUND: ON"));
             Assert.That(session.AudioForTests.IsMuted, Is.False);
         }

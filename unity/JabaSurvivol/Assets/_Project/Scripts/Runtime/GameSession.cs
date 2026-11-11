@@ -156,14 +156,7 @@ namespace JabaSurvivol.Gameplay
 
         public string SoundLabelForTests => _ui?.SoundLabelForTests ?? string.Empty;
 
-        /// <summary>
-        /// Test hook that flips the persistent sound preference and refreshes
-        /// the pause-menu label.
-        /// </summary>
-        public void ToggleSoundForTests()
-        {
-            ToggleSound();
-        }
+        public UnityEngine.UI.Button SoundButtonForTests => _ui?.SoundButtonForTests;
 
         public float LastBulletDamageForTests { get; private set; }
 
@@ -272,7 +265,7 @@ namespace JabaSurvivol.Gameplay
 
             CreateActors();
 
-            _audio = gameObject.AddComponent<GameAudio>();
+            _audio = gameObject.GetComponent<GameAudio>() ?? gameObject.AddComponent<GameAudio>();
 
             _ui = new GameUi(
                 transform,

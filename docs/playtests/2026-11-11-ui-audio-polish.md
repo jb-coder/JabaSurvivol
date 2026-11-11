@@ -4,7 +4,7 @@
 - Issue: #100
 - Version under test: `0.5.0` (version code `5`)
 - APK: `artifacts/android/JabaSurvivol-emulator-0.5.0-ui-polish.apk`
-- APK SHA-256: `063A0369BAA16470C7A42F0AE6111282D0325D66F7B560C4D02AC62CF55481AC`
+- APK SHA-256: `BE69841EBA0F8A49E23E72204A0D268B153B71F39BBFFADBBA710B59D0DD0E0C`
 - Android: API 35 x86_64 emulator
   - Phone: 1080x2340 at 440 dpi
   - Tablet: 2560x1600 at 320 dpi
@@ -43,10 +43,12 @@ Phone and tablet screenshots show the pause menu and the sound toggle:
 
 - `v051-ui-phone-pause-sound-on.png` and `v051-ui-phone-pause-sound-off.png`
 - `v051-ui-tablet-pause-sound.png`
-- `v051-ui-tablet-main.png` and `v051-ui-tablet-account.png`
+- `v051-ui-tablet-main.png`
 
 The crash buffer is empty and the app log has no fatal exception, ANR,
-AndroidRuntime crash, or NullReferenceException.
+AndroidRuntime crash, or NullReferenceException for this APK. Evidence:
+`v051-ui-android-crash-buffer.txt`, `v051-ui-android-exit-info.txt`,
+`v051-ui-android-logcat-filtered.txt`.
 
 ## Limitations
 

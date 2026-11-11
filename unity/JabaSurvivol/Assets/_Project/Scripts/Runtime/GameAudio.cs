@@ -8,7 +8,6 @@ namespace JabaSurvivol.Gameplay
     /// </summary>
     public enum GameAudioCue
     {
-        Button,
         Kill,
         Hit,
         LevelUp,
@@ -26,7 +25,7 @@ namespace JabaSurvivol.Gameplay
         public const string MutedKey = "audio.muted";
 
         private const int SampleRate = 22050;
-        private const int CueCount = 7;
+        private const int CueCount = 6;
         private const float Amplitude = 0.12f;
 
         private readonly AudioClip[] _clips = new AudioClip[CueCount];
@@ -125,12 +124,6 @@ namespace JabaSurvivol.Gameplay
 
         private void BuildClips()
         {
-            _clips[(int)GameAudioCue.Button] = CreateTone(
-                "GameAudio.Button",
-                880f,
-                880f,
-                0.05f,
-                Amplitude * 0.8f);
             _clips[(int)GameAudioCue.Kill] = CreateTone(
                 "GameAudio.Kill",
                 520f,
@@ -159,6 +152,20 @@ namespace JabaSurvivol.Gameplay
                 "GameAudio.Defeat",
                 new[] { 392f, 329.63f, 261.63f, 196f },
                 0.09f);
+        }
+
+        private void OnDestroy()
+        {
+            for (var i = 0; i < _clips.Length; i++)
+            {
+                if (_clips[i] == null)
+                {
+                    continue;
+                }
+
+                Destroy(_clips[i]);
+                _clips[i] = null;
+            }
         }
 
         private static AudioClip CreateTone(

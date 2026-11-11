@@ -17,6 +17,7 @@ namespace JabaSurvivol.Gameplay
         private readonly GameObject _hud;
         private readonly GameObject _pausePanel;
         private readonly Text _pauseSoundLabel;
+        private readonly Button _pauseSoundButton;
         private readonly GameObject _gameOverPanel;
         private readonly GameObject _victoryPanel;
         private readonly GameObject _bossPanel;
@@ -203,7 +204,8 @@ namespace JabaSurvivol.Gameplay
                 onArmory,
                 onCharacterSheet,
                 onToggleSound,
-                out _pauseSoundLabel);
+                out _pauseSoundLabel,
+                out _pauseSoundButton);
             _gameOverPanel = BuildGameOverPanel(onRestart, onMenu, out _gameOverSummary);
             _victoryPanel = BuildVictoryPanel(onRestart, onMenu, onLeaderboard, out _victorySummary);
             _roundEndPanel = BuildRoundEndPanel(
@@ -593,6 +595,8 @@ namespace JabaSurvivol.Gameplay
         }
 
         public string SoundLabelForTests => _pauseSoundLabel?.text ?? string.Empty;
+
+        public Button SoundButtonForTests => _pauseSoundButton;
 
         public void ShowGameOver(int round, int kills, int suppliesEarned)
         {
@@ -1851,7 +1855,8 @@ namespace JabaSurvivol.Gameplay
             System.Action onArmory,
             System.Action onCharacterSheet,
             System.Action onToggleSound,
-            out Text soundLabel)
+            out Text soundLabel,
+            out Button soundButton)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Pause Panel", new Color(0.01f, 0.02f, 0.03f, 0.9f));
             var root = panel.gameObject;
@@ -1880,6 +1885,7 @@ namespace JabaSurvivol.Gameplay
                 onToggleSound);
             UiFactory.Place(sound.GetComponent<RectTransform>(), new Vector2(0.5f, 0.11f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 72f));
             soundLabel = sound.GetComponentInChildren<Text>();
+            soundButton = sound.GetComponent<Button>();
 
             return root;
         }
