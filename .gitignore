@@ -31,7 +31,9 @@
 
 # Generated build stamp for the Android APK
 /unity/JabaSurvivol/Assets/Resources/build-info.txt
+/unity/JabaSurvivol/Assets/Resources/build-info.txt.meta
 /unity/JabaSurvivol/Assets/Resources/api-base-url.txt
+/unity/JabaSurvivol/Assets/Resources/api-base-url.txt.meta
 /unity/JabaSurvivol/Assets/Resources.meta
 
 # ---------------------------------------------------------------------------
