@@ -1,0 +1,40 @@
+# Local beta account and save deletion exercise
+
+- Date: 2026-11-11
+- Issue: #108
+- Database: local PostgreSQL, throwaway container on 127.0.0.1
+
+## Procedure
+
+Run the following transaction with the tester account id:
+
+```sql
+BEGIN;
+DELETE FROM telemetry."TelemetryEvents" WHERE "AccountId" = '<account-id>';
+DELETE FROM game."LeaderboardRuns" WHERE "AccountId" = '<account-id>';
+DELETE FROM game."CloudSaves" WHERE "AccountId" = '<account-id>';
+DELETE FROM identity."RefreshSessions" WHERE "AccountId" = '<account-id>';
+DELETE FROM identity."Accounts" WHERE "Id" = '<account-id>';
+COMMIT;
+```
+
+`telemetry."DailyAggregates"` is keyed by date. The telemetry worker recomputes
+each day from the remaining raw events, so the deleted tester contribution is
+removed on the next aggregation pass. If an immediate correction is required,
+delete the affected `DailyAggregates` row so the worker rebuilds it.
+
+## Exercise
+
+1. Registered the test account `sec_audit_delete`.
+2. Created one cloud save and one leaderboard run.
+3. Rows before deletion: accounts `1`, refresh sessions `1`, cloud saves `1`,
+   leaderboard runs `1`.
+4. Ran the transaction above.
+5. Rows after deletion: accounts `0`, refresh sessions `0`, cloud saves `0`,
+   leaderboard runs `0`.
+6. Login after deletion returned `401`.
+
+## Result
+
+The deletion procedure removes the account and all associated persistent data
+without leaving orphan rows.
