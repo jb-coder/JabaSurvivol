@@ -36,6 +36,9 @@
 /unity/JabaSurvivol/Assets/Resources/api-base-url.txt.meta
 /unity/JabaSurvivol/Assets/Resources.meta
 
+# Local tooling logs
+.pnpm-debug.log
+
 # ---------------------------------------------------------------------------
 # .NET and build output
 # ---------------------------------------------------------------------------

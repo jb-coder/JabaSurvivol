@@ -83,7 +83,7 @@ namespace JabaSurvivol.Editor
             {
                 commit = "dev";
             }
-            else if (!string.IsNullOrWhiteSpace(RunGit("status --porcelain")))
+            else if (!string.IsNullOrWhiteSpace(RunGit("status --porcelain --untracked-files=no")))
             {
                 commit += "-dirty";
             }
