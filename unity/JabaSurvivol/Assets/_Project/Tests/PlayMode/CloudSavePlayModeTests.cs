@@ -144,11 +144,12 @@ namespace JabaSurvivol.Tests.PlayMode
 
         private sealed class FakeAccountService : IAccountService
         {
+            private readonly Guid _accountId = Guid.NewGuid();
             private AccountState _state = AccountState.SignedIn;
 
             public AccountState State => _state;
             public string Username => "Tester";
-            public Guid? AccountId => Guid.NewGuid();
+            public Guid? AccountId => _accountId;
             public string AccessToken => "token";
             public event Action<AccountState> StateChanged;
 

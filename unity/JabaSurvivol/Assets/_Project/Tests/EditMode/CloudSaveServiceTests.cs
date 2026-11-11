@@ -131,13 +131,27 @@ namespace JabaSurvivol.Tests.EditMode
         }
 
         [Test]
-        public async Task Restore_persistence_failure_keeps_the_conflict_and_local_progress()
+        public async Task Reset_discards_an_in_flight_sync_response()
         {
-            Directory.CreateDirectory(_directory);
-            var blockedParent = Path.Combine(_directory, "blocked");
-            File.WriteAllText(blockedParent, "not a directory");
-            var failingStore = new ProfileStore(Path.Combine(blockedParent, ProfileStore.FileName));
-            var service = new CloudSaveService(_api, failingStore, _account, _ => TimeSpan.Zero);
+            var completion = new TaskCompletionSource<CloudSaveApiResult>();
+            _api.GetHandler = _ => completion.Task;
+            var profile = new Profile { Supplies = 20, CloudSaveRevision = 2 };
+
+            var sync = _service.SyncAsync(profile, CancellationToken.None);
+            _service.Reset();
+            completion.SetResult(Cloud(5, new Profile { Supplies = 99 }));
+            var result = await sync;
+
+            Assert.That(result.State, Is.EqualTo(CloudSyncState.SignedOut));
+            Assert.That(_service.CloudRevision, Is.EqualTo(0));
+        }
+
+        [Test]
+        public async Task Restore_persistence_failure_keeps_the_existing_local_file_and_conflict()
+        {
+            _store.Save(new Profile { Supplies = 20, CloudSaveRevision = 2 });
+            Directory.CreateDirectory(_pathForTempBlock());
+            var service = new CloudSaveService(_api, _store, _account, _ => TimeSpan.Zero);
             var profile = new Profile { Supplies = 20, CloudSaveRevision = 2 };
             _api.GetResults.Enqueue(Cloud(5, new Profile { Supplies = 500 }));
             await service.SyncAsync(profile, CancellationToken.None);
@@ -147,6 +161,47 @@ namespace JabaSurvivol.Tests.EditMode
             Assert.That(result.State, Is.EqualTo(CloudSyncState.Offline));
             Assert.That(service.CloudRevision, Is.EqualTo(5));
             Assert.That(profile.Supplies, Is.EqualTo(20));
+            Assert.That(_store.Load().Supplies, Is.EqualTo(20));
+        }
+
+        [Test]
+        public async Task Backup_persistence_failure_reports_offline_without_overwriting_local()
+        {
+            _store.Save(new Profile { Supplies = 321, CloudSaveRevision = 1 });
+            Directory.CreateDirectory(_pathForTempBlock());
+            var service = new CloudSaveService(_api, _store, _account, _ => TimeSpan.Zero);
+            var profile = new Profile { Supplies = 321, CloudSaveRevision = 1 };
+            _api.PutResults.Enqueue(Saved(2));
+
+            var result = await service.BackupAsync(profile, CancellationToken.None);
+
+            Assert.That(result.State, Is.EqualTo(CloudSyncState.Offline));
+            Assert.That(profile.CloudSaveRevision, Is.EqualTo(2));
+            Assert.That(_store.Load().Supplies, Is.EqualTo(321));
+            Assert.That(_store.Load().CloudSaveRevision, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task Keeping_local_persistence_failure_retains_the_conflict()
+        {
+            _store.Save(new Profile { Supplies = 20, CloudSaveRevision = 2 });
+            var service = new CloudSaveService(_api, _store, _account, _ => TimeSpan.Zero);
+            var profile = new Profile { Supplies = 20, CloudSaveRevision = 2 };
+            _api.GetResults.Enqueue(Cloud(5, new Profile { Supplies = 99 }));
+            await service.SyncAsync(profile, CancellationToken.None);
+            Directory.CreateDirectory(_pathForTempBlock());
+            _api.PutResults.Enqueue(Saved(6));
+
+            var result = await service.KeepLocalAsync(profile, CancellationToken.None);
+
+            Assert.That(result.State, Is.EqualTo(CloudSyncState.Offline));
+            Assert.That(service.CloudRevision, Is.EqualTo(5));
+            Assert.That(_store.Load().Supplies, Is.EqualTo(20));
+        }
+
+        private string _pathForTempBlock()
+        {
+            return Path.Combine(_directory, ProfileStore.FileName) + ".tmp";
         }
 
         [Test]
@@ -206,6 +261,7 @@ namespace JabaSurvivol.Tests.EditMode
         {
             public Queue<CloudSaveApiResult> GetResults { get; } = new Queue<CloudSaveApiResult>();
             public Queue<CloudSaveApiResult> PutResults { get; } = new Queue<CloudSaveApiResult>();
+            public Func<CancellationToken, Task<CloudSaveApiResult>> GetHandler { get; set; }
             public int GetCalls { get; private set; }
             public int PutCalls { get; private set; }
             public long LastBaseRevision { get; private set; }
@@ -213,6 +269,11 @@ namespace JabaSurvivol.Tests.EditMode
             public Task<CloudSaveApiResult> GetAsync(CancellationToken cancellationToken)
             {
                 GetCalls++;
+                if (GetHandler != null)
+                {
+                    return GetHandler(cancellationToken);
+                }
+
                 return Task.FromResult(GetResults.Count > 0
                     ? GetResults.Dequeue()
                     : new CloudSaveApiResult { Status = CloudSaveApiStatus.NotFound });

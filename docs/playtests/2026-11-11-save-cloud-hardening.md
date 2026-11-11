@@ -4,7 +4,7 @@
 - Issue: #102
 - Version under test: `0.5.0` (version code `5`)
 - APK: `artifacts/android/JabaSurvivol-emulator-0.5.0-save-hardening.apk`
-- APK SHA-256: `2E028C6F5005FC6DC4F8F005322CDCCBF4C8CD84000E7B63A78A16BB225D5CA4`
+- APK SHA-256: `7FB1938DE22E00C03D1344FFCEABAFD6F20F68EF4254B7048F54F2F16E28CDE0`
 - Android: API 35 x86_64 emulator, phone 1080x2340 at 440 dpi
 
 ## Changes verified
@@ -22,15 +22,17 @@
 | .NET Release build | 0 warnings, 0 errors |
 | .NET tests | 1 architecture, 167 core, 86 integration, 1 smoke passed; 0 failed |
 | `dotnet format --verify-no-changes` | Clean |
-| Unity EditMode | 73 passed, 0 failed |
+| Unity EditMode | 77 passed, 0 failed |
 | Unity PlayMode | 82 passed, 0 failed |
 
 New coverage:
 
-- `ProfileStoreTests`: recovery from an empty main save and from a main save
-  that deserializes to `null`.
-- `CloudSaveServiceTests`: `Reset` clears a pending conflict, and a restore
-  persistence failure keeps the conflict and local progress.
+- `ProfileStoreTests`: recovery from an empty main save, a main save that
+  deserializes to `null`, and a missing main save with an orphaned backup.
+- `CloudSaveServiceTests`: `Reset` clears a pending conflict, an in-flight
+  response is discarded after reset, and backup, restore, and keep-local
+  persistence failures return offline without clearing the conflict or
+  overwriting local progress.
 - `CloudSavePlayModeTests`: signing out clears the conflict dialog.
 
 ## Android device verification

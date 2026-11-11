@@ -28,6 +28,13 @@ namespace JabaSurvivol.Gameplay
         {
             if (!File.Exists(_path))
             {
+                var orphaned = TryLoadBackup();
+                if (orphaned != null)
+                {
+                    RestoreMainFromBackup();
+                    return orphaned;
+                }
+
                 return new Profile();
             }
 

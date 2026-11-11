@@ -54,6 +54,7 @@ namespace JabaSurvivol.Gameplay
         private readonly IAccountService _account;
         private readonly Func<int, TimeSpan> _retryDelay;
         private CloudSaveDto _conflict;
+        private int _generation;
 
         public CloudSaveService(
             ICloudSaveApiClient api,
@@ -95,6 +96,7 @@ namespace JabaSurvivol.Gameplay
         /// </summary>
         public void Reset()
         {
+            _generation++;
             _conflict = null;
             LocalRevision = 0;
             SetState(Enabled ? CloudSyncState.SignedOut : CloudSyncState.Disabled);
@@ -115,11 +117,17 @@ namespace JabaSurvivol.Gameplay
             LocalRevision = profile.CloudSaveRevision;
             SetState(CloudSyncState.Syncing);
 
+            var generation = _generation;
             var cloud = await _api.GetAsync(cancellationToken);
+            if (generation != _generation)
+            {
+                return Result(CloudSyncState.SignedOut, Localization.Get("cloud.signedout"));
+            }
+
             switch (cloud.Status)
             {
                 case CloudSaveApiStatus.NotFound:
-                    return await UploadAsync(profile, 0, cancellationToken);
+                    return await UploadAsync(profile, 0, cancellationToken, generation);
                 case CloudSaveApiStatus.NetworkError:
                     return Result(CloudSyncState.Offline, Localization.Get("cloud.offline"));
                 case CloudSaveApiStatus.Unauthorized:
@@ -129,7 +137,7 @@ namespace JabaSurvivol.Gameplay
                 case CloudSaveApiStatus.Success:
                     if (cloud.Save.revision == profile.CloudSaveRevision)
                     {
-                        return await UploadAsync(profile, cloud.Save.revision, cancellationToken);
+                        return await UploadAsync(profile, cloud.Save.revision, cancellationToken, generation);
                     }
 
                     return SetConflict(cloud.Save);
@@ -154,7 +162,7 @@ namespace JabaSurvivol.Gameplay
 
             LocalRevision = profile.CloudSaveRevision;
             SetState(CloudSyncState.Syncing);
-            return await UploadAsync(profile, profile.CloudSaveRevision, cancellationToken);
+            return await UploadAsync(profile, profile.CloudSaveRevision, cancellationToken, _generation);
         }
 
         public async Task<CloudSyncResult> RestoreAsync(Profile profile, CancellationToken cancellationToken)
@@ -170,7 +178,13 @@ namespace JabaSurvivol.Gameplay
             }
 
             SetState(CloudSyncState.Syncing);
+            var generation = _generation;
             var cloud = await _api.GetAsync(cancellationToken);
+            if (generation != _generation)
+            {
+                return Result(CloudSyncState.SignedOut, Localization.Get("cloud.signedout"));
+            }
+
             return cloud.Status switch
             {
                 CloudSaveApiStatus.Success when cloud.Save?.document is not null => ApplyRestore(cloud.Save),
@@ -188,15 +202,26 @@ namespace JabaSurvivol.Gameplay
                 return Result(CloudSyncState.Offline, Localization.Get("cloud.msg.noconflict"));
             }
 
+            var generation = _generation;
             if (_conflict.document is null)
             {
                 var fetched = await _api.GetAsync(cancellationToken);
+                if (generation != _generation)
+                {
+                    return Result(CloudSyncState.SignedOut, Localization.Get("cloud.signedout"));
+                }
+
                 if (fetched.Status != CloudSaveApiStatus.Success || fetched.Save?.document is null)
                 {
                     return Result(CloudSyncState.Offline, Localization.Get("cloud.msg.loadFailed"));
                 }
 
                 _conflict = fetched.Save;
+            }
+
+            if (generation != _generation)
+            {
+                return Result(CloudSyncState.SignedOut, Localization.Get("cloud.signedout"));
             }
 
             return ApplyRestore(_conflict);
@@ -210,20 +235,34 @@ namespace JabaSurvivol.Gameplay
             }
 
             SetState(CloudSyncState.Syncing);
-            return await UploadAsync(profile, _conflict.revision, cancellationToken);
+            return await UploadAsync(profile, _conflict.revision, cancellationToken, _generation);
         }
 
         private async Task<CloudSyncResult> UploadAsync(
             Profile profile,
             long baseRevision,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            int generation)
         {
             for (var attempt = 0; attempt < 3; attempt++)
             {
+                if (generation != _generation)
+                {
+                    return Result(CloudSyncState.SignedOut, Localization.Get("cloud.signedout"));
+                }
+
                 var result = await _api.PutAsync(baseRevision, profile, cancellationToken);
+                if (generation != _generation)
+                {
+                    return Result(CloudSyncState.SignedOut, Localization.Get("cloud.signedout"));
+                }
+
                 switch (result.Status)
                 {
                     case CloudSaveApiStatus.Success when result.Save is not null:
+                        // The cloud accepted the write; advance the in-memory
+                        // revision before persistence so a local write failure
+                        // can be reconciled on the next sync.
                         profile.CloudSaveRevision = result.Save.revision;
                         if (!TryPersist(profile))
                         {
@@ -235,6 +274,11 @@ namespace JabaSurvivol.Gameplay
                         return Result(CloudSyncState.Synced, Localization.Get("cloud.msg.backup"));
                     case CloudSaveApiStatus.Conflict:
                         var current = await _api.GetAsync(cancellationToken);
+                        if (generation != _generation)
+                        {
+                            return Result(CloudSyncState.SignedOut, Localization.Get("cloud.signedout"));
+                        }
+
                         return SetConflict(current.Status == CloudSaveApiStatus.Success && current.Save is not null
                             ? current.Save
                             : new CloudSaveDto
