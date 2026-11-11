@@ -45,6 +45,9 @@ Phone and tablet screenshots show the pause menu and the sound toggle:
 - `v051-ui-tablet-pause-sound.png`
 - `v051-ui-tablet-main.png`
 
+The phone captures show the persisted muted state first and the unmuted state
+after the toggle. The tablet capture shows the persisted state on that device.
+
 The crash buffer is empty and the app log has no fatal exception, ANR,
 AndroidRuntime crash, or NullReferenceException for this APK. Evidence:
 `v051-ui-android-crash-buffer.txt`, `v051-ui-android-exit-info.txt`,
