@@ -6,11 +6,13 @@
 
 ## Procedure
 
-Run the following transaction with the tester account id:
+Run the following transaction with the tester account id and the dates of the
+tester telemetry events:
 
 ```sql
 BEGIN;
 DELETE FROM telemetry."TelemetryEvents" WHERE "AccountId" = '<account-id>';
+DELETE FROM telemetry."DailyAggregates" WHERE "Date" IN (<affected-dates>);
 DELETE FROM game."LeaderboardRuns" WHERE "AccountId" = '<account-id>';
 DELETE FROM game."CloudSaves" WHERE "AccountId" = '<account-id>';
 DELETE FROM identity."RefreshSessions" WHERE "AccountId" = '<account-id>';
@@ -18,10 +20,19 @@ DELETE FROM identity."Accounts" WHERE "Id" = '<account-id>';
 COMMIT;
 ```
 
-`telemetry."DailyAggregates"` is keyed by date. The telemetry worker recomputes
-each day from the remaining raw events, so the deleted tester contribution is
-removed on the next aggregation pass. If an immediate correction is required,
-delete the affected `DailyAggregates` row so the worker rebuilds it.
+`telemetry."DailyAggregates"` is keyed by date and the worker recomputes only
+dates that still have raw events. Deleting the affected dates forces a clean
+rebuild from the remaining raw events, so a deleted tester contribution is
+removed.
+
+Backups and logs:
+
+- The local beta has no automated database backups. If an operator takes a
+  manual `pg_dump`, it must be stored in the private beta channel and deleted
+  when the beta ends or when a tester requests deletion.
+- Server logs and OpenTelemetry traces are retained only for the beta window
+  and are deleted with the development machine cleanup. They never contain
+  tokens, passwords, or save documents.
 
 ## Exercise
 
@@ -29,7 +40,8 @@ delete the affected `DailyAggregates` row so the worker rebuilds it.
 2. Created one cloud save and one leaderboard run.
 3. Rows before deletion: accounts `1`, refresh sessions `1`, cloud saves `1`,
    leaderboard runs `1`.
-4. Ran the transaction above.
+4. Ran the transaction above. The account had no telemetry events, so no
+   aggregate date was affected.
 5. Rows after deletion: accounts `0`, refresh sessions `0`, cloud saves `0`,
    leaderboard runs `0`.
 6. Login after deletion returned `401`.
@@ -37,4 +49,5 @@ delete the affected `DailyAggregates` row so the worker rebuilds it.
 ## Result
 
 The deletion procedure removes the account and all associated persistent data
-without leaving orphan rows.
+without leaving orphan rows, and the updated runbook covers telemetry
+aggregates, backups, logs, and traces.

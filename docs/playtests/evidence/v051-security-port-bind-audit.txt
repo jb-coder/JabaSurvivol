@@ -36,5 +36,7 @@ Loopback 127.0.0.1:5433 reachable = true
 
 ## Residual check
 
-A second Tailscale peer reachability check is part of the five-person beta
-run in #101 and must run before testers connect.
+A second Tailscale peer reachability check and a public-Internet probe from a
+non-tailnet network are pre-beta gates in #101 and must run before testers
+connect. The reviewed configuration has no router port forward and no service
+bound to a public interface.
