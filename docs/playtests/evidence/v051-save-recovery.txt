@@ -1,5 +1,6 @@
 Date: 2026-11-11
 Client: Android emulator, APK 0.5.0 (version code 5), save-cloud hardening build
+APK SHA-256: 7FB1938DE22E00C03D1344FFCEABAFD6F20F68EF4254B7048F54F2F16E28CDE0
 
 Setup: profile.json was truncated to 0 bytes while profile.json.bak held the last valid save (441 bytes, supplies 777, best round 3).
 After launch: profile.json was restored to 441 bytes from the backup, and the main menu showed supplies 777 and best round 3.
