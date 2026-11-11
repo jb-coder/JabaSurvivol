@@ -14,13 +14,13 @@ namespace JabaSurvivol.Core
 
         public int MaxRound { get; set; } = GameBalance.MaxRound;
 
-        public int RunawaySupplyThreshold { get; set; } = 6000;
+        public int RunawaySupplyThreshold { get; set; } = BalanceTargets.MaximumSuppliesEarned;
 
-        public float BossMinimumSeconds { get; set; } = 15f;
+        public float BossMinimumSeconds { get; set; } = BalanceTargets.MinimumBossSeconds;
 
-        public float BossMaximumSeconds { get; set; } = 90f;
+        public float BossMaximumSeconds { get; set; } = BalanceTargets.MaximumBossSeconds;
 
-        public float AmmoPressureThreshold { get; set; } = 0.5f;
+        public float AmmoPressureThreshold { get; set; } = BalanceTargets.MaximumAmmoPressure;
 
         /// <summary>
         /// Optional starting reserve bonus used by tests to exercise ammo
