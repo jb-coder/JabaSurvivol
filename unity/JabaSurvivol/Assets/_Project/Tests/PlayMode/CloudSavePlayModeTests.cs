@@ -113,6 +113,29 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(stored.CloudSaveRevision, Is.EqualTo(4));
         }
 
+        [UnityTest]
+        public IEnumerator Sign_out_clears_the_conflict_dialog()
+        {
+            _cloud.SyncResult = new CloudSyncResult
+            {
+                State = CloudSyncState.Conflict,
+                Conflict = true,
+                Message = string.Empty
+            };
+
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            yield return null;
+            Assert.That(_bootstrap.Session.CloudConflictVisibleForTests, Is.True);
+
+            _bootstrap.Session.LogoutForTests();
+            yield return null;
+            yield return null;
+
+            Assert.That(_cloud.ResetCalled, Is.True);
+            Assert.That(_bootstrap.Session.CloudConflictVisibleForTests, Is.False);
+        }
+
         private GameBootstrap CreateBootstrap()
         {
             var bootstrapObject = new GameObject("GameBootstrap");
@@ -121,18 +144,37 @@ namespace JabaSurvivol.Tests.PlayMode
 
         private sealed class FakeAccountService : IAccountService
         {
-            public AccountState State => AccountState.SignedIn;
+            private AccountState _state = AccountState.SignedIn;
+
+            public AccountState State => _state;
             public string Username => "Tester";
             public Guid? AccountId => Guid.NewGuid();
             public string AccessToken => "token";
             public event Action<AccountState> StateChanged;
 
             public Task InitializeAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-            public Task<AccountActionResult> RegisterAsync(string username, string password, CancellationToken cancellationToken) =>
-                Task.FromResult(new AccountActionResult { Success = true, State = State });
-            public Task<AccountActionResult> LoginAsync(string username, string password, CancellationToken cancellationToken) =>
-                Task.FromResult(new AccountActionResult { Success = true, State = State });
-            public Task LogoutAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+            public Task<AccountActionResult> RegisterAsync(string username, string password, CancellationToken cancellationToken)
+            {
+                _state = AccountState.SignedIn;
+                StateChanged?.Invoke(_state);
+                return Task.FromResult(new AccountActionResult { Success = true, State = _state });
+            }
+
+            public Task<AccountActionResult> LoginAsync(string username, string password, CancellationToken cancellationToken)
+            {
+                _state = AccountState.SignedIn;
+                StateChanged?.Invoke(_state);
+                return Task.FromResult(new AccountActionResult { Success = true, State = _state });
+            }
+
+            public Task LogoutAsync(CancellationToken cancellationToken)
+            {
+                _state = AccountState.SignedOut;
+                StateChanged?.Invoke(_state);
+                return Task.CompletedTask;
+            }
+
             public Task<bool> RefreshAsync(CancellationToken cancellationToken) => Task.FromResult(true);
         }
 
@@ -150,8 +192,16 @@ namespace JabaSurvivol.Tests.PlayMode
             public CloudSyncResult RestoreResult { get; set; } = new CloudSyncResult { State = CloudSyncState.Synced };
             public CloudSyncResult UseCloudResult { get; set; } = new CloudSyncResult { State = CloudSyncState.Synced };
             public CloudSyncResult KeepLocalResult { get; set; } = new CloudSyncResult { State = CloudSyncState.Synced };
+            public bool ResetCalled { get; private set; }
 
             public void Configure(bool enabled) => Enabled = enabled;
+
+            public void Reset()
+            {
+                ResetCalled = true;
+                State = CloudSyncState.SignedOut;
+                StateChanged?.Invoke(State);
+            }
 
             public Task<CloudSyncResult> SyncAsync(Profile profile, CancellationToken cancellationToken) =>
                 Complete(SyncResult);

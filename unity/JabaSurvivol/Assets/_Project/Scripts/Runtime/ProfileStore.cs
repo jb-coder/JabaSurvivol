@@ -34,34 +34,31 @@ namespace JabaSurvivol.Gameplay
             try
             {
                 var json = File.ReadAllText(_path);
-                if (string.IsNullOrWhiteSpace(json))
+                if (!string.IsNullOrWhiteSpace(json))
                 {
-                    return new Profile();
+                    var profile = JsonUtility.FromJson<Profile>(json);
+                    if (profile != null)
+                    {
+                        profile.Validate();
+                        return profile;
+                    }
                 }
-
-                var profile = JsonUtility.FromJson<Profile>(json);
-                if (profile == null)
-                {
-                    return new Profile();
-                }
-
-                profile.Validate();
-                return profile;
             }
             catch (Exception exception)
             {
                 Debug.LogWarning($"Profile load failed: {exception.Message}");
-                var recovered = TryLoadBackup();
-                BackupCorruptFile();
-
-                if (recovered != null)
-                {
-                    RestoreMainFromBackup();
-                    return recovered;
-                }
-
-                return new Profile();
             }
+
+            var recovered = TryLoadBackup();
+            BackupCorruptFile();
+
+            if (recovered != null)
+            {
+                RestoreMainFromBackup();
+                return recovered;
+            }
+
+            return new Profile();
         }
 
         public void Save(Profile profile)

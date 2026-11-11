@@ -33,6 +33,9 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 ### Fixed
 
 - Local Aspire AppHost now waits for PostgreSQL and upstream services before starting dependent projects, so the identity, game, telemetry, and BFF resources stay running during local verification.
+- The profile store recovers persistent progression from the backup file when the main save is empty or unreadable, instead of returning a fresh profile.
+- A pending cloud-save conflict is cleared when the signed-in account changes, so one account can never apply another account's cloud document.
+- A local persistence failure during cloud backup or restore is reported as offline and never clears a pending conflict.
 
 ## [0.4.0] - 2026-11-08
 

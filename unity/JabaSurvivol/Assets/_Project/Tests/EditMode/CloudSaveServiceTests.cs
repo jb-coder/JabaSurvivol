@@ -114,6 +114,42 @@ namespace JabaSurvivol.Tests.EditMode
         }
 
         [Test]
+        public async Task Reset_clears_a_pending_conflict_before_another_account_signs_in()
+        {
+            var profile = new Profile { Supplies = 20, CloudSaveRevision = 2 };
+            _api.GetResults.Enqueue(Cloud(5, new Profile { Supplies = 99 }));
+            await _service.SyncAsync(profile, CancellationToken.None);
+            Assert.That(_service.State, Is.EqualTo(CloudSyncState.Conflict));
+            Assert.That(_service.CloudRevision, Is.EqualTo(5));
+
+            _service.Reset();
+
+            Assert.That(_service.State, Is.EqualTo(CloudSyncState.SignedOut));
+            Assert.That(_service.CloudRevision, Is.EqualTo(0));
+            var useCloud = await _service.UseCloudAsync(profile, CancellationToken.None);
+            Assert.That(useCloud.State, Is.EqualTo(CloudSyncState.Offline));
+        }
+
+        [Test]
+        public async Task Restore_persistence_failure_keeps_the_conflict_and_local_progress()
+        {
+            Directory.CreateDirectory(_directory);
+            var blockedParent = Path.Combine(_directory, "blocked");
+            File.WriteAllText(blockedParent, "not a directory");
+            var failingStore = new ProfileStore(Path.Combine(blockedParent, ProfileStore.FileName));
+            var service = new CloudSaveService(_api, failingStore, _account, _ => TimeSpan.Zero);
+            var profile = new Profile { Supplies = 20, CloudSaveRevision = 2 };
+            _api.GetResults.Enqueue(Cloud(5, new Profile { Supplies = 500 }));
+            await service.SyncAsync(profile, CancellationToken.None);
+
+            var result = await service.UseCloudAsync(profile, CancellationToken.None);
+
+            Assert.That(result.State, Is.EqualTo(CloudSyncState.Offline));
+            Assert.That(service.CloudRevision, Is.EqualTo(5));
+            Assert.That(profile.Supplies, Is.EqualTo(20));
+        }
+
+        [Test]
         public async Task Network_failure_retries_bounded_and_keeps_local_progress()
         {
             var profile = new Profile { Supplies = 321, CloudSaveRevision = 1 };

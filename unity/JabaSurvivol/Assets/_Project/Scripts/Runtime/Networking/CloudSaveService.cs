@@ -34,6 +34,7 @@ namespace JabaSurvivol.Gameplay
         event Action<CloudSyncState> StateChanged;
 
         void Configure(bool enabled);
+        void Reset();
         Task<CloudSyncResult> SyncAsync(Profile profile, CancellationToken cancellationToken);
         Task<CloudSyncResult> BackupAsync(Profile profile, CancellationToken cancellationToken);
         Task<CloudSyncResult> RestoreAsync(Profile profile, CancellationToken cancellationToken);
@@ -85,6 +86,18 @@ namespace JabaSurvivol.Gameplay
             {
                 SetState(CloudSyncState.Disabled);
             }
+        }
+
+        /// <summary>
+        /// Clears any pending conflict and revision state when the signed-in
+        /// account changes, so one account can never apply another account's
+        /// cloud document.
+        /// </summary>
+        public void Reset()
+        {
+            _conflict = null;
+            LocalRevision = 0;
+            SetState(Enabled ? CloudSyncState.SignedOut : CloudSyncState.Disabled);
         }
 
         public async Task<CloudSyncResult> SyncAsync(Profile profile, CancellationToken cancellationToken)
@@ -212,7 +225,11 @@ namespace JabaSurvivol.Gameplay
                 {
                     case CloudSaveApiStatus.Success when result.Save is not null:
                         profile.CloudSaveRevision = result.Save.revision;
-                        _store.Save(profile);
+                        if (!TryPersist(profile))
+                        {
+                            return Result(CloudSyncState.Offline, Localization.Get("cloud.msg.backupFailed"));
+                        }
+
                         LocalRevision = result.Save.revision;
                         _conflict = null;
                         return Result(CloudSyncState.Synced, Localization.Get("cloud.msg.backup"));
@@ -245,7 +262,11 @@ namespace JabaSurvivol.Gameplay
             var restored = cloud.document;
             restored.Validate();
             restored.CloudSaveRevision = cloud.revision;
-            _store.Save(restored);
+            if (!TryPersist(restored))
+            {
+                return Result(CloudSyncState.Offline, Localization.Get("cloud.msg.restoreFailed"));
+            }
+
             LocalRevision = cloud.revision;
             _conflict = null;
             SetState(CloudSyncState.Synced);
@@ -255,6 +276,20 @@ namespace JabaSurvivol.Gameplay
                 Message = Localization.Get("cloud.msg.restored"),
                 RestoredProfile = restored
             };
+        }
+
+        private bool TryPersist(Profile profile)
+        {
+            try
+            {
+                _store.Save(profile);
+                return true;
+            }
+            catch (Exception exception)
+            {
+                UnityEngine.Debug.LogWarning($"Cloud save persistence failed: {exception.GetType().Name}");
+                return false;
+            }
         }
 
         private CloudSyncResult SetConflict(CloudSaveDto cloud)

@@ -2313,6 +2313,11 @@ namespace JabaSurvivol.Gameplay
             {
                 _ = SyncCloudAsync();
             }
+            else if (state != AccountState.SignedIn)
+            {
+                _cloudSaveService?.Reset();
+                _ui?.HideCloudConflict();
+            }
         }
 
         private void HandleCloudStateChanged(CloudSyncState state)
