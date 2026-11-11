@@ -13,6 +13,7 @@ namespace JabaSurvivol.Editor
     {
         public static void BuildAndroid()
         {
+            WriteBuildInfo();
             ProjectSetup.Configure();
             EditorUserBuildSettings.buildAppBundle = false;
             EditorUserBuildSettings.development = false;
@@ -27,6 +28,7 @@ namespace JabaSurvivol.Editor
         /// </summary>
         public static void BuildAndroidEmulator()
         {
+            WriteBuildInfo();
             ProjectSetup.Configure();
             EditorUserBuildSettings.buildAppBundle = false;
             EditorUserBuildSettings.development = true;
@@ -72,6 +74,42 @@ namespace JabaSurvivol.Editor
             ProjectSetup.Configure();
             var output = GetOutputPath("-buildOutput", "artifacts/webgl");
             Build(BuildTarget.WebGL, output);
+        }
+
+        private static void WriteBuildInfo()
+        {
+            var commit = "dev";
+            try
+            {
+                var startInfo = new System.Diagnostics.ProcessStartInfo("git", "rev-parse --short HEAD")
+                {
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WorkingDirectory = Path.GetFullPath(Path.Combine(Application.dataPath, ".."))
+                };
+
+                using var process = System.Diagnostics.Process.Start(startInfo);
+                if (process != null)
+                {
+                    commit = process.StandardOutput.ReadToEnd().Trim();
+                    process.WaitForExit();
+                }
+            }
+            catch (Exception)
+            {
+                commit = "dev";
+            }
+
+            if (string.IsNullOrWhiteSpace(commit))
+            {
+                commit = "dev";
+            }
+
+            var resources = Path.Combine(Application.dataPath, "Resources");
+            Directory.CreateDirectory(resources);
+            File.WriteAllText(Path.Combine(resources, "build-info.txt"), "commit=" + commit);
         }
 
         private static void Build(BuildTarget target, string outputPath, BuildOptions buildOptions = BuildOptions.None)

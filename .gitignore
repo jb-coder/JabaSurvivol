@@ -29,6 +29,10 @@
 /unity/**/*.unitypackage
 /unity/**/*.app
 
+# Generated build stamp for the Android APK
+/unity/JabaSurvivol/Assets/Resources/
+/unity/JabaSurvivol/Assets/Resources.meta
+
 # ---------------------------------------------------------------------------
 # .NET and build output
 # ---------------------------------------------------------------------------

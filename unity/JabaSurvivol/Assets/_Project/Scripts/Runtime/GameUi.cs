@@ -14,6 +14,7 @@ namespace JabaSurvivol.Gameplay
     {
         private readonly RectTransform _safeArea;
         private readonly GameObject _mainMenu;
+        private readonly Text _buildLabel;
         private readonly GameObject _hud;
         private readonly GameObject _pausePanel;
         private readonly Text _pauseSoundLabel;
@@ -184,7 +185,8 @@ namespace JabaSurvivol.Gameplay
                 onTelemetryToggle,
                 out _mainMenuAccountState,
                 out _telemetryButton,
-                out _telemetryLabel);
+                out _telemetryLabel,
+                out _buildLabel);
             _hud = BuildHud(onPause, onReload, onSwitchWeapon, onActiveSkill, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
             _roundModifierText = FindText(_hud, "Round Modifier");
             _weaponText = FindText(_hud, "Weapon");
@@ -595,6 +597,8 @@ namespace JabaSurvivol.Gameplay
         }
 
         public string SoundLabelForTests => _pauseSoundLabel?.text ?? string.Empty;
+
+        public string BuildLabelForTests => _buildLabel?.text ?? string.Empty;
 
         public Button SoundButtonForTests => _pauseSoundButton;
 
@@ -1463,7 +1467,8 @@ namespace JabaSurvivol.Gameplay
             System.Action onTelemetryToggle,
             out Text accountStateText,
             out Button telemetryButton,
-            out Text telemetryLabel)
+            out Text telemetryLabel,
+            out Text buildLabel)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Main Menu", new Color(0.012f, 0.018f, 0.03f, 0.98f));
             var root = panel.gameObject;
@@ -1508,6 +1513,20 @@ namespace JabaSurvivol.Gameplay
 
             var controls = UiFactory.CreateText(root.transform, "Controls", Localization.Get("menu.controls"), 24, TextAnchor.MiddleCenter, new Color(0.55f, 0.62f, 0.72f));
             UiFactory.Place(controls.rectTransform, new Vector2(0.5f, 0.05f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300f, 36f));
+
+            buildLabel = UiFactory.CreateText(
+                root.transform,
+                "Build",
+                Localization.Format("menu.build", BuildInfo.Version, BuildInfo.Commit),
+                20,
+                TextAnchor.MiddleLeft,
+                new Color(0.45f, 0.52f, 0.62f));
+            UiFactory.Place(
+                buildLabel.rectTransform,
+                new Vector2(0f, 0f),
+                new Vector2(0f, 0f),
+                new Vector2(36f, 28f),
+                new Vector2(700f, 32f));
 
             return root;
         }

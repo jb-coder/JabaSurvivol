@@ -1,0 +1,8 @@
+adb install -r artifacts/android/JabaSurvivol-0.5.1-emulator.apk
+Success
+
+adb shell dumpsys package com.jabasurvivol.game
+versionCode=6 minSdk=26 targetSdk=36
+versionName=0.5.1
+
+Main menu label: v0.5.1 · <commit>
