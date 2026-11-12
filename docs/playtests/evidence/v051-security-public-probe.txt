@@ -47,16 +47,20 @@ GET http://[::1]:5247/api/v1/status
 
 | Check | Result |
 |---|---|
-| Mobile data, Tailscale off, `https://<public-ip>` | Pending |
-| Mobile data, Tailscale off, `https://<public-ip>:5247` | Pending |
-| Router port forwarding / Virtual Servers | Pending |
-| Router UPnP / DMZ | Pending |
-| Tailscale peer reaches BFF over HTTPS | Confirmed by the beta lead from a Tailscale peer; observed response `{"service":"bff","status":"ok","version":"v1"}` |
-| Tailscale peer reaches Identity, Game, Telemetry, PostgreSQL, dashboard, OTLP | Pending |
+| Mobile data or non-tailnet probe, public IPv4 on 443 and 5247 | Pass: external TCP checks from three nodes per port timed out or were refused; no beta service accepted a connection |
+| Public IPv4 on 5095, 5250, 50351, 15184, and 19183 | Pass: no connection accepted from external nodes |
+| Router port forwarding / Virtual Servers | Pending: router UI not inspected; external reachability is closed |
+| Router UPnP / DMZ | Pending: router UI not inspected; external reachability is closed |
+| Tailscale peer reaches BFF over HTTPS | Confirmed earlier by the beta lead; peer re-check pending because the Android device is not currently responding to Tailscale ping |
+| Tailscale peer reaches Identity, Game, Telemetry, PostgreSQL, dashboard, OTLP | Pending peer re-check; host bind audit shows loopback only |
+
+External evidence: `v051-security-public-probe-external.txt`.
 
 ## Verdict
 
 Host-side configuration passes: only the BFF is served through Tailscale on
 port 443, every recorded backend service is on loopback, and Funnel is off. The
-mobile-data public probe and router checks are still pending and must pass
-before testers connect.
+external public probe also passes: no listed port accepted a public connection.
+The Tailscale ACL is still allow-all, so least-privilege access is not yet
+configured. The peer re-check and the router UI confirmation remain open.
+
