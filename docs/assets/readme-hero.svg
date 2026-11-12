@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 520" role="img" aria-labelledby="heroTitle heroDescription">
+  <title id="heroTitle">JabaSurvivol</title>
+  <desc id="heroDescription">Neon survival banner: JabaSurvivol. Survive the night. Keep everything.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#03060d"/>
+      <stop offset="0.55" stop-color="#07111f"/>
+      <stop offset="1" stop-color="#0b1b2c"/>
+    </linearGradient>
+    <linearGradient id="titleFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.6" stop-color="#e0f7ff"/>
+      <stop offset="1" stop-color="#7dd3fc"/>
+    </linearGradient>
+    <linearGradient id="accentLine" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22d3ee" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#67e8f9"/>
+      <stop offset="1" stop-color="#22d3ee" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="centerGlow" cx="0.5" cy="0.38" r="0.55">
+      <stop offset="0" stop-color="#22d3ee" stop-opacity="0.22"/>
+      <stop offset="0.55" stop-color="#0ea5e9" stop-opacity="0.07"/>
+      <stop offset="1" stop-color="#020617" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#38bdf8" stroke-opacity="0.06"/>
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="520" fill="url(#background)"/>
+  <rect width="1600" height="520" fill="url(#grid)"/>
+  <rect width="1600" height="520" fill="url(#centerGlow)"/>
+
+  <g fill="none" stroke="#22d3ee" stroke-width="2">
+    <path d="M44 92V44H92" stroke-opacity="0.5"/>
+    <path d="M1556 92V44H1508" stroke-opacity="0.5"/>
+    <path d="M44 428V476H92" stroke-opacity="0.32"/>
+    <path d="M1556 428V476H1508" stroke-opacity="0.32"/>
+  </g>
+
+  <g fill="none" stroke="#22d3ee">
+    <circle cx="800" cy="244" r="132" stroke-opacity="0.09"/>
+    <circle cx="800" cy="244" r="182" stroke-opacity="0.06"/>
+    <circle cx="800" cy="244" r="232" stroke-opacity="0.035"/>
+    <path d="M800 6V34M800 454V482M562 244H590M1010 244H1038" stroke-opacity="0.18"/>
+    <path d="M640 84L660 104M940 384L960 404M960 84L940 104M660 384L640 404" stroke-opacity="0.1"/>
+  </g>
+
+  <text x="64" y="76" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" letter-spacing="4" fill="#67e8f9" fill-opacity="0.8">TACTICAL SURVIVAL // LOCAL BETA</text>
+  <text x="1536" y="76" text-anchor="end" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" letter-spacing="4" fill="#67e8f9" fill-opacity="0.8">ANDROID + WINDOWS</text>
+
+  <text x="800" y="270" text-anchor="middle" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="118" font-weight="800" letter-spacing="8" fill="url(#titleFill)" filter="url(#neonGlow)">JABASURVIVOL</text>
+
+  <rect x="360" y="302" width="880" height="2" fill="url(#accentLine)"/>
+
+  <text x="800" y="352" text-anchor="middle" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="27" font-weight="600" letter-spacing="7" fill="#a5f3fc">SURVIVE THE NIGHT. KEEP EVERYTHING.</text>
+
+  <g font-family="Inter, Segoe UI, Arial, sans-serif" text-anchor="middle">
+    <text x="560" y="426" font-size="30" font-weight="800" fill="#f8fafc">10</text>
+    <text x="560" y="450" font-size="13" font-weight="600" letter-spacing="3" fill="#67e8f9">ROUNDS</text>
+    <text x="760" y="426" font-size="30" font-weight="800" fill="#f8fafc">5</text>
+    <text x="760" y="450" font-size="13" font-weight="600" letter-spacing="3" fill="#67e8f9">WEAPONS</text>
+    <text x="960" y="426" font-size="30" font-weight="800" fill="#f8fafc">3 + 1</text>
+    <text x="960" y="450" font-size="13" font-weight="600" letter-spacing="3" fill="#67e8f9">ENEMIES + BOSS</text>
+    <text x="1160" y="426" font-size="30" font-weight="800" fill="#f8fafc">35</text>
+    <text x="1160" y="450" font-size="13" font-weight="600" letter-spacing="3" fill="#67e8f9">SKILL POINTS</text>
+  </g>
+
+  <g stroke="#22d3ee" stroke-opacity="0.28">
+    <path d="M660 414V452M860 414V452M1060 414V452"/>
+  </g>
+
+  <text x="800" y="492" text-anchor="middle" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" letter-spacing="5" fill="#7dd3fc" fill-opacity="0.75">PERSISTENT PROGRESSION // NO WIPE ON DEATH</text>
+</svg>
