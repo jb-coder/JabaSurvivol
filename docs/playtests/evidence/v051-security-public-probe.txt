@@ -1,0 +1,62 @@
+# Local beta public reachability probe
+
+- Date: 2026-11-11
+- Issue: #108
+- Host: development PC
+- Tailscale address: `<redacted>`
+- Public IPv4: `<redacted>` (documentation range `203.0.113.x`)
+
+## Host-side checks
+
+`tailscale serve status`:
+
+```text
+https://<host>.<tailnet>.ts.net (tailnet only)
+|-- / proxy http://127.0.0.1:5247
+```
+
+`tailscale funnel status`: `(tailnet only)`, no public funnel.
+
+Listeners for the beta services:
+
+| Service | Address | Port | Exposure |
+|---|---|---|---|
+| Tailscale serve | Tailscale address only | 443 | Tailnet only |
+| BFF | `::1` and `127.0.0.1` | 5247 | Loopback |
+| Identity.Api | `::1` | 5095 | Loopback |
+| Game.Api | `::1` | 5250 | Loopback |
+| Telemetry.Worker | `::1` | 5000 | Loopback |
+| PostgreSQL | `127.0.0.1` | 50351 | Loopback |
+| Aspire dashboard | `::1` | 15184 | Loopback |
+| OTLP | `::1` | 19183 | Loopback |
+
+The HTTPS development profiles (`7228`, `7299`, `7251`) are not listening in
+this session. No beta service listens on `0.0.0.0` or `::`.
+
+BFF verification:
+
+```text
+GET http://127.0.0.1:5247/api/v1/status
+{"service":"bff","status":"ok","version":"v1"}
+
+GET http://[::1]:5247/api/v1/status
+{"service":"bff","status":"ok","version":"v1"}
+```
+
+## External checks
+
+| Check | Result |
+|---|---|
+| Mobile data, Tailscale off, `https://<public-ip>` | Pending |
+| Mobile data, Tailscale off, `https://<public-ip>:5247` | Pending |
+| Router port forwarding / Virtual Servers | Pending |
+| Router UPnP / DMZ | Pending |
+| Tailscale peer reaches BFF over HTTPS | Confirmed by the beta lead from a Tailscale peer; observed response `{"service":"bff","status":"ok","version":"v1"}` |
+| Tailscale peer reaches Identity, Game, Telemetry, PostgreSQL, dashboard, OTLP | Pending |
+
+## Verdict
+
+Host-side configuration passes: only the BFF is served through Tailscale on
+port 443, every recorded backend service is on loopback, and Funnel is off. The
+mobile-data public probe and router checks are still pending and must pass
+before testers connect.
