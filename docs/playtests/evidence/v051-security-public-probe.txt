@@ -1,0 +1,56 @@
+# Local beta public reachability probe
+
+- Date: 2026-11-11
+- Issue: #108
+- Host: development PC
+- Tailscale address: `100.x.x.x` (redacted)
+- Public IPv4: `212.225.225.x` (redacted)
+
+## Host-side checks
+
+`tailscale serve status`:
+
+```text
+https://<host>.<tailnet>.ts.net (tailnet only)
+|-- / proxy http://127.0.0.1:5247
+```
+
+`tailscale funnel status`: `(tailnet only)`, no public funnel.
+
+Listeners for the beta ports:
+
+| Service | Address | Port | Exposure |
+|---|---|---|---|
+| Tailscale serve | Tailscale IP only | 443 | Tailnet only |
+| BFF | `::1` | 5247 | Loopback |
+| Identity.Api | `::1` | 5095 | Loopback |
+| Game.Api | `::1` | 5250 | Loopback |
+| Aspire dashboard | `::1` | 15184 | Loopback |
+| OTLP | `::1` | 19183 | Loopback |
+
+No beta service listens on `0.0.0.0` or `::`.
+
+BFF verification:
+
+```text
+GET http://127.0.0.1:5247/api/v1/status
+{"service":"bff","status":"ok","version":"v1"}
+```
+
+## External checks
+
+| Check | Result |
+|---|---|
+| Mobile data, Tailscale off, `https://<public-ip>` | Pending |
+| Mobile data, Tailscale off, `https://<public-ip>:5247` | Pending |
+| Router port forwarding / Virtual Servers | Pending |
+| Router UPnP / DMZ | Pending |
+| Tailscale peer reaches BFF over HTTPS | Confirmed |
+| Tailscale peer reaches Identity, Game, PostgreSQL, dashboard, OTLP | Pending |
+
+## Verdict
+
+Host-side configuration passes: only the BFF is served through Tailscale on
+port 443, every backend service is on loopback, and Funnel is off. The
+mobile-data public probe and router checks are still pending and must pass
+before testers connect.
