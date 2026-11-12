@@ -1,5 +1,9 @@
 # Deployment Runbook
 
+> Historical Oracle/k3s runbook. The beta runs locally over Tailscale, and the
+> eventual hosting target is a VPS at final handoff. No deployment is performed
+> during v0.5.1. See ADR-0008.
+
 ## Prerequisites
 
 - Oracle Always Free A1 VM (2 OCPU, 12 GB) with Ubuntu 24.04 ARM64.

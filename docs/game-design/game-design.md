@@ -173,7 +173,6 @@ Everything else persists:
 - Open world.
 - Procedural narrative.
 - Loot boxes.
-- Pay-to-win.
 - In-game purchases, premium currency, or pay-to-win. Optional donations are
   allowed and grant no rewards.
 - Localization before the final phase.

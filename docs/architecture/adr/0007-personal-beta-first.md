@@ -2,8 +2,8 @@
 
 ## Status
 
-Accepted. Partially superseded by ADR-0008 for VPS timing, v1.0.0 scope, and
-donation policy.
+Accepted. Partially superseded by ADR-0008 for VPS timing, Oracle scope,
+v1.0.0 scope, and donation policy.
 
 ## Context
 
@@ -53,6 +53,9 @@ the initial candidates. The chosen architecture must account for x86 versus
 ARM64 images, backups, TLS, least-privilege access, and monitoring.
 
 ### 4. Park Oracle-specific provisioning
+
+Superseded by ADR-0008: Oracle is out of scope and #81 is closed. The eventual
+hosting target is a VPS, provisioned only at the final handoff.
 
 Issue #81 is removed from the v0.5.0 milestone and remains a future,
 human-dependent infrastructure task. The project does not wait for Oracle

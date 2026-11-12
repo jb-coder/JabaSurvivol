@@ -27,8 +27,9 @@ want to support the initial phase.
 ### 2. VPS is a final handoff step
 
 - The eventual hosting target is a VPS.
-- No VPS is contracted, provisioned, or deployed before the local beta exit
-  criteria are met.
+- No VPS is contracted, provisioned, or deployed during v0.5.1. The handoff
+  starts after the local beta exit criteria are met and before any wider beta or
+  release.
 - Provider, region, size, architecture, orchestration, domain, TLS, backups,
   observability, and budget are decided at handoff.
 - No paid resource is created before that decision.
@@ -62,8 +63,9 @@ want to support the initial phase.
 
 ## Consequences
 
-- AGENTS.md, security standards, game design documents, and the v1.0.0
-  milestone are updated.
+- AGENTS.md, security standards, game design documents, and the repository
+  milestone table are updated to match this ADR. The GitHub milestone is
+  updated after merge.
 - #81 closes as out of scope.
 - No VPS issue or paid resource is created now.
 - The donation link is a small later task, not a payment system.

@@ -74,7 +74,7 @@ Identity     Game   Telemetry worker
 - `tests`: unit, architecture, integration, and smoke tests.
 - `unity/JabaSurvivol`: Unity project. Do not hand-edit generated project files.
 - `deploy`: Kubernetes, observability, encrypted secrets, scripts.
-- `infra`: Oracle bootstrap and infrastructure scripts.
+- `infra`: infrastructure scripts and historical Oracle notes.
 - `docs`: standards, ADRs, game design, setup, playtests, releases.
 - `.opencode`: persistent agents, commands, and skills.
 - `.github`: workflows, templates, and automation.

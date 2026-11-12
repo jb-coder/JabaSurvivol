@@ -18,7 +18,9 @@ Never remove on death:
 - Allocated skills.
 - Weapon unlocks and upgrades.
 - Armor unlocks.
-- Premium currency.
+
+Donations are not progression and grant no resources. Premium currency is
+deferred (ADR-0008).
 
 ## Currencies and progression
 
@@ -27,7 +29,8 @@ Never remove on death:
 | Supplies | Kills, headshots, rounds, elites, boss | Weapons, upgrades, armor | No |
 | XP | Kills, rounds, challenges, boss | Character levels | No |
 | Skill points | Character levels | Skill tree | No |
-| Cores | Real money, battle pass, events | Cosmetics, battle pass, slots | No |
+
+Cores are not implemented. Optional donations grant no resources.
 
 ## Character progression
 
@@ -69,13 +72,14 @@ After each round, offer one of three:
 
 Ammo and armor repairs must not consume persistent currency.
 
-## Premium currency
+## Donations and deferred premium currency
 
-- Implemented last.
-- Cosmetic-only unless a future ADR changes it.
-- Server-authoritative wallet.
-- No loot boxes or randomized paid rewards.
-- No pay-to-win.
+- An optional PayPal donation link may be shown.
+- Donations grant no Supplies, XP, Cores, items, cosmetics, content, or
+  advantage.
+- Cores, the cosmetic store, battle pass, and payments are deferred.
+- When introduced, premium currency must be cosmetic-only, server-authoritative,
+  and free of loot boxes, randomized paid rewards, and pay-to-win (ADR-0008).
 
 ## Testing
 

@@ -16,7 +16,7 @@ Agents own the full development loop: plan, implement, test, review, merge, buil
 | `tester` | subagent | Unit, PlayMode, integration, simulations |
 | `pr-reviewer` | subagent | Independent review and veto |
 | `security` | subagent | Security, secrets, payments, supply chain |
-| `devops` | subagent | CI/CD, Oracle, releases, observability |
+| `devops` | subagent | CI/CD, VPS handoff, releases, observability |
 | `verifier` | subagent | Acceptance, builds, smoke tests |
 
 ## Separation of duties

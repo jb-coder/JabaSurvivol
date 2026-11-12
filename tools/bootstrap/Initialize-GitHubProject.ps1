@@ -118,9 +118,10 @@ $milestones = @(
     @{ Title = "v0.2.0 Rounds and Economy"; Due = "2026-12-07T23:59:59Z"; Description = "Round system, rewards, XP, character levels, persistent supplies." },
     @{ Title = "v0.3.0 Armory and Skills"; Due = "2026-12-21T23:59:59Z"; Description = "Weapons, armor, upgrades, passive skills, respec." },
     @{ Title = "v0.4.0 Content and Boss"; Due = "2027-01-04T23:59:59Z"; Description = "Additional enemies, boss, active skills, synergies, balance." },
-    @{ Title = "v0.5.0 Backend and Cloud"; Due = "2027-01-18T23:59:59Z"; Description = "Cloud saves, leaderboards, telemetry, remote config, Oracle deployment." },
+    @{ Title = "v0.5.0 Backend and Cloud"; Due = "2027-01-18T23:59:59Z"; Description = "Cloud saves, leaderboards, telemetry, remote config, and backend deployment automation." },
+    @{ Title = "v0.5.1 Polish and Local Beta"; Due = "2026-12-14T23:59:59Z"; Description = "Polish the single-player experience, validate the online flow with five local testers over Tailscale, and defer paid VPS and monetization work." },
     @{ Title = "v0.6.0 Localization"; Due = "2027-02-01T23:59:59Z"; Description = "English plus additional locales, store metadata, layout tests." },
-    @{ Title = "v1.0.0 Monetization and Release"; Due = "2027-02-15T23:59:59Z"; Description = "Premium currency, cosmetic store, payments sandbox, release." }
+    @{ Title = "v1.0.0 Release and Donations"; Due = "2027-02-15T23:59:59Z"; Description = "Free release readiness, optional PayPal donation link, and final release. No premium currency, cosmetic store, payments sandbox, or in-game purchases." }
 )
 
 $existingMilestones = Invoke-GhJson @("api", "repos/$Repository/milestones")
