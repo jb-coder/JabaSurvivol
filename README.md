@@ -39,6 +39,7 @@ Fight through ten escalating rounds, build a survivor across runs, and keep ever
 - [Quality gates](#quality-gates)
 - [Quick start](#quick-start)
 - [Roadmap](#roadmap)
+- [Principles](#principles)
 - [Documentation](#documentation)
 - [License](#license)
 
@@ -72,8 +73,8 @@ The design is deliberately focused:
 | **Nine-node skill tree** | Strength, Agility, and Survival branches, five ranks per node, free respec between runs. |
 | **Three active skills** | Turret, Dash, and Shockwave, selected from the armory or character sheet. |
 | **Three synergies** | Berserker, Ghost, and Bastion unlock from allocated ranks and add build-defining effects. |
-| **Elite rounds** | Every fifth round buffs enemies and doubles supplies and XP. |
-| **Boss encounter** | The Warden arrives after round 10 is cleared, telegraphs a slam, and enrages below half health. |
+| **Elite rounds** | Round 5 buffs enemies and doubles supplies and XP; round 10 is the boss round. |
+| **Boss encounter** | The Warden spawns after the regular round-10 enemies are cleared; the round does not end until the boss dies. The slam is telegraphed, and the boss enrages below half health. |
 | **Persistent profile** | Supplies, XP, levels, skill points, unlocks, upgrades, records, and settings survive death. |
 | **Touch-first controls** | Landscape twin-stick movement and aiming, with reload, weapon switch, active skill, and pause. |
 | **Optional online layer** | Accounts, revision-safe cloud saves, highest-round leaderboard, remote config, and opt-in telemetry. |
@@ -88,10 +89,11 @@ flowchart LR
     C --> D["Pick 1 of 3 rewards"]
     D --> E["Upgrade weapons and armor"]
     E --> F["Allocate skill points"]
-    F --> G{"Round 10 cleared?"}
+    F --> G{"Round 10?"}
     G -- "No" --> B
-    G -- "Yes" --> H["Defeat The Warden"]
-    H --> I["Victory screen"]
+    G -- "Yes" --> H["Clear regular enemies"]
+    H --> I["Defeat The Warden"]
+    I --> J["Victory screen"]
 ```
 
 Each round is deterministic from the run seed and round number, so enemy composition and reward choices are reproducible without removing the tension of the fight.
@@ -208,7 +210,7 @@ flowchart LR
     end
     subgraph Services["Backend modules"]
         Identity["Identity API<br/>accounts and tokens"]
-        GameApi["Game API<br/>cloud saves and leaderboard"]
+        GameApi["Game API<br/>cloud saves, leaderboards,<br/>telemetry ingestion"]
         Worker["Telemetry worker<br/>aggregation and retention"]
     end
     DB[("PostgreSQL")]
@@ -217,7 +219,6 @@ flowchart LR
     Game -->|"HTTPS /api/v1"| BFF
     BFF --> Identity
     BFF --> GameApi
-    BFF --> Worker
     Identity --> DB
     GameApi --> DB
     Worker --> DB
@@ -234,7 +235,7 @@ The backend is a modular monolith. Services are extracted only when a concrete n
 - **`Game.Core` is pure C#.** It owns combat rules, economy, skills, stats, balance, and deterministic spawn composition. It does not reference `UnityEngine`.
 - **Unity presents; the core decides.** The client renders, captures touch input, and applies rules from the shared core package.
 - **Local play works offline.** Cloud saves are backups with explicit revision conflicts, not a hard dependency for the core loop.
-- **Online data is server-authoritative.** Identity, cloud saves, and leaderboards live behind the BFF.
+- **Online data is server-authoritative.** Identity, cloud saves, leaderboards, and telemetry ingestion live behind the BFF.
 - **Tokens stay short-lived.** Access tokens live in memory; refresh tokens use platform encryption and never touch `PlayerPrefs`.
 - **Migrations are additive.** Save and database schemas are versioned and backward-compatible.
 
