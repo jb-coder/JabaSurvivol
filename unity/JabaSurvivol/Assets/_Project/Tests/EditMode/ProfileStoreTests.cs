@@ -197,7 +197,7 @@ namespace JabaSurvivol.Tests.EditMode
 
             Assert.That(loaded.Supplies, Is.EqualTo(111));
             Assert.That(File.Exists(_path), Is.True);
-            Assert.That(File.ReadAllText(_path), Does.Contain("\"Supplies\": 111"));
+            Assert.That(File.ReadAllText(_path), Does.Contain("\"Supplies\":111"));
             Assert.That(File.Exists(_path + ".corrupt"), Is.True);
         }
 
@@ -213,7 +213,7 @@ namespace JabaSurvivol.Tests.EditMode
 
             Assert.That(loaded.Supplies, Is.EqualTo(111));
             Assert.That(File.Exists(_path), Is.True);
-            Assert.That(File.ReadAllText(_path), Does.Contain("\"Supplies\": 111"));
+            Assert.That(File.ReadAllText(_path), Does.Contain("\"Supplies\":111"));
         }
 
         [Test]
@@ -227,7 +227,7 @@ namespace JabaSurvivol.Tests.EditMode
             var loaded = store.Load();
 
             Assert.That(loaded.Supplies, Is.EqualTo(111));
-            Assert.That(File.ReadAllText(_path), Does.Contain("\"Supplies\": 111"));
+            Assert.That(File.ReadAllText(_path), Does.Contain("\"Supplies\":111"));
             Assert.That(File.Exists(_path + ".corrupt"), Is.True);
         }
 
@@ -242,7 +242,7 @@ namespace JabaSurvivol.Tests.EditMode
             var loaded = store.Load();
 
             Assert.That(loaded.Supplies, Is.EqualTo(111));
-            Assert.That(File.ReadAllText(_path), Does.Contain("\"Supplies\": 111"));
+            Assert.That(File.ReadAllText(_path), Does.Contain("\"Supplies\":111"));
             Assert.That(File.Exists(_path + ".corrupt"), Is.True);
         }
     }

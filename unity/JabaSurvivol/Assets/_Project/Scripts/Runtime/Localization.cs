@@ -215,6 +215,46 @@ namespace JabaSurvivol.Gameplay
             return string.Format(CultureInfo.InvariantCulture, Get(key), arguments);
         }
 
+        public static string Format(string key, int arg0)
+        {
+            return string.Format(CultureInfo.InvariantCulture, Get(key), arg0);
+        }
+
+        public static string Format(string key, int arg0, int arg1)
+        {
+            return string.Format(CultureInfo.InvariantCulture, Get(key), arg0, arg1);
+        }
+
+        public static string Format(string key, int arg0, int arg1, int arg2)
+        {
+            return string.Format(CultureInfo.InvariantCulture, Get(key), arg0, arg1, arg2);
+        }
+
+        public static string Format(string key, int arg0, int arg1, int arg2, int arg3)
+        {
+            return string.Format(CultureInfo.InvariantCulture, Get(key), arg0, arg1, arg2, arg3);
+        }
+
+        public static string Format(string key, string arg0)
+        {
+            return string.Format(CultureInfo.InvariantCulture, Get(key), arg0);
+        }
+
+        public static string Format(string key, string arg0, string arg1)
+        {
+            return string.Format(CultureInfo.InvariantCulture, Get(key), arg0, arg1);
+        }
+
+        public static string Format(string key, string arg0, int arg1)
+        {
+            return string.Format(CultureInfo.InvariantCulture, Get(key), arg0, arg1);
+        }
+
+        public static string Format(string key, int arg0, int arg1, string arg2)
+        {
+            return string.Format(CultureInfo.InvariantCulture, Get(key), arg0, arg1, arg2);
+        }
+
         public static string WeaponNameKey(WeaponId weaponId)
         {
             return weaponId switch

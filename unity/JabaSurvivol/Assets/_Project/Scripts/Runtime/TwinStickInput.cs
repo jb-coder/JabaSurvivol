@@ -141,6 +141,9 @@ namespace JabaSurvivol.Gameplay
 
         private void UpdateTouches()
         {
+            var moveActive = false;
+            var aimActive = false;
+
             foreach (var touch in Touch.activeTouches)
             {
                 var finger = touch.finger.index;
@@ -152,16 +155,23 @@ namespace JabaSurvivol.Gameplay
                         _moveFinger = finger;
                         _moveOrigin = touch.screenPosition;
                         _moveCurrent = touch.screenPosition;
+                        moveActive = true;
+                        continue;
                     }
-                    else if (_aimFinger < 0)
+
+                    if (_aimFinger < 0)
                     {
                         _aimFinger = finger;
                         _aimOrigin = touch.screenPosition;
                         _aimCurrent = touch.screenPosition;
+                        aimActive = true;
+                        continue;
                     }
                 }
-                else if (finger == _moveFinger)
+
+                if (finger == _moveFinger)
                 {
+                    moveActive = true;
                     if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
                     {
                         _moveFinger = -1;
@@ -173,6 +183,7 @@ namespace JabaSurvivol.Gameplay
                 }
                 else if (finger == _aimFinger)
                 {
+                    aimActive = true;
                     if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
                     {
                         _aimFinger = -1;
@@ -184,28 +195,15 @@ namespace JabaSurvivol.Gameplay
                 }
             }
 
-            if (_moveFinger >= 0 && !FingerIsActive(_moveFinger))
+            if (_moveFinger >= 0 && !moveActive)
             {
                 _moveFinger = -1;
             }
 
-            if (_aimFinger >= 0 && !FingerIsActive(_aimFinger))
+            if (_aimFinger >= 0 && !aimActive)
             {
                 _aimFinger = -1;
             }
-        }
-
-        private static bool FingerIsActive(int finger)
-        {
-            foreach (var touch in Touch.activeTouches)
-            {
-                if (touch.finger.index == finger && touch.phase != TouchPhase.Ended && touch.phase != TouchPhase.Canceled)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }
