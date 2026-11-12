@@ -381,6 +381,30 @@ public sealed class BalanceSimulationTests
     }
 
     [Fact]
+    public void Weapon_scenarios_cover_every_weapon_without_replacing_the_equipped_weapon()
+    {
+        var scenarios = BalanceSimulation.RunWeaponScenarios();
+
+        Assert.Equal(WeaponCatalog.All.Count, scenarios.Count);
+        foreach (var scenario in scenarios)
+        {
+            Assert.Equal(GameBalance.MaxRound, scenario.Report.Rounds.Count);
+            Assert.All(
+                scenario.Report.Rounds,
+                round => Assert.Equal(scenario.Weapon, round.Build.Weapon));
+        }
+    }
+
+    [Fact]
+    public void Weapon_scenarios_keep_the_rifle_progression_clean()
+    {
+        var rifle = BalanceSimulation.RunWeaponScenarios()
+            .Single(scenario => scenario.Weapon == WeaponId.Rifle);
+
+        Assert.Empty(rifle.Report.Outliers);
+    }
+
+    [Fact]
     public void Run_rejects_invalid_options()
     {
         Assert.Throws<ArgumentOutOfRangeException>(

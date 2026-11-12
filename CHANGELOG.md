@@ -9,6 +9,7 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 ### Changed
 
 - Documented the accepted residual risk for the short, trusted Tailscale beta and closed the security audit with that exception.
+- Added weapon scenario coverage to the balance simulation and documented the rejected round 4 brute cap; no gameplay numbers changed.
 
 ### Fixed
 
