@@ -75,7 +75,7 @@ jobs:
           tags: jabasurvivol/${{ matrix.name }}:${{ github.sha }}
 
       - name: Scan ${{ matrix.name }}
-        uses: aquasecurity/trivy-action@v0.33.1
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: jabasurvivol/${{ matrix.name }}:${{ github.sha }}
           format: table
