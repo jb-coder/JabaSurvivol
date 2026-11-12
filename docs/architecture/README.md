@@ -18,11 +18,18 @@ Current target:
 Unity Android/Windows client
             |
             v
-   BFF / API gateway
-    /       |        \
-Identity   Game   Telemetry worker
-    \       |        /
-     PostgreSQL / RabbitMQ
+      BFF / API gateway
+       /             \
+ Identity API      Game API
+       \             /
+        PostgreSQL
+             ^
+             |
+     Telemetry worker
 ```
+
+Telemetry events enter through the Game API. The telemetry worker aggregates
+daily totals from PostgreSQL. PostgreSQL is the durable boundary; RabbitMQ is
+deferred until a documented need appears.
 
 Start with a modular backend. Extract services only when a documented need appears.
