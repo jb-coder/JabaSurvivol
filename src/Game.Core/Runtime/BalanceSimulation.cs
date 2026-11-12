@@ -386,6 +386,24 @@ namespace JabaSurvivol.Core
     }
 
     /// <summary>
+    /// Full-run result for one preferred weapon with every weapon unlocked.
+    /// The scenario isolates weapon pacing, ammo pressure, and progression
+    /// without changing the default rifle-first report.
+    /// </summary>
+    public sealed class WeaponScenario
+    {
+        public WeaponScenario(WeaponId weapon, BalanceSimulationReport report)
+        {
+            Weapon = weapon;
+            Report = report;
+        }
+
+        public WeaponId Weapon { get; }
+
+        public BalanceSimulationReport Report { get; }
+    }
+
+    /// <summary>
     /// Headless v0.4.0 simulation. It uses the same weapon, upgrade, armor, and
     /// skill rules as the game and never references Unity.
     /// </summary>
@@ -684,6 +702,34 @@ namespace JabaSurvivol.Core
                 outliers.ToArray(),
                 totalSuppliesEarned,
                 suppliesSpent);
+        }
+
+        /// <summary>
+        /// Runs one full progression scenario per weapon with every weapon
+        /// unlocked so the equipped weapon is never replaced by the default
+        /// rifle-first strategy.
+        /// </summary>
+        public static IReadOnlyList<WeaponScenario> RunWeaponScenarios(int seed = 20261106)
+        {
+            var scenarios = new List<WeaponScenario>(WeaponCatalog.All.Count);
+            foreach (var definition in WeaponCatalog.All)
+            {
+                var profile = new Profile();
+                foreach (var weapon in WeaponCatalog.All)
+                {
+                    profile.UnlockWeapon(weapon.Id);
+                }
+
+                profile.EquipWeapon(definition.Id);
+                var report = Run(new BalanceSimulationOptions
+                {
+                    Seed = seed,
+                    StartingProfile = profile
+                });
+                scenarios.Add(new WeaponScenario(definition.Id, report));
+            }
+
+            return scenarios;
         }
 
         private static float Uptime(int rank, float duration, float cooldown)

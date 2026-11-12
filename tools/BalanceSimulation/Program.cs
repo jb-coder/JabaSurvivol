@@ -90,9 +90,63 @@ Directory.CreateDirectory(outputDirectory);
 var outputPath = Path.Combine(outputDirectory, "rounds.md");
 File.WriteAllText(outputPath, builder.ToString());
 
+var scenarios = BalanceSimulation.RunWeaponScenarios();
+var scenarioBuilder = new StringBuilder();
+scenarioBuilder.AppendLine("# JabaSurvivol weapon scenarios");
+scenarioBuilder.AppendLine();
+scenarioBuilder.AppendLine("Every weapon unlocked and equipped at level 1; the default rifle-first strategy does not replace it.");
+scenarioBuilder.AppendLine();
+scenarioBuilder.AppendLine("| Weapon | Run s | Supplies earned | Supplies remaining | Final level | Boss TTK s | Max ammo pressure | Outliers |");
+scenarioBuilder.AppendLine("|---|---:|---:|---:|---:|---:|---:|---:|");
+
+foreach (var scenario in scenarios)
+{
+    var scenarioReport = scenario.Report;
+    var totalSeconds = 0f;
+    var maxPressure = 0f;
+    foreach (var round in scenarioReport.Rounds)
+    {
+        totalSeconds += round.RoundSeconds;
+        maxPressure = Math.Max(maxPressure, round.Ammo.Pressure);
+    }
+
+    var bossSeconds = scenarioReport.Rounds.Count == 0 ? 0f : scenarioReport.Rounds[^1].Content.BossSeconds;
+    scenarioBuilder.AppendLine(
+        $"| {scenario.Weapon} | {Format(totalSeconds)} | {scenarioReport.TotalSuppliesEarned} | " +
+        $"{scenarioReport.TotalSupplies} | {scenarioReport.FinalLevel} | {Format(bossSeconds)} | " +
+        $"{Format(maxPressure)} | {scenarioReport.Outliers.Count} |");
+}
+
+scenarioBuilder.AppendLine();
+scenarioBuilder.AppendLine("## Scenario outliers");
+scenarioBuilder.AppendLine();
+
+foreach (var scenario in scenarios)
+{
+    scenarioBuilder.AppendLine($"### {scenario.Weapon}");
+    scenarioBuilder.AppendLine();
+    if (scenario.Report.HasOutliers)
+    {
+        foreach (var outlier in scenario.Report.Outliers)
+        {
+            scenarioBuilder.AppendLine($"- {outlier}");
+        }
+    }
+    else
+    {
+        scenarioBuilder.AppendLine("No outliers detected.");
+    }
+
+    scenarioBuilder.AppendLine();
+}
+
+var scenarioPath = Path.Combine(outputDirectory, "weapons.md");
+File.WriteAllText(scenarioPath, scenarioBuilder.ToString());
+
 Console.Write(builder.ToString());
 Console.WriteLine();
 Console.WriteLine($"Report written to {outputPath}.");
+Console.WriteLine($"Weapon scenarios written to {scenarioPath}.");
 
 static string UnlockSummary(BuildSnapshot build)
 {
