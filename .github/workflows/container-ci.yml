@@ -59,10 +59,10 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
 
       - name: Set up Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build ${{ matrix.name }}
         uses: docker/build-push-action@v7
@@ -75,7 +75,7 @@ jobs:
           tags: jabasurvivol/${{ matrix.name }}:${{ github.sha }}
 
       - name: Scan ${{ matrix.name }}
-        uses: aquasecurity/trivy-action@v0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: jabasurvivol/${{ matrix.name }}:${{ github.sha }}
           format: table
