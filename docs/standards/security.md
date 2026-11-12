@@ -24,9 +24,16 @@
 - Version public contracts under `/api/v1`.
 - Expose only the BFF through ingress.
 
-## Payments
+## Payments and donations
 
-- Implement payments last.
+Current phase: payments, premium currency, in-game purchases, and the cosmetic
+store are deferred (ADR-0008). Only an optional PayPal donation link is allowed.
+It opens an external page, grants no currency, items, cosmetics, or content, and
+must be clearly labeled as a donation rather than a purchase.
+
+When payments are reintroduced:
+
+- Implement payments only after a later ADR explicitly reintroduces them.
 - Validate receipts server-side.
 - Use idempotency keys for purchase grants.
 - Handle refunds and chargebacks.

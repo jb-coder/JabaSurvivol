@@ -20,9 +20,10 @@ JabaSurvivol is a 2D top-down, round-based zombie survival game for Android phon
 - All progression is persistent. Death only resets the current run: health, round, position, and enemies.
 - Never remove Supplies, XP, character level, skill points, allocated skills, weapon unlocks, weapon upgrades, or armor unlocks on death.
 - Ammo and armor repairs are free or drop-based. Do not consume persistent currency on consumables.
-- Premium currency (Cores) is implemented last and is cosmetic-only unless a future ADR explicitly changes this.
+- Premium currency, in-game purchases, and payments are deferred. The initial phase may show an optional PayPal donation link with no rewards or entitlements (ADR-0008).
+- Donations are voluntary, outside the game economy, and never unlock content.
 - No loot boxes, randomized paid rewards, or pay-to-win mechanics.
-- Localization is the final phase before monetization. English is the only locale until then.
+- Localization is the final phase before release readiness. English is the only locale until then.
 
 ## Language policy
 
@@ -58,9 +59,9 @@ Identity     Game   Telemetry worker
 - `Game.Core` is pure C# in `src/Game.Core` and must not reference `UnityEngine`.
 - Unity consumes the same game rules through the local UPM package in `unity/JabaSurvivol/Packages/com.jabasurvivol.core` once the Unity project exists.
 - Backend starts as a modular monolith (`Game.Api`) with modules for identity, game, and telemetry. Extract services only when a concrete need is documented in an ADR.
-- The target deployment is Oracle Always Free plus k3s, with a 2 OCPU / 12 GB budget. Do not assume 4 OCPU / 24 GB.
+- The v0.5.1 beta runs locally over Tailscale. The eventual deployment target is a VPS, provisioned only at the final handoff; Oracle is out of scope.
 - The BFF is introduced when there is more than one service or a clear aggregation/authentication need.
-- Payments are implemented last. Premium wallet state is server-authoritative.
+- Payments and premium currency are deferred. Only an optional PayPal donation link is allowed, and it grants no in-game value (ADR-0008).
 
 ## Repository map
 
@@ -221,6 +222,7 @@ A task is done only when:
 - `docs/agents/autonomy-policy.md`
 - `docs/agents/review-checklist.md`
 - `docs/agents/kill-switch.md`
+- `docs/architecture/adr/0008-local-first-beta-with-donations.md`
 - `docs/game-design/game-design.md`
 - `docs/game-design/economy.md`
 - `docs/game-design/skills.md`

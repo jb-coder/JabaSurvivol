@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted.
+Accepted. Partially superseded by ADR-0008 for VPS timing, v1.0.0 scope, and
+donation policy.
 
 ## Context
 
