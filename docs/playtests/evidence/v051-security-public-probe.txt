@@ -63,4 +63,3 @@ port 443, every recorded backend service is on loopback, and Funnel is off. The
 external public probe also passes: no listed port accepted a public connection.
 The Tailscale ACL is still allow-all, so least-privilege access is not yet
 configured. The peer re-check and the router UI confirmation remain open.
-
