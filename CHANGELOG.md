@@ -11,6 +11,7 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Documented the accepted residual risk for the short, trusted Tailscale beta and closed the security audit with that exception.
 - Added weapon scenario coverage to the balance simulation and documented the rejected round 4 brute cap; no gameplay numbers changed.
 - Reduced Android hot-path work by throttling profile saves, using compact save JSON, skipping inactive telemetry payloads, and removing common HUD and touch allocations.
+- Closed the v0.5.1 local beta with owner-reported validation and recorded the five-tester and tablet evidence as reviewed exceptions.
 
 ### Fixed
 
