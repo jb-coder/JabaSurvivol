@@ -117,7 +117,7 @@ Weapon unlocks and upgrades are permanent. Ammunition is run-only: magazines, fi
 | **Walker** | Round 1 | Baseline health, speed, and contact damage | 10 supplies, 10 XP |
 | **Runner** | Round 2 | Faster and more fragile; punishes standing still | 15 supplies, 15 XP |
 | **Brute** | Round 4 | High health and contact damage, but slow | 30 supplies, 30 XP |
-| **Elite round** | Every fifth round | 1.50x health, 1.25x contact damage | 2.00x supplies and XP |
+| **Elite round** | Round 5 | 1.50x health, 1.25x contact damage | 2.00x supplies and XP |
 | **The Warden** | Round 10 | 2,400 health, telegraphed slam, enrage below 50% health | 1,000 supplies, 500 XP |
 
 The Warden does not appear until the regular round-10 enemies are cleared. The round stays active until the boss dies.
@@ -127,7 +127,7 @@ The Warden does not appear until the regular round-10 enemies are cleared. The r
 ### Levels and skill points
 
 - Level cap: **30**.
-- **35 skill points** in total: one per level, plus one extra at levels 5, 10, 15, 20, 25, and 30.
+- **35 skill points** in total: one per level-up, plus one extra at levels 5, 10, 15, 20, 25, and 30.
 - Nine nodes, five ranks each, across three branches.
 - Free respec between runs.
 - Allocation is available from the armory, pause menu, and round-end screen.
@@ -235,7 +235,7 @@ The backend is a modular monolith. Services are extracted only when a concrete n
 - **`Game.Core` is pure C#.** It owns combat rules, economy, skills, stats, balance, and deterministic spawn composition. It does not reference `UnityEngine`.
 - **Unity presents; the core decides.** The client renders, captures touch input, and applies rules from the shared core package.
 - **Local play works offline.** Cloud saves are backups with explicit revision conflicts, not a hard dependency for the core loop.
-- **Online data is server-authoritative.** Identity, cloud saves, leaderboards, and telemetry ingestion live behind the BFF.
+- **Online data is server-mediated.** Identity, cloud saves, leaderboards, and telemetry ingestion live behind the BFF. Cloud saves are backups validated for shape and size, and leaderboard runs are client-reported until server-side simulation is introduced.
 - **Tokens stay short-lived.** Access tokens live in memory; refresh tokens use platform encryption and never touch `PlayerPrefs`.
 - **Migrations are additive.** Save and database schemas are versioned and backward-compatible.
 
