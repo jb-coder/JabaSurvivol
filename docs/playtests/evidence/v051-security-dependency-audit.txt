@@ -49,8 +49,24 @@ The given project `BalanceSimulation` has no vulnerable packages given the curre
 - Recent pull requests passed `security` (CodeQL and dependency audit) and the
   container image jobs.
 
+## GitHub Actions
+
+Dependabot reported two open alerts for
+`aquasecurity/trivy-action@v0.33.1` used by the container CI workflow:
+
+- GHSA-9p44-j4g5-cfx5: command injection through a sourced environment file,
+  patched in `v0.34.0`.
+- Trivy ecosystem supply-chain compromise, fixed in `v0.35.0`.
+
+The workflow now pins `aquasecurity/trivy-action` to the `v0.36.0` commit
+`ed142fd0673e97e23eac54620cfb913e5ce36c25`. The container CI scan must run on
+the updated workflow and the two Dependabot alerts must close before #108
+sign-off.
+
 ## Result
 
-No open dependency vulnerability remains after the AppHost SDK upgrade. The
-AppHost is local development orchestration and is not part of the shipped
-backend images, but the upgrade removes the finding.
+No open NuGet dependency vulnerability remains after the AppHost SDK upgrade.
+The Trivy action finding is fixed by the `v0.36.0` pin and is pending a green
+container CI run and alert closure. The AppHost is local development
+orchestration and is not part of the shipped backend images, but the upgrade
+removes the finding.
