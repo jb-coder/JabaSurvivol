@@ -1,5 +1,9 @@
 # Oracle Always Free Setup
 
+> Historical. Oracle is out of scope (ADR-0008). The beta runs locally over
+> Tailscale, and the eventual hosting target is a VPS at final handoff. Do not
+> provision Oracle from this guide.
+
 ## Budget
 
 Plan for 2 OCPU and 12 GB RAM on the A1 allowance. Some tenancies or regions may show a larger allowance, but the project must fit the lower budget.

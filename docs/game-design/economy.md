@@ -7,8 +7,10 @@
 | Supplies | Kills, headshots, rounds, elites, boss, challenges | Weapons, weapon upgrades, armor | No |
 | XP | Kills, rounds, challenges, boss | Character levels | No |
 | Skill points | Character levels | Skill tree | No |
-| Cores | Real money, battle pass, events | Cosmetics, battle pass, slots | No |
 | Rounds reached | Survival | Nothing; it is a record | Not applicable |
+
+Cores are not implemented. Optional donations grant no resources, currency, or
+items.
 
 ## Income
 
@@ -142,14 +144,18 @@ are too easy or too hard, ammo starvation, runaway supplies, unreachable
 upgrades, unreachable synergies, cap violations, and builds that never unlock a
 weapon or weapon damage upgrade.
 
-## Premium currency
+## Donations (current phase)
 
-- Cores are implemented last.
-- Cosmetic-only by default.
-- Server-authoritative wallet.
-- No loot boxes.
-- No randomized paid rewards.
-- No pay-to-win.
+- An optional PayPal donation link may be shown outside the game.
+- Donations grant no Supplies, XP, Cores, items, cosmetics, content, or
+  advantage.
+- Donations are outside the game economy.
+
+## Premium currency (deferred)
+
+- Cores, the cosmetic store, the battle pass, and payments are deferred.
+- When introduced, they must be cosmetic-only, server-authoritative, and free
+  of loot boxes, randomized paid rewards, and pay-to-win mechanics (ADR-0008).
 
 ## Anti-inflation
 

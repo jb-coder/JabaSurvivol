@@ -17,7 +17,7 @@
 
 ## Final localization phase
 
-The localization phase happens immediately before monetization.
+The localization phase happens before release readiness.
 
 It includes:
 

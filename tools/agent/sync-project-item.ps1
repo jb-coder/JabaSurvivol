@@ -178,7 +178,7 @@ if ($milestoneTitle) {
         "v0.5.0*" { $phase = "Backend" }
         "v0.5.1*" { $phase = "Content" }
         "v0.6.0*" { $phase = "Localization" }
-        "v1.0.0*" { $phase = "Monetization" }
+        "v1.0.0*" { $phase = "Release" }
     }
 }
 

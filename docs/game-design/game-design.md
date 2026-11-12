@@ -152,6 +152,14 @@ Everything else persists:
 - Balance targets are defined in `BalanceTargets` and enforced by
   `BalanceSimulationTests`.
 
+## Donations
+
+- An optional PayPal donation link may be shown outside the game.
+- Donations grant no Cores, currency, items, cosmetics, content, priority, or
+  gameplay advantage.
+- Donations are outside the game economy and are not a purchase.
+- In-game purchases, premium currency, and the cosmetic store are deferred.
+
 ## Setting and art
 
 - Neon-lit urban survival.
@@ -165,6 +173,6 @@ Everything else persists:
 - Open world.
 - Procedural narrative.
 - Loot boxes.
-- Pay-to-win.
-- Real-money features before the monetization phase.
+- In-game purchases, premium currency, or pay-to-win. Optional donations are
+  allowed and grant no rewards.
 - Localization before the final phase.

@@ -18,8 +18,8 @@ supplies, game over, restart, and local persistent progression.
 - Level cap 30, 35 skill points, free respec between runs.
 - Persistent economy: supplies, XP, skill points, weapons, upgrades, and armor survive death.
 - Death resets only the current run.
-- Premium currency is cosmetic-only and implemented last.
-- Localization is implemented only in the final phase before monetization.
+- Payments and premium currency are deferred; an optional PayPal donation link may be shown with no rewards or entitlements.
+- Localization is implemented only in the final phase before release readiness.
 - English is the only repository and product language until localization.
 
 ## Architecture
@@ -46,7 +46,7 @@ src/              .NET 10 solution, services, shared core
 tests/            Unit, architecture, integration, smoke tests
 unity/            Unity project and local UPM packages
 deploy/           Kubernetes, observability, secrets, scripts
-infra/            Oracle and infrastructure bootstrap
+infra/            infrastructure bootstrap (historical Oracle scripts; see ADR-0008)
 docs/             Standards, ADRs, design, setup, playtests
 tools/            Agent, bootstrap, and build scripts
 ```
@@ -77,7 +77,7 @@ Unity setup instructions are in `docs/setup/unity.md`.
 - `docs/standards/`: English-only, commits, PRs, autonomy, security, localization.
 - `docs/game-design/`: core loop, economy, skills.
 - `docs/architecture/adr/`: architecture decisions.
-- `docs/setup/`: GitHub, GitHub Project, Unity, Oracle.
+- `docs/setup/`: GitHub, GitHub Project, Unity, deployment notes.
 - `docs/agents/`: autonomy policy, review checklist, incident runbook, kill switch.
 
 ## License
