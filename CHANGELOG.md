@@ -6,6 +6,10 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+### Changed
+
+- Documented the accepted residual risk for the short, trusted Tailscale beta and closed the security audit with that exception.
+
 ### Fixed
 
 - Pinned the container CI Trivy action to the `v0.36.0` commit to address GHSA-9p44-j4g5-cfx5 and the Trivy ecosystem supply-chain advisory.
