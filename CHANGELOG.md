@@ -6,6 +6,8 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-12
+
 ### Added
 
 - Username/password identity accounts with case-insensitive unique usernames, ASP.NET Core Identity password hashing, 15-minute JWT access tokens, and 30-day rotating refresh tokens stored as hashes.
