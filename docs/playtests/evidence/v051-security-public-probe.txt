@@ -51,7 +51,7 @@ GET http://[::1]:5247/api/v1/status
 | Mobile data, Tailscale off, `https://<public-ip>:5247` | Pending |
 | Router port forwarding / Virtual Servers | Pending |
 | Router UPnP / DMZ | Pending |
-| Tailscale peer reaches BFF over HTTPS | Confirmed by the beta lead in step 6; expected response `{"service":"bff","status":"ok","version":"v1"}` |
+| Tailscale peer reaches BFF over HTTPS | Confirmed by the beta lead from a Tailscale peer; observed response `{"service":"bff","status":"ok","version":"v1"}` |
 | Tailscale peer reaches Identity, Game, Telemetry, PostgreSQL, dashboard, OTLP | Pending |
 
 ## Verdict
