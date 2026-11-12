@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using JabaSurvivol.Core;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -26,6 +28,7 @@ namespace JabaSurvivol.Gameplay
         private IGameInput _input;
         private Transform _worldRoot;
         private GameUi _ui;
+        private GameAudio _audio;
         private GameObject _playerObject;
         private Transform _aimPivot;
         private ZombieActor _zombieActor;
@@ -64,6 +67,22 @@ namespace JabaSurvivol.Gameplay
         private float _levelUpRemaining;
         private bool _lastBerserkerActive;
         private bool _lastGhostActive;
+        private IAccountService _accountService;
+        private CancellationTokenSource _accountCancellation;
+        private ICloudSaveService _cloudSaveService;
+        private RemoteConfigClient _remoteConfigClient;
+        private bool _cloudSavesEnabled;
+        private bool _cloudConfigLoaded;
+        private Guid? _cloudAccountId;
+        private bool _leaderboardsEnabled;
+        private bool _telemetryEnabled;
+        private double _telemetrySampleRate;
+        private ILeaderboardService _leaderboardService;
+        private ITelemetryService _telemetryService;
+        private Guid _currentRunId;
+        private DateTime _runStartedAt;
+        private bool _runSubmitted;
+        private readonly SemaphoreSlim _cloudActionGate = new(1, 1);
 
         public Profile Profile => _profile;
 
@@ -132,6 +151,14 @@ namespace JabaSurvivol.Gameplay
         public bool LevelUpVisible => _ui != null && _ui.LevelUpVisible;
 
         public bool HudVisible => _ui != null && _ui.HudVisible;
+
+        public GameAudio AudioForTests => _audio;
+
+        public string SoundLabelForTests => _ui?.SoundLabelForTests ?? string.Empty;
+
+        public string BuildLabelForTests => _ui?.BuildLabelForTests ?? string.Empty;
+
+        public UnityEngine.UI.Button SoundButtonForTests => _ui?.SoundButtonForTests;
 
         public float LastBulletDamageForTests { get; private set; }
 
@@ -217,7 +244,14 @@ namespace JabaSurvivol.Gameplay
             _input = input ?? throw new ArgumentNullException(nameof(input));
         }
 
-        public void Initialize(ProfileStore store, IGameInput input, Transform worldRoot)
+        public void Initialize(
+            ProfileStore store,
+            IGameInput input,
+            Transform worldRoot,
+            IAccountService accountService = null,
+            ICloudSaveService cloudSaveService = null,
+            ILeaderboardService leaderboardService = null,
+            ITelemetryService telemetryService = null)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _input = input ?? throw new ArgumentNullException(nameof(input));
@@ -233,6 +267,8 @@ namespace JabaSurvivol.Gameplay
 
             CreateActors();
 
+            _audio = gameObject.GetComponent<GameAudio>() ?? gameObject.AddComponent<GameAudio>();
+
             _ui = new GameUi(
                 transform,
                 StartRun,
@@ -240,6 +276,7 @@ namespace JabaSurvivol.Gameplay
                 ReturnToMenu,
                 PauseGame,
                 ResumeGame,
+                ToggleSound,
                 () => ReloadWeapon(),
                 () => SwitchWeapon(),
                 () => ActivateActiveSkill(),
@@ -254,7 +291,38 @@ namespace JabaSurvivol.Gameplay
                 HandleAllocateSkill,
                 HandleRespecSkills,
                 CloseCharacterSheet,
-                CloseArmory);
+                CloseArmory,
+                ShowAccount,
+                HandleAccountRegister,
+                HandleAccountLogin,
+                HandleAccountLogout,
+                HideAccount,
+                HandleCloudBackup,
+                HandleCloudRestore,
+                HandleCloudUseCloud,
+                HandleCloudKeepLocal,
+                ShowLeaderboard,
+                ToggleTelemetry,
+                HideLeaderboard);
+
+            _accountService = accountService ?? CreateDefaultAccountService();
+            _accountService.StateChanged += HandleAccountStateChanged;
+            _cloudSaveService = cloudSaveService ??
+                GameBootstrap.CloudSaveServiceFactoryOverride?.Invoke(_accountService) ??
+                CreateCloudSaveService();
+            _cloudSaveService.StateChanged += HandleCloudStateChanged;
+            _cloudSaveService.Configure(false);
+            _leaderboardService = leaderboardService ??
+                GameBootstrap.LeaderboardServiceFactoryOverride?.Invoke(_accountService) ??
+                CreateLeaderboardService();
+            _telemetryService = telemetryService ??
+                GameBootstrap.TelemetryServiceFactoryOverride?.Invoke(_accountService) ??
+                CreateTelemetryService();
+            _remoteConfigClient = new RemoteConfigClient(ApiConfig.BaseUrl);
+            _accountCancellation = new CancellationTokenSource();
+            _ui.SetAccountState(_accountService.State, _accountService.Username);
+            _ = InitializeAccountAsync();
+            _ = InitializeCloudAsync();
 
             _state = GameSessionState.MainMenu;
             _ui.ShowMainMenu(_profile);
@@ -834,11 +902,16 @@ namespace JabaSurvivol.Gameplay
             _runXpEarned += reward.Xp;
             _profile.RecordRunEnd(_run);
             _store.Save(_profile);
+            _ = SyncCloudAsync();
+            TrySubmitRun();
+            EnqueueTelemetry("run_end", $"{{\"highestRound\":{_run.Round},\"totalKills\":{_run.Kills},\"durationSeconds\":{RunDurationSeconds()}}}");
+            _ = FlushTelemetryAsync();
 
             _state = GameSessionState.Victory;
             _zombieActive = false;
             _playerObject.SetActive(false);
             _bullets.Clear();
+            _audio?.Play(GameAudioCue.Victory);
             _ui.HideBoss();
             _ui.ShowVictory(_run.Round, _run.Kills, _runSuppliesEarned, _runXpEarned);
         }
@@ -893,6 +966,9 @@ namespace JabaSurvivol.Gameplay
             _weapon = _run.CurrentWeaponState.Stats;
             _runSuppliesEarned = 0;
             _runXpEarned = 0;
+            _currentRunId = Guid.NewGuid();
+            _runStartedAt = DateTime.UtcNow;
+            _runSubmitted = false;
             _roundClearPending = false;
             _roundRewardOptions = null;
             _spreadSequence = 0;
@@ -933,6 +1009,7 @@ namespace JabaSurvivol.Gameplay
                 _run.ActiveSkill.ActiveFraction);
             _ui.SetSticks(default, default);
             _store.Save(_profile);
+            EnqueueTelemetry("run_start", $"{{\"startingRound\":{startingRound}}}");
         }
 
         public void RestartRun()
@@ -949,8 +1026,17 @@ namespace JabaSurvivol.Gameplay
 
             _state = GameSessionState.Paused;
             _ui.ShowPaused(true);
+            _ui.SetSound(!_audio.IsMuted);
             _ui.SetSticks(default, default);
             _store.Save(_profile);
+            _ = SyncCloudAsync();
+            _ = FlushTelemetryAsync();
+        }
+
+        private void ToggleSound()
+        {
+            _audio.ToggleMute();
+            _ui?.SetSound(!_audio.IsMuted);
         }
 
         public void ResumeGame()
@@ -974,6 +1060,7 @@ namespace JabaSurvivol.Gameplay
                 }
 
                 _store.Save(_profile);
+                _ = SyncCloudAsync();
             }
 
             _state = GameSessionState.MainMenu;
@@ -1193,7 +1280,9 @@ namespace JabaSurvivol.Gameplay
         private void ShowLevelUpNotification()
         {
             _ui.ShowLevelUp(_profile.Level);
+            _audio?.Play(GameAudioCue.LevelUp);
             _levelUpRemaining = GameBalance.LevelUpNotificationSeconds;
+            EnqueueTelemetry("level_up", $"{{\"level\":{_profile.Level}}}");
         }
 
         private void HandleArmoryAction(WeaponId weaponId)
@@ -1500,6 +1589,8 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
+            _audio?.Play(GameAudioCue.Hit);
+
             if (_run.DamagePlayer(amount))
             {
                 EndRun();
@@ -1754,6 +1845,550 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
+        private static IAccountService CreateDefaultAccountService()
+        {
+            if (GameBootstrap.OnlineDisabledForTests && GameBootstrap.AccountServiceFactoryOverride == null)
+            {
+                return new AccountService(
+                    new AuthApiClient(ApiConfig.BaseUrl),
+                    new InMemorySecureTokenStore());
+            }
+
+            return AccountService.CreateDefault();
+        }
+
+        private ILeaderboardService CreateLeaderboardService()
+        {
+            return new LeaderboardService(
+                () => _accountService?.AccessToken,
+                token => _accountService != null
+                    ? _accountService.RefreshAsync(token)
+                    : Task.FromResult(false),
+                () => _leaderboardsEnabled,
+                ApiConfig.BaseUrl);
+        }
+
+        private ITelemetryService CreateTelemetryService()
+        {
+            return new TelemetryService(
+                () => _accountService?.AccessToken,
+                token => _accountService != null
+                    ? _accountService.RefreshAsync(token)
+                    : Task.FromResult(false),
+                baseUrl: ApiConfig.BaseUrl);
+        }
+
+        private void ShowLeaderboard()
+        {
+            _ui?.ShowLeaderboard();
+            if (!_leaderboardsEnabled)
+            {
+                _ui?.SetLeaderboardStatus(Localization.Get("leaderboard.disabled"));
+                return;
+            }
+
+            _ = LoadLeaderboardAsync();
+        }
+
+        private void HideLeaderboard()
+        {
+            _ui?.HideLeaderboard();
+        }
+
+        private async Task LoadLeaderboardAsync()
+        {
+            try
+            {
+                _ui.SetLeaderboardStatus(Localization.Get("leaderboard.loading"));
+                var result = await _leaderboardService.LoadAsync(_accountCancellation.Token);
+                if (result.Success)
+                {
+                    _ui.SetLeaderboardEntries(result.Entries);
+                }
+                else
+                {
+                    _ui.SetLeaderboardStatus(result.ErrorMessage);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            catch (Exception)
+            {
+                _ui.SetLeaderboardStatus(Localization.Get("leaderboard.error"));
+            }
+        }
+
+        private void ToggleTelemetry()
+        {
+            if (!_telemetryEnabled || _telemetryService == null)
+            {
+                return;
+            }
+
+            _telemetryService.SetOptIn(!_telemetryService.OptedIn);
+            _ui.SetTelemetry(true, _telemetryService.OptedIn);
+            if (_telemetryService.OptedIn)
+            {
+                _ = FlushTelemetryAsync();
+            }
+        }
+
+        private void EnqueueTelemetry(string eventType, string payloadJson)
+        {
+            _telemetryService?.Enqueue(eventType, payloadJson);
+        }
+
+        private async Task FlushTelemetryAsync()
+        {
+            if (_telemetryService == null || !_telemetryService.OptedIn)
+            {
+                return;
+            }
+
+            try
+            {
+                await _telemetryService.FlushAsync(_accountCancellation.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            catch (Exception)
+            {
+                // Telemetry never blocks gameplay.
+            }
+        }
+
+        private int RunDurationSeconds()
+        {
+            if (_runStartedAt == default)
+            {
+                return 1;
+            }
+
+            return Math.Max(1, (int)(DateTime.UtcNow - _runStartedAt).TotalSeconds);
+        }
+
+        private void TrySubmitRun()
+        {
+            if (_runSubmitted || _run == null || !_leaderboardsEnabled)
+            {
+                return;
+            }
+
+            _runSubmitted = true;
+            _ = SubmitRunAsync(_run.Round, _run.Kills, RunDurationSeconds());
+        }
+
+        private async Task SubmitRunAsync(int highestRound, int totalKills, int durationSeconds)
+        {
+            try
+            {
+                await _leaderboardService.SubmitAsync(
+                    _currentRunId,
+                    highestRound,
+                    totalKills,
+                    durationSeconds,
+                    _accountCancellation.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            catch (Exception)
+            {
+                // Leaderboard submission is non-blocking.
+            }
+        }
+        private ICloudSaveService CreateCloudSaveService()
+        {
+            var api = new CloudSaveApiClient(
+                () => _accountService?.AccessToken,
+                token => _accountService != null
+                    ? _accountService.RefreshAsync(token)
+                    : Task.FromResult(false),
+                ApiConfig.BaseUrl);
+            return new CloudSaveService(api, _store, _accountService);
+        }
+
+        private async Task InitializeCloudAsync()
+        {
+            try
+            {
+                var config = GameBootstrap.RemoteConfigOverride?.Invoke();
+                if (config is null && GameBootstrap.OnlineDisabledForTests)
+                {
+                    config = new RemoteConfigDto { cloudSavesEnabled = false, leaderboardsEnabled = false, telemetryEnabled = false };
+                }
+
+                config ??= await _remoteConfigClient.GetAsync(_accountCancellation.Token);
+                _cloudSavesEnabled = config?.cloudSavesEnabled ?? false;
+                _leaderboardsEnabled = config?.leaderboardsEnabled ?? false;
+                _telemetryEnabled = config?.telemetryEnabled ?? false;
+                _telemetrySampleRate = config?.telemetrySampleRate ?? 0d;
+                _telemetryService.Configure(_telemetryEnabled, _telemetrySampleRate);
+                _ui.SetTelemetry(_telemetryEnabled, _telemetryService.OptedIn);
+                _cloudConfigLoaded = true;
+                _cloudSaveService.Configure(_cloudSavesEnabled);
+                _ui.SetCloudControls(_accountService.State == AccountState.SignedIn, _cloudSavesEnabled);
+                _ui.SetCloudState(_cloudSaveService.State, null);
+                if (_accountService.State == AccountState.SignedIn)
+                {
+                    await SyncCloudAsync();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            catch (Exception)
+            {
+                _ui?.SetCloudState(CloudSyncState.Offline, null);
+            }
+        }
+
+        public void SyncCloudNow()
+        {
+            _ = SyncCloudAsync();
+        }
+
+        public void FlushTelemetryNow() => _ = FlushTelemetryAsync();
+
+        public void ShowLeaderboardForTests() => ShowLeaderboard();
+
+        public void ToggleTelemetryForTests() => ToggleTelemetry();
+
+        public bool TelemetryOptedInForTests => _telemetryService != null && _telemetryService.OptedIn;
+
+        public int TelemetryPendingForTests => _telemetryService?.PendingCount ?? 0;
+
+        public bool LeaderboardVisibleForTests => _ui != null && _ui.LeaderboardVisibleForTests;
+
+        public bool TelemetryVisibleForTests => _ui != null && _ui.TelemetryVisibleForTests;
+
+        public ITelemetryService TelemetryServiceForTests => _telemetryService;
+
+        public string LeaderboardStatusForTests => _ui?.LeaderboardStatusForTests ?? string.Empty;
+
+        public string LeaderboardTextForTests => _ui?.LeaderboardTextForTests ?? string.Empty;
+
+        public bool LeaderboardScrollableForTests => _ui != null && _ui.LeaderboardScrollableForTests;
+
+        public void BackupCloudForTests() => HandleCloudBackup();
+
+        public void RestoreCloudForTests() => HandleCloudRestore();
+
+        public void UseCloudForTests() => HandleCloudUseCloud();
+
+        public void KeepLocalForTests() => HandleCloudKeepLocal();
+
+        private async Task SyncCloudAsync()
+        {
+            if (_cloudSaveService == null ||
+                _accountCancellation == null ||
+                !_cloudConfigLoaded ||
+                !_cloudSavesEnabled ||
+                !_cloudSaveService.Enabled ||
+                _accountService.State != AccountState.SignedIn)
+            {
+                return;
+            }
+
+            if (!await _cloudActionGate.WaitAsync(0))
+            {
+                return;
+            }
+
+            try
+            {
+                var result = await _cloudSaveService.SyncAsync(_profile, _accountCancellation.Token);
+                ApplyCloudResult(result);
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            catch (Exception)
+            {
+                _ui?.SetCloudState(CloudSyncState.Offline, null);
+            }
+            finally
+            {
+                _cloudActionGate.Release();
+            }
+        }
+
+        private async void HandleCloudBackup()
+        {
+            await RunCloudAction((profile, token) => _cloudSaveService.BackupAsync(profile, token));
+        }
+
+        private async void HandleCloudRestore()
+        {
+            await RunCloudAction((profile, token) => _cloudSaveService.RestoreAsync(profile, token));
+        }
+
+        private async void HandleCloudUseCloud()
+        {
+            await RunCloudAction((profile, token) => _cloudSaveService.UseCloudAsync(profile, token));
+        }
+
+        private async void HandleCloudKeepLocal()
+        {
+            await RunCloudAction((profile, token) => _cloudSaveService.KeepLocalAsync(profile, token));
+        }
+
+        private async Task RunCloudAction(
+            Func<Profile, CancellationToken, Task<CloudSyncResult>> action)
+        {
+            if (_cloudSaveService == null || _accountCancellation == null)
+            {
+                return;
+            }
+
+            await _cloudActionGate.WaitAsync(_accountCancellation.Token);
+            try
+            {
+                _ui.SetCloudState(CloudSyncState.Syncing, null);
+                var result = await action(_profile, _accountCancellation.Token);
+                ApplyCloudResult(result);
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            catch (Exception)
+            {
+                _ui.SetCloudState(CloudSyncState.Offline, null);
+            }
+            finally
+            {
+                _cloudActionGate.Release();
+            }
+        }
+
+        private void ApplyCloudResult(CloudSyncResult result)
+        {
+            _ui.SetCloudState(result.State, result.Message);
+            if (result.RestoredProfile != null)
+            {
+                ApplyRestoredProfile(result.RestoredProfile);
+            }
+
+            if (result.Conflict)
+            {
+                _ui.ShowCloudConflict(BuildCloudConflictDetails());
+            }
+            else if (result.State != CloudSyncState.Conflict)
+            {
+                _ui.HideCloudConflict();
+            }
+        }
+
+        private void ApplyRestoredProfile(Profile restored)
+        {
+            _profile = restored;
+            _profile.Validate();
+            _store.Save(_profile);
+            _weapon = WeaponUpgradeService.GetEffectiveStats(_profile, _profile.EquippedWeapon);
+            _stats = StatAggregation.Compute(
+                _profile,
+                _weapon,
+                ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor));
+            _ui.ShowMainMenu(_profile);
+            _ui.SetAccountState(_accountService.State, _accountService.Username);
+            _ui.SetCloudControls(_accountService.State == AccountState.SignedIn, _cloudSavesEnabled);
+        }
+
+        private string BuildCloudConflictDetails()
+        {
+            return Localization.Format(
+                "cloud.conflict.details",
+                _profile.CloudSaveRevision,
+                _cloudSaveService.CloudRevision,
+                _cloudSaveService.CloudUpdatedAt);
+        }
+        public IAccountService AccountServiceForTests => _accountService;
+
+        public ICloudSaveService CloudSaveServiceForTests => _cloudSaveService;
+
+        public string CloudStatusForTests => _ui?.CloudStatusForTests ?? string.Empty;
+
+        public bool CloudConflictVisibleForTests => _ui != null && _ui.CloudConflictVisibleForTests;
+
+        public bool AccountPanelVisibleForTests => _ui != null && _ui.AccountPanelVisibleForTests;
+
+        public string AccountStatusForTests => _ui?.AccountStatusForTests ?? string.Empty;
+
+        public string MainMenuAccountStateForTests => _ui?.MainMenuAccountStateForTests ?? string.Empty;
+
+        public void ShowAccountForTests() => ShowAccount();
+
+        public void SubmitRegisterForTests(string username, string password) =>
+            HandleAccountRegister(username, password);
+
+        public void SubmitLoginForTests(string username, string password) =>
+            HandleAccountLogin(username, password);
+
+        public void LogoutForTests() => HandleAccountLogout();
+
+        private void ShowAccount()
+        {
+            if (_ui == null || _state != GameSessionState.MainMenu)
+            {
+                return;
+            }
+
+            _ui.ShowAccount();
+            HandleAccountStateChanged(_accountService.State);
+        }
+
+        private void HideAccount()
+        {
+            _ui?.HideAccount();
+        }
+
+        private async void HandleAccountRegister(string username, string password)
+        {
+            await RunAccountAction(token => _accountService.RegisterAsync(username, password, token));
+        }
+
+        private async void HandleAccountLogin(string username, string password)
+        {
+            await RunAccountAction(token => _accountService.LoginAsync(username, password, token));
+        }
+
+        private async void HandleAccountLogout()
+        {
+            if (_accountService == null)
+            {
+                return;
+            }
+
+            _ui.SetAccountBusy(true);
+            try
+            {
+                await _accountService.LogoutAsync(_accountCancellation.Token);
+                _ui.SetAccountStatus(Localization.Get("account.state.signedout"));
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            finally
+            {
+                _ui.SetAccountBusy(false);
+                HandleAccountStateChanged(_accountService.State);
+            }
+        }
+
+        private async Task RunAccountAction(
+            Func<CancellationToken, Task<AccountActionResult>> action)
+        {
+            if (_accountService == null || _accountCancellation == null)
+            {
+                return;
+            }
+
+            _ui.SetAccountBusy(true);
+            try
+            {
+                var result = await action(_accountCancellation.Token);
+                _ui.SetAccountStatus(result.Message);
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            catch (Exception)
+            {
+                _ui.SetAccountStatus(Localization.Get("account.error.generic"));
+            }
+            finally
+            {
+                _ui.SetAccountBusy(false);
+                HandleAccountStateChanged(_accountService.State);
+            }
+        }
+
+        private async Task InitializeAccountAsync()
+        {
+            try
+            {
+                await _accountService.InitializeAsync(_accountCancellation.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                // The session is ending.
+            }
+            catch (Exception)
+            {
+                _ui?.SetAccountStatus(Localization.Get("account.error.network"));
+            }
+        }
+
+        private void HandleAccountStateChanged(AccountState state)
+        {
+            _ui?.SetAccountState(state, _accountService?.Username ?? string.Empty);
+            _ui?.SetCloudControls(state == AccountState.SignedIn, _cloudSavesEnabled);
+
+            var accountId = state == AccountState.SignedIn ? _accountService?.AccountId : null;
+            if (_cloudSaveService != null && (_cloudAccountId != accountId || state != AccountState.SignedIn))
+            {
+                _cloudSaveService.Reset();
+                _ui?.HideCloudConflict();
+                _cloudAccountId = accountId;
+            }
+
+            if (state == AccountState.SignedIn && _cloudConfigLoaded)
+            {
+                _ = SyncCloudAsync();
+            }
+        }
+
+        private void HandleCloudStateChanged(CloudSyncState state)
+        {
+            _ui?.SetCloudState(state, null);
+            if (state == CloudSyncState.Conflict)
+            {
+                _ui?.ShowCloudConflict(BuildCloudConflictDetails());
+            }
+            else if (state != CloudSyncState.Syncing)
+            {
+                _ui?.HideCloudConflict();
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (_accountService != null)
+            {
+                _accountService.StateChanged -= HandleAccountStateChanged;
+                if (_accountService is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+            }
+
+            _accountCancellation?.Cancel();
+            _accountCancellation?.Dispose();
+            _accountCancellation = null;
+            _cloudActionGate.Dispose();
+            if (_leaderboardService is IDisposable leaderboardDisposable)
+            {
+                leaderboardDisposable.Dispose();
+            }
+
+            if (_telemetryService is IDisposable telemetryDisposable)
+            {
+                telemetryDisposable.Dispose();
+            }
+
+            _remoteConfigClient?.Dispose();
+            _accountService = null;
+        }
         public void SaveNow()
         {
             if (_store != null && _profile != null)
@@ -1782,6 +2417,8 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
+            _audio?.Play(GameAudioCue.Kill);
+
             var archetype = _zombieStats.Archetype;
             var wasElite = _zombieStats.IsElite;
             var deathPosition = (Vector2)_zombieActor.GameObject.transform.position;
@@ -1807,6 +2444,7 @@ namespace JabaSurvivol.Gameplay
             _runSuppliesEarned += reward.Supplies;
             _runXpEarned += reward.Xp;
             _store.Save(_profile);
+            EnqueueTelemetry("zombie_kill", $"{{\"round\":{_run.Round},\"archetype\":\"{archetype.ToString().ToLowerInvariant()}\"}}");
 
             if (reward.CompletedRound)
             {
@@ -1855,6 +2493,7 @@ namespace JabaSurvivol.Gameplay
 
             _runSuppliesEarned += result.Supplies;
             _runXpEarned += result.Xp;
+            _audio?.Play(GameAudioCue.Reward);
             _store.Save(_profile);
             CompleteRoundClear();
             return true;
@@ -1946,8 +2585,13 @@ namespace JabaSurvivol.Gameplay
                 _turretObject.SetActive(false);
             }
 
+            _audio?.Play(GameAudioCue.Defeat);
             _profile.RecordRunEnd(_run);
             _store.Save(_profile);
+            _ = SyncCloudAsync();
+            TrySubmitRun();
+            EnqueueTelemetry("run_end", $"{{\"highestRound\":{_run.Round},\"totalKills\":{_run.Kills},\"durationSeconds\":{RunDurationSeconds()}}}");
+            _ = FlushTelemetryAsync();
             _ui.ShowGameOver(_run.Round, _run.Kills, _runSuppliesEarned);
         }
 

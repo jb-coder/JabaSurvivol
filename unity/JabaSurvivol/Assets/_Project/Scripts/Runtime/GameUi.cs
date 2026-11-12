@@ -14,8 +14,11 @@ namespace JabaSurvivol.Gameplay
     {
         private readonly RectTransform _safeArea;
         private readonly GameObject _mainMenu;
+        private readonly Text _buildLabel;
         private readonly GameObject _hud;
         private readonly GameObject _pausePanel;
+        private readonly Text _pauseSoundLabel;
+        private readonly Button _pauseSoundButton;
         private readonly GameObject _gameOverPanel;
         private readonly GameObject _victoryPanel;
         private readonly GameObject _bossPanel;
@@ -61,6 +64,26 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _characterStatsText;
         private readonly Text _characterSynergyText;
         private readonly Text _characterStatusText;
+        private readonly GameObject _accountPanel;
+        private readonly Text _accountStateText;
+        private readonly Text _accountStatusText;
+        private readonly InputField _accountUsername;
+        private readonly InputField _accountPassword;
+        private readonly Button _accountRegisterButton;
+        private readonly Button _accountLoginButton;
+        private readonly Button _accountLogoutButton;
+        private readonly Text _cloudStatusText;
+        private readonly Button _cloudBackupButton;
+        private readonly Button _cloudRestoreButton;
+        private readonly GameObject _cloudConflictPanel;
+        private readonly Text _cloudConflictText;
+        private readonly GameObject _leaderboardPanel;
+        private readonly Text _leaderboardStatusText;
+        private readonly Text _leaderboardText;
+        private readonly RectTransform _leaderboardViewport;
+        private readonly Button _telemetryButton;
+        private readonly Text _telemetryLabel;
+        private Text _mainMenuAccountState;
         private readonly Button _characterRespecButton;
         private readonly Text _characterRespecLabel;
         private readonly Button[] _characterTabs;
@@ -116,6 +139,7 @@ namespace JabaSurvivol.Gameplay
             System.Action onMenu,
             System.Action onPause,
             System.Action onResume,
+            System.Action onToggleSound,
             System.Action onReload,
             System.Action onSwitchWeapon,
             System.Action onActiveSkill,
@@ -130,7 +154,19 @@ namespace JabaSurvivol.Gameplay
             System.Action<SkillNode> onAllocateSkill,
             System.Action onRespecSkills,
             System.Action onCharacterSheetClose,
-            System.Action onArmoryClose)
+            System.Action onArmoryClose,
+            System.Action onAccount,
+            System.Action<string, string> onRegister,
+            System.Action<string, string> onLogin,
+            System.Action onLogout,
+            System.Action onAccountClose,
+            System.Action onCloudBackup,
+            System.Action onCloudRestore,
+            System.Action onCloudUseCloud,
+            System.Action onCloudKeepLocal,
+            System.Action onLeaderboard,
+            System.Action onTelemetryToggle,
+            System.Action onLeaderboardClose)
         {
             var canvasObject = UiFactory.CreateCanvas("JabaSurvivol UI", parent);
 
@@ -140,7 +176,17 @@ namespace JabaSurvivol.Gameplay
             UiFactory.Stretch(_safeArea);
             safeAreaObject.AddComponent<SafeAreaFitter>();
 
-            _mainMenu = BuildMainMenu(onStart, onArmory, onCharacterSheet);
+            _mainMenu = BuildMainMenu(
+                onStart,
+                onArmory,
+                onCharacterSheet,
+                onAccount,
+                onLeaderboard,
+                onTelemetryToggle,
+                out _mainMenuAccountState,
+                out _telemetryButton,
+                out _telemetryLabel,
+                out _buildLabel);
             _hud = BuildHud(onPause, onReload, onSwitchWeapon, onActiveSkill, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
             _roundModifierText = FindText(_hud, "Round Modifier");
             _weaponText = FindText(_hud, "Weapon");
@@ -154,9 +200,16 @@ namespace JabaSurvivol.Gameplay
             _bossNameText = FindText(_hud, "Boss Name");
             _bossHealthText = FindText(_hud, "Boss Health Text");
             _bossHealthFill = FindImage(_hud, "Boss Health Fill");
-            _pausePanel = BuildPausePanel(onResume, onMenu, onArmory, onCharacterSheet);
+            _pausePanel = BuildPausePanel(
+                onResume,
+                onMenu,
+                onArmory,
+                onCharacterSheet,
+                onToggleSound,
+                out _pauseSoundLabel,
+                out _pauseSoundButton);
             _gameOverPanel = BuildGameOverPanel(onRestart, onMenu, out _gameOverSummary);
-            _victoryPanel = BuildVictoryPanel(onRestart, onMenu, out _victorySummary);
+            _victoryPanel = BuildVictoryPanel(onRestart, onMenu, onLeaderboard, out _victorySummary);
             _roundEndPanel = BuildRoundEndPanel(
                 onRewardSelected,
                 onCharacterSheet,
@@ -198,6 +251,32 @@ namespace JabaSurvivol.Gameplay
                 out _characterBranchPanels,
                 out _characterNodeRows);
             _characterSynergyText = FindText(_characterSheet, "Synergies");
+            _accountPanel = BuildAccountPanel(
+                onRegister,
+                onLogin,
+                onLogout,
+                onAccountClose,
+                onCloudBackup,
+                onCloudRestore,
+                out _accountStateText,
+                out _accountStatusText,
+                out _accountUsername,
+                out _accountPassword,
+                out _accountRegisterButton,
+                out _accountLoginButton,
+                out _accountLogoutButton,
+                out _cloudStatusText,
+                out _cloudBackupButton,
+                out _cloudRestoreButton);
+            _cloudConflictPanel = BuildCloudConflictPanel(
+                onCloudUseCloud,
+                onCloudKeepLocal,
+                out _cloudConflictText);
+            _leaderboardPanel = BuildLeaderboardPanel(
+                onLeaderboardClose,
+                out _leaderboardStatusText,
+                out _leaderboardText,
+                out _leaderboardViewport);
 
             _selectActiveButtons = new Button[3];
             _selectActiveLabels = new Text[3];
@@ -240,6 +319,8 @@ namespace JabaSurvivol.Gameplay
             HideRoundEnd();
             HideArmory();
             HideCharacterSheet();
+            HideAccount();
+            HideLeaderboard();
             _progressText.text = Localization.Format(
                 "menu.progress",
                 profile.Supplies,
@@ -257,6 +338,8 @@ namespace JabaSurvivol.Gameplay
             HideBoss();
             HideArmory();
             HideCharacterSheet();
+            HideAccount();
+            HideLeaderboard();
             _lastHealth = int.MinValue;
             _lastMaxHealth = int.MinValue;
             _lastArmor = int.MinValue;
@@ -500,6 +583,25 @@ namespace JabaSurvivol.Gameplay
             _pausePanel.SetActive(visible);
         }
 
+        /// <summary>
+        /// Updates the pause-menu sound toggle label.
+        /// </summary>
+        public void SetSound(bool enabled)
+        {
+            if (_pauseSoundLabel == null)
+            {
+                return;
+            }
+
+            _pauseSoundLabel.text = Localization.Get(enabled ? "pause.sound.on" : "pause.sound.off");
+        }
+
+        public string SoundLabelForTests => _pauseSoundLabel?.text ?? string.Empty;
+
+        public string BuildLabelForTests => _buildLabel?.text ?? string.Empty;
+
+        public Button SoundButtonForTests => _pauseSoundButton;
+
         public void ShowGameOver(int round, int kills, int suppliesEarned)
         {
             _mainMenu.SetActive(false);
@@ -636,6 +738,188 @@ namespace JabaSurvivol.Gameplay
             SetCharacterSheetStatus(
                 canAllocate ? string.Empty : Localization.Get("character.allocation.blocked"));
         }
+
+        public void ShowAccount()
+        {
+            _accountPanel.SetActive(true);
+            _accountStatusText.text = string.Empty;
+        }
+
+        public void HideAccount()
+        {
+            _accountPanel.SetActive(false);
+        }
+
+        public void SetAccountState(AccountState state, string username)
+        {
+            var signedIn = state == AccountState.SignedIn;
+            var stateKey = state switch
+            {
+                AccountState.SigningIn => "account.state.signingin",
+                AccountState.SignedIn => "account.state.signedin",
+                AccountState.Offline => "account.state.offline",
+                _ => "account.state.signedout"
+            };
+            var stateText = signedIn
+                ? Localization.Format(stateKey, username)
+                : Localization.Get(stateKey);
+
+            if (_mainMenuAccountState != null)
+            {
+                _mainMenuAccountState.text = stateText;
+            }
+
+            if (_accountStateText != null)
+            {
+                _accountStateText.text = stateText;
+            }
+
+            var showCredentials = !signedIn;
+            _accountUsername.gameObject.SetActive(showCredentials);
+            _accountPassword.gameObject.SetActive(showCredentials);
+            _accountRegisterButton.gameObject.SetActive(showCredentials);
+            _accountLoginButton.gameObject.SetActive(showCredentials);
+            _accountLogoutButton.gameObject.SetActive(signedIn);
+            if (!signedIn)
+            {
+                SetCloudControls(false, false);
+                HideCloudConflict();
+            }
+        }
+
+        public void ShowLeaderboard()
+        {
+            _leaderboardPanel.SetActive(true);
+        }
+
+        public void HideLeaderboard()
+        {
+            _leaderboardPanel.SetActive(false);
+        }
+
+        public void SetLeaderboardStatus(string message)
+        {
+            _leaderboardStatusText.text = message ?? string.Empty;
+        }
+
+        public void SetLeaderboardEntries(LeaderboardEntryDto[] entries)
+        {
+            if (entries == null || entries.Length == 0)
+            {
+                _leaderboardText.text = string.Empty;
+                SetLeaderboardStatus(Localization.Get("leaderboard.empty"));
+                return;
+            }
+
+            var builder = new StringBuilder();
+            foreach (var entry in entries)
+            {
+                builder.Append(entry.rank)
+                    .Append(". ")
+                    .Append(entry.username)
+                    .Append("   R")
+                    .Append(entry.highestRound)
+                    .Append("   K")
+                    .Append(entry.totalKills)
+                    .Append("   ")
+                    .Append(entry.durationSeconds)
+                    .AppendLine("s");
+            }
+
+            _leaderboardText.text = builder.ToString();
+            LayoutRebuilder.ForceRebuildLayoutImmediate(_leaderboardText.rectTransform);
+            SetLeaderboardStatus(string.Empty);
+        }
+
+        public void SetTelemetry(bool available, bool enabled)
+        {
+            _telemetryButton.gameObject.SetActive(available);
+            _telemetryLabel.text = Localization.Get(enabled ? "telemetry.on" : "telemetry.off");
+        }
+
+        public bool LeaderboardVisibleForTests => _leaderboardPanel != null && _leaderboardPanel.activeSelf;
+
+        public bool TelemetryVisibleForTests => _telemetryButton != null && _telemetryButton.gameObject.activeSelf;
+
+        public string LeaderboardStatusForTests => _leaderboardStatusText?.text ?? string.Empty;
+
+        public string LeaderboardTextForTests => _leaderboardText?.text ?? string.Empty;
+
+        public bool LeaderboardScrollableForTests =>
+            _leaderboardViewport != null &&
+            _leaderboardText.rectTransform.rect.height > _leaderboardViewport.rect.height;
+        public void SetCloudState(CloudSyncState state, string message)
+        {
+            if (_cloudStatusText == null)
+            {
+                return;
+            }
+
+            _cloudStatusText.text = string.IsNullOrWhiteSpace(message)
+                ? Localization.Get(CloudStateKey(state))
+                : message;
+        }
+
+        public void SetCloudControls(bool signedIn, bool enabled)
+        {
+            var visible = signedIn && enabled;
+            _cloudBackupButton.gameObject.SetActive(visible);
+            _cloudRestoreButton.gameObject.SetActive(visible);
+            if (!enabled)
+            {
+                SetCloudState(CloudSyncState.Disabled, null);
+            }
+            else if (!signedIn)
+            {
+                SetCloudState(CloudSyncState.SignedOut, null);
+            }
+        }
+
+        public void ShowCloudConflict(string details)
+        {
+            _cloudConflictText.text = details;
+            _cloudConflictPanel.SetActive(true);
+        }
+
+        public void HideCloudConflict()
+        {
+            _cloudConflictPanel.SetActive(false);
+        }
+
+        public string CloudStatusForTests => _cloudStatusText?.text ?? string.Empty;
+
+        public bool CloudConflictVisibleForTests => _cloudConflictPanel != null && _cloudConflictPanel.activeSelf;
+
+        private static string CloudStateKey(CloudSyncState state)
+        {
+            return state switch
+            {
+                CloudSyncState.Disabled => "cloud.disabled",
+                CloudSyncState.SignedOut => "cloud.signedout",
+                CloudSyncState.Syncing => "cloud.syncing",
+                CloudSyncState.Synced => "cloud.synced",
+                CloudSyncState.Conflict => "cloud.conflict",
+                CloudSyncState.Offline => "cloud.offline",
+                _ => "cloud.idle"
+            };
+        }
+        public void SetAccountBusy(bool busy)
+        {
+            _accountRegisterButton.interactable = !busy;
+            _accountLoginButton.interactable = !busy;
+            _accountLogoutButton.interactable = !busy;
+        }
+
+        public void SetAccountStatus(string message)
+        {
+            _accountStatusText.text = message ?? string.Empty;
+        }
+
+        public string AccountStatusForTests => _accountStatusText.text;
+
+        public bool AccountPanelVisibleForTests => _accountPanel.activeSelf;
+
+        public string MainMenuAccountStateForTests => _mainMenuAccountState?.text ?? string.Empty;
 
         public void HideCharacterSheet()
         {
@@ -1174,7 +1458,17 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
-        private GameObject BuildMainMenu(System.Action onStart, System.Action onArmory, System.Action onCharacterSheet)
+        private GameObject BuildMainMenu(
+            System.Action onStart,
+            System.Action onArmory,
+            System.Action onCharacterSheet,
+            System.Action onAccount,
+            System.Action onLeaderboard,
+            System.Action onTelemetryToggle,
+            out Text accountStateText,
+            out Button telemetryButton,
+            out Text telemetryLabel,
+            out Text buildLabel)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Main Menu", new Color(0.012f, 0.018f, 0.03f, 0.98f));
             var root = panel.gameObject;
@@ -1189,17 +1483,221 @@ namespace JabaSurvivol.Gameplay
             var progress = UiFactory.CreateText(root.transform, "Progress", string.Empty, 28, TextAnchor.MiddleCenter, new Color(0.55f, 0.92f, 0.7f));
             UiFactory.Place(progress.rectTransform, new Vector2(0.5f, 0.57f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(1300f, 50f));
 
+            accountStateText = UiFactory.CreateText(root.transform, "Account State", string.Empty, 24, TextAnchor.MiddleCenter, new Color(0.72f, 0.78f, 0.9f));
+            UiFactory.Place(accountStateText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300f, 40f));
+
             var start = UiFactory.CreateButton(root.transform, "Start", Localization.Get("menu.start"), 38, onStart);
-            UiFactory.Place(start.GetComponent<RectTransform>(), new Vector2(0.5f, 0.43f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 96f));
+            UiFactory.Place(start.GetComponent<RectTransform>(), new Vector2(0.5f, 0.41f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 96f));
 
             var armory = UiFactory.CreateButton(root.transform, "Armory", Localization.Get("menu.armory"), 32, onArmory);
-            UiFactory.Place(armory.GetComponent<RectTransform>(), new Vector2(0.5f, 0.32f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 78f));
+            UiFactory.Place(armory.GetComponent<RectTransform>(), new Vector2(0.5f, 0.31f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 76f));
 
             var character = UiFactory.CreateButton(root.transform, "Skills", Localization.Get("character.open"), 32, onCharacterSheet);
-            UiFactory.Place(character.GetComponent<RectTransform>(), new Vector2(0.5f, 0.21f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 78f));
+            UiFactory.Place(character.GetComponent<RectTransform>(), new Vector2(0.5f, 0.22f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 76f));
+
+            var leaderboard = UiFactory.CreateButton(root.transform, "Leaderboard", Localization.Get("leaderboard.open"), 28, onLeaderboard);
+            UiFactory.Place(leaderboard.GetComponent<RectTransform>(), new Vector2(0.5f, 0.13f), new Vector2(0.5f, 0.5f), new Vector2(-190f, 0f), new Vector2(340f, 76f));
+
+            var account = UiFactory.CreateButton(root.transform, "Account", Localization.Get("account.open"), 28, onAccount);
+            UiFactory.Place(account.GetComponent<RectTransform>(), new Vector2(0.5f, 0.13f), new Vector2(0.5f, 0.5f), new Vector2(190f, 0f), new Vector2(340f, 76f));
+
+            telemetryButton = UiFactory.CreateButton(
+                root.transform,
+                "Telemetry",
+                Localization.Get("telemetry.off"),
+                22,
+                onTelemetryToggle);
+            UiFactory.Place(telemetryButton.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-40f, -32f), new Vector2(360f, 56f));
+            telemetryLabel = telemetryButton.GetComponentInChildren<Text>();
+            telemetryButton.gameObject.SetActive(false);
 
             var controls = UiFactory.CreateText(root.transform, "Controls", Localization.Get("menu.controls"), 24, TextAnchor.MiddleCenter, new Color(0.55f, 0.62f, 0.72f));
-            UiFactory.Place(controls.rectTransform, new Vector2(0.5f, 0.1f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300f, 50f));
+            UiFactory.Place(controls.rectTransform, new Vector2(0.5f, 0.05f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300f, 36f));
+
+            buildLabel = UiFactory.CreateText(
+                root.transform,
+                "Build",
+                Localization.Format("menu.build", BuildInfo.Version, BuildInfo.Commit),
+                20,
+                TextAnchor.MiddleLeft,
+                new Color(0.45f, 0.52f, 0.62f));
+            UiFactory.Place(
+                buildLabel.rectTransform,
+                new Vector2(0f, 0f),
+                new Vector2(0f, 0f),
+                new Vector2(36f, 28f),
+                new Vector2(700f, 32f));
+
+            return root;
+        }
+
+        private GameObject BuildCloudConflictPanel(
+            System.Action onUseCloud,
+            System.Action onKeepLocal,
+            out Text details)
+        {
+            var panel = UiFactory.CreatePanel(
+                _safeArea,
+                "Cloud Conflict",
+                new Color(0.008f, 0.012f, 0.022f, 1f));
+            var root = panel.gameObject;
+            root.SetActive(false);
+
+            var title = UiFactory.CreateText(
+                root.transform,
+                "Title",
+                Localization.Get("cloud.conflict.title"),
+                52,
+                TextAnchor.MiddleCenter,
+                new Color(1f, 0.78f, 0.35f));
+            title.fontStyle = FontStyle.Bold;
+            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.75f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(1100f, 80f));
+
+            details = UiFactory.CreateText(
+                root.transform,
+                "Details",
+                string.Empty,
+                26,
+                TextAnchor.MiddleCenter,
+                new Color(0.82f, 0.86f, 0.94f));
+            UiFactory.Place(details.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1200f, 220f));
+
+            var useCloud = UiFactory.CreateButton(
+                root.transform,
+                "Use Cloud",
+                Localization.Get("cloud.useCloud"),
+                28,
+                onUseCloud);
+            UiFactory.Place(useCloud.GetComponent<RectTransform>(), new Vector2(0.5f, 0.25f), new Vector2(0.5f, 0.5f), new Vector2(-210f, 0f), new Vector2(380f, 72f));
+
+            var keepLocal = UiFactory.CreateButton(
+                root.transform,
+                "Keep Local",
+                Localization.Get("cloud.keepLocal"),
+                28,
+                onKeepLocal);
+            UiFactory.Place(keepLocal.GetComponent<RectTransform>(), new Vector2(0.5f, 0.25f), new Vector2(0.5f, 0.5f), new Vector2(210f, 0f), new Vector2(380f, 72f));
+
+            return root;
+        }
+        private GameObject BuildAccountPanel(
+            System.Action<string, string> onRegister,
+            System.Action<string, string> onLogin,
+            System.Action onLogout,
+            System.Action onClose,
+            System.Action onCloudBackup,
+            System.Action onCloudRestore,
+            out Text stateText,
+            out Text statusText,
+            out InputField username,
+            out InputField password,
+            out Button registerButton,
+            out Button loginButton,
+            out Button logoutButton,
+            out Text cloudStatus,
+            out Button cloudBackup,
+            out Button cloudRestore)
+        {
+            var panel = UiFactory.CreatePanel(
+                _safeArea,
+                "Account Panel",
+                new Color(0.008f, 0.012f, 0.022f, 1f));
+            var root = panel.gameObject;
+            root.SetActive(false);
+
+            var title = UiFactory.CreateText(
+                root.transform,
+                "Title",
+                Localization.Get("account.title"),
+                64,
+                TextAnchor.MiddleCenter,
+                new Color(0.4f, 0.95f, 1f));
+            title.fontStyle = FontStyle.Bold;
+            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.82f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(1100f, 90f));
+
+            stateText = UiFactory.CreateText(
+                root.transform,
+                "Account State",
+                string.Empty,
+                28,
+                TextAnchor.MiddleCenter,
+                new Color(0.72f, 0.78f, 0.9f));
+            UiFactory.Place(stateText.rectTransform, new Vector2(0.5f, 0.72f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1100f, 44f));
+
+            var usernameInput = UiFactory.CreateInputField(root.transform, "Username", Localization.Get("account.username"), 28);
+            username = usernameInput;
+            UiFactory.Place(usernameInput.GetComponent<RectTransform>(), new Vector2(0.5f, 0.58f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(720f, 72f));
+
+            var passwordInput = UiFactory.CreateInputField(root.transform, "Password", Localization.Get("account.password"), 28);
+            password = passwordInput;
+            passwordInput.contentType = InputField.ContentType.Password;
+            UiFactory.Place(passwordInput.GetComponent<RectTransform>(), new Vector2(0.5f, 0.46f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(720f, 72f));
+
+            statusText = UiFactory.CreateText(
+                root.transform,
+                "Status",
+                string.Empty,
+                24,
+                TextAnchor.MiddleCenter,
+                new Color(0.95f, 0.78f, 0.4f));
+            UiFactory.Place(statusText.rectTransform, new Vector2(0.5f, 0.35f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f, 60f));
+
+            registerButton = UiFactory.CreateButton(
+                root.transform,
+                "Register",
+                Localization.Get("account.register"),
+                30,
+                () => onRegister(usernameInput.text, passwordInput.text));
+            UiFactory.Place(registerButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.23f), new Vector2(0.5f, 0.5f), new Vector2(-190f, 0f), new Vector2(340f, 72f));
+
+            loginButton = UiFactory.CreateButton(
+                root.transform,
+                "Login",
+                Localization.Get("account.login"),
+                30,
+                () => onLogin(usernameInput.text, passwordInput.text));
+            UiFactory.Place(loginButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.23f), new Vector2(0.5f, 0.5f), new Vector2(190f, 0f), new Vector2(340f, 72f));
+
+            logoutButton = UiFactory.CreateButton(
+                root.transform,
+                "Logout",
+                Localization.Get("account.logout"),
+                30,
+                onLogout);
+            UiFactory.Place(logoutButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.23f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(340f, 72f));
+
+            cloudStatus = UiFactory.CreateText(
+                root.transform,
+                "Cloud Status",
+                Localization.Get("cloud.signedout"),
+                22,
+                TextAnchor.MiddleCenter,
+                new Color(0.55f, 0.85f, 0.75f));
+            UiFactory.Place(cloudStatus.rectTransform, new Vector2(0.5f, 0.15f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f, 40f));
+
+            cloudBackup = UiFactory.CreateButton(
+                root.transform,
+                "Cloud Backup",
+                Localization.Get("cloud.backup"),
+                26,
+                onCloudBackup);
+            UiFactory.Place(cloudBackup.GetComponent<RectTransform>(), new Vector2(0.5f, 0.07f), new Vector2(0.5f, 0.5f), new Vector2(-190f, 0f), new Vector2(340f, 64f));
+
+            cloudRestore = UiFactory.CreateButton(
+                root.transform,
+                "Cloud Restore",
+                Localization.Get("cloud.restore"),
+                26,
+                onCloudRestore);
+            UiFactory.Place(cloudRestore.GetComponent<RectTransform>(), new Vector2(0.5f, 0.07f), new Vector2(0.5f, 0.5f), new Vector2(190f, 0f), new Vector2(340f, 64f));
+
+            var close = UiFactory.CreateButton(
+                root.transform,
+                "Close",
+                Localization.Get("account.close"),
+                26,
+                onClose);
+            UiFactory.Place(close.GetComponent<RectTransform>(), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-40f, 32f), new Vector2(220f, 64f));
 
             return root;
         }
@@ -1370,26 +1868,43 @@ namespace JabaSurvivol.Gameplay
             return baseImage;
         }
 
-        private GameObject BuildPausePanel(System.Action onResume, System.Action onMenu, System.Action onArmory, System.Action onCharacterSheet)
+        private GameObject BuildPausePanel(
+            System.Action onResume,
+            System.Action onMenu,
+            System.Action onArmory,
+            System.Action onCharacterSheet,
+            System.Action onToggleSound,
+            out Text soundLabel,
+            out Button soundButton)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Pause Panel", new Color(0.01f, 0.02f, 0.03f, 0.9f));
             var root = panel.gameObject;
 
             var title = UiFactory.CreateText(root.transform, "Title", Localization.Get("pause.title"), 64, TextAnchor.MiddleCenter, new Color(0.5f, 0.95f, 1f));
             title.fontStyle = FontStyle.Bold;
-            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.68f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900f, 100f));
+            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.72f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900f, 100f));
 
             var resume = UiFactory.CreateButton(root.transform, "Resume", Localization.Get("pause.resume"), 32, onResume);
-            UiFactory.Place(resume.GetComponent<RectTransform>(), new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 84f));
+            UiFactory.Place(resume.GetComponent<RectTransform>(), new Vector2(0.5f, 0.55f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 84f));
 
             var armory = UiFactory.CreateButton(root.transform, "Armory", Localization.Get("pause.armory"), 28, onArmory);
-            UiFactory.Place(armory.GetComponent<RectTransform>(), new Vector2(0.5f, 0.40f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
+            UiFactory.Place(armory.GetComponent<RectTransform>(), new Vector2(0.5f, 0.44f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
 
             var character = UiFactory.CreateButton(root.transform, "Skills", Localization.Get("character.open"), 28, onCharacterSheet);
-            UiFactory.Place(character.GetComponent<RectTransform>(), new Vector2(0.5f, 0.29f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
+            UiFactory.Place(character.GetComponent<RectTransform>(), new Vector2(0.5f, 0.33f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
 
             var menu = UiFactory.CreateButton(root.transform, "Menu", Localization.Get("pause.menu"), 28, onMenu);
-            UiFactory.Place(menu.GetComponent<RectTransform>(), new Vector2(0.5f, 0.18f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
+            UiFactory.Place(menu.GetComponent<RectTransform>(), new Vector2(0.5f, 0.22f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
+
+            var sound = UiFactory.CreateButton(
+                root.transform,
+                "Sound Toggle",
+                Localization.Get("pause.sound.on"),
+                26,
+                onToggleSound);
+            UiFactory.Place(sound.GetComponent<RectTransform>(), new Vector2(0.5f, 0.11f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 72f));
+            soundLabel = sound.GetComponentInChildren<Text>();
+            soundButton = sound.GetComponent<Button>();
 
             return root;
         }
@@ -1415,7 +1930,90 @@ namespace JabaSurvivol.Gameplay
             return root;
         }
 
-        private GameObject BuildVictoryPanel(System.Action onNextRun, System.Action onMenu, out Text summary)
+        private GameObject BuildLeaderboardPanel(
+            System.Action onClose,
+            out Text status,
+            out Text entries,
+            out RectTransform viewport)
+        {
+            var panel = UiFactory.CreatePanel(
+                _safeArea,
+                "Leaderboard Panel",
+                new Color(0.008f, 0.012f, 0.022f, 1f));
+            var root = panel.gameObject;
+            root.SetActive(false);
+
+            var title = UiFactory.CreateText(
+                root.transform,
+                "Title",
+                Localization.Get("leaderboard.title"),
+                52,
+                TextAnchor.MiddleCenter,
+                new Color(0.4f, 0.95f, 1f));
+            title.fontStyle = FontStyle.Bold;
+            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.9f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(1100f, 70f));
+
+            status = UiFactory.CreateText(
+                root.transform,
+                "Status",
+                string.Empty,
+                24,
+                TextAnchor.MiddleCenter,
+                new Color(0.85f, 0.8f, 0.5f));
+            UiFactory.Place(status.rectTransform, new Vector2(0.5f, 0.83f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(1200f, 36f));
+
+            var viewportObject = new GameObject(
+                "Viewport",
+                typeof(RectTransform),
+                typeof(RectMask2D));
+            viewportObject.transform.SetParent(root.transform, false);
+            viewport = viewportObject.GetComponent<RectTransform>();
+            UiFactory.Place(
+                viewport,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0f, -30f),
+                new Vector2(1900f, 700f));
+
+            entries = UiFactory.CreateText(
+                viewportObject.transform,
+                "Entries",
+                string.Empty,
+                20,
+                TextAnchor.UpperLeft,
+                new Color(0.86f, 0.9f, 0.96f));
+            var entriesRect = entries.rectTransform;
+            entriesRect.anchorMin = new Vector2(0f, 1f);
+            entriesRect.anchorMax = new Vector2(1f, 1f);
+            entriesRect.pivot = new Vector2(0.5f, 1f);
+            entriesRect.anchoredPosition = Vector2.zero;
+            entriesRect.sizeDelta = new Vector2(0f, 0f);
+            entries.verticalOverflow = VerticalWrapMode.Overflow;
+            var fitter = entries.gameObject.AddComponent<ContentSizeFitter>();
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var scroll = root.AddComponent<ScrollRect>();
+            scroll.viewport = viewport;
+            scroll.content = entriesRect;
+            scroll.horizontal = false;
+            scroll.vertical = true;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+
+            var close = UiFactory.CreateButton(
+                root.transform,
+                "Close",
+                Localization.Get("account.close"),
+                26,
+                onClose);
+            UiFactory.Place(close.GetComponent<RectTransform>(), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-40f, 28f), new Vector2(220f, 64f));
+
+            return root;
+        }
+        private GameObject BuildVictoryPanel(
+            System.Action onNextRun,
+            System.Action onMenu,
+            System.Action onLeaderboard,
+            out Text summary)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Victory Panel", new Color(0.01f, 0.045f, 0.03f, 0.97f));
             var root = panel.gameObject;
@@ -1434,7 +2032,10 @@ namespace JabaSurvivol.Gameplay
             UiFactory.Place(next.GetComponent<RectTransform>(), new Vector2(0.5f, 0.34f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 104f));
 
             var menu = UiFactory.CreateButton(root.transform, "Menu", Localization.Get("victory.menu"), 30, onMenu);
-            UiFactory.Place(menu.GetComponent<RectTransform>(), new Vector2(0.5f, 0.21f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 88f));
+            UiFactory.Place(menu.GetComponent<RectTransform>(), new Vector2(0.5f, 0.21f), new Vector2(0.5f, 0.5f), new Vector2(-190f, 0f), new Vector2(340f, 88f));
+
+            var leaderboard = UiFactory.CreateButton(root.transform, "Leaderboard", Localization.Get("leaderboard.open"), 28, onLeaderboard);
+            UiFactory.Place(leaderboard.GetComponent<RectTransform>(), new Vector2(0.5f, 0.21f), new Vector2(0.5f, 0.5f), new Vector2(190f, 0f), new Vector2(340f, 88f));
 
             root.SetActive(false);
             return root;

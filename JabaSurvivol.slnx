@@ -11,12 +11,16 @@
   </Folder>
   <Folder Name="/src/Services/">
     <Project Path="src/Services/Game.Api/Game.Api.csproj" />
+    <Project Path="src/Services/Game.Data/JabaSurvivol.Game.Data.csproj" />
     <Project Path="src/Services/Identity.Api/Identity.Api.csproj" />
     <Project Path="src/Services/Telemetry.Worker/Telemetry.Worker.csproj" />
   </Folder>
   <Folder Name="/src/Shared/" />
   <Folder Name="/src/Shared/Contracts/">
     <Project Path="src/Shared/Contracts/JabaSurvivol.Contracts.csproj" />
+  </Folder>
+  <Folder Name="/src/Shared/Security/">
+    <Project Path="src/Shared/Security/JabaSurvivol.Security.csproj" />
   </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/ArchitectureTests/">

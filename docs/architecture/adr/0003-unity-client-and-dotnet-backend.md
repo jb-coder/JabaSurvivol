@@ -2,7 +2,9 @@
 
 ## Status
 
-Accepted.
+Accepted. Partially superseded by ADR-0007 and ADR-0008 for hosting. The beta
+runs locally over Tailscale; the eventual deployment target is a VPS at final
+handoff, and Oracle is out of scope.
 
 ## Context
 
@@ -16,7 +18,8 @@ The game is Android-first, 2D, touch-based, and intended to strengthen Unity emp
 - Share those rules with Unity through a local UPM package.
 - Start the backend as a modular monolith and extract services only when justified.
 - Use Aspire 13.x for local orchestration.
-- Deploy the backend to Oracle Always Free plus k3s.
+- Deploy the backend at the final handoff to a VPS. Oracle is out of scope
+  (ADR-0007, ADR-0008).
 
 ## Alternatives considered
 

@@ -6,6 +6,48 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-12
+
+### Added
+
+- Username/password identity accounts with case-insensitive unique usernames, ASP.NET Core Identity password hashing, 15-minute JWT access tokens, and 30-day rotating refresh tokens stored as hashes.
+- Registration, login, refresh, logout, and current-account endpoints under `/api/v1/identity`, with strict per-IP rate limiting and ProblemDetails responses.
+- Reusable PostgreSQL Testcontainers fixture and identity integration tests that cover rotation, reuse revocation, logout, expiry, cross-account isolation, and rate limiting.
+- Revision-safe primary cloud save endpoints with ETag support, 1 MiB limits, schema validation, and `409` conflict responses that never overwrite newer data.
+- Game module PostgreSQL schema with an additive cloud-save migration and a unique account/slot constraint.
+- Highest-round leaderboard with idempotent run submission, bounds validation, best run per account, top-50 default query capped at 100, deterministic tiebreaks, and per-account submission rate limiting.
+- Public read-only remote config with minimum client version, operational flags, sample rate, ETag support, conservative cache headers, and startup validation that rejects invalid values.
+- Authenticated telemetry ingestion with 1-100 event batches, 64 KiB request and 4 KiB payload limits, typed allowlists, timestamp windows, per-account idempotency, and no PII.
+- Telemetry worker aggregation into idempotent daily totals with 30-day raw-event retention.
+- BFF public boundary with YARP routing, JWT validation, per-IP and per-account rate limits, correlation IDs, safe ProblemDetails on authentication and upstream failures, and no public route to internal status endpoints.
+- Unity account panel with register, login, logout, loading, signed-out, signed-in, and offline states, plus ProblemDetails handling and one refresh-and-retry on `401`.
+- Access tokens kept in memory only; refresh tokens encrypted with Windows DPAPI or the Android Keystore and never written to `PlayerPrefs`.
+- Android INTERNET permission enabled, with cleartext HTTP limited to development emulator builds.
+- Unity cloud-save backup and restore with explicit revision conflicts, `409` handling, bounded upload retries, offline fallback, and sync at login, run end, and app pause.
+- Cloud save revision persisted additively in schema version 1 so older profiles remain compatible.
+- Unity highest-round leaderboard panel from the main menu and victory screen, with run submission, idempotent retries, and non-blocking failures.
+- Opt-in telemetry with a persistent toggle, allowlisted event queue, batched retries, and remote-config gating that defaults to off.
+- Hardened multi-stage backend container images and Kustomize manifests for Identity, Game, Telemetry Worker, BFF, and PostgreSQL, with non-root containers, probes, resource budgets, network policies, and BFF-only ingress.
+- Container CI builds all four images, validates the rendered manifests, and scans images with Trivy.
+- Gated ARM64 deploy workflow with immutable image digests, pre-migration backup, ordered migration Jobs, rollout probes, BFF smoke tests, and automatic rollback.
+- Identity and Game migration-only startup mode for Kubernetes migration Jobs.
+- Procedural audio cues for hit, kill, level-up, reward, victory, and defeat, with a persistent pause-menu mute toggle.
+- Main menu shows the app version and build commit for beta feedback.
+
+### Changed
+
+- Android and core package version bumped to `0.5.1` with version code `6`.
+- The balance simulation and guard tests now enforce the documented run length, round pacing, progression, boss, and ammo pressure target ranges from `BalanceTargets`.
+- Documented the local-first beta, deferred VPS, and donation-only support policy in ADR-0008.
+
+### Fixed
+
+- Local Aspire AppHost now waits for PostgreSQL and upstream services before starting dependent projects, so the identity, game, telemetry, and BFF resources stay running during local verification.
+- The profile store recovers persistent progression from the backup file when the main save is empty, unreadable, or missing, instead of returning a fresh profile.
+- A pending cloud-save conflict is cleared when the signed-in account changes, and in-flight cloud responses from the previous account are discarded, so one account can never apply another account's cloud document.
+- A local persistence failure during cloud backup or restore is reported as offline and never clears a pending conflict.
+- Upgraded the local Aspire AppHost SDK to 13.6.5 to remove a high-severity dependency advisory.
+
 ## [0.4.0] - 2026-11-08
 
 ### Added

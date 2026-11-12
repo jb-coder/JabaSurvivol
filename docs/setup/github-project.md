@@ -41,8 +41,9 @@
 | v0.3.0 Armory and Skills | 2026-12-21 |
 | v0.4.0 Content and Boss | 2027-01-04 |
 | v0.5.0 Backend and Cloud | 2027-01-18 |
+| v0.5.1 Polish and Local Beta | 2026-12-14 |
 | v0.6.0 Localization | 2027-02-01 |
-| v1.0.0 Monetization and Release | 2027-02-15 |
+| v1.0.0 Release and Donations | 2027-02-15 |
 
 ## Bootstrap
 

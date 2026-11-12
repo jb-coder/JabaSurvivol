@@ -42,13 +42,15 @@ namespace JabaSurvivol.Editor
         {
             PlayerSettings.companyName = "JabaSurvivol";
             PlayerSettings.productName = "JabaSurvivol";
-            PlayerSettings.bundleVersion = "0.4.0";
-            PlayerSettings.Android.bundleVersionCode = 4;
+            PlayerSettings.bundleVersion = "0.5.1";
+            PlayerSettings.Android.bundleVersionCode = 6;
             PlayerSettings.colorSpace = ColorSpace.Linear;
 
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.jabasurvivol.game");
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+            PlayerSettings.Android.forceInternetPermission = true;
+            PlayerSettings.insecureHttpOption = InsecureHttpOption.NotAllowed;
             PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)36;
             PlayerSettings.Android.minSdkVersion = (AndroidSdkVersions)26;
 

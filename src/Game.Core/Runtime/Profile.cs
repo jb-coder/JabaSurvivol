@@ -26,6 +26,12 @@ namespace JabaSurvivol.Core
         public int BestKills;
 
         /// <summary>
+        /// Last cloud-save revision known to this profile. Zero means the
+        /// profile has never been backed up. The field is additive to schema 1.
+        /// </summary>
+        public long CloudSaveRevision;
+
+        /// <summary>
         /// Permanently unlocked weapons. The pistol is always available and is
         /// restored by <see cref="Validate"/> for older saves.
         /// </summary>
@@ -556,6 +562,7 @@ namespace JabaSurvivol.Core
             TotalKills = Math.Max(0, TotalKills);
             TotalRuns = Math.Max(0, TotalRuns);
             BestKills = Math.Max(0, BestKills);
+            CloudSaveRevision = Math.Max(0, CloudSaveRevision);
             ValidateWeapons();
             ValidateWeaponUpgrades();
             ValidateArmor();

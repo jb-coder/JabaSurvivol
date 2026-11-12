@@ -20,7 +20,7 @@
 
 - **Builder:** the repository owner account `jb-coder`. It creates branches and PRs, enables auto-merge, and merges. It uses the current `gh` authentication, or `JABA_BUILDER_TOKEN` when provided.
 - **Reviewer:** the GitHub App `jaba-survivol-reviewer-jb`. It is not a user account. It approves or requests changes and manages `agent:approved` and `agent:changes-requested`.
-- **Deployer:** optional short-lived OIDC credentials for Oracle and GHCR.
+- **Deployer:** optional short-lived credentials for the eventual VPS deployment and GHCR.
 
 The builder must not approve its own PR. The reviewer app must not edit code.
 
@@ -101,9 +101,13 @@ The wrappers set `GH_TOKEN` and `GH_HOST` only for the duration of the command. 
 
 - `production`: deployment branch policy `main` only; secrets scoped; no human reviewers required.
 - `unity-ci`: Unity license secrets.
-- `oracle`: Oracle and k3s deployment secrets.
+- `oracle`: historical Oracle and k3s deployment secrets. Oracle is out of scope (ADR-0008); the eventual VPS deployment defines its own secrets.
 
 ## Repository variables
+
+Oracle deployment is out of scope (ADR-0008). The eventual VPS deployment
+defines its own provider, SSH, and kubeconfig secrets at handoff. The
+Oracle-specific variables below are historical.
 
 - `UNITY_CI_ENABLED`
 - `DEPLOY_ENABLED`
@@ -216,5 +220,5 @@ git push -u origin develop
 9. Run `pwsh tools/bootstrap/Initialize-GitHubProject.ps1`.
 10. Add the `PROJECT_TOKEN` secret with `project` scope.
 11. Set `UNITY_CI_ENABLED=true` after Unity is configured.
-12. Set `DEPLOY_ENABLED=true` after Oracle is configured.
+12. Set `DEPLOY_ENABLED=true` only when the final VPS deployment is approved.
 13. Set `AGENT_DRY_RUN=false` after the first successful review cycle.

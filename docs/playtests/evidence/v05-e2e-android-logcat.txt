@@ -1,0 +1,5 @@
+Command: adb logcat -d --pid=5739
+11-09 01:35:34.704  5739  5739 I Unity   : applyWindowUIChanges fullScreen = true, renderOutsideSafeArea = true
+11-09 01:35:36.360  5739  5739 V Unity   : Context Type: ActivityOrService
+11-09 01:35:36.363  5739  5739 D Unity   : CommandLine:  
+11-09 01:35:36.440  5739  5739 I Unity   : onResume

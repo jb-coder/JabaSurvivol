@@ -8,10 +8,14 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Shared\Contracts\JabaSurvivol.Contracts.csproj" />
+    <ProjectReference Include="..\..\Shared\Security\JabaSurvivol.Security.csproj" />
     <ProjectReference Include="..\..\ServiceDefaults\ServiceDefaults.csproj" />
   </ItemGroup>
 

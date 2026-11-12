@@ -1,3 +1,4 @@
+using System;
 using JabaSurvivol.Core;
 using UnityEngine;
 
@@ -10,6 +11,18 @@ namespace JabaSurvivol.Gameplay
     public sealed class GameBootstrap : MonoBehaviour
     {
         public static string SavePathOverride;
+
+        public static Func<IAccountService> AccountServiceFactoryOverride;
+
+        public static Func<IAccountService, ICloudSaveService> CloudSaveServiceFactoryOverride;
+
+        public static Func<RemoteConfigDto> RemoteConfigOverride;
+
+        public static Func<IAccountService, ILeaderboardService> LeaderboardServiceFactoryOverride;
+
+        public static Func<IAccountService, ITelemetryService> TelemetryServiceFactoryOverride;
+
+        public static bool OnlineDisabledForTests;
 
         public static GameBootstrap Instance { get; private set; }
 
@@ -28,6 +41,11 @@ namespace JabaSurvivol.Gameplay
 
             Instance = this;
             Application.targetFrameRate = 60;
+            ApiConfig.Initialize();
+#if DEVELOPMENT_BUILD
+            SeedDevelopmentSession();
+            RunSecureStorageProbe();
+#endif
 
             var runtimeRoot = new GameObject("Runtime").transform;
             runtimeRoot.SetParent(transform, false);
@@ -41,7 +59,11 @@ namespace JabaSurvivol.Gameplay
             input.Initialize(_camera);
 
             Session = gameObject.AddComponent<GameSession>();
-            Session.Initialize(new ProfileStore(SavePathOverride), input, _worldRoot);
+            Session.Initialize(
+                new ProfileStore(SavePathOverride),
+                input,
+                _worldRoot,
+                AccountServiceFactoryOverride?.Invoke());
         }
 
         private void OnApplicationPause(bool pauseStatus)
@@ -49,6 +71,8 @@ namespace JabaSurvivol.Gameplay
             if (pauseStatus)
             {
                 Session?.SaveNow();
+                Session?.SyncCloudNow();
+                Session?.FlushTelemetryNow();
             }
         }
 
@@ -67,6 +91,61 @@ namespace JabaSurvivol.Gameplay
             Session?.SaveNow();
             Instance = null;
         }
+
+#if DEVELOPMENT_BUILD
+        private static void SeedDevelopmentSession()
+        {
+            if (Application.platform != RuntimePlatform.Android)
+            {
+                return;
+            }
+
+            try
+            {
+                using var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+                using var activity = player.GetStatic<AndroidJavaObject>("currentActivity");
+                using var intent = activity.Call<AndroidJavaObject>("getIntent");
+                var token = intent?.Call<string>("getStringExtra", "seedRefreshToken");
+                if (!string.IsNullOrWhiteSpace(token))
+                {
+                    SecureTokenStore.CreateDefault().Save(token);
+                    Debug.Log("Development session seeded.");
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning("Development session seed failed: " + exception.GetType().Name);
+            }
+        }
+
+#endif
+
+#if DEVELOPMENT_BUILD
+        private static void RunSecureStorageProbe()
+        {
+            if (Application.platform != RuntimePlatform.Android)
+            {
+                return;
+            }
+
+            try
+            {
+                var probePath = System.IO.Path.Combine(Application.persistentDataPath, "probe-session.bin");
+                var probe = new AndroidKeystoreTokenStore(probePath, "jaba_survivol_probe");
+                probe.ResetKey();
+                probe.Clear();
+                probe.Save("probe-token");
+                var restored = probe.Load() == "probe-token";
+                probe.Clear();
+                probe.ResetKey();
+                Debug.Log("SecureTokenStore probe: " + (restored ? "ok" : "failed") + " provider=AndroidKeyStore alias=jaba_survivol_probe");
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError("SecureTokenStore probe failed: " + exception);
+            }
+        }
+#endif
 
         private Camera CreateCamera(Transform parent)
         {

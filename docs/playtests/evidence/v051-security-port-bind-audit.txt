@@ -1,0 +1,42 @@
+# Local beta network bind audit
+
+- Date: 2026-11-11
+- Issue: #108
+- Development machine: Windows, LAN address 192.168.3.8
+- Services under test: Identity.Api, Game.Api, PostgreSQL
+
+## Loopback bindings
+
+| Service | Bind address | Port | LAN reachable (192.168.3.8) |
+|---|---|---:|---|
+| Identity.Api | 127.0.0.1 | 5095 | No |
+| Game.Api | 127.0.0.1 | 5250 | No |
+
+## PostgreSQL finding and correction
+
+A manual `docker run -p 5433:5432 postgres:16` published PostgreSQL on
+`0.0.0.0:5433` and `[::]:5433`. The database was reachable at
+`192.168.3.8:5433`.
+
+Corrected configuration:
+
+```text
+docker run -p 127.0.0.1:5433:5432 postgres:16
+docker port -> 5432/tcp -> 127.0.0.1:5433
+LAN 192.168.3.8:5433 reachable = false
+Loopback 127.0.0.1:5433 reachable = true
+```
+
+## Rule for the beta
+
+- Never publish PostgreSQL or any internal service on `0.0.0.0`.
+- Bind internal services to `127.0.0.1`.
+- Expose only the BFF to testers, and only on the Tailscale interface.
+- The Aspire AppHost publishes its PostgreSQL container on `127.0.0.1` only.
+
+## Residual check
+
+A second Tailscale peer reachability check and a public-Internet probe from a
+non-tailnet network are pre-beta gates in #101 and must run before testers
+connect. The reviewed configuration has no router port forward and no service
+bound to a public interface.

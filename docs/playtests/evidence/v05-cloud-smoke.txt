@@ -1,0 +1,38 @@
+# v0.5.0 Android cloud save smoke evidence
+
+- Date: 2026-11-08
+- Build: `JabaSurvivol-emulator-0.5.0-cloud.apk` (development build; app version remains `0.4.0` until the release branch bump)
+- Backend: local Identity, Game, and BFF services with PostgreSQL
+- Emulator: `jaba_survivol_api35`, Android 15 API 35 x86_64, phone 1080x2340 @ 440 dpi
+- API base URL: `http://10.0.2.2:5102` through the BFF
+
+## Automated flow
+
+1. Registered and logged in a test account through the BFF.
+2. Seeded a cloud save at revision 1 and launched the app with a
+   development-only refresh-token seed.
+3. Confirmed the app signed in, compared revisions, and opened the explicit
+   `SAVE CONFLICT` dialog showing local revision 0, cloud revision 1, and the
+   cloud update timestamp.
+4. Chose `KEEP LOCAL`; the app uploaded the local profile and returned to the
+   main menu signed in.
+5. Advanced the cloud save to revision 3 through the API.
+6. Opened the account panel, confirmed `BACK UP` and `RESTORE` controls, and
+   chose `USE CLOUD` from the conflict dialog.
+7. Confirmed the restored profile updated the main menu to supplies 999, level
+   3, and best round 4.
+8. Reopened the account panel and confirmed `BACKUP COMPLETE` with both cloud
+   controls visible.
+9. Checked logcat for `FATAL EXCEPTION`, `AndroidRuntime` crash, unhandled
+   exception, and `NullReferenceException`. None were present.
+
+## Evidence files
+
+- `v05-cloud-conflict.png`
+- `v05-cloud-keep-local.png`
+- `v05-cloud-restore.png`
+- `v05-cloud-account-panel.png`
+- `v05-cloud-android-logcat.txt`
+
+No tokens, save contents, or secrets are included in the evidence. Automated
+verification only; no human playtest was performed.

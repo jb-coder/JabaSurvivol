@@ -313,6 +313,58 @@ public sealed class BalanceSimulationTests
     }
 
     [Fact]
+    public void Run_stays_within_the_target_run_length()
+    {
+        var report = BalanceSimulation.Run();
+        var totalSeconds = report.Rounds.Sum(round => round.RoundSeconds);
+
+        Assert.InRange(totalSeconds, BalanceTargets.MinimumRunSeconds, BalanceTargets.MaximumRunSeconds);
+    }
+
+    [Fact]
+    public void Run_keeps_every_round_within_its_pacing_target()
+    {
+        var report = BalanceSimulation.Run();
+
+        Assert.All(report.Rounds, round =>
+        {
+            if (round.Round <= 3)
+            {
+                Assert.InRange(round.RoundSeconds, 0f, BalanceTargets.EarlyRoundMaximumSeconds);
+                return;
+            }
+
+            if (round.Round <= 7)
+            {
+                Assert.InRange(round.RoundSeconds, BalanceTargets.MidRoundMinimumSeconds, BalanceTargets.MidRoundMaximumSeconds);
+                return;
+            }
+
+            Assert.InRange(round.RoundSeconds, BalanceTargets.LateRoundMinimumSeconds, BalanceTargets.LateRoundMaximumSeconds);
+        });
+    }
+
+    [Fact]
+    public void Run_keeps_progression_rewards_within_target_ranges()
+    {
+        var report = BalanceSimulation.Run();
+
+        Assert.InRange(report.FinalLevel, BalanceTargets.MinimumFinalLevel, BalanceTargets.MaximumFinalLevel);
+        Assert.InRange(report.TotalSuppliesEarned, BalanceTargets.MinimumSuppliesEarned, BalanceTargets.MaximumSuppliesEarned);
+        Assert.InRange(report.TotalSupplies, BalanceTargets.MinimumSuppliesRemaining, BalanceTargets.MaximumSuppliesRemaining);
+    }
+
+    [Fact]
+    public void Run_keeps_the_boss_and_ammo_pressure_within_target_ranges()
+    {
+        var report = BalanceSimulation.Run();
+        var boss = report.Rounds[^1];
+
+        Assert.InRange(boss.Content.BossSeconds, BalanceTargets.MinimumBossSeconds, BalanceTargets.MaximumBossSeconds);
+        Assert.All(report.Rounds, round => Assert.InRange(round.Ammo.Pressure, 0f, BalanceTargets.MaximumAmmoPressure));
+    }
+
+    [Fact]
     public void Run_flags_unreachable_upgrades_when_income_cannot_cover_the_maximum_cost()
     {
         var report = BalanceSimulation.Run(new BalanceSimulationOptions { MaxRound = 1 });

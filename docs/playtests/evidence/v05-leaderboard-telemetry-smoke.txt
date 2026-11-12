@@ -1,0 +1,33 @@
+# v0.5.0 Android leaderboard and telemetry smoke evidence
+
+- Date: 2026-11-08
+- Build: `JabaSurvivol-emulator-0.5.0-lb.apk` (development build; app version remains `0.4.0` until the release branch bump)
+- Backend: local Identity, Game, and BFF services with PostgreSQL
+- Emulator: `jaba_survivol_api35`, Android 15 API 35 x86_64, phone 1080x2340 @ 440 dpi
+- API base URL: `http://10.0.2.2:5102` through the BFF
+
+## Automated flow
+
+1. Seeded a signed-in session and a highest-round leaderboard entry.
+2. Opened the leaderboard from the main menu and confirmed rank, username,
+   round, kills, and duration were displayed.
+3. Closed the panel and confirmed the telemetry control shows `TELEMETRY: OFF`
+   by default.
+4. Toggled telemetry and confirmed `TELEMETRY: ON` plus persisted opt-in state.
+5. Confirmed remote config showed the telemetry control only when
+   `telemetryEnabled` was true.
+6. Checked logcat for `FATAL EXCEPTION`, `AndroidRuntime` crash, unhandled
+   exception, and `NullReferenceException`. None were present.
+
+Telemetry batching, retry, and opt-in persistence are covered by EditMode tests
+(`TelemetryServiceTests`). Daily aggregate verification is part of the end-to-end
+slice (#82) because it needs `Telemetry.Worker`.
+
+## Evidence files
+
+- `v05-leaderboard-panel.png`
+- `v05-telemetry-toggle.png`
+- `v05-leaderboard-telemetry-logcat.txt`
+
+No tokens, save contents, or secrets are included. Automated verification only;
+no human playtest was performed.

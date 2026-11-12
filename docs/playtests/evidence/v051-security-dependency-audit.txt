@@ -1,0 +1,56 @@
+# Local beta dependency and container security
+
+- Date: 2026-11-11
+- Issue: #108
+- Command: `dotnet list JabaSurvivol.slnx package --vulnerable --include-transitive`
+- Environment: `DOTNET_CLI_UI_LANGUAGE=en`
+
+## Finding and fix
+
+The pre-fix audit reported:
+
+```text
+Aspire.Hosting.AppHost 13.6.4 (via Aspire.AppHost.Sdk/13.6.4)
+High: GHSA-f7vh-h5g3-7jrh
+Aspire.Hosting 13.6.4 (transitive)
+High: GHSA-f7vh-h5g3-7jrh
+```
+
+The AppHost SDK was upgraded from `Aspire.AppHost.Sdk/13.6.4` to
+`Aspire.AppHost.Sdk/13.6.5`. The advisory is patched in `13.6.5`.
+
+## Post-fix audit
+
+Full English output is in `v051-security-dependency-audit-raw.txt`:
+
+```text
+The given project `AppHost` has no vulnerable packages given the current sources.
+The given project `ServiceDefaults` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.Core` has no vulnerable packages given the current sources.
+The given project `Bff` has no vulnerable packages given the current sources.
+The given project `Game.Api` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.Game.Data` has no vulnerable packages given the current sources.
+The given project `Identity.Api` has no vulnerable packages given the current sources.
+The given project `Telemetry.Worker` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.Contracts` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.Security` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.ArchitectureTests` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.Core.Tests` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.IntegrationTests` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.SmokeTests` has no vulnerable packages given the current sources.
+The given project `BalanceSimulation` has no vulnerable packages given the current sources.
+```
+
+## Container images
+
+- Container CI builds all four images and scans them with Trivy.
+- The CI dependency audit is advisory and does not fail the build. The manual
+  audit above is the authoritative result for this beta.
+- Recent pull requests passed `security` (CodeQL and dependency audit) and the
+  container image jobs.
+
+## Result
+
+No open dependency vulnerability remains after the AppHost SDK upgrade. The
+AppHost is local development orchestration and is not part of the shipped
+backend images, but the upgrade removes the finding.

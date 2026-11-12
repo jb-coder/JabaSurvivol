@@ -1,0 +1,121 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: jabasurvivol
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: jabasurvivol
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: jabasurvivol
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: jabasurvivol
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgres
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: postgres
+        app.kubernetes.io/part-of: jabasurvivol
+    spec:
+      serviceAccountName: jabasurvivol
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 70
+        runAsGroup: 70
+        fsGroup: 70
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: jabasurvivol
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jabasurvivol-secrets
+                  key: postgres-password
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+            limits:
+              cpu: 600m
+              memory: 2Gi
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres", "-d", "jabasurvivol"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres", "-d", "jabasurvivol"]
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: postgres-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+  namespace: jabasurvivol
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: jabasurvivol
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-backup
+  namespace: jabasurvivol
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: jabasurvivol
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 5Gi

@@ -1,0 +1,21 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+
+The following sources were used:
+   https://api.nuget.org/v3/index.json
+
+The given project `AppHost` has no vulnerable packages given the current sources.
+The given project `ServiceDefaults` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.Core` has no vulnerable packages given the current sources.
+The given project `Bff` has no vulnerable packages given the current sources.
+The given project `Game.Api` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.Game.Data` has no vulnerable packages given the current sources.
+The given project `Identity.Api` has no vulnerable packages given the current sources.
+The given project `Telemetry.Worker` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.Contracts` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.Security` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.ArchitectureTests` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.Core.Tests` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.IntegrationTests` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.SmokeTests` has no vulnerable packages given the current sources.
+The given project `BalanceSimulation` has no vulnerable packages given the current sources.

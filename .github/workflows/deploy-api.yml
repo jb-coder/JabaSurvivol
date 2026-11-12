@@ -2,19 +2,55 @@ name: deploy-api
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: Semantic version to deploy
+        required: true
+        default: 0.5.0
+  push:
+    tags:
+      - "v*"
 
 permissions:
   contents: read
   packages: write
+  issues: write
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
 
 jobs:
-  deploy:
-    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
+  dry-run:
+    if: ${{ vars.DEPLOY_ENABLED == 'true' && vars.AGENT_PAUSED != 'true' && vars.AGENT_DRY_RUN == 'true' }}
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - name: Report dry-run plan
+        run: |
+          echo "AGENT_DRY_RUN=true"
+          echo "Would build ARM64 images, back up PostgreSQL, run migrations, roll out digests, smoke-test the BFF, and enable rollback."
+
+  deploy:
+    if: ${{ vars.DEPLOY_ENABLED == 'true' && vars.AGENT_PAUSED != 'true' && vars.AGENT_DRY_RUN != 'true' }}
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      VERSION: ${{ github.event.inputs.version || github.ref_name }}
+      REGISTRY_PREFIX: ghcr.io/${{ github.repository_owner }}/jabasurvivol
+    steps:
       - name: Check out repository
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Verify deployment commit is on main
+        run: |
+          git fetch origin main --depth=1
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+
+      - name: Normalize version
+        run: echo "VERSION=${VERSION#v}" >> "$GITHUB_ENV"
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v6
@@ -26,6 +62,19 @@ jobs:
           dotnet restore JabaSurvivol.slnx
           dotnet test JabaSurvivol.slnx -c Release --no-restore
 
+      - name: Configure kubeconfig
+        env:
+          KUBE_CONFIG_B64: ${{ secrets.KUBE_CONFIG_B64 }}
+        run: |
+          echo "$KUBE_CONFIG_B64" | base64 -d > "$RUNNER_TEMP/kubeconfig"
+          echo "KUBECONFIG=$RUNNER_TEMP/kubeconfig" >> "$GITHUB_ENV"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -33,34 +82,130 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Game API
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: src/Services/Game.Api/Dockerfile
-          push: true
-          tags: ghcr.io/${{ github.repository }}/game-api:${{ github.sha }}
-
       - name: Build and push Identity API
+        id: identity
         uses: docker/build-push-action@v7
         with:
           context: .
           file: src/Services/Identity.Api/Dockerfile
+          platforms: linux/arm64
           push: true
-          tags: ghcr.io/${{ github.repository }}/identity-api:${{ github.sha }}
+          tags: |
+            ${{ env.REGISTRY_PREFIX }}/identity-api:${{ github.sha }}
+            ${{ env.REGISTRY_PREFIX }}/identity-api:${{ env.VERSION }}
+
+      - name: Build and push Game API
+        id: game
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: src/Services/Game.Api/Dockerfile
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY_PREFIX }}/game-api:${{ github.sha }}
+            ${{ env.REGISTRY_PREFIX }}/game-api:${{ env.VERSION }}
 
       - name: Build and push Telemetry Worker
+        id: worker
         uses: docker/build-push-action@v7
         with:
           context: .
           file: src/Services/Telemetry.Worker/Dockerfile
+          platforms: linux/arm64
           push: true
-          tags: ghcr.io/${{ github.repository }}/telemetry-worker:${{ github.sha }}
+          tags: |
+            ${{ env.REGISTRY_PREFIX }}/telemetry-worker:${{ github.sha }}
+            ${{ env.REGISTRY_PREFIX }}/telemetry-worker:${{ env.VERSION }}
 
       - name: Build and push BFF
+        id: bff
         uses: docker/build-push-action@v7
         with:
           context: .
           file: src/Gateway/Bff/Dockerfile
+          platforms: linux/arm64
           push: true
-          tags: ghcr.io/${{ github.repository }}/bff:${{ github.sha }}
+          tags: |
+            ${{ env.REGISTRY_PREFIX }}/bff:${{ github.sha }}
+            ${{ env.REGISTRY_PREFIX }}/bff:${{ env.VERSION }}
+
+      - name: Apply support manifests
+        run: |
+          kubectl apply -f deploy/k8s/base/namespace.yaml
+          kubectl apply -f deploy/k8s/base/serviceaccount.yaml
+          kubectl apply -f deploy/k8s/base/configmap.yaml
+          kubectl apply -f deploy/k8s/base/postgres.yaml
+          kubectl apply -f deploy/k8s/base/network-policies.yaml
+          kubectl -n jabasurvivol rollout status statefulset/postgres --timeout=180s
+
+      - name: Pre-migration backup
+        run: |
+          kubectl -n jabasurvivol delete job pre-migration-backup --ignore-not-found
+          sed -i "s/__VERSION__/${VERSION}/g" deploy/k8s/jobs/backup.yaml
+          kubectl apply -f deploy/k8s/jobs/backup.yaml
+          kubectl -n jabasurvivol wait --for=condition=complete job/pre-migration-backup --timeout=300s
+
+      - name: Run database migrations
+        env:
+          IDENTITY_IMAGE: ${{ env.REGISTRY_PREFIX }}/identity-api@${{ steps.identity.outputs.digest }}
+          GAME_IMAGE: ${{ env.REGISTRY_PREFIX }}/game-api@${{ steps.game.outputs.digest }}
+        run: |
+          kubectl -n jabasurvivol delete job db-migrate --ignore-not-found
+          sed -i "s#__IDENTITY_IMAGE__#${IDENTITY_IMAGE}#g" deploy/k8s/jobs/migration.yaml
+          sed -i "s#__GAME_IMAGE__#${GAME_IMAGE}#g" deploy/k8s/jobs/migration.yaml
+          kubectl apply -f deploy/k8s/jobs/migration.yaml
+          if ! kubectl -n jabasurvivol wait --for=condition=complete job/db-migrate --timeout=300s; then
+            kubectl -n jabasurvivol logs job/db-migrate --all-containers=true || true
+            exit 1
+          fi
+
+      - name: Render manifests with image digests
+        id: render
+        run: |
+          kubectl kustomize deploy/k8s/overlays/prod > rendered.yaml
+          sed -i "s#${REGISTRY_PREFIX}/identity-api:0.5.0#${REGISTRY_PREFIX}/identity-api@${{ steps.identity.outputs.digest }}#g" rendered.yaml
+          sed -i "s#${REGISTRY_PREFIX}/game-api:0.5.0#${REGISTRY_PREFIX}/game-api@${{ steps.game.outputs.digest }}#g" rendered.yaml
+          sed -i "s#${REGISTRY_PREFIX}/telemetry-worker:0.5.0#${REGISTRY_PREFIX}/telemetry-worker@${{ steps.worker.outputs.digest }}#g" rendered.yaml
+          sed -i "s#${REGISTRY_PREFIX}/bff:0.5.0#${REGISTRY_PREFIX}/bff@${{ steps.bff.outputs.digest }}#g" rendered.yaml
+          echo "needed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Apply application manifests
+        run: kubectl apply -f rendered.yaml
+
+      - name: Wait for rollout
+        run: |
+          kubectl -n jabasurvivol rollout status deployment/identity-api --timeout=180s
+          kubectl -n jabasurvivol rollout status deployment/game-api --timeout=180s
+          kubectl -n jabasurvivol rollout status deployment/telemetry-worker --timeout=180s
+          kubectl -n jabasurvivol rollout status deployment/bff --timeout=180s
+
+      - name: Smoke test through the BFF
+        run: |
+          kubectl -n jabasurvivol port-forward svc/bff 18080:8080 > /tmp/port-forward.log 2>&1 &
+          PORT_FORWARD_PID=$!
+          trap 'kill $PORT_FORWARD_PID || true' EXIT
+          for _ in 1 2 3 4 5; do
+            if curl -fsS --max-time 10 -o /dev/null http://127.0.0.1:18080/alive; then
+              break
+            fi
+            sleep 4
+          done
+          curl -fsS --max-time 10 -o /dev/null http://127.0.0.1:18080/api/v1/status
+          curl -fsS --max-time 10 -o /dev/null http://127.0.0.1:18080/health
+          curl -fsS --max-time 10 -o /dev/null http://127.0.0.1:18080/alive
+          curl -fsS --max-time 10 http://127.0.0.1:18080/api/v1/game/config | grep -q minimumClientVersion
+
+      - name: Roll back on failure
+        if: failure() && steps.render.outputs.needed == 'true'
+        run: bash deploy/scripts/rollback.sh
+
+      - name: Open incident issue after rollback
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "Deployment failure: ${VERSION}" \
+            --body "The deploy-api workflow failed for ${VERSION}. Review the workflow run and the rollback evidence." \
+            --label agent:blocked || true
