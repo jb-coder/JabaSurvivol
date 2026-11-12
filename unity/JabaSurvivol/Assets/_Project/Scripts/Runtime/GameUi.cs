@@ -129,6 +129,9 @@ namespace JabaSurvivol.Gameplay
         private bool _lastSkillReady;
         private int _lastSkillCooldownPercent = int.MinValue;
         private int _lastSkillActivePercent = int.MinValue;
+        private StickState _lastMoveStick;
+        private StickState _lastAimStick;
+        private bool _sticksInitialized;
         private bool _characterSheetTablet;
         private int _activeCharacterBranch;
 
@@ -502,13 +505,13 @@ namespace JabaSurvivol.Gameplay
                 _lastReserve = reserve;
                 _lastInfiniteReserve = infiniteReserve;
                 _weaponText.text = weaponName;
-                _ammoText.text = Localization.Format(
-                    infiniteReserve ? "hud.ammo.infinite" : "hud.ammo",
-                    magazine,
-                    magazineSize,
-                    infiniteReserve
-                        ? Localization.Get("armory.reserve.infinite")
-                        : reserve.ToString(CultureInfo.InvariantCulture));
+                _ammoText.text = infiniteReserve
+                    ? Localization.Format(
+                        "hud.ammo.infinite",
+                        magazine,
+                        magazineSize,
+                        Localization.Get("armory.reserve.infinite"))
+                    : Localization.Format("hud.ammo", magazine, magazineSize, reserve);
             }
 
             if (reloading != _lastReloading)
@@ -1416,6 +1419,20 @@ namespace JabaSurvivol.Gameplay
 
         public void SetSticks(StickState move, StickState aim)
         {
+            if (_sticksInitialized &&
+                move.Active == _lastMoveStick.Active &&
+                move.Origin == _lastMoveStick.Origin &&
+                move.Current == _lastMoveStick.Current &&
+                aim.Active == _lastAimStick.Active &&
+                aim.Origin == _lastAimStick.Origin &&
+                aim.Current == _lastAimStick.Current)
+            {
+                return;
+            }
+
+            _sticksInitialized = true;
+            _lastMoveStick = move;
+            _lastAimStick = aim;
             UpdateStick(_moveBase, _moveKnob, _moveBaseImage, move, false);
             UpdateStick(_aimBase, _aimKnob, _aimBaseImage, aim, true);
         }

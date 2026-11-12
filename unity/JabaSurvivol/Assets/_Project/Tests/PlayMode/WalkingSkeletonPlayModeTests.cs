@@ -69,6 +69,7 @@ namespace JabaSurvivol.Tests.PlayMode
             yield return null;
 
             Assert.That(session.Profile.Supplies, Is.EqualTo(GameBalance.SuppliesPerKill));
+            yield return new WaitForSeconds(1f);
             Assert.That(File.Exists(_path), Is.True);
 
             session.ApplyDamage(GameBalance.PlayerMaxHealth * 2f);
@@ -78,6 +79,26 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(session.PlayerActive, Is.False);
             Assert.That(session.Profile.Supplies, Is.EqualTo(GameBalance.SuppliesPerKill));
             Assert.That(session.Profile.TotalRuns, Is.EqualTo(1));
+        }
+
+        [UnityTest]
+        public IEnumerator Rapid_kills_are_saved_at_most_once_per_interval()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.StartRun();
+            var afterStart = session.ProfileSaveCountForTests;
+
+            session.DamageZombieForTests(100000f);
+            session.SpawnZombieForTests();
+            session.DamageZombieForTests(100000f);
+            yield return null;
+
+            Assert.That(session.ProfileSaveCountForTests, Is.EqualTo(afterStart));
+
+            yield return new WaitForSeconds(1f);
+            Assert.That(session.ProfileSaveCountForTests, Is.GreaterThan(afterStart));
         }
 
         [UnityTest]
