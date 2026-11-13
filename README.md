@@ -45,7 +45,7 @@ Fight through ten escalating rounds, build a survivor across runs, and keep ever
 
 ## Status
 
-> **v0.6.0 localization release candidate.** The core loop, persistent progression, five-weapon arsenal, boss encounter, accounts, cloud saves, leaderboard, opt-in telemetry, and BFF are implemented. English and Spanish are available with a device-language default and a runtime selector. Visuals are still prototype art, and online features require a reachable backend configured at build time.
+> **v0.6.0 localization release.** The core loop, persistent progression, five-weapon arsenal, boss encounter, accounts, cloud saves, leaderboard, opt-in telemetry, and BFF are implemented. English and Spanish are available with a device-language default and a runtime selector. Visuals are still prototype art, and online features require a reachable backend configured at build time.
 
 Read the [v0.6.0 release notes](docs/releases/2026-11-13-v0.6.0.md) for the full feature list, verification evidence, and known issues.
 
@@ -307,7 +307,7 @@ dotnet run --project src/AppHost
 
 ### Open the game
 
-Unity setup instructions, scene details, and Android build steps live in [`docs/setup/unity.md`](docs/setup/unity.md). The release APK will be attached to the [v0.6.0 release](https://github.com/jb-coder/JabaSurvivol/releases/tag/v0.6.0) when the tag is published.
+Unity setup instructions, scene details, and Android build steps live in [`docs/setup/unity.md`](docs/setup/unity.md). The release APK is attached to the [v0.6.0 release](https://github.com/jb-coder/JabaSurvivol/releases/tag/v0.6.0).
 
 ## Roadmap
 
@@ -315,7 +315,7 @@ Unity setup instructions, scene details, and Android build steps live in [`docs/
 |---|---|---|
 | **v0.5.1 Local Beta** | Shipped | Core loop, boss, progression, accounts, cloud saves, leaderboards, telemetry, Android beta |
 | **v0.5.2 Beta Follow-ups** | Closed | Beta close-out, combat tuning baseline, Android performance baseline, security risk acceptance |
-| **v0.6.0 Localization** | Release candidate | English and Spanish, device-language default, runtime selector, key coverage, and layout checks |
+| **v0.6.0 Localization** | Shipped | English and Spanish, device-language default, runtime selector, key coverage, and layout checks |
 | **v1.0.0 Release and Donations** | Planned | Release readiness and an optional donation link with no in-game rewards |
 
 ## Principles
