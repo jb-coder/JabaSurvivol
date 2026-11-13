@@ -141,6 +141,16 @@ namespace JabaSurvivol.Tests.EditMode
         }
 
         [Test]
+        public void Display_culture_uses_locale_number_conventions()
+        {
+            Localization.SetLocale("es");
+            Assert.That(1.5f.ToString(Localization.DisplayCulture), Is.EqualTo("1,5"));
+
+            Localization.SetLocale("en");
+            Assert.That(1.5f.ToString(Localization.DisplayCulture), Is.EqualTo("1.5"));
+        }
+
+        [Test]
         public void Invalid_locale_is_rejected()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => Localization.SetLocale("fr"));
