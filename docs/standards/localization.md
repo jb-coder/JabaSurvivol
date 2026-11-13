@@ -9,12 +9,12 @@
 - Additional locales, store metadata, RTL, and non-Latin font work remain out of
   scope until a reviewed ADR approves them.
 - Do not hardcode user-facing strings.
-- Spanish is a complete first translation but is **pending human review**. It
-  must not be described as reviewed until
-  `docs/playtests/evidence/localization-review-es.txt` is signed.
-- The Spanish table was merged in #147 as a historical exception before this
-  workflow existed. It remains on `develop`, must not be released, and blocks
-  the v0.6.0 release until the review record is signed.
+- Spanish is a complete first translation and was human-reviewed and approved
+  on 2026-11-13. See
+  `docs/playtests/evidence/localization-review-es.txt`. Any later source or
+  glossary change requires re-review.
+- The Spanish table was merged in #147 before this workflow existed. It is now
+  covered by the signed review record and may ship with v0.6.0.
 
 ## Source of truth
 
@@ -91,7 +91,8 @@ The review record is
 - Locale file and English source table.
 - Key coverage and placeholder coverage.
 - Glossary version.
-- Translation method: `Human` or `Machine-assisted, fully human-reviewed`.
+- Translation method: `Human`, `Human-reviewed`, or
+  `Machine-assisted, fully human-reviewed`.
 - Screens reviewed.
 - Unresolved items.
 - Explicit approval.

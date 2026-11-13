@@ -4,7 +4,7 @@
 
 <br />
 
-[![Latest release](https://img.shields.io/badge/release-v0.5.1-22d3ee?style=for-the-badge&labelColor=07111f)](https://github.com/jb-coder/JabaSurvivol/releases/tag/v0.5.1)
+[![Latest release](https://img.shields.io/badge/release-v0.6.0-22d3ee?style=for-the-badge&labelColor=07111f)](https://github.com/jb-coder/JabaSurvivol/releases/tag/v0.6.0)
 [![Status](https://img.shields.io/badge/status-local%20beta-f59e0b?style=for-the-badge&labelColor=07111f)](#status)
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20Windows-22c55e?style=for-the-badge&labelColor=07111f)](#built-for-phones-and-tablets)
 [![Unity](https://img.shields.io/badge/Unity-6.3%20LTS-111827?style=for-the-badge&labelColor=07111f&logo=unity&logoColor=white)](https://unity.com/)
@@ -45,9 +45,9 @@ Fight through ten escalating rounds, build a survivor across runs, and keep ever
 
 ## Status
 
-> **v0.5.1 local beta.** The core loop, persistent progression, five-weapon arsenal, boss encounter, accounts, cloud saves, leaderboard, opt-in telemetry, and BFF are implemented. Visuals are still prototype art, and online features require a reachable backend configured at build time.
+> **v0.6.0 localization release.** The core loop, persistent progression, five-weapon arsenal, boss encounter, accounts, cloud saves, leaderboard, opt-in telemetry, and BFF are implemented. English and Spanish are available with a device-language default and a runtime selector. Visuals are still prototype art, and online features require a reachable backend configured at build time.
 
-Read the [v0.5.1 release notes](docs/releases/2026-11-12-v0.5.1.md) for the full feature list, verification evidence, and known issues.
+Read the [v0.6.0 release notes](docs/releases/2026-11-13-v0.6.0.md) for the full feature list, verification evidence, and known issues.
 
 ## The pitch
 
@@ -256,17 +256,17 @@ The backend is a modular monolith. Services are extracted only when a concrete n
 
 ## Quality gates
 
-The v0.5.1 release was verified with:
+The v0.6.0 release was verified with:
 
 | Gate | Result |
 |---|---|
 | Release build | 0 warnings, 0 errors |
-| .NET tests | 259 passed: 171 core, 86 integration, 1 architecture, 1 smoke |
-| Unity EditMode | 79 passed |
-| Unity PlayMode | 86 passed |
+| .NET tests | 261 passed: 173 core, 86 integration, 1 architecture, 1 smoke |
+| Unity EditMode | 111 passed |
+| Unity PlayMode | 99 passed |
 | Formatting | `dotnet format --verify-no-changes` passed |
-| Android APK | v0.5.1, version code 6, `arm64-v8a`, minimum API 26, target API 36 |
-| Device coverage | Android emulator phone and tablet layouts; owner-reported physical-device smoke test |
+| Android APK | v0.6.0, version code 7, `arm64-v8a`, minimum API 26, target API 36 |
+| Device coverage | Android emulator phone and tablet layouts; owner-approved Spanish locale review |
 
 ```powershell
 dotnet restore JabaSurvivol.slnx
@@ -307,7 +307,7 @@ dotnet run --project src/AppHost
 
 ### Open the game
 
-Unity setup instructions, scene details, and Android build steps live in [`docs/setup/unity.md`](docs/setup/unity.md). The latest APK is attached to the [v0.5.1 release](https://github.com/jb-coder/JabaSurvivol/releases/tag/v0.5.1).
+Unity setup instructions, scene details, and Android build steps live in [`docs/setup/unity.md`](docs/setup/unity.md). The latest APK is attached to the [v0.6.0 release](https://github.com/jb-coder/JabaSurvivol/releases/tag/v0.6.0).
 
 ## Roadmap
 
@@ -315,7 +315,7 @@ Unity setup instructions, scene details, and Android build steps live in [`docs/
 |---|---|---|
 | **v0.5.1 Local Beta** | Shipped | Core loop, boss, progression, accounts, cloud saves, leaderboards, telemetry, Android beta |
 | **v0.5.2 Beta Follow-ups** | Closed | Beta close-out, combat tuning baseline, Android performance baseline, security risk acceptance |
-| **v0.6.0 Localization** | In progress | English and Spanish, device-language default, runtime selector, key coverage, and layout checks |
+| **v0.6.0 Localization** | Shipped | English and Spanish, device-language default, runtime selector, key coverage, and layout checks |
 | **v1.0.0 Release and Donations** | Planned | Release readiness and an optional donation link with no in-game rewards |
 
 ## Principles

@@ -2,10 +2,10 @@
 
 ## Status
 
-These are the canonical English source terms and the Spanish terms currently
-used by the locale table. The Spanish column is a working reference and remains
-**pending human review**. A glossary change follows the same review path as a
-locale-table change.
+These are the canonical English source terms and the Spanish terms used by the
+locale table. The Spanish column was reviewed with the v0.6.0 locale on
+2026-11-13. A glossary change follows the same review path as a locale-table
+change.
 
 ## How to use this glossary
 

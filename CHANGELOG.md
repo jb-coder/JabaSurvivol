@@ -4,7 +4,7 @@ All notable changes to this project are documented in this file.
 
 The format is based on Keep a Changelog and the project follows Semantic Versioning.
 
-## [Unreleased]
+## [0.6.0] - 2026-11-13
 
 ### Added
 
@@ -15,6 +15,8 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ### Changed
 
+- Android and core package version bumped to `0.6.0` with version code `7`.
+- Spanish localization human-reviewed and approved on 2026-11-13; any later string or glossary change requires re-review.
 - Made generated UI text resize to fit its bounds and adjusted HUD and main-menu spacing for expanded locales.
 - Localized leaderboard rows and identity error messages, with a safe generic fallback for unknown backend codes and no raw ProblemDetails text in the UI.
 - Documented the accepted residual risk for the short, trusted Tailscale beta and closed the security audit with that exception.
