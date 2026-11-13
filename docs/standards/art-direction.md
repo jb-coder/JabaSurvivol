@@ -12,6 +12,8 @@ tablets in landscape orientation. Readability at phone size wins over detail.
 
 - Neon-lit urban survival in a sealed arena.
 - Top-down view with strong silhouettes and a small palette.
+- Actors and weapons are drawn facing right (`+X`). Aim rotation is
+  `atan2(y, x)`; legs counter-rotate toward the movement direction.
 - Friendly to low-end Android devices and to 1080p phone screens.
 - No text baked into sprites. User-facing text uses localization keys.
 
