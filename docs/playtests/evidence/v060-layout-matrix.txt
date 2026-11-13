@@ -36,7 +36,7 @@ The main-menu screenshots show build label `ca4a770`. The HUD, pause, armory, an
 
 ## Limitations
 
-- The pseudo-locale overflow audit covers the main menu, HUD, pause, game-over, and round-end screens on the 1920x1080 design layout. Armory and character-sheet layouts are covered by the English/Spanish screenshot matrix and key checks, not by the pseudo-locale audit.
+- The pseudo-locale overflow audit covers the main menu, HUD, pause, game-over, and round-end screens on the 1920x1080 design layout. Armory is covered by the English/Spanish screenshot matrix. Character-sheet layout is not in the #141 pseudo audit or screenshot matrix; it remains a documented gap for later expanded-locale QA.
 - The result screenshots are game-over screens. Round-end layout is covered by the PlayMode pseudo-locale audit, not a committed screenshot.
 - The pseudo-locale overflow audit uses the 1920x1080 design layout; the English/Spanish matrix covers the actual phone and tablet sizes.
 - No unresolved truncation or overlap was found in the covered pseudo-locale screens or the English/Spanish screenshot matrix.
