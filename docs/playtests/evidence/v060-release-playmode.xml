@@ -1,0 +1,764 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="99" result="Passed" total="99" passed="99" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-13 16:24:52Z" end-time="2026-11-13 16:25:20Z" duration="28,0361378">
+  <test-suite type="TestSuite" id="1121" name="JabaSurvivol" fullname="JabaSurvivol" runstate="Runnable" testcasecount="99" result="Passed" start-time="2026-11-13 16:24:52Z" end-time="2026-11-13 16:25:20Z" duration="28.036138" total="99" passed="99" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="SetUpFixture" id="1001" name="JabaSurvivol.Tests.PlayMode.dll" fullname="PlayModeTestBootstrap" classname="PlayModeTestBootstrap" runstate="Runnable" testcasecount="99" result="Passed" start-time="2026-11-13 16:24:52Z" end-time="2026-11-13 16:25:20Z" duration="28.026207" total="99" passed="99" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="29280" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1115" name="JabaSurvivol" fullname="JabaSurvivol" runstate="Runnable" testcasecount="99" result="Passed" start-time="2026-11-13 16:24:52Z" end-time="2026-11-13 16:25:20Z" duration="28.012303" total="99" passed="99" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1116" name="Tests" fullname="JabaSurvivol.Tests" runstate="Runnable" testcasecount="99" result="Passed" start-time="2026-11-13 16:24:52Z" end-time="2026-11-13 16:25:20Z" duration="28.010502" total="99" passed="99" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1117" name="PlayMode" fullname="JabaSurvivol.Tests.PlayMode" runstate="Runnable" testcasecount="99" result="Passed" start-time="2026-11-13 16:24:52Z" end-time="2026-11-13 16:25:20Z" duration="28.008778" total="99" passed="99" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1002" name="AccountUiPlayModeTests" fullname="JabaSurvivol.Tests.PlayMode.AccountUiPlayModeTests" classname="JabaSurvivol.Tests.PlayMode.AccountUiPlayModeTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-11-13 16:24:52Z" end-time="2026-11-13 16:24:53Z" duration="0.963939" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1007" name="Account_labels_follow_the_locale" fullname="JabaSurvivol.Tests.PlayMode.AccountUiPlayModeTests.Account_labels_follow_the_locale" methodname="Account_labels_follow_the_locale" classname="JabaSurvivol.Tests.PlayMode.AccountUiPlayModeTests" runstate="Runnable" seed="1414267309" result="Passed" start-time="2026-11-13 16:24:52Z" end-time="2026-11-13 16:24:53Z" duration="0.411711" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1003" name="Account_panel_reflects_signed_out_and_signed_in_states" fullname="JabaSurvivol.Tests.PlayMode.AccountUiPlayModeTests.Account_panel_reflects_signed_out_and_signed_in_states" methodname="Account_panel_reflects_signed_out_and_signed_in_states" classname="JabaSurvivol.Tests.PlayMode.AccountUiPlayModeTests" runstate="Runnable" seed="357365344" result="Passed" start-time="2026-11-13 16:24:53Z" end-time="2026-11-13 16:24:53Z" duration="0.116503" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1004" name="Login_success_updates_the_account_ui_and_logout_returns_to_signed_out" fullname="JabaSurvivol.Tests.PlayMode.AccountUiPlayModeTests.Login_success_updates_the_account_ui_and_logout_returns_to_signed_out" methodname="Login_success_updates_the_account_ui_and_logout_returns_to_signed_out" classname="JabaSurvivol.Tests.PlayMode.AccountUiPlayModeTests" runstate="Runnable" seed="172970563" result="Passed" start-time="2026-11-13 16:24:53Z" end-time="2026-11-13 16:24:53Z" duration="0.116820" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1005" name="Refresh_failure_shows_offline_state" fullname="JabaSurvivol.Tests.PlayMode.AccountUiPlayModeTests.Refresh_failure_shows_offline_state" methodname="Refresh_failure_shows_offline_state" classname="JabaSurvivol.Tests.PlayMode.AccountUiPlayModeTests" runstate="Runnable" seed="2146379030" result="Passed" start-time="2026-11-13 16:24:53Z" end-time="2026-11-13 16:24:53Z" duration="0.101367" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1006" name="Refresh_network_failure_through_account_service_shows_offline" fullname="JabaSurvivol.Tests.PlayMode.AccountUiPlayModeTests.Refresh_network_failure_through_account_service_shows_offline" methodname="Refresh_network_failure_through_account_service_shows_offline" classname="JabaSurvivol.Tests.PlayMode.AccountUiPlayModeTests" runstate="Runnable" seed="846739326" result="Passed" start-time="2026-11-13 16:24:53Z" end-time="2026-11-13 16:24:53Z" duration="0.085536" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1008" name="Starting_a_run_without_an_account_keeps_local_play_available" fullname="JabaSurvivol.Tests.PlayMode.AccountUiPlayModeTests.Starting_a_run_without_an_account_keeps_local_play_available" methodname="Starting_a_run_without_an_account_keeps_local_play_available" classname="JabaSurvivol.Tests.PlayMode.AccountUiPlayModeTests" runstate="Runnable" seed="857543814" result="Passed" start-time="2026-11-13 16:24:53Z" end-time="2026-11-13 16:24:53Z" duration="0.115213" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1009" name="BossPlayModeTests" fullname="JabaSurvivol.Tests.PlayMode.BossPlayModeTests" classname="JabaSurvivol.Tests.PlayMode.BossPlayModeTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-11-13 16:24:53Z" end-time="2026-11-13 16:24:59Z" duration="5.615646" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1012" name="Boss_enrages_and_telegraphs_its_slam" fullname="JabaSurvivol.Tests.PlayMode.BossPlayModeTests.Boss_enrages_and_telegraphs_its_slam" methodname="Boss_enrages_and_telegraphs_its_slam" classname="JabaSurvivol.Tests.PlayMode.BossPlayModeTests" runstate="Runnable" seed="1742998532" result="Passed" start-time="2026-11-13 16:24:53Z" end-time="2026-11-13 16:24:54Z" duration="0.960824" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1015" name="Boss_hud_returns_after_the_armory_from_pause" fullname="JabaSurvivol.Tests.PlayMode.BossPlayModeTests.Boss_hud_returns_after_the_armory_from_pause" methodname="Boss_hud_returns_after_the_armory_from_pause" classname="JabaSurvivol.Tests.PlayMode.BossPlayModeTests" runstate="Runnable" seed="546107244" result="Passed" start-time="2026-11-13 16:24:54Z" end-time="2026-11-13 16:24:55Z" duration="0.950842" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1011" name="Boss_kill_enters_victory_and_rewards_the_profile" fullname="JabaSurvivol.Tests.PlayMode.BossPlayModeTests.Boss_kill_enters_victory_and_rewards_the_profile" methodname="Boss_kill_enters_victory_and_rewards_the_profile" classname="JabaSurvivol.Tests.PlayMode.BossPlayModeTests" runstate="Runnable" seed="694272833" result="Passed" start-time="2026-11-13 16:24:55Z" end-time="2026-11-13 16:24:56Z" duration="0.914044" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1010" name="Boss_spawns_after_regular_enemies_and_shows_the_hud" fullname="JabaSurvivol.Tests.PlayMode.BossPlayModeTests.Boss_spawns_after_regular_enemies_and_shows_the_hud" methodname="Boss_spawns_after_regular_enemies_and_shows_the_hud" classname="JabaSurvivol.Tests.PlayMode.BossPlayModeTests" runstate="Runnable" seed="2014042209" result="Passed" start-time="2026-11-13 16:24:56Z" end-time="2026-11-13 16:24:57Z" duration="0.911641" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1013" name="Death_during_the_boss_round_keeps_persistent_progress" fullname="JabaSurvivol.Tests.PlayMode.BossPlayModeTests.Death_during_the_boss_round_keeps_persistent_progress" methodname="Death_during_the_boss_round_keeps_persistent_progress" classname="JabaSurvivol.Tests.PlayMode.BossPlayModeTests" runstate="Runnable" seed="1895829947" result="Passed" start-time="2026-11-13 16:24:57Z" end-time="2026-11-13 16:24:58Z" duration="0.921886" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1014" name="Victory_rewards_are_not_granted_twice" fullname="JabaSurvivol.Tests.PlayMode.BossPlayModeTests.Victory_rewards_are_not_granted_twice" methodname="Victory_rewards_are_not_granted_twice" classname="JabaSurvivol.Tests.PlayMode.BossPlayModeTests" runstate="Runnable" seed="584904697" result="Passed" start-time="2026-11-13 16:24:58Z" end-time="2026-11-13 16:24:59Z" duration="0.952535" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1016" name="BuildInfoPlayModeTests" fullname="JabaSurvivol.Tests.PlayMode.BuildInfoPlayModeTests" classname="JabaSurvivol.Tests.PlayMode.BuildInfoPlayModeTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-11-13 16:24:59Z" end-time="2026-11-13 16:24:59Z" duration="0.128445" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1017" name="Main_menu_shows_the_version_and_commit" fullname="JabaSurvivol.Tests.PlayMode.BuildInfoPlayModeTests.Main_menu_shows_the_version_and_commit" methodname="Main_menu_shows_the_version_and_commit" classname="JabaSurvivol.Tests.PlayMode.BuildInfoPlayModeTests" runstate="Runnable" seed="2109227719" result="Passed" start-time="2026-11-13 16:24:59Z" end-time="2026-11-13 16:24:59Z" duration="0.126372" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1018" name="CloudSavePlayModeTests" fullname="JabaSurvivol.Tests.PlayMode.CloudSavePlayModeTests" classname="JabaSurvivol.Tests.PlayMode.CloudSavePlayModeTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-13 16:24:59Z" end-time="2026-11-13 16:24:59Z" duration="0.624502" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1019" name="Cloud_status_follows_the_locale" fullname="JabaSurvivol.Tests.PlayMode.CloudSavePlayModeTests.Cloud_status_follows_the_locale" methodname="Cloud_status_follows_the_locale" classname="JabaSurvivol.Tests.PlayMode.CloudSavePlayModeTests" runstate="Runnable" seed="759520571" result="Passed" start-time="2026-11-13 16:24:59Z" end-time="2026-11-13 16:24:59Z" duration="0.138025" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1020" name="Conflict_opens_the_explicit_choice_dialog" fullname="JabaSurvivol.Tests.PlayMode.CloudSavePlayModeTests.Conflict_opens_the_explicit_choice_dialog" methodname="Conflict_opens_the_explicit_choice_dialog" classname="JabaSurvivol.Tests.PlayMode.CloudSavePlayModeTests" runstate="Runnable" seed="745077329" result="Passed" start-time="2026-11-13 16:24:59Z" end-time="2026-11-13 16:24:59Z" duration="0.118724" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1021" name="Offline_sync_keeps_local_play_and_reports_offline" fullname="JabaSurvivol.Tests.PlayMode.CloudSavePlayModeTests.Offline_sync_keeps_local_play_and_reports_offline" methodname="Offline_sync_keeps_local_play_and_reports_offline" classname="JabaSurvivol.Tests.PlayMode.CloudSavePlayModeTests" runstate="Runnable" seed="181615219" result="Passed" start-time="2026-11-13 16:24:59Z" end-time="2026-11-13 16:24:59Z" duration="0.110920" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1022" name="Restore_replaces_the_local_profile_atomically" fullname="JabaSurvivol.Tests.PlayMode.CloudSavePlayModeTests.Restore_replaces_the_local_profile_atomically" methodname="Restore_replaces_the_local_profile_atomically" classname="JabaSurvivol.Tests.PlayMode.CloudSavePlayModeTests" runstate="Runnable" seed="227592505" result="Passed" start-time="2026-11-13 16:24:59Z" end-time="2026-11-13 16:24:59Z" duration="0.116638" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1023" name="Sign_out_clears_the_conflict_dialog" fullname="JabaSurvivol.Tests.PlayMode.CloudSavePlayModeTests.Sign_out_clears_the_conflict_dialog" methodname="Sign_out_clears_the_conflict_dialog" classname="JabaSurvivol.Tests.PlayMode.CloudSavePlayModeTests" runstate="Runnable" seed="1922777176" result="Passed" start-time="2026-11-13 16:24:59Z" end-time="2026-11-13 16:24:59Z" duration="0.136857" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1024" name="DashShockwavePlayModeTests" fullname="JabaSurvivol.Tests.PlayMode.DashShockwavePlayModeTests" classname="JabaSurvivol.Tests.PlayMode.DashShockwavePlayModeTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-13 16:24:59Z" end-time="2026-11-13 16:25:01Z" duration="1.187986" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1028" name="Active_skill_selection_works_from_the_character_sheet" fullname="JabaSurvivol.Tests.PlayMode.DashShockwavePlayModeTests.Active_skill_selection_works_from_the_character_sheet" methodname="Active_skill_selection_works_from_the_character_sheet" classname="JabaSurvivol.Tests.PlayMode.DashShockwavePlayModeTests" runstate="Runnable" seed="1617284768" result="Passed" start-time="2026-11-13 16:24:59Z" end-time="2026-11-13 16:25:00Z" duration="0.220482" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1025" name="Dash_moves_the_player_and_grants_invulnerability" fullname="JabaSurvivol.Tests.PlayMode.DashShockwavePlayModeTests.Dash_moves_the_player_and_grants_invulnerability" methodname="Dash_moves_the_player_and_grants_invulnerability" classname="JabaSurvivol.Tests.PlayMode.DashShockwavePlayModeTests" runstate="Runnable" seed="1199497999" result="Passed" start-time="2026-11-13 16:25:00Z" end-time="2026-11-13 16:25:00Z" duration="0.592492" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1027" name="Dash_uses_the_aim_direction_when_stationary_and_does_not_deploy_a_turret" fullname="JabaSurvivol.Tests.PlayMode.DashShockwavePlayModeTests.Dash_uses_the_aim_direction_when_stationary_and_does_not_deploy_a_turret" methodname="Dash_uses_the_aim_direction_when_stationary_and_does_not_deploy_a_turret" classname="JabaSurvivol.Tests.PlayMode.DashShockwavePlayModeTests" runstate="Runnable" seed="1995236895" result="Passed" start-time="2026-11-13 16:25:00Z" end-time="2026-11-13 16:25:00Z" duration="0.141637" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1026" name="Shockwave_damages_and_knocks_back_a_nearby_zombie" fullname="JabaSurvivol.Tests.PlayMode.DashShockwavePlayModeTests.Shockwave_damages_and_knocks_back_a_nearby_zombie" methodname="Shockwave_damages_and_knocks_back_a_nearby_zombie" classname="JabaSurvivol.Tests.PlayMode.DashShockwavePlayModeTests" runstate="Runnable" seed="1696948153" result="Passed" start-time="2026-11-13 16:25:00Z" end-time="2026-11-13 16:25:01Z" duration="0.125938" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1029" name="Zero_rank_active_skill_cannot_be_selected" fullname="JabaSurvivol.Tests.PlayMode.DashShockwavePlayModeTests.Zero_rank_active_skill_cannot_be_selected" methodname="Zero_rank_active_skill_cannot_be_selected" classname="JabaSurvivol.Tests.PlayMode.DashShockwavePlayModeTests" runstate="Runnable" seed="1996543451" result="Passed" start-time="2026-11-13 16:25:01Z" end-time="2026-11-13 16:25:01Z" duration="0.103968" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1030" name="GameAudioPlayModeTests" fullname="JabaSurvivol.Tests.PlayMode.GameAudioPlayModeTests" classname="JabaSurvivol.Tests.PlayMode.GameAudioPlayModeTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-13 16:25:01Z" end-time="2026-11-13 16:25:01Z" duration="0.250790" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1031" name="Mute_preference_persists_across_instances" fullname="JabaSurvivol.Tests.PlayMode.GameAudioPlayModeTests.Mute_preference_persists_across_instances" methodname="Mute_preference_persists_across_instances" classname="JabaSurvivol.Tests.PlayMode.GameAudioPlayModeTests" runstate="Runnable" seed="390357672" result="Passed" start-time="2026-11-13 16:25:01Z" end-time="2026-11-13 16:25:01Z" duration="0.084459" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[There are no audio listeners in the scene. Please ensure there is always one audio listener in the scene
+There are no audio listeners in the scene. Please ensure there is always one audio listener in the scene
+]]></output>
+              </test-case>
+              <test-case id="1033" name="Pause_menu_sound_label_toggles_between_on_and_off" fullname="JabaSurvivol.Tests.PlayMode.GameAudioPlayModeTests.Pause_menu_sound_label_toggles_between_on_and_off" methodname="Pause_menu_sound_label_toggles_between_on_and_off" classname="JabaSurvivol.Tests.PlayMode.GameAudioPlayModeTests" runstate="Runnable" seed="1237976441" result="Passed" start-time="2026-11-13 16:25:01Z" end-time="2026-11-13 16:25:01Z" duration="0.123727" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1032" name="Play_is_silent_and_uncounted_while_muted" fullname="JabaSurvivol.Tests.PlayMode.GameAudioPlayModeTests.Play_is_silent_and_uncounted_while_muted" methodname="Play_is_silent_and_uncounted_while_muted" classname="JabaSurvivol.Tests.PlayMode.GameAudioPlayModeTests" runstate="Runnable" seed="161622507" result="Passed" start-time="2026-11-13 16:25:01Z" end-time="2026-11-13 16:25:01Z" duration="0.039797" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[There are no audio listeners in the scene. Please ensure there is always one audio listener in the scene
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1034" name="LeaderboardTelemetryPlayModeTests" fullname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests" classname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-11-13 16:25:01Z" end-time="2026-11-13 16:25:02Z" duration="0.994130" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1039" name="Leaderboard_disabled_flag_shows_disabled_state" fullname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests.Leaderboard_disabled_flag_shows_disabled_state" methodname="Leaderboard_disabled_flag_shows_disabled_state" classname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests" runstate="Runnable" seed="306526331" result="Passed" start-time="2026-11-13 16:25:01Z" end-time="2026-11-13 16:25:01Z" duration="0.147281" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1035" name="Leaderboard_empty_state_is_shown" fullname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests.Leaderboard_empty_state_is_shown" methodname="Leaderboard_empty_state_is_shown" classname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests" runstate="Runnable" seed="153048588" result="Passed" start-time="2026-11-13 16:25:01Z" end-time="2026-11-13 16:25:01Z" duration="0.120909" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1036" name="Leaderboard_populated_board_renders_rank_and_stats" fullname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests.Leaderboard_populated_board_renders_rank_and_stats" methodname="Leaderboard_populated_board_renders_rank_and_stats" classname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests" runstate="Runnable" seed="339890305" result="Passed" start-time="2026-11-13 16:25:01Z" end-time="2026-11-13 16:25:01Z" duration="0.180564" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1037" name="Leaderboard_rows_follow_the_locale" fullname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests.Leaderboard_rows_follow_the_locale" methodname="Leaderboard_rows_follow_the_locale" classname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests" runstate="Runnable" seed="2120849305" result="Passed" start-time="2026-11-13 16:25:01Z" end-time="2026-11-13 16:25:01Z" duration="0.128251" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1040" name="Leaderboard_submission_failure_does_not_block_death_or_progress" fullname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests.Leaderboard_submission_failure_does_not_block_death_or_progress" methodname="Leaderboard_submission_failure_does_not_block_death_or_progress" classname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests" runstate="Runnable" seed="1467242292" result="Passed" start-time="2026-11-13 16:25:01Z" end-time="2026-11-13 16:25:02Z" duration="0.136469" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1042" name="Telemetry_disabled_flag_hides_the_toggle" fullname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests.Telemetry_disabled_flag_hides_the_toggle" methodname="Telemetry_disabled_flag_hides_the_toggle" classname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests" runstate="Runnable" seed="224128044" result="Passed" start-time="2026-11-13 16:25:02Z" end-time="2026-11-13 16:25:02Z" duration="0.102609" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1041" name="Telemetry_opt_in_persists_and_toggles" fullname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests.Telemetry_opt_in_persists_and_toggles" methodname="Telemetry_opt_in_persists_and_toggles" classname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests" runstate="Runnable" seed="418259847" result="Passed" start-time="2026-11-13 16:25:02Z" end-time="2026-11-13 16:25:02Z" duration="0.116917" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1038" name="Telemetry_queue_retries_in_play_mode" fullname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests.Telemetry_queue_retries_in_play_mode" methodname="Telemetry_queue_retries_in_play_mode" classname="JabaSurvivol.Tests.PlayMode.LeaderboardTelemetryPlayModeTests" runstate="Runnable" seed="1968647648" result="Passed" start-time="2026-11-13 16:25:02Z" end-time="2026-11-13 16:25:02Z" duration="0.043773" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1043" name="LocalizationUiPlayModeTests" fullname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests" classname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-11-13 16:25:02Z" end-time="2026-11-13 16:25:04Z" duration="1.704395" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1048" name="Language_choice_applies_to_result_screens" fullname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests.Language_choice_applies_to_result_screens" methodname="Language_choice_applies_to_result_screens" classname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests" runstate="Runnable" seed="1042779262" result="Passed" start-time="2026-11-13 16:25:02Z" end-time="2026-11-13 16:25:02Z" duration="0.166575" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1049" name="Language_choice_survives_bootstrap_recreation" fullname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests.Language_choice_survives_bootstrap_recreation" methodname="Language_choice_survives_bootstrap_recreation" classname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests" runstate="Runnable" seed="1210021309" result="Passed" start-time="2026-11-13 16:25:02Z" end-time="2026-11-13 16:25:02Z" duration="0.191989" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1051" name="Language_selector_close_does_not_change_the_locale" fullname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests.Language_selector_close_does_not_change_the_locale" methodname="Language_selector_close_does_not_change_the_locale" classname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests" runstate="Runnable" seed="384818648" result="Passed" start-time="2026-11-13 16:25:02Z" end-time="2026-11-13 16:25:02Z" duration="0.119165" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1044" name="Language_selector_updates_main_menu_labels" fullname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests.Language_selector_updates_main_menu_labels" methodname="Language_selector_updates_main_menu_labels" classname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests" runstate="Runnable" seed="1272632183" result="Passed" start-time="2026-11-13 16:25:02Z" end-time="2026-11-13 16:25:02Z" duration="0.118282" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1047" name="Language_selector_updates_pause_and_hud_without_resetting_the_run" fullname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests.Language_selector_updates_pause_and_hud_without_resetting_the_run" methodname="Language_selector_updates_pause_and_hud_without_resetting_the_run" classname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests" runstate="Runnable" seed="1640487330" result="Passed" start-time="2026-11-13 16:25:02Z" end-time="2026-11-13 16:25:03Z" duration="0.172661" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1050" name="Language_system_option_clears_the_override" fullname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests.Language_system_option_clears_the_override" methodname="Language_system_option_clears_the_override" classname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests" runstate="Runnable" seed="24727735" result="Passed" start-time="2026-11-13 16:25:03Z" end-time="2026-11-13 16:25:03Z" duration="0.149749" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1045" name="Pseudo_locale_main_menu_has_no_text_overflow" fullname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests.Pseudo_locale_main_menu_has_no_text_overflow" methodname="Pseudo_locale_main_menu_has_no_text_overflow" classname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests" runstate="Runnable" seed="1860916160" result="Passed" start-time="2026-11-13 16:25:03Z" end-time="2026-11-13 16:25:03Z" duration="0.114272" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1046" name="Pseudo_locale_primary_screens_have_no_text_overflow" fullname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests.Pseudo_locale_primary_screens_have_no_text_overflow" methodname="Pseudo_locale_primary_screens_have_no_text_overflow" classname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests" runstate="Runnable" seed="1694042804" result="Passed" start-time="2026-11-13 16:25:03Z" end-time="2026-11-13 16:25:03Z" duration="0.386588" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1052" name="Round_reward_cards_are_localized" fullname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests.Round_reward_cards_are_localized" methodname="Round_reward_cards_are_localized" classname="JabaSurvivol.Tests.PlayMode.LocalizationUiPlayModeTests" runstate="Runnable" seed="1340024941" result="Passed" start-time="2026-11-13 16:25:03Z" end-time="2026-11-13 16:25:04Z" duration="0.280707" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1053" name="SynergyPlayModeTests" fullname="JabaSurvivol.Tests.PlayMode.SynergyPlayModeTests" classname="JabaSurvivol.Tests.PlayMode.SynergyPlayModeTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-13 16:25:04Z" end-time="2026-11-13 16:25:07Z" duration="2.954884" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1056" name="Bastion_regenerates_armor_out_of_combat" fullname="JabaSurvivol.Tests.PlayMode.SynergyPlayModeTests.Bastion_regenerates_armor_out_of_combat" methodname="Bastion_regenerates_armor_out_of_combat" classname="JabaSurvivol.Tests.PlayMode.SynergyPlayModeTests" runstate="Runnable" seed="1265719826" result="Passed" start-time="2026-11-13 16:25:04Z" end-time="2026-11-13 16:25:04Z" duration="0.139667" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1054" name="Berserker_increases_damage_below_half_health" fullname="JabaSurvivol.Tests.PlayMode.SynergyPlayModeTests.Berserker_increases_damage_below_half_health" methodname="Berserker_increases_damage_below_half_health" classname="JabaSurvivol.Tests.PlayMode.SynergyPlayModeTests" runstate="Runnable" seed="1161769332" result="Passed" start-time="2026-11-13 16:25:04Z" end-time="2026-11-13 16:25:04Z" duration="0.144336" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1057" name="Berserker_survives_a_weapon_switch" fullname="JabaSurvivol.Tests.PlayMode.SynergyPlayModeTests.Berserker_survives_a_weapon_switch" methodname="Berserker_survives_a_weapon_switch" classname="JabaSurvivol.Tests.PlayMode.SynergyPlayModeTests" runstate="Runnable" seed="1620724510" result="Passed" start-time="2026-11-13 16:25:04Z" end-time="2026-11-13 16:25:04Z" duration="0.142247" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1058" name="Character_sheet_shows_synergy_status" fullname="JabaSurvivol.Tests.PlayMode.SynergyPlayModeTests.Character_sheet_shows_synergy_status" methodname="Character_sheet_shows_synergy_status" classname="JabaSurvivol.Tests.PlayMode.SynergyPlayModeTests" runstate="Runnable" seed="1196898025" result="Passed" start-time="2026-11-13 16:25:04Z" end-time="2026-11-13 16:25:04Z" duration="0.099952" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1055" name="Ghost_grants_move_speed_for_two_seconds_after_a_kill" fullname="JabaSurvivol.Tests.PlayMode.SynergyPlayModeTests.Ghost_grants_move_speed_for_two_seconds_after_a_kill" methodname="Ghost_grants_move_speed_for_two_seconds_after_a_kill" classname="JabaSurvivol.Tests.PlayMode.SynergyPlayModeTests" runstate="Runnable" seed="2012584811" result="Passed" start-time="2026-11-13 16:25:04Z" end-time="2026-11-13 16:25:07Z" duration="2.424926" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1059" name="TurretPlayModeTests" fullname="JabaSurvivol.Tests.PlayMode.TurretPlayModeTests" classname="JabaSurvivol.Tests.PlayMode.TurretPlayModeTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-13 16:25:07Z" end-time="2026-11-13 16:25:08Z" duration="1.492357" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1061" name="Turret_deploys_for_its_duration_and_starts_cooldown" fullname="JabaSurvivol.Tests.PlayMode.TurretPlayModeTests.Turret_deploys_for_its_duration_and_starts_cooldown" methodname="Turret_deploys_for_its_duration_and_starts_cooldown" classname="JabaSurvivol.Tests.PlayMode.TurretPlayModeTests" runstate="Runnable" seed="1153809703" result="Passed" start-time="2026-11-13 16:25:07Z" end-time="2026-11-13 16:25:07Z" duration="0.147951" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1062" name="Turret_fires_and_damages_the_active_zombie" fullname="JabaSurvivol.Tests.PlayMode.TurretPlayModeTests.Turret_fires_and_damages_the_active_zombie" methodname="Turret_fires_and_damages_the_active_zombie" classname="JabaSurvivol.Tests.PlayMode.TurretPlayModeTests" runstate="Runnable" seed="587377292" result="Passed" start-time="2026-11-13 16:25:07Z" end-time="2026-11-13 16:25:08Z" duration="0.901553" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1064" name="Turret_only_fires_at_targets_in_range" fullname="JabaSurvivol.Tests.PlayMode.TurretPlayModeTests.Turret_only_fires_at_targets_in_range" methodname="Turret_only_fires_at_targets_in_range" classname="JabaSurvivol.Tests.PlayMode.TurretPlayModeTests" runstate="Runnable" seed="1007727938" result="Passed" start-time="2026-11-13 16:25:08Z" end-time="2026-11-13 16:25:08Z" duration="0.167700" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1063" name="Turret_state_resets_on_death_and_new_run" fullname="JabaSurvivol.Tests.PlayMode.TurretPlayModeTests.Turret_state_resets_on_death_and_new_run" methodname="Turret_state_resets_on_death_and_new_run" classname="JabaSurvivol.Tests.PlayMode.TurretPlayModeTests" runstate="Runnable" seed="1482991422" result="Passed" start-time="2026-11-13 16:25:08Z" end-time="2026-11-13 16:25:08Z" duration="0.152555" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1060" name="Zero_rank_turret_is_locked" fullname="JabaSurvivol.Tests.PlayMode.TurretPlayModeTests.Zero_rank_turret_is_locked" methodname="Zero_rank_turret_is_locked" classname="JabaSurvivol.Tests.PlayMode.TurretPlayModeTests" runstate="Runnable" seed="1965241013" result="Passed" start-time="2026-11-13 16:25:08Z" end-time="2026-11-13 16:25:08Z" duration="0.104951" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1065" name="WalkingSkeletonPlayModeTests" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" testcasecount="33" result="Passed" start-time="2026-11-13 16:25:08Z" end-time="2026-11-13 16:25:15Z" duration="7.081742" total="33" passed="33" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1085" name="Armor_absorbs_damage_before_health_and_death_resets_run_armor" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Armor_absorbs_damage_before_health_and_death_resets_run_armor" methodname="Armor_absorbs_damage_before_health_and_death_resets_run_armor" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="1638913218" result="Passed" start-time="2026-11-13 16:25:08Z" end-time="2026-11-13 16:25:08Z" duration="0.151604" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1086" name="Armor_plates_repair_run_condition_but_not_without_armor" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Armor_plates_repair_run_condition_but_not_without_armor" methodname="Armor_plates_repair_run_condition_but_not_without_armor" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="1020943596" result="Passed" start-time="2026-11-13 16:25:08Z" end-time="2026-11-13 16:25:08Z" duration="0.116723" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1084" name="Armor_purchase_equip_and_upgrade_apply_to_runs_and_persist" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Armor_purchase_equip_and_upgrade_apply_to_runs_and_persist" methodname="Armor_purchase_equip_and_upgrade_apply_to_runs_and_persist" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="229815681" result="Passed" start-time="2026-11-13 16:25:08Z" end-time="2026-11-13 16:25:08Z" duration="0.179032" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1079" name="Armory_from_pause_restores_the_hud" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Armory_from_pause_restores_the_hud" methodname="Armory_from_pause_restores_the_hud" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="521462251" result="Passed" start-time="2026-11-13 16:25:08Z" end-time="2026-11-13 16:25:09Z" duration="0.157698" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1075" name="Armory_purchases_equips_and_persists_a_weapon" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Armory_purchases_equips_and_persists_a_weapon" methodname="Armory_purchases_equips_and_persists_a_weapon" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="1082722468" result="Passed" start-time="2026-11-13 16:25:09Z" end-time="2026-11-13 16:25:09Z" duration="0.178865" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1076" name="Armory_rejects_a_purchase_without_supplies" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Armory_rejects_a_purchase_without_supplies" methodname="Armory_rejects_a_purchase_without_supplies" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="1068741056" result="Passed" start-time="2026-11-13 16:25:09Z" end-time="2026-11-13 16:25:09Z" duration="0.106578" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1066" name="Bootstrap_starts_a_run_with_player_and_zombie" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Bootstrap_starts_a_run_with_player_and_zombie" methodname="Bootstrap_starts_a_run_with_player_and_zombie" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="1620490117" result="Passed" start-time="2026-11-13 16:25:09Z" end-time="2026-11-13 16:25:09Z" duration="0.101373" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1094" name="Character_sheet_allocation_is_available_from_the_armory" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Character_sheet_allocation_is_available_from_the_armory" methodname="Character_sheet_allocation_is_available_from_the_armory" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="1099790715" result="Passed" start-time="2026-11-13 16:25:09Z" end-time="2026-11-13 16:25:09Z" duration="0.107478" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1093" name="Character_sheet_opens_allocates_and_respecs_from_the_main_menu" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Character_sheet_opens_allocates_and_respecs_from_the_main_menu" methodname="Character_sheet_opens_allocates_and_respecs_from_the_main_menu" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="925257701" result="Passed" start-time="2026-11-13 16:25:09Z" end-time="2026-11-13 16:25:09Z" duration="0.116573" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1096" name="Character_sheet_opens_during_round_end_and_keeps_the_reward_flow" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Character_sheet_opens_during_round_end_and_keeps_the_reward_flow" methodname="Character_sheet_opens_during_round_end_and_keeps_the_reward_flow" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="262904813" result="Passed" start-time="2026-11-13 16:25:09Z" end-time="2026-11-13 16:25:10Z" duration="0.311813" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1095" name="Character_sheet_opens_from_pause_and_respec_stays_blocked" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Character_sheet_opens_from_pause_and_respec_stays_blocked" methodname="Character_sheet_opens_from_pause_and_respec_stays_blocked" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="566601472" result="Passed" start-time="2026-11-13 16:25:10Z" end-time="2026-11-13 16:25:10Z" duration="0.140745" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1078" name="Equipped_weapon_stats_drive_combat" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Equipped_weapon_stats_drive_combat" methodname="Equipped_weapon_stats_drive_combat" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="916122961" result="Passed" start-time="2026-11-13 16:25:10Z" end-time="2026-11-13 16:25:10Z" duration="0.124365" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1071" name="Full_round_clear_advances_round_and_keeps_progress" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Full_round_clear_advances_round_and_keeps_progress" methodname="Full_round_clear_advances_round_and_keeps_progress" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="1252243660" result="Passed" start-time="2026-11-13 16:25:10Z" end-time="2026-11-13 16:25:10Z" duration="0.300285" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1067" name="Kill_awards_progress_and_death_keeps_it" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Kill_awards_progress_and_death_keeps_it" methodname="Kill_awards_progress_and_death_keeps_it" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="2042960379" result="Passed" start-time="2026-11-13 16:25:10Z" end-time="2026-11-13 16:25:11Z" duration="1.139446" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1097" name="Level_up_notification_is_visible_over_round_end" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Level_up_notification_is_visible_over_round_end" methodname="Level_up_notification_is_visible_over_round_end" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="2116484152" result="Passed" start-time="2026-11-13 16:25:11Z" end-time="2026-11-13 16:25:12Z" duration="0.302788" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1074" name="Pause_stops_the_run_and_resume_continues" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Pause_stops_the_run_and_resume_continues" methodname="Pause_stops_the_run_and_resume_continues" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="959304146" result="Passed" start-time="2026-11-13 16:25:12Z" end-time="2026-11-13 16:25:12Z" duration="0.130965" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1070" name="Profile_survives_bootstrap_recreation" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Profile_survives_bootstrap_recreation" methodname="Profile_survives_bootstrap_recreation" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="1002104921" result="Passed" start-time="2026-11-13 16:25:12Z" end-time="2026-11-13 16:25:12Z" duration="0.188782" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1077" name="Purchased_weapon_survives_death" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Purchased_weapon_survives_death" methodname="Purchased_weapon_survives_death" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="516945072" result="Passed" start-time="2026-11-13 16:25:12Z" end-time="2026-11-13 16:25:12Z" duration="0.122865" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1068" name="Rapid_kills_are_saved_at_most_once_per_interval" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Rapid_kills_are_saved_at_most_once_per_interval" methodname="Rapid_kills_are_saved_at_most_once_per_interval" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="2075481794" result="Passed" start-time="2026-11-13 16:25:12Z" end-time="2026-11-13 16:25:13Z" duration="1.115958" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1069" name="Restart_resets_health_and_round_but_keeps_progress" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Restart_resets_health_and_round_but_keeps_progress" methodname="Restart_resets_health_and_round_but_keeps_progress" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="1777161786" result="Passed" start-time="2026-11-13 16:25:13Z" end-time="2026-11-13 16:25:13Z" duration="0.141287" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1072" name="Round_reward_persists_across_bootstrap_recreation" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Round_reward_persists_across_bootstrap_recreation" methodname="Round_reward_persists_across_bootstrap_recreation" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="1549860836" result="Passed" start-time="2026-11-13 16:25:13Z" end-time="2026-11-13 16:25:14Z" duration="0.373720" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1073" name="Scripted_fire_spawns_bullets" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Scripted_fire_spawns_bullets" methodname="Scripted_fire_spawns_bullets" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="1098796022" result="Passed" start-time="2026-11-13 16:25:14Z" end-time="2026-11-13 16:25:14Z" duration="0.125255" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1080" name="Single_pellet_weapon_applies_configured_spread" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Single_pellet_weapon_applies_configured_spread" methodname="Single_pellet_weapon_applies_configured_spread" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="2100568215" result="Passed" start-time="2026-11-13 16:25:14Z" end-time="2026-11-13 16:25:14Z" duration="0.121556" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1090" name="Skill_allocation_is_rejected_from_bare_main_menu_and_game_over" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Skill_allocation_is_rejected_from_bare_main_menu_and_game_over" methodname="Skill_allocation_is_rejected_from_bare_main_menu_and_game_over" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="224666737" result="Passed" start-time="2026-11-13 16:25:14Z" end-time="2026-11-13 16:25:14Z" duration="0.122361" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1098" name="Skill_allocation_is_rejected_while_playing" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Skill_allocation_is_rejected_while_playing" methodname="Skill_allocation_is_rejected_while_playing" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="817954052" result="Passed" start-time="2026-11-13 16:25:14Z" end-time="2026-11-13 16:25:14Z" duration="0.104922" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1087" name="Skill_allocation_spends_points_and_updates_damage" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Skill_allocation_spends_points_and_updates_damage" methodname="Skill_allocation_spends_points_and_updates_damage" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="784759510" result="Passed" start-time="2026-11-13 16:25:14Z" end-time="2026-11-13 16:25:14Z" duration="0.118669" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1092" name="Skill_ranks_and_unlocks_survive_death" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Skill_ranks_and_unlocks_survive_death" methodname="Skill_ranks_and_unlocks_survive_death" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="1159116425" result="Passed" start-time="2026-11-13 16:25:14Z" end-time="2026-11-13 16:25:14Z" duration="0.141337" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1089" name="Skill_respec_is_free_and_restores_points" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Skill_respec_is_free_and_restores_points" methodname="Skill_respec_is_free_and_restores_points" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="2028058899" result="Passed" start-time="2026-11-13 16:25:14Z" end-time="2026-11-13 16:25:14Z" duration="0.113554" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1091" name="Skill_respec_is_rejected_during_an_active_run" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Skill_respec_is_rejected_during_an_active_run" methodname="Skill_respec_is_rejected_during_an_active_run" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="1798187830" result="Passed" start-time="2026-11-13 16:25:14Z" end-time="2026-11-13 16:25:15Z" duration="0.103687" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1088" name="Vitality_and_endurance_apply_to_the_active_run" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Vitality_and_endurance_apply_to_the_active_run" methodname="Vitality_and_endurance_apply_to_the_active_run" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="2014231883" result="Passed" start-time="2026-11-13 16:25:15Z" end-time="2026-11-13 16:25:15Z" duration="0.106980" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1081" name="Weapon_upgrade_increases_effective_stats_and_persists" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Weapon_upgrade_increases_effective_stats_and_persists" methodname="Weapon_upgrade_increases_effective_stats_and_persists" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="838535417" result="Passed" start-time="2026-11-13 16:25:15Z" end-time="2026-11-13 16:25:15Z" duration="0.170849" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1083" name="Weapon_upgrade_reaches_max_tier_and_rejects_extra" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Weapon_upgrade_reaches_max_tier_and_rejects_extra" methodname="Weapon_upgrade_reaches_max_tier_and_rejects_extra" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="1321926117" result="Passed" start-time="2026-11-13 16:25:15Z" end-time="2026-11-13 16:25:15Z" duration="0.107926" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1082" name="Weapon_upgrade_survives_death" fullname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests.Weapon_upgrade_survives_death" methodname="Weapon_upgrade_survives_death" classname="JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" runstate="Runnable" seed="1094302243" result="Passed" start-time="2026-11-13 16:25:15Z" end-time="2026-11-13 16:25:15Z" duration="0.122711" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1099" name="WeaponAmmoPlayModeTests" fullname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests" classname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-11-13 16:25:15Z" end-time="2026-11-13 16:25:19Z" duration="3.725439" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1107" name="Armory_upgrade_after_returning_to_menu_uses_the_profile_weapon" fullname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests.Armory_upgrade_after_returning_to_menu_uses_the_profile_weapon" methodname="Armory_upgrade_after_returning_to_menu_uses_the_profile_weapon" classname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests" runstate="Runnable" seed="1058601629" result="Passed" start-time="2026-11-13 16:25:15Z" end-time="2026-11-13 16:25:15Z" duration="0.155504" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1106" name="Armory_upgrade_targets_the_run_weapon_while_paused" fullname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests.Armory_upgrade_targets_the_run_weapon_while_paused" methodname="Armory_upgrade_targets_the_run_weapon_while_paused" classname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests" runstate="Runnable" seed="167512063" result="Passed" start-time="2026-11-13 16:25:15Z" end-time="2026-11-13 16:25:15Z" duration="0.201664" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1103" name="Death_resets_magazine_and_reserve" fullname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests.Death_resets_magazine_and_reserve" methodname="Death_resets_magazine_and_reserve" classname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests" runstate="Runnable" seed="513515742" result="Passed" start-time="2026-11-13 16:25:15Z" end-time="2026-11-13 16:25:16Z" duration="0.135544" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1101" name="Empty_magazine_stops_firing_and_auto_reloads" fullname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests.Empty_magazine_stops_firing_and_auto_reloads" methodname="Empty_magazine_stops_firing_and_auto_reloads" classname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests" runstate="Runnable" seed="348628606" result="Passed" start-time="2026-11-13 16:25:16Z" end-time="2026-11-13 16:25:17Z" duration="1.073073" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1100" name="Firing_consumes_ammo_and_manual_reload_refills" fullname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests.Firing_consumes_ammo_and_manual_reload_refills" methodname="Firing_consumes_ammo_and_manual_reload_refills" classname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests" runstate="Runnable" seed="1956587190" result="Passed" start-time="2026-11-13 16:25:17Z" end-time="2026-11-13 16:25:18Z" duration="1.550353" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1105" name="Mid_run_upgrade_updates_reload_and_magazine_capacity" fullname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests.Mid_run_upgrade_updates_reload_and_magazine_capacity" methodname="Mid_run_upgrade_updates_reload_and_magazine_capacity" classname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests" runstate="Runnable" seed="1374879355" result="Passed" start-time="2026-11-13 16:25:18Z" end-time="2026-11-13 16:25:18Z" duration="0.159134" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1104" name="Reload_is_rejected_when_the_magazine_is_full" fullname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests.Reload_is_rejected_when_the_magazine_is_full" methodname="Reload_is_rejected_when_the_magazine_is_full" classname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests" runstate="Runnable" seed="741454899" result="Passed" start-time="2026-11-13 16:25:18Z" end-time="2026-11-13 16:25:19Z" duration="0.184718" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1102" name="Switch_weapon_preserves_each_magazine" fullname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests.Switch_weapon_preserves_each_magazine" methodname="Switch_weapon_preserves_each_magazine" classname="JabaSurvivol.Tests.PlayMode.WeaponAmmoPlayModeTests" runstate="Runnable" seed="822846347" result="Passed" start-time="2026-11-13 16:25:19Z" end-time="2026-11-13 16:25:19Z" duration="0.260965" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1108" name="ZombieArchetypePlayModeTests" fullname="JabaSurvivol.Tests.PlayMode.ZombieArchetypePlayModeTests" classname="JabaSurvivol.Tests.PlayMode.ZombieArchetypePlayModeTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-13 16:25:19Z" end-time="2026-11-13 16:25:20Z" duration="1.278581" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1113" name="Archetype_actor_and_death_effect_are_pooled" fullname="JabaSurvivol.Tests.PlayMode.ZombieArchetypePlayModeTests.Archetype_actor_and_death_effect_are_pooled" methodname="Archetype_actor_and_death_effect_are_pooled" classname="JabaSurvivol.Tests.PlayMode.ZombieArchetypePlayModeTests" runstate="Runnable" seed="976440231" result="Passed" start-time="2026-11-13 16:25:19Z" end-time="2026-11-13 16:25:19Z" duration="0.267369" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1111" name="Archetype_rewards_survive_death" fullname="JabaSurvivol.Tests.PlayMode.ZombieArchetypePlayModeTests.Archetype_rewards_survive_death" methodname="Archetype_rewards_survive_death" classname="JabaSurvivol.Tests.PlayMode.ZombieArchetypePlayModeTests" runstate="Runnable" seed="2041469759" result="Passed" start-time="2026-11-13 16:25:19Z" end-time="2026-11-13 16:25:19Z" duration="0.231310" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1110" name="Elite_round_uses_scaled_values_and_rewards" fullname="JabaSurvivol.Tests.PlayMode.ZombieArchetypePlayModeTests.Elite_round_uses_scaled_values_and_rewards" methodname="Elite_round_uses_scaled_values_and_rewards" classname="JabaSurvivol.Tests.PlayMode.ZombieArchetypePlayModeTests" runstate="Runnable" seed="552461358" result="Passed" start-time="2026-11-13 16:25:19Z" end-time="2026-11-13 16:25:19Z" duration="0.149046" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1109" name="Round_one_spawns_only_walkers" fullname="JabaSurvivol.Tests.PlayMode.ZombieArchetypePlayModeTests.Round_one_spawns_only_walkers" methodname="Round_one_spawns_only_walkers" classname="JabaSurvivol.Tests.PlayMode.ZombieArchetypePlayModeTests" runstate="Runnable" seed="1166840350" result="Passed" start-time="2026-11-13 16:25:19Z" end-time="2026-11-13 16:25:20Z" duration="0.139909" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1112" name="Spawn_plan_matches_the_round_state" fullname="JabaSurvivol.Tests.PlayMode.ZombieArchetypePlayModeTests.Spawn_plan_matches_the_round_state" methodname="Spawn_plan_matches_the_round_state" classname="JabaSurvivol.Tests.PlayMode.ZombieArchetypePlayModeTests" runstate="Runnable" seed="1899616251" result="Passed" start-time="2026-11-13 16:25:20Z" end-time="2026-11-13 16:25:20Z" duration="0.486955" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Saving results to: C:/Users/javier.baenasantacru/AppData/LocalLow/JabaSurvivol/JabaSurvivol\TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

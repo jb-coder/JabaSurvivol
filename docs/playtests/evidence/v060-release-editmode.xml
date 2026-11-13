@@ -1,0 +1,758 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="111" result="Passed" total="111" passed="111" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:37Z" duration="0,7815914">
+  <test-suite type="TestSuite" id="1000" name="JabaSurvivol" fullname="JabaSurvivol" runstate="Runnable" testcasecount="111" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:37Z" duration="0.781591" total="111" passed="111" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1130" name="JabaSurvivol.Tests.EditMode.dll" fullname="C:/dev/personal/JabaSurvivol/unity/JabaSurvivol/Library/ScriptAssemblies/JabaSurvivol.Tests.EditMode.dll" runstate="Runnable" testcasecount="111" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:37Z" duration="0.769872" total="111" passed="111" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="2272" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1131" name="JabaSurvivol" fullname="JabaSurvivol" runstate="Runnable" testcasecount="111" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:37Z" duration="0.767812" total="111" passed="111" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1132" name="Tests" fullname="JabaSurvivol.Tests" runstate="Runnable" testcasecount="111" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:37Z" duration="0.766186" total="111" passed="111" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1133" name="EditMode" fullname="JabaSurvivol.Tests.EditMode" runstate="Runnable" testcasecount="111" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:37Z" duration="0.764217" total="111" passed="111" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1002" name="AccountServiceTests" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" testcasecount="23" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.216908" total="23" passed="23" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1026" name="Authenticated_client_does_not_retry_when_refresh_fails" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Authenticated_client_does_not_retry_when_refresh_fails" methodname="Authenticated_client_does_not_retry_when_refresh_fails" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="1394184122" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.068184" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1025" name="Authenticated_client_retries_once_after_refresh_on_401" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Authenticated_client_retries_once_after_refresh_on_401" methodname="Authenticated_client_retries_once_after_refresh_on_401" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="713478098" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.009967" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-suite type="ParameterizedMethod" id="1022" name="Failed_login_uses_a_localized_message_for_identity_codes" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Failed_login_uses_a_localized_message_for_identity_codes" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" testcasecount="12" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.026171" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1010" name="Failed_login_uses_a_localized_message_for_identity_codes(&quot;username_taken&quot;,&quot;account.error.taken&quot;)" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Failed_login_uses_a_localized_message_for_identity_codes(&quot;username_taken&quot;,&quot;account.error.taken&quot;)" methodname="Failed_login_uses_a_localized_message_for_identity_codes" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="1343300746" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.006705" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1011" name="Failed_login_uses_a_localized_message_for_identity_codes(&quot;invalid_credentials&quot;,&quot;account.error.invalid&quot;)" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Failed_login_uses_a_localized_message_for_identity_codes(&quot;invalid_credentials&quot;,&quot;account.error.invalid&quot;)" methodname="Failed_login_uses_a_localized_message_for_identity_codes" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="745384975" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.001179" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1012" name="Failed_login_uses_a_localized_message_for_identity_codes(&quot;unauthorized&quot;,&quot;account.error.invalid&quot;)" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Failed_login_uses_a_localized_message_for_identity_codes(&quot;unauthorized&quot;,&quot;account.error.invalid&quot;)" methodname="Failed_login_uses_a_localized_message_for_identity_codes" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="1149490619" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.001073" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1013" name="Failed_login_uses_a_localized_message_for_identity_codes(&quot;http_401&quot;,&quot;account.error.invalid&quot;)" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Failed_login_uses_a_localized_message_for_identity_codes(&quot;http_401&quot;,&quot;account.error.invalid&quot;)" methodname="Failed_login_uses_a_localized_message_for_identity_codes" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="906098734" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.001292" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1014" name="Failed_login_uses_a_localized_message_for_identity_codes(&quot;invalid_username&quot;,&quot;account.error.username&quot;)" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Failed_login_uses_a_localized_message_for_identity_codes(&quot;invalid_username&quot;,&quot;account.error.username&quot;)" methodname="Failed_login_uses_a_localized_message_for_identity_codes" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="1013284009" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.001163" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1015" name="Failed_login_uses_a_localized_message_for_identity_codes(&quot;invalid_password&quot;,&quot;account.error.password&quot;)" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Failed_login_uses_a_localized_message_for_identity_codes(&quot;invalid_password&quot;,&quot;account.error.password&quot;)" methodname="Failed_login_uses_a_localized_message_for_identity_codes" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="1772863290" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.001088" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1016" name="Failed_login_uses_a_localized_message_for_identity_codes(&quot;invalid_request&quot;,&quot;account.error.validation&quot;)" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Failed_login_uses_a_localized_message_for_identity_codes(&quot;invalid_request&quot;,&quot;account.error.validation&quot;)" methodname="Failed_login_uses_a_localized_message_for_identity_codes" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="1540898038" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.001042" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1017" name="Failed_login_uses_a_localized_message_for_identity_codes(&quot;http_400&quot;,&quot;account.error.validation&quot;)" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Failed_login_uses_a_localized_message_for_identity_codes(&quot;http_400&quot;,&quot;account.error.validation&quot;)" methodname="Failed_login_uses_a_localized_message_for_identity_codes" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="368859668" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.001166" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1018" name="Failed_login_uses_a_localized_message_for_identity_codes(&quot;rate_limited&quot;,&quot;account.error.rateLimited&quot;)" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Failed_login_uses_a_localized_message_for_identity_codes(&quot;rate_limited&quot;,&quot;account.error.rateLimited&quot;)" methodname="Failed_login_uses_a_localized_message_for_identity_codes" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="924757787" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.001147" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1019" name="Failed_login_uses_a_localized_message_for_identity_codes(&quot;http_429&quot;,&quot;account.error.rateLimited&quot;)" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Failed_login_uses_a_localized_message_for_identity_codes(&quot;http_429&quot;,&quot;account.error.rateLimited&quot;)" methodname="Failed_login_uses_a_localized_message_for_identity_codes" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="588392668" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.000965" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1020" name="Failed_login_uses_a_localized_message_for_identity_codes(&quot;network_error&quot;,&quot;account.error.network&quot;)" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Failed_login_uses_a_localized_message_for_identity_codes(&quot;network_error&quot;,&quot;account.error.network&quot;)" methodname="Failed_login_uses_a_localized_message_for_identity_codes" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="2030313373" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.003457" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1021" name="Failed_login_uses_a_localized_message_for_identity_codes(&quot;timeout&quot;,&quot;account.error.network&quot;)" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Failed_login_uses_a_localized_message_for_identity_codes(&quot;timeout&quot;,&quot;account.error.network&quot;)" methodname="Failed_login_uses_a_localized_message_for_identity_codes" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="842146162" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.001086" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-case id="1005" name="Initialize_rotates_a_persisted_refresh_token" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Initialize_rotates_a_persisted_refresh_token" methodname="Initialize_rotates_a_persisted_refresh_token" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="1140864074" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.010774" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1003" name="Initialize_without_a_token_stays_signed_out" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Initialize_without_a_token_stays_signed_out" methodname="Initialize_without_a_token_stays_signed_out" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="1431125575" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.002700" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1004" name="Login_persists_only_the_refresh_token" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Login_persists_only_the_refresh_token" methodname="Login_persists_only_the_refresh_token" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="1941448989" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.001899" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1008" name="Logout_clears_local_credentials_even_when_the_server_fails" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Logout_clears_local_credentials_even_when_the_server_fails" methodname="Logout_clears_local_credentials_even_when_the_server_fails" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="175430918" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.021069" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1007" name="Network_failure_keeps_the_refresh_token_and_reports_offline" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Network_failure_keeps_the_refresh_token_and_reports_offline" methodname="Network_failure_keeps_the_refresh_token_and_reports_offline" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="1307251459" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.002164" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1009" name="Register_signs_in_after_creating_the_account" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Register_signs_in_after_creating_the_account" methodname="Register_signs_in_after_creating_the_account" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="1550922861" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.003059" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1006" name="Rejected_refresh_clears_the_session" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Rejected_refresh_clears_the_session" methodname="Rejected_refresh_clears_the_session" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="442475798" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.001691" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1024" name="Secure_store_encrypts_the_token_on_windows" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Secure_store_encrypts_the_token_on_windows" methodname="Secure_store_encrypts_the_token_on_windows" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="1195987398" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.035280" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1023" name="Unknown_backend_error_uses_the_generic_localized_message" fullname="JabaSurvivol.Tests.EditMode.AccountServiceTests.Unknown_backend_error_uses_the_generic_localized_message" methodname="Unknown_backend_error_uses_the_generic_localized_message" classname="JabaSurvivol.Tests.EditMode.AccountServiceTests" runstate="Runnable" seed="241016432" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.003236" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1027" name="ActiveSkillEditModeTests" fullname="JabaSurvivol.Tests.EditMode.ActiveSkillEditModeTests" classname="JabaSurvivol.Tests.EditMode.ActiveSkillEditModeTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.021992" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1031" name="Death_resets_turret_state" fullname="JabaSurvivol.Tests.EditMode.ActiveSkillEditModeTests.Death_resets_turret_state" methodname="Death_resets_turret_state" classname="JabaSurvivol.Tests.EditMode.ActiveSkillEditModeTests" runstate="Runnable" seed="7580511" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.016395" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1032" name="Restart_resets_turret_state" fullname="JabaSurvivol.Tests.EditMode.ActiveSkillEditModeTests.Restart_resets_turret_state" methodname="Restart_resets_turret_state" classname="JabaSurvivol.Tests.EditMode.ActiveSkillEditModeTests" runstate="Runnable" seed="2011542187" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.001274" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1029" name="Turret_deployment_uses_rank_scaled_values" fullname="JabaSurvivol.Tests.EditMode.ActiveSkillEditModeTests.Turret_deployment_uses_rank_scaled_values" methodname="Turret_deployment_uses_rank_scaled_values" classname="JabaSurvivol.Tests.EditMode.ActiveSkillEditModeTests" runstate="Runnable" seed="187357652" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.000846" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1030" name="Turret_expires_and_cooldown_gates_redeployment" fullname="JabaSurvivol.Tests.EditMode.ActiveSkillEditModeTests.Turret_expires_and_cooldown_gates_redeployment" methodname="Turret_expires_and_cooldown_gates_redeployment" classname="JabaSurvivol.Tests.EditMode.ActiveSkillEditModeTests" runstate="Runnable" seed="1647420375" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.000651" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1028" name="Turret_requires_an_allocated_rank" fullname="JabaSurvivol.Tests.EditMode.ActiveSkillEditModeTests.Turret_requires_an_allocated_rank" methodname="Turret_requires_an_allocated_rank" classname="JabaSurvivol.Tests.EditMode.ActiveSkillEditModeTests" runstate="Runnable" seed="1204239887" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.000388" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1033" name="ActiveSkillSelectionEditModeTests" fullname="JabaSurvivol.Tests.EditMode.ActiveSkillSelectionEditModeTests" classname="JabaSurvivol.Tests.EditMode.ActiveSkillSelectionEditModeTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.012475" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1036" name="Dash_and_shockwave_expose_rank_scaled_values" fullname="JabaSurvivol.Tests.EditMode.ActiveSkillSelectionEditModeTests.Dash_and_shockwave_expose_rank_scaled_values" methodname="Dash_and_shockwave_expose_rank_scaled_values" classname="JabaSurvivol.Tests.EditMode.ActiveSkillSelectionEditModeTests" runstate="Runnable" seed="303682305" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.004487" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1035" name="Selected_active_skill_persists_through_validation" fullname="JabaSurvivol.Tests.EditMode.ActiveSkillSelectionEditModeTests.Selected_active_skill_persists_through_validation" methodname="Selected_active_skill_persists_through_validation" classname="JabaSurvivol.Tests.EditMode.ActiveSkillSelectionEditModeTests" runstate="Runnable" seed="1143217196" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.004379" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1034" name="Selection_requires_an_allocated_active_rank" fullname="JabaSurvivol.Tests.EditMode.ActiveSkillSelectionEditModeTests.Selection_requires_an_allocated_active_rank" methodname="Selection_requires_an_allocated_active_rank" classname="JabaSurvivol.Tests.EditMode.ActiveSkillSelectionEditModeTests" runstate="Runnable" seed="1617690733" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.000456" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1037" name="BossContentTests" fullname="JabaSurvivol.Tests.EditMode.BossContentTests" classname="JabaSurvivol.Tests.EditMode.BossContentTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.014178" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1038" name="Boss_definition_has_a_telegraphed_slam_and_enrage_phase" fullname="JabaSurvivol.Tests.EditMode.BossContentTests.Boss_definition_has_a_telegraphed_slam_and_enrage_phase" methodname="Boss_definition_has_a_telegraphed_slam_and_enrage_phase" classname="JabaSurvivol.Tests.EditMode.BossContentTests" runstate="Runnable" seed="525800101" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.007016" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1041" name="Boss_enrages_below_half_health" fullname="JabaSurvivol.Tests.EditMode.BossContentTests.Boss_enrages_below_half_health" methodname="Boss_enrages_below_half_health" classname="JabaSurvivol.Tests.EditMode.BossContentTests" runstate="Runnable" seed="1668222231" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.002955" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1040" name="Boss_kill_grants_the_victory_reward_once" fullname="JabaSurvivol.Tests.EditMode.BossContentTests.Boss_kill_grants_the_victory_reward_once" methodname="Boss_kill_grants_the_victory_reward_once" classname="JabaSurvivol.Tests.EditMode.BossContentTests" runstate="Runnable" seed="1604127082" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.001196" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1039" name="Boss_round_waits_for_the_boss_before_clearing" fullname="JabaSurvivol.Tests.EditMode.BossContentTests.Boss_round_waits_for_the_boss_before_clearing" methodname="Boss_round_waits_for_the_boss_before_clearing" classname="JabaSurvivol.Tests.EditMode.BossContentTests" runstate="Runnable" seed="1510171504" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.000560" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1042" name="BuildInfoTests" fullname="JabaSurvivol.Tests.EditMode.BuildInfoTests" classname="JabaSurvivol.Tests.EditMode.BuildInfoTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.003067" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1044" name="Commit_is_available" fullname="JabaSurvivol.Tests.EditMode.BuildInfoTests.Commit_is_available" methodname="Commit_is_available" classname="JabaSurvivol.Tests.EditMode.BuildInfoTests" runstate="Runnable" seed="853455181" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.001185" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1043" name="Version_matches_the_player_version" fullname="JabaSurvivol.Tests.EditMode.BuildInfoTests.Version_matches_the_player_version" methodname="Version_matches_the_player_version" classname="JabaSurvivol.Tests.EditMode.BuildInfoTests" runstate="Runnable" seed="1031826857" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:36Z" duration="0.000515" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1045" name="CloudSaveServiceTests" fullname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests" classname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests" runstate="Runnable" testcasecount="14" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:37Z" duration="0.130810" total="14" passed="14" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1056" name="Backup_persistence_failure_reports_offline_without_overwriting_local" fullname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests.Backup_persistence_failure_reports_offline_without_overwriting_local" methodname="Backup_persistence_failure_reports_offline_without_overwriting_local" classname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests" runstate="Runnable" seed="2021042408" result="Passed" start-time="2026-11-13 16:23:36Z" end-time="2026-11-13 16:23:37Z" duration="0.026804" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Cloud save persistence failed: UnauthorizedAccessException
+]]></output>
+              </test-case>
+              <test-case id="1046" name="Disabled_cloud_message_is_localized" fullname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests.Disabled_cloud_message_is_localized" methodname="Disabled_cloud_message_is_localized" classname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests" runstate="Runnable" seed="1209861324" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.004311" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1059" name="Disabled_cloud_saves_do_not_call_the_api" fullname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests.Disabled_cloud_saves_do_not_call_the_api" methodname="Disabled_cloud_saves_do_not_call_the_api" classname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests" runstate="Runnable" seed="25790316" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.001957" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1049" name="Equal_revision_uploads_local_changes" fullname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests.Equal_revision_uploads_local_changes" methodname="Equal_revision_uploads_local_changes" classname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests" runstate="Runnable" seed="1863309771" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.005885" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1048" name="First_sync_uploads_with_revision_zero" fullname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests.First_sync_uploads_with_revision_zero" methodname="First_sync_uploads_with_revision_zero" classname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests" runstate="Runnable" seed="633993915" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.008365" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1057" name="Keeping_local_persistence_failure_retains_the_conflict" fullname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests.Keeping_local_persistence_failure_retains_the_conflict" methodname="Keeping_local_persistence_failure_retains_the_conflict" classname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests" runstate="Runnable" seed="1345684134" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.014239" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Cloud save persistence failed: UnauthorizedAccessException
+]]></output>
+              </test-case>
+              <test-case id="1051" name="Keeping_local_uploads_with_the_cloud_base_revision" fullname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests.Keeping_local_uploads_with_the_cloud_base_revision" methodname="Keeping_local_uploads_with_the_cloud_base_revision" classname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests" runstate="Runnable" seed="1213663177" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.006884" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1058" name="Network_failure_retries_bounded_and_keeps_local_progress" fullname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests.Network_failure_retries_bounded_and_keeps_local_progress" methodname="Network_failure_retries_bounded_and_keeps_local_progress" classname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests" runstate="Runnable" seed="1226329328" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.012864" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1050" name="Newer_cloud_revision_opens_a_conflict_without_overwriting" fullname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests.Newer_cloud_revision_opens_a_conflict_without_overwriting" methodname="Newer_cloud_revision_opens_a_conflict_without_overwriting" classname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests" runstate="Runnable" seed="1726745499" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.003739" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1047" name="Offline_cloud_message_is_localized" fullname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests.Offline_cloud_message_is_localized" methodname="Offline_cloud_message_is_localized" classname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests" runstate="Runnable" seed="158485468" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.005462" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1053" name="Reset_clears_a_pending_conflict_before_another_account_signs_in" fullname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests.Reset_clears_a_pending_conflict_before_another_account_signs_in" methodname="Reset_clears_a_pending_conflict_before_another_account_signs_in" classname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests" runstate="Runnable" seed="327760825" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.003579" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1054" name="Reset_discards_an_in_flight_sync_response" fullname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests.Reset_discards_an_in_flight_sync_response" methodname="Reset_discards_an_in_flight_sync_response" classname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests" runstate="Runnable" seed="868408575" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.006473" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1055" name="Restore_persistence_failure_keeps_the_existing_local_file_and_conflict" fullname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests.Restore_persistence_failure_keeps_the_existing_local_file_and_conflict" methodname="Restore_persistence_failure_keeps_the_existing_local_file_and_conflict" classname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests" runstate="Runnable" seed="15863082" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.012229" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Cloud save persistence failed: UnauthorizedAccessException
+]]></output>
+              </test-case>
+              <test-case id="1052" name="Using_cloud_restores_atomically_and_updates_revision" fullname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests.Using_cloud_restores_atomically_and_updates_revision" methodname="Using_cloud_restores_atomically_and_updates_revision" classname="JabaSurvivol.Tests.EditMode.CloudSaveServiceTests" runstate="Runnable" seed="1555315634" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.011846" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1060" name="CoreProgressionTests" fullname="JabaSurvivol.Tests.EditMode.CoreProgressionTests" classname="JabaSurvivol.Tests.EditMode.CoreProgressionTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.004154" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1061" name="Death_does_not_remove_persistent_progress" fullname="JabaSurvivol.Tests.EditMode.CoreProgressionTests.Death_does_not_remove_persistent_progress" methodname="Death_does_not_remove_persistent_progress" classname="JabaSurvivol.Tests.EditMode.CoreProgressionTests" runstate="Runnable" seed="1691637291" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.001969" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1062" name="Restart_resets_run_state_only" fullname="JabaSurvivol.Tests.EditMode.CoreProgressionTests.Restart_resets_run_state_only" methodname="Restart_resets_run_state_only" classname="JabaSurvivol.Tests.EditMode.CoreProgressionTests" runstate="Runnable" seed="1637092217" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.000612" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1063" name="LeaderboardServiceTests" fullname="JabaSurvivol.Tests.EditMode.LeaderboardServiceTests" classname="JabaSurvivol.Tests.EditMode.LeaderboardServiceTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.034252" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1067" name="Load_error_message_is_localized" fullname="JabaSurvivol.Tests.EditMode.LeaderboardServiceTests.Load_error_message_is_localized" methodname="Load_error_message_is_localized" classname="JabaSurvivol.Tests.EditMode.LeaderboardServiceTests" runstate="Runnable" seed="1954739315" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.007629" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1066" name="Load_maps_server_errors" fullname="JabaSurvivol.Tests.EditMode.LeaderboardServiceTests.Load_maps_server_errors" methodname="Load_maps_server_errors" classname="JabaSurvivol.Tests.EditMode.LeaderboardServiceTests" runstate="Runnable" seed="1483050818" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.003029" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1064" name="Load_parses_entries_and_request_path" fullname="JabaSurvivol.Tests.EditMode.LeaderboardServiceTests.Load_parses_entries_and_request_path" methodname="Load_parses_entries_and_request_path" classname="JabaSurvivol.Tests.EditMode.LeaderboardServiceTests" runstate="Runnable" seed="650914688" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.002987" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1065" name="Load_returns_empty_on_not_found" fullname="JabaSurvivol.Tests.EditMode.LeaderboardServiceTests.Load_returns_empty_on_not_found" methodname="Load_returns_empty_on_not_found" classname="JabaSurvivol.Tests.EditMode.LeaderboardServiceTests" runstate="Runnable" seed="1204568418" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.006486" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1068" name="Submit_posts_once_and_accepts_200" fullname="JabaSurvivol.Tests.EditMode.LeaderboardServiceTests.Submit_posts_once_and_accepts_200" methodname="Submit_posts_once_and_accepts_200" classname="JabaSurvivol.Tests.EditMode.LeaderboardServiceTests" runstate="Runnable" seed="1405705456" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.006160" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1069" name="Submit_refreshes_once_on_401" fullname="JabaSurvivol.Tests.EditMode.LeaderboardServiceTests.Submit_refreshes_once_on_401" methodname="Submit_refreshes_once_on_401" classname="JabaSurvivol.Tests.EditMode.LeaderboardServiceTests" runstate="Runnable" seed="707616406" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.002288" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1070" name="Submit_returns_false_on_conflict_or_network_error" fullname="JabaSurvivol.Tests.EditMode.LeaderboardServiceTests.Submit_returns_false_on_conflict_or_network_error" methodname="Submit_returns_false_on_conflict_or_network_error" classname="JabaSurvivol.Tests.EditMode.LeaderboardServiceTests" runstate="Runnable" seed="1729754772" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.001741" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1071" name="LocalizationTests" fullname="JabaSurvivol.Tests.EditMode.LocalizationTests" classname="JabaSurvivol.Tests.EditMode.LocalizationTests" runstate="Runnable" testcasecount="16" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.108097" total="16" passed="16" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1079" name="Device_language_mapping_prefers_supported_system_languages" fullname="JabaSurvivol.Tests.EditMode.LocalizationTests.Device_language_mapping_prefers_supported_system_languages" methodname="Device_language_mapping_prefers_supported_system_languages" classname="JabaSurvivol.Tests.EditMode.LocalizationTests" runstate="Runnable" seed="1090954230" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.003970" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1085" name="Display_culture_uses_locale_number_conventions" fullname="JabaSurvivol.Tests.EditMode.LocalizationTests.Display_culture_uses_locale_number_conventions" methodname="Display_culture_uses_locale_number_conventions" classname="JabaSurvivol.Tests.EditMode.LocalizationTests" runstate="Runnable" seed="574601108" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.003527" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1073" name="English_and_spanish_have_the_same_keys" fullname="JabaSurvivol.Tests.EditMode.LocalizationTests.English_and_spanish_have_the_same_keys" methodname="English_and_spanish_have_the_same_keys" classname="JabaSurvivol.Tests.EditMode.LocalizationTests" runstate="Runnable" seed="601201765" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.009029" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1076" name="Every_english_value_is_nonempty_and_not_a_key" fullname="JabaSurvivol.Tests.EditMode.LocalizationTests.Every_english_value_is_nonempty_and_not_a_key" methodname="Every_english_value_is_nonempty_and_not_a_key" classname="JabaSurvivol.Tests.EditMode.LocalizationTests" runstate="Runnable" seed="1351263734" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.006493" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1075" name="Every_spanish_value_is_nonempty_and_not_a_key" fullname="JabaSurvivol.Tests.EditMode.LocalizationTests.Every_spanish_value_is_nonempty_and_not_a_key" methodname="Every_spanish_value_is_nonempty_and_not_a_key" classname="JabaSurvivol.Tests.EditMode.LocalizationTests" runstate="Runnable" seed="2123619537" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.006172" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1086" name="Invalid_locale_is_rejected" fullname="JabaSurvivol.Tests.EditMode.LocalizationTests.Invalid_locale_is_rejected" methodname="Invalid_locale_is_rejected" classname="JabaSurvivol.Tests.EditMode.LocalizationTests" runstate="Runnable" seed="365510121" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.004441" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1087" name="Locale_change_event_fires" fullname="JabaSurvivol.Tests.EditMode.LocalizationTests.Locale_change_event_fires" methodname="Locale_change_event_fires" classname="JabaSurvivol.Tests.EditMode.LocalizationTests" runstate="Runnable" seed="1858982591" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.003973" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1077" name="Missing_key_falls_back_to_english_before_the_placeholder" fullname="JabaSurvivol.Tests.EditMode.LocalizationTests.Missing_key_falls_back_to_english_before_the_placeholder" methodname="Missing_key_falls_back_to_english_before_the_placeholder" classname="JabaSurvivol.Tests.EditMode.LocalizationTests" runstate="Runnable" seed="1077764153" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.003160" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1084" name="Missing_key_returns_a_placeholder_and_never_the_raw_key" fullname="JabaSurvivol.Tests.EditMode.LocalizationTests.Missing_key_returns_a_placeholder_and_never_the_raw_key" methodname="Missing_key_returns_a_placeholder_and_never_the_raw_key" classname="JabaSurvivol.Tests.EditMode.LocalizationTests" runstate="Runnable" seed="1991952753" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.006525" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Missing localization key in all locales: missing.key
+]]></output>
+              </test-case>
+              <test-case id="1078" name="Pseudo_locale_expands_every_english_value_by_at_least_thirty_percent" fullname="JabaSurvivol.Tests.EditMode.LocalizationTests.Pseudo_locale_expands_every_english_value_by_at_least_thirty_percent" methodname="Pseudo_locale_expands_every_english_value_by_at_least_thirty_percent" classname="JabaSurvivol.Tests.EditMode.LocalizationTests" runstate="Runnable" seed="1590658295" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.012547" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1074" name="Runtime_literal_localization_keys_exist_in_both_locales" fullname="JabaSurvivol.Tests.EditMode.LocalizationTests.Runtime_literal_localization_keys_exist_in_both_locales" methodname="Runtime_literal_localization_keys_exist_in_both_locales" classname="JabaSurvivol.Tests.EditMode.LocalizationTests" runstate="Runnable" seed="1327700864" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.023343" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1080" name="Saved_override_wins_over_the_device_language" fullname="JabaSurvivol.Tests.EditMode.LocalizationTests.Saved_override_wins_over_the_device_language" methodname="Saved_override_wins_over_the_device_language" classname="JabaSurvivol.Tests.EditMode.LocalizationTests" runstate="Runnable" seed="1409032139" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.002858" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1081" name="Set_locale_persists_across_reload" fullname="JabaSurvivol.Tests.EditMode.LocalizationTests.Set_locale_persists_across_reload" methodname="Set_locale_persists_across_reload" classname="JabaSurvivol.Tests.EditMode.LocalizationTests" runstate="Runnable" seed="374397149" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.004680" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1083" name="Spanish_values_differ_from_english_values" fullname="JabaSurvivol.Tests.EditMode.LocalizationTests.Spanish_values_differ_from_english_values" methodname="Spanish_values_differ_from_english_values" classname="JabaSurvivol.Tests.EditMode.LocalizationTests" runstate="Runnable" seed="1880364581" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.003467" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1072" name="Supported_locales_are_english_and_spanish" fullname="JabaSurvivol.Tests.EditMode.LocalizationTests.Supported_locales_are_english_and_spanish" methodname="Supported_locales_are_english_and_spanish" classname="JabaSurvivol.Tests.EditMode.LocalizationTests" runstate="Runnable" seed="1357982213" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.003246" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1082" name="Use_system_locale_clears_the_override" fullname="JabaSurvivol.Tests.EditMode.LocalizationTests.Use_system_locale_clears_the_override" methodname="Use_system_locale_clears_the_override" classname="JabaSurvivol.Tests.EditMode.LocalizationTests" runstate="Runnable" seed="800918351" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.004231" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1088" name="ProfileStoreTests" fullname="JabaSurvivol.Tests.EditMode.ProfileStoreTests" classname="JabaSurvivol.Tests.EditMode.ProfileStoreTests" runstate="Runnable" testcasecount="14" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.156865" total="14" passed="14" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1097" name="Load_adds_none_armor_to_a_legacy_save_without_armor_fields" fullname="JabaSurvivol.Tests.EditMode.ProfileStoreTests.Load_adds_none_armor_to_a_legacy_save_without_armor_fields" methodname="Load_adds_none_armor_to_a_legacy_save_without_armor_fields" classname="JabaSurvivol.Tests.EditMode.ProfileStoreTests" runstate="Runnable" seed="928085681" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.006256" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1093" name="Load_adds_the_pistol_to_a_legacy_save_without_weapon_fields" fullname="JabaSurvivol.Tests.EditMode.ProfileStoreTests.Load_adds_the_pistol_to_a_legacy_save_without_weapon_fields" methodname="Load_adds_the_pistol_to_a_legacy_save_without_weapon_fields" classname="JabaSurvivol.Tests.EditMode.ProfileStoreTests" runstate="Runnable" seed="1510823320" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.005814" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1099" name="Load_recovers_from_backup_when_the_main_file_is_corrupt" fullname="JabaSurvivol.Tests.EditMode.ProfileStoreTests.Load_recovers_from_backup_when_the_main_file_is_corrupt" methodname="Load_recovers_from_backup_when_the_main_file_is_corrupt" classname="JabaSurvivol.Tests.EditMode.ProfileStoreTests" runstate="Runnable" seed="811273112" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.025603" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Profile load failed: JSON parse error: Missing a name for object member.
+]]></output>
+              </test-case>
+              <test-case id="1101" name="Load_recovers_from_backup_when_the_main_file_is_empty" fullname="JabaSurvivol.Tests.EditMode.ProfileStoreTests.Load_recovers_from_backup_when_the_main_file_is_empty" methodname="Load_recovers_from_backup_when_the_main_file_is_empty" classname="JabaSurvivol.Tests.EditMode.ProfileStoreTests" runstate="Runnable" seed="374370003" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.016956" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1100" name="Load_recovers_from_backup_when_the_main_file_is_missing" fullname="JabaSurvivol.Tests.EditMode.ProfileStoreTests.Load_recovers_from_backup_when_the_main_file_is_missing" methodname="Load_recovers_from_backup_when_the_main_file_is_missing" classname="JabaSurvivol.Tests.EditMode.ProfileStoreTests" runstate="Runnable" seed="943088989" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.014106" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1102" name="Load_recovers_from_backup_when_the_main_file_parses_to_null" fullname="JabaSurvivol.Tests.EditMode.ProfileStoreTests.Load_recovers_from_backup_when_the_main_file_parses_to_null" methodname="Load_recovers_from_backup_when_the_main_file_parses_to_null" classname="JabaSurvivol.Tests.EditMode.ProfileStoreTests" runstate="Runnable" seed="601311379" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.023896" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Profile load failed: JSON must represent an object type.
+]]></output>
+              </test-case>
+              <test-case id="1098" name="Load_recovers_from_corrupt_file_and_keeps_a_backup" fullname="JabaSurvivol.Tests.EditMode.ProfileStoreTests.Load_recovers_from_corrupt_file_and_keeps_a_backup" methodname="Load_recovers_from_corrupt_file_and_keeps_a_backup" classname="JabaSurvivol.Tests.EditMode.ProfileStoreTests" runstate="Runnable" seed="1416840663" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.008447" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Profile load failed: JSON parse error: Missing a name for object member.
+]]></output>
+              </test-case>
+              <test-case id="1094" name="Load_returns_defaults_when_file_is_missing" fullname="JabaSurvivol.Tests.EditMode.ProfileStoreTests.Load_returns_defaults_when_file_is_missing" methodname="Load_returns_defaults_when_file_is_missing" classname="JabaSurvivol.Tests.EditMode.ProfileStoreTests" runstate="Runnable" seed="1701517971" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.001053" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1095" name="Save_and_load_round_trips_armor_unlocks_equip_and_upgrades" fullname="JabaSurvivol.Tests.EditMode.ProfileStoreTests.Save_and_load_round_trips_armor_unlocks_equip_and_upgrades" methodname="Save_and_load_round_trips_armor_unlocks_equip_and_upgrades" classname="JabaSurvivol.Tests.EditMode.ProfileStoreTests" runstate="Runnable" seed="207135008" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.009366" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1089" name="Save_and_load_round_trips_persistent_progress" fullname="JabaSurvivol.Tests.EditMode.ProfileStoreTests.Save_and_load_round_trips_persistent_progress" methodname="Save_and_load_round_trips_persistent_progress" classname="JabaSurvivol.Tests.EditMode.ProfileStoreTests" runstate="Runnable" seed="551924280" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.010751" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1096" name="Save_and_load_round_trips_skill_allocation_and_active_skill" fullname="JabaSurvivol.Tests.EditMode.ProfileStoreTests.Save_and_load_round_trips_skill_allocation_and_active_skill" methodname="Save_and_load_round_trips_skill_allocation_and_active_skill" classname="JabaSurvivol.Tests.EditMode.ProfileStoreTests" runstate="Runnable" seed="1865011859" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.007008" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1090" name="Save_and_load_round_trips_the_highest_round" fullname="JabaSurvivol.Tests.EditMode.ProfileStoreTests.Save_and_load_round_trips_the_highest_round" methodname="Save_and_load_round_trips_the_highest_round" classname="JabaSurvivol.Tests.EditMode.ProfileStoreTests" runstate="Runnable" seed="1123348422" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.006708" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1091" name="Save_and_load_round_trips_weapon_unlocks_and_equipped_weapon" fullname="JabaSurvivol.Tests.EditMode.ProfileStoreTests.Save_and_load_round_trips_weapon_unlocks_and_equipped_weapon" methodname="Save_and_load_round_trips_weapon_unlocks_and_equipped_weapon" classname="JabaSurvivol.Tests.EditMode.ProfileStoreTests" runstate="Runnable" seed="1506731308" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.006927" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1092" name="Save_and_load_round_trips_weapon_upgrades" fullname="JabaSurvivol.Tests.EditMode.ProfileStoreTests.Save_and_load_round_trips_weapon_upgrades" methodname="Save_and_load_round_trips_weapon_upgrades" classname="JabaSurvivol.Tests.EditMode.ProfileStoreTests" runstate="Runnable" seed="254724878" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.007550" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1103" name="RoundLifecycleTests" fullname="JabaSurvivol.Tests.EditMode.RoundLifecycleTests" classname="JabaSurvivol.Tests.EditMode.RoundLifecycleTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.006950" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1107" name="Death_fails_the_round_and_restart_restores_the_first_round" fullname="JabaSurvivol.Tests.EditMode.RoundLifecycleTests.Death_fails_the_round_and_restart_restores_the_first_round" methodname="Death_fails_the_round_and_restart_restores_the_first_round" classname="JabaSurvivol.Tests.EditMode.RoundLifecycleTests" runstate="Runnable" seed="2028506232" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.001803" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1108" name="Highest_round_record_updates_when_a_run_reaches_a_new_round" fullname="JabaSurvivol.Tests.EditMode.RoundLifecycleTests.Highest_round_record_updates_when_a_run_reaches_a_new_round" methodname="Highest_round_record_updates_when_a_run_reaches_a_new_round" classname="JabaSurvivol.Tests.EditMode.RoundLifecycleTests" runstate="Runnable" seed="25296042" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.000836" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1105" name="Round_clear_waits_for_reward_flow_before_advancing" fullname="JabaSurvivol.Tests.EditMode.RoundLifecycleTests.Round_clear_waits_for_reward_flow_before_advancing" methodname="Round_clear_waits_for_reward_flow_before_advancing" classname="JabaSurvivol.Tests.EditMode.RoundLifecycleTests" runstate="Runnable" seed="767891541" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.000711" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1104" name="Run_starts_the_first_round_with_a_spawn_budget" fullname="JabaSurvivol.Tests.EditMode.RoundLifecycleTests.Run_starts_the_first_round_with_a_spawn_budget" methodname="Run_starts_the_first_round_with_a_spawn_budget" classname="JabaSurvivol.Tests.EditMode.RoundLifecycleTests" runstate="Runnable" seed="865465856" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.000511" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1106" name="Scaling_increases_health_speed_damage_and_budget_by_round" fullname="JabaSurvivol.Tests.EditMode.RoundLifecycleTests.Scaling_increases_health_speed_damage_and_budget_by_round" methodname="Scaling_increases_health_speed_damage_and_budget_by_round" classname="JabaSurvivol.Tests.EditMode.RoundLifecycleTests" runstate="Runnable" seed="669665972" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.000520" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1109" name="RoundRewardTests" fullname="JabaSurvivol.Tests.EditMode.RoundRewardTests" classname="JabaSurvivol.Tests.EditMode.RoundRewardTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.008443" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1111" name="Persistent_rewards_are_saved_and_run_only_rewards_are_not" fullname="JabaSurvivol.Tests.EditMode.RoundRewardTests.Persistent_rewards_are_saved_and_run_only_rewards_are_not" methodname="Persistent_rewards_are_saved_and_run_only_rewards_are_not" classname="JabaSurvivol.Tests.EditMode.RoundRewardTests" runstate="Runnable" seed="680053127" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.001385" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1112" name="Reward_amounts_scale_with_the_round" fullname="JabaSurvivol.Tests.EditMode.RoundRewardTests.Reward_amounts_scale_with_the_round" methodname="Reward_amounts_scale_with_the_round" classname="JabaSurvivol.Tests.EditMode.RoundRewardTests" runstate="Runnable" seed="1219169748" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.000401" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1110" name="Reward_generation_is_deterministic_and_distinct" fullname="JabaSurvivol.Tests.EditMode.RoundRewardTests.Reward_generation_is_deterministic_and_distinct" methodname="Reward_generation_is_deterministic_and_distinct" classname="JabaSurvivol.Tests.EditMode.RoundRewardTests" runstate="Runnable" seed="1132662015" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.004882" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1113" name="SynergyEditModeTests" fullname="JabaSurvivol.Tests.EditMode.SynergyEditModeTests" classname="JabaSurvivol.Tests.EditMode.SynergyEditModeTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.003174" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1115" name="Ghost_timer_and_bastion_regen_are_run_only" fullname="JabaSurvivol.Tests.EditMode.SynergyEditModeTests.Ghost_timer_and_bastion_regen_are_run_only" methodname="Ghost_timer_and_bastion_regen_are_run_only" classname="JabaSurvivol.Tests.EditMode.SynergyEditModeTests" runstate="Runnable" seed="889549647" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.001324" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1114" name="Synergy_requires_both_prerequisite_ranks" fullname="JabaSurvivol.Tests.EditMode.SynergyEditModeTests.Synergy_requires_both_prerequisite_ranks" methodname="Synergy_requires_both_prerequisite_ranks" classname="JabaSurvivol.Tests.EditMode.SynergyEditModeTests" runstate="Runnable" seed="1578240858" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.000407" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1116" name="TelemetryServiceTests" fullname="JabaSurvivol.Tests.EditMode.TelemetryServiceTests" classname="JabaSurvivol.Tests.EditMode.TelemetryServiceTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.022507" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1120" name="Disabled_telemetry_drops_events" fullname="JabaSurvivol.Tests.EditMode.TelemetryServiceTests.Disabled_telemetry_drops_events" methodname="Disabled_telemetry_drops_events" classname="JabaSurvivol.Tests.EditMode.TelemetryServiceTests" runstate="Runnable" seed="1552714570" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.006290" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1119" name="Opt_in_persists_in_player_prefs" fullname="JabaSurvivol.Tests.EditMode.TelemetryServiceTests.Opt_in_persists_in_player_prefs" methodname="Opt_in_persists_in_player_prefs" classname="JabaSurvivol.Tests.EditMode.TelemetryServiceTests" runstate="Runnable" seed="1008605048" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.001131" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1118" name="Opted_in_events_batch_and_retry_then_clear" fullname="JabaSurvivol.Tests.EditMode.TelemetryServiceTests.Opted_in_events_batch_and_retry_then_clear" methodname="Opted_in_events_batch_and_retry_then_clear" classname="JabaSurvivol.Tests.EditMode.TelemetryServiceTests" runstate="Runnable" seed="1237110389" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.010470" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1117" name="Queue_is_off_by_default_and_does_not_send" fullname="JabaSurvivol.Tests.EditMode.TelemetryServiceTests.Queue_is_off_by_default_and_does_not_send" methodname="Queue_is_off_by_default_and_does_not_send" classname="JabaSurvivol.Tests.EditMode.TelemetryServiceTests" runstate="Runnable" seed="2004560468" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.002323" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1121" name="WeaponAmmoEditModeTests" fullname="JabaSurvivol.Tests.EditMode.WeaponAmmoEditModeTests" classname="JabaSurvivol.Tests.EditMode.WeaponAmmoEditModeTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.005334" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1124" name="Ammo_crate_refills_reserve_and_death_resets_it" fullname="JabaSurvivol.Tests.EditMode.WeaponAmmoEditModeTests.Ammo_crate_refills_reserve_and_death_resets_it" methodname="Ammo_crate_refills_reserve_and_death_resets_it" classname="JabaSurvivol.Tests.EditMode.WeaponAmmoEditModeTests" runstate="Runnable" seed="183034505" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.000789" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1122" name="Firing_consumes_magazine_and_reload_uses_effective_time" fullname="JabaSurvivol.Tests.EditMode.WeaponAmmoEditModeTests.Firing_consumes_magazine_and_reload_uses_effective_time" methodname="Firing_consumes_magazine_and_reload_uses_effective_time" classname="JabaSurvivol.Tests.EditMode.WeaponAmmoEditModeTests" runstate="Runnable" seed="243932981" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.002075" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1123" name="Switching_preserves_per_weapon_magazine_state" fullname="JabaSurvivol.Tests.EditMode.WeaponAmmoEditModeTests.Switching_preserves_per_weapon_magazine_state" methodname="Switching_preserves_per_weapon_magazine_state" classname="JabaSurvivol.Tests.EditMode.WeaponAmmoEditModeTests" runstate="Runnable" seed="2143760479" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.000730" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1125" name="ZombieContentTests" fullname="JabaSurvivol.Tests.EditMode.ZombieContentTests" classname="JabaSurvivol.Tests.EditMode.ZombieContentTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.007519" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1126" name="Catalog_exposes_three_archetypes" fullname="JabaSurvivol.Tests.EditMode.ZombieContentTests.Catalog_exposes_three_archetypes" methodname="Catalog_exposes_three_archetypes" classname="JabaSurvivol.Tests.EditMode.ZombieContentTests" runstate="Runnable" seed="536732335" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.000748" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1128" name="Elite_round_rewards_are_multiplied" fullname="JabaSurvivol.Tests.EditMode.ZombieContentTests.Elite_round_rewards_are_multiplied" methodname="Elite_round_rewards_are_multiplied" classname="JabaSurvivol.Tests.EditMode.ZombieContentTests" runstate="Runnable" seed="1284999470" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.000413" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1129" name="Round_state_reports_the_archetype_for_each_spawn" fullname="JabaSurvivol.Tests.EditMode.ZombieContentTests.Round_state_reports_the_archetype_for_each_spawn" methodname="Round_state_reports_the_archetype_for_each_spawn" classname="JabaSurvivol.Tests.EditMode.ZombieContentTests" runstate="Runnable" seed="623758918" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.001148" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1127" name="Spawn_plan_is_deterministic_and_mixes_archetypes" fullname="JabaSurvivol.Tests.EditMode.ZombieContentTests.Spawn_plan_is_deterministic_and_mixes_archetypes" methodname="Spawn_plan_is_deterministic_and_mixes_archetypes" classname="JabaSurvivol.Tests.EditMode.ZombieContentTests" runstate="Runnable" seed="51135293" result="Passed" start-time="2026-11-13 16:23:37Z" end-time="2026-11-13 16:23:37Z" duration="0.003342" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Saving results to: C:/Users/javier.baenasantacru/AppData/LocalLow/JabaSurvivol/JabaSurvivol\TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
