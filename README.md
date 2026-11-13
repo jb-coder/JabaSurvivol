@@ -316,6 +316,7 @@ Unity setup instructions, scene details, and Android build steps live in [`docs/
 | **v0.5.1 Local Beta** | Shipped | Core loop, boss, progression, accounts, cloud saves, leaderboards, telemetry, Android beta |
 | **v0.5.2 Beta Follow-ups** | Closed | Beta close-out, combat tuning baseline, Android performance baseline, security risk acceptance |
 | **v0.6.0 Localization** | Shipped | English and Spanish, device-language default, runtime selector, key coverage, and layout checks |
+| **v0.7.0 Art and Visual Polish** | Planned | Generated neon art pipeline, modular characters, weapons, projectiles, combat FX, environment, UI icons, and app icon |
 | **v1.0.0 Release and Donations** | Planned | Release readiness and an optional donation link with no in-game rewards |
 
 ## Principles
