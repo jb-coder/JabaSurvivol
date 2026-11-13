@@ -159,6 +159,36 @@ namespace JabaSurvivol.Gameplay
 
         public string SoundLabelForTests => _ui?.SoundLabelForTests ?? string.Empty;
 
+        public bool LanguagePanelVisibleForTests => _ui?.LanguagePanelVisible ?? false;
+
+        public UnityEngine.UI.Button LanguageButtonForTests => _ui?.LanguageButtonForTests;
+
+        public UnityEngine.UI.Button PauseLanguageButtonForTests => _ui?.PauseLanguageButtonForTests;
+
+        public UnityEngine.UI.Button LanguageSystemButtonForTests => _ui?.LanguageSystemButtonForTests;
+
+        public UnityEngine.UI.Button LanguageEnglishButtonForTests => _ui?.LanguageEnglishButtonForTests;
+
+        public UnityEngine.UI.Button LanguageSpanishButtonForTests => _ui?.LanguageSpanishButtonForTests;
+
+        public UnityEngine.UI.Button LanguageCloseButtonForTests => _ui?.LanguageCloseButtonForTests;
+
+        public string MainMenuStartLabelForTests => _ui?.MainMenuStartLabelForTests ?? string.Empty;
+
+        public string MainMenuSubtitleForTests => _ui?.MainMenuSubtitleForTests ?? string.Empty;
+
+        public string PauseTitleForTests => _ui?.PauseTitleForTests ?? string.Empty;
+
+        public string HudReloadLabelForTests => _ui?.HudReloadLabelForTests ?? string.Empty;
+
+        public string HudRoundLabelForTests => _ui?.HudRoundLabelForTests ?? string.Empty;
+
+        public string GameOverTitleForTests => _ui?.GameOverTitleForTests ?? string.Empty;
+
+        public string VictoryTitleForTests => _ui?.VictoryTitleForTests ?? string.Empty;
+
+        public string RoundEndHintForTests => _ui?.RoundEndHintForTests ?? string.Empty;
+
         public string BuildLabelForTests => _ui?.BuildLabelForTests ?? string.Empty;
 
         public UnityEngine.UI.Button SoundButtonForTests => _ui?.SoundButtonForTests;
@@ -308,7 +338,10 @@ namespace JabaSurvivol.Gameplay
                 HandleCloudKeepLocal,
                 ShowLeaderboard,
                 ToggleTelemetry,
+                HandleLocaleSelected,
                 HideLeaderboard);
+
+            Localization.LocaleChanged += HandleLocaleChanged;
 
             _accountService = accountService ?? CreateDefaultAccountService();
             _accountService.StateChanged += HandleAccountStateChanged;
@@ -1050,6 +1083,75 @@ namespace JabaSurvivol.Gameplay
         {
             _audio.ToggleMute();
             _ui?.SetSound(!_audio.IsMuted);
+        }
+
+        private void HandleLocaleSelected(string locale)
+        {
+            if (locale == Localization.SystemLocaleValue)
+            {
+                Localization.UseSystemLocale();
+                return;
+            }
+
+            Localization.SetLocale(locale);
+        }
+
+        private void HandleLocaleChanged()
+        {
+            if (_ui == null)
+            {
+                return;
+            }
+
+            _ui.RefreshProgress(_profile);
+            _ui.SetSound(!_audio.IsMuted);
+            _ui.SetTelemetry(
+                _telemetryEnabled,
+                _telemetryService != null && _telemetryService.OptedIn);
+            _ui.SetRoundModifier(_run != null && _run.RoundModel.Definition.IsElite);
+            _ui.InvalidateHudCache();
+
+            if (_run != null)
+            {
+                _ui.UpdateHud(
+                    _run.Player,
+                    _run.Armor,
+                    _run.MaxArmor,
+                    _run.Round,
+                    _run.EnemiesRemaining,
+                    _run.Kills,
+                    _profile);
+                UpdateWeaponHud();
+                _ui.UpdateActiveSkillHud(
+                    _run.ActiveSkill.Node,
+                    _run.ActiveSkill.Rank,
+                    _run.ActiveSkill.CanActivate,
+                    _run.ActiveSkill.CooldownFraction,
+                    _run.ActiveSkill.ActiveFraction);
+
+                if (_run.BossActive && _run.Boss != null)
+                {
+                    _ui.UpdateBoss(_run.Boss.Health, _run.Boss.MaxHealth, _run.Boss.IsEnraged);
+                }
+            }
+
+            if (_accountService != null)
+            {
+                _ui.SetAccountState(_accountService.State, _accountService.Username);
+                _ui.SetCloudControls(
+                    _accountService.State == AccountState.SignedIn,
+                    _cloudSavesEnabled);
+            }
+
+            if (_ui.ArmoryVisible)
+            {
+                _ui.RefreshArmory(_profile, ArmoryDisplayWeapon());
+            }
+
+            if (_ui.CharacterSheetVisible)
+            {
+                RefreshCharacterSheetUi();
+            }
         }
 
         public void ResumeGame()
@@ -2399,6 +2501,7 @@ namespace JabaSurvivol.Gameplay
         private void OnDestroy()
         {
             SaveNow();
+            Localization.LocaleChanged -= HandleLocaleChanged;
 
             if (_accountService != null)
             {
