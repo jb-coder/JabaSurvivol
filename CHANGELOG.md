@@ -4,7 +4,31 @@ All notable changes to this project are documented in this file.
 
 The format is based on Keep a Changelog and the project follows Semantic Versioning.
 
-## [Unreleased]
+## [0.6.0] - 2026-11-13
+
+### Added
+
+- English and Spanish locale tables with device-language default, persisted manual override, and runtime locale state.
+- Language selector in the main and pause menus with a system-default option and live label refresh.
+- Localization key, fallback, pseudo-locale, and phone/tablet layout checks with an English and Spanish screenshot matrix.
+- Translation workflow, glossary, Spanish review record, and per-locale release gate.
+
+### Changed
+
+- Android and core package version bumped to `0.6.0` with version code `7`.
+- Spanish localization human-reviewed and approved on 2026-11-13; any later string or glossary change requires re-review.
+- Made generated UI text resize to fit its bounds and adjusted HUD and main-menu spacing for expanded locales.
+- Localized leaderboard rows and identity error messages, with a safe generic fallback for unknown backend codes and no raw ProblemDetails text in the UI.
+- Documented the accepted residual risk for the short, trusted Tailscale beta and closed the security audit with that exception.
+- Added weapon scenario coverage to the balance simulation and documented the rejected round 4 brute cap; no gameplay numbers changed.
+- Reduced Android hot-path work by throttling profile saves, using compact save JSON, skipping inactive telemetry payloads, and removing common HUD and touch allocations.
+- Closed the v0.5.1 local beta with owner-reported validation and recorded the five-tester and tablet evidence as reviewed exceptions.
+- Planned v0.6.0 localization with English and Spanish, device-language default, runtime selector, key coverage, and layout checks.
+- Recorded ADR-0009 for JSON locale tables behind the existing facade, English fallback, runtime language changes, and human-reviewed translations.
+
+### Fixed
+
+- Pinned the container CI Trivy action to the `v0.36.0` commit to address GHSA-9p44-j4g5-cfx5 and the Trivy ecosystem supply-chain advisory.
 
 ## [0.5.1] - 2026-11-12
 

@@ -14,7 +14,7 @@ Check:
 - Android APK build for Android-visible changes.
 - APK launch and `logcat` errors when an emulator is available.
 - Touch controls, safe areas, phone/tablet layouts, and persistence.
-- English-only policy and no-attribution policy.
+- English-only repository content (approved locale tables excepted) and no-attribution policy.
 - Required checks and reviewer approval.
 - No P0 or P1 defects.
 

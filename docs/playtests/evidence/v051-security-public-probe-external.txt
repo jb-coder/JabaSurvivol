@@ -1,0 +1,32 @@
+# External public reachability probe
+
+- Date: 2026-11-12
+- Issue: #108
+- Target: development PC public IPv4 (redacted)
+- Method: independent TCP checks from three external nodes per port
+- Tool: `https://check-host.net/check-tcp`
+
+## Results
+
+| Port | Expected service | Result |
+|---:|---|---|
+| 443 | Tailscale serve, tailnet only | Connection timed out from 3 of 3 nodes |
+| 5247 | BFF, loopback only | Connection timed out or connect timeout from 3 of 3 nodes |
+| 5095 | Identity.Api, loopback only | Connection refused from one node; timeouts from two nodes |
+| 5250 | Game.Api, loopback only | Connection timed out from 3 of 3 nodes |
+| 50351 | PostgreSQL, loopback only | Connection timed out from 3 of 3 nodes |
+| 15184 | Aspire dashboard, loopback only | Connection timed out from 3 of 3 nodes |
+| 19183 | OTLP, loopback only | Connection timed out from 3 of 3 nodes |
+
+## Verdict
+
+No listed beta service accepted a public connection. The external result matches the
+host-side bind audit: only Tailscale serves port 443, and every backend service
+listens on loopback.
+
+Router port-forwarding and UPnP configuration were not inspected from the router
+UI. The external probe is the reachability source of truth for public exposure;
+the router check remains a configuration confirmation.
+
+The public IPv4 address, tailnet name, and request identifiers are intentionally
+redacted from this evidence.

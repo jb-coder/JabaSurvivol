@@ -79,6 +79,9 @@ namespace JabaSurvivol.Gameplay
             text.raycastTarget = false;
             text.horizontalOverflow = HorizontalWrapMode.Wrap;
             text.verticalOverflow = VerticalWrapMode.Overflow;
+            text.resizeTextForBestFit = true;
+            text.resizeTextMinSize = Mathf.Max(8, fontSize / 2);
+            text.resizeTextMaxSize = fontSize;
             text.supportRichText = true;
             return text;
         }

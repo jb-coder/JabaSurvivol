@@ -24,6 +24,12 @@ namespace JabaSurvivol.Gameplay
 
         public string FilePath => _path;
 
+        /// <summary>
+        /// Number of completed saves. Used by tests and profiling to verify
+        /// save throttling without inspecting the file system.
+        /// </summary>
+        public int SaveCount { get; private set; }
+
         public Profile Load()
         {
             if (!File.Exists(_path))
@@ -85,7 +91,7 @@ namespace JabaSurvivol.Gameplay
 
             var temporaryPath = _path + ".tmp";
             var backupPath = _path + ".bak";
-            File.WriteAllText(temporaryPath, JsonUtility.ToJson(profile, true));
+            File.WriteAllText(temporaryPath, JsonUtility.ToJson(profile));
 
             try
             {
@@ -132,6 +138,8 @@ namespace JabaSurvivol.Gameplay
                     File.Delete(temporaryPath);
                 }
             }
+
+            SaveCount++;
         }
 
         private Profile TryLoadBackup()

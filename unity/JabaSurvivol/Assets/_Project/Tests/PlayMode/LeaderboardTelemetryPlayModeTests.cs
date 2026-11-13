@@ -25,6 +25,7 @@ namespace JabaSurvivol.Tests.PlayMode
         [SetUp]
         public void SetUp()
         {
+            Localization.SetLocale("en");
             _directory = Path.Combine(Path.GetTempPath(), "jabasurvivol-lb-ui", Guid.NewGuid().ToString("N"));
             GameBootstrap.SavePathOverride = Path.Combine(_directory, ProfileStore.FileName);
             GameBootstrap.AccountServiceFactoryOverride = () => new FakeAccountService();
@@ -60,6 +61,7 @@ namespace JabaSurvivol.Tests.PlayMode
             GameBootstrap.RemoteConfigOverride = null;
             PlayerPrefs.DeleteKey("telemetry.optIn");
             PlayerPrefs.Save();
+            Localization.SetLocale("en");
 
             if (_bootstrap != null)
             {
@@ -120,6 +122,39 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(text, Does.Contain("K1000"));
             Assert.That(text, Does.Contain("100s"));
             Assert.That(_bootstrap.Session.LeaderboardScrollableForTests, Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator Leaderboard_rows_follow_the_locale()
+        {
+            Localization.SetLocale("es");
+            _leaderboard.LoadResult = new LeaderboardResult
+            {
+                Success = true,
+                Entries = new[]
+                {
+                    new LeaderboardEntryDto
+                    {
+                        rank = 1,
+                        username = "Player01",
+                        highestRound = 3,
+                        totalKills = 42,
+                        durationSeconds = 120,
+                        achievedAt = "2026-11-08T12:00:00Z"
+                    }
+                }
+            };
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            yield return null;
+
+            _bootstrap.Session.ShowLeaderboardForTests();
+            yield return null;
+
+            var text = _bootstrap.Session.LeaderboardTextForTests;
+            Assert.That(text, Does.Contain("1. Player01"));
+            Assert.That(text, Does.Contain("RONDA 3"));
+            Assert.That(text, Does.Contain("BAJAS 42"));
         }
 
         [UnityTest]

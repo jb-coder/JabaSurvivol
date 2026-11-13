@@ -1,4 +1,5 @@
 using JabaSurvivol.Core;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using UnityEngine;
@@ -19,6 +20,14 @@ namespace JabaSurvivol.Gameplay
         private readonly GameObject _pausePanel;
         private readonly Text _pauseSoundLabel;
         private readonly Button _pauseSoundButton;
+        private readonly GameObject _languagePanel;
+        private readonly Button _languageButtonMain;
+        private readonly Button _languageButtonPause;
+        private readonly Button _languageSystemButton;
+        private readonly Button _languageEnglishButton;
+        private readonly Button _languageSpanishButton;
+        private readonly Button _languageCloseButton;
+        private readonly System.Action<string> _onLocaleSelected;
         private readonly GameObject _gameOverPanel;
         private readonly GameObject _victoryPanel;
         private readonly GameObject _bossPanel;
@@ -129,6 +138,9 @@ namespace JabaSurvivol.Gameplay
         private bool _lastSkillReady;
         private int _lastSkillCooldownPercent = int.MinValue;
         private int _lastSkillActivePercent = int.MinValue;
+        private StickState _lastMoveStick;
+        private StickState _lastAimStick;
+        private bool _sticksInitialized;
         private bool _characterSheetTablet;
         private int _activeCharacterBranch;
 
@@ -166,8 +178,10 @@ namespace JabaSurvivol.Gameplay
             System.Action onCloudKeepLocal,
             System.Action onLeaderboard,
             System.Action onTelemetryToggle,
+            System.Action<string> onLocaleSelected,
             System.Action onLeaderboardClose)
         {
+            _onLocaleSelected = onLocaleSelected;
             var canvasObject = UiFactory.CreateCanvas("JabaSurvivol UI", parent);
 
             var safeAreaObject = new GameObject("Safe Area", typeof(RectTransform));
@@ -183,10 +197,12 @@ namespace JabaSurvivol.Gameplay
                 onAccount,
                 onLeaderboard,
                 onTelemetryToggle,
+                ShowLanguagePanel,
                 out _mainMenuAccountState,
                 out _telemetryButton,
                 out _telemetryLabel,
-                out _buildLabel);
+                out _buildLabel,
+                out _languageButtonMain);
             _hud = BuildHud(onPause, onReload, onSwitchWeapon, onActiveSkill, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
             _roundModifierText = FindText(_hud, "Round Modifier");
             _weaponText = FindText(_hud, "Weapon");
@@ -206,8 +222,16 @@ namespace JabaSurvivol.Gameplay
                 onArmory,
                 onCharacterSheet,
                 onToggleSound,
+                ShowLanguagePanel,
                 out _pauseSoundLabel,
-                out _pauseSoundButton);
+                out _pauseSoundButton,
+                out _languageButtonPause);
+            _languagePanel = BuildLanguagePanel(
+                SelectLocale,
+                out _languageSystemButton,
+                out _languageEnglishButton,
+                out _languageSpanishButton,
+                out _languageCloseButton);
             _gameOverPanel = BuildGameOverPanel(onRestart, onMenu, out _gameOverSummary);
             _victoryPanel = BuildVictoryPanel(onRestart, onMenu, onLeaderboard, out _victorySummary);
             _roundEndPanel = BuildRoundEndPanel(
@@ -305,6 +329,7 @@ namespace JabaSurvivol.Gameplay
             _levelUpText.gameObject.SetActive(false);
 
             _progressText = FindText(_mainMenu, "Progress");
+            BindStaticLocalization();
             ShowMainMenu(new Profile());
         }
 
@@ -340,6 +365,13 @@ namespace JabaSurvivol.Gameplay
             HideCharacterSheet();
             HideAccount();
             HideLeaderboard();
+            InvalidateHudCache();
+            HideLevelUp();
+            HideRoundEnd();
+        }
+
+        public void InvalidateHudCache()
+        {
             _lastHealth = int.MinValue;
             _lastMaxHealth = int.MinValue;
             _lastArmor = int.MinValue;
@@ -351,6 +383,9 @@ namespace JabaSurvivol.Gameplay
             _lastLevel = int.MinValue;
             _lastXp = int.MinValue;
             _lastSkillPoints = int.MinValue;
+            _lastBossHealth = int.MinValue;
+            _lastBossMaxHealth = int.MinValue;
+            _lastBossEnraged = false;
             _lastWeaponName = string.Empty;
             _lastMagazine = int.MinValue;
             _lastMagazineSize = int.MinValue;
@@ -362,8 +397,6 @@ namespace JabaSurvivol.Gameplay
             _lastSkillReady = false;
             _lastSkillCooldownPercent = int.MinValue;
             _lastSkillActivePercent = int.MinValue;
-            HideLevelUp();
-            HideRoundEnd();
         }
 
         public void UpdateHud(PlayerState player, int armor, int maxArmor, int round, int enemiesRemaining, int kills, Profile profile)
@@ -502,13 +535,13 @@ namespace JabaSurvivol.Gameplay
                 _lastReserve = reserve;
                 _lastInfiniteReserve = infiniteReserve;
                 _weaponText.text = weaponName;
-                _ammoText.text = Localization.Format(
-                    infiniteReserve ? "hud.ammo.infinite" : "hud.ammo",
-                    magazine,
-                    magazineSize,
-                    infiniteReserve
-                        ? Localization.Get("armory.reserve.infinite")
-                        : reserve.ToString(CultureInfo.InvariantCulture));
+                _ammoText.text = infiniteReserve
+                    ? Localization.Format(
+                        "hud.ammo.infinite",
+                        magazine,
+                        magazineSize,
+                        Localization.Get("armory.reserve.infinite"))
+                    : Localization.Format("hud.ammo", magazine, magazineSize, reserve);
             }
 
             if (reloading != _lastReloading)
@@ -583,6 +616,56 @@ namespace JabaSurvivol.Gameplay
             _pausePanel.SetActive(visible);
         }
 
+        public bool LanguagePanelVisible => _languagePanel != null && _languagePanel.activeSelf;
+
+        public void ShowLanguagePanel()
+        {
+            if (_languagePanel != null)
+            {
+                _languagePanel.SetActive(true);
+            }
+        }
+
+        public void HideLanguagePanel()
+        {
+            if (_languagePanel != null)
+            {
+                _languagePanel.SetActive(false);
+            }
+        }
+
+        public Button LanguageButtonForTests => _languageButtonMain;
+
+        public Button PauseLanguageButtonForTests => _languageButtonPause;
+
+        public Button LanguageSystemButtonForTests => _languageSystemButton;
+
+        public Button LanguageEnglishButtonForTests => _languageEnglishButton;
+
+        public Button LanguageSpanishButtonForTests => _languageSpanishButton;
+
+        public Button LanguageCloseButtonForTests => _languageCloseButton;
+
+        public void RefreshProgress(Profile profile)
+        {
+            if (_progressText == null || profile == null)
+            {
+                return;
+            }
+
+            _progressText.text = Localization.Format(
+                "menu.progress",
+                profile.Supplies,
+                profile.Level,
+                profile.HighestRound);
+        }
+
+        private void SelectLocale(string locale)
+        {
+            HideLanguagePanel();
+            _onLocaleSelected?.Invoke(locale);
+        }
+
         /// <summary>
         /// Updates the pause-menu sound toggle label.
         /// </summary>
@@ -598,7 +681,106 @@ namespace JabaSurvivol.Gameplay
 
         public string SoundLabelForTests => _pauseSoundLabel?.text ?? string.Empty;
 
+        public string MainMenuStartLabelForTests =>
+            FindGameObject(_mainMenu, "Start")?.GetComponentInChildren<Text>()?.text ?? string.Empty;
+
+        public string MainMenuSubtitleForTests => FindText(_mainMenu, "Subtitle")?.text ?? string.Empty;
+
+        public string PauseTitleForTests => FindText(_pausePanel, "Title")?.text ?? string.Empty;
+
+        public string HudReloadLabelForTests =>
+            FindGameObject(_hud, "Reload Button")?.GetComponentInChildren<Text>()?.text ?? string.Empty;
+
+        public string HudRoundLabelForTests => _roundText?.text ?? string.Empty;
+
+        public string GameOverTitleForTests => FindText(_gameOverPanel, "Title")?.text ?? string.Empty;
+
+        public string VictoryTitleForTests => FindText(_victoryPanel, "Title")?.text ?? string.Empty;
+
+        public string RoundEndHintForTests => FindText(_roundEndPanel, "Hint")?.text ?? string.Empty;
+
+        public string[] RoundEndRewardLabelsForTests
+        {
+            get
+            {
+                var labels = new string[_rewardLabels.Length];
+                for (var i = 0; i < _rewardLabels.Length; i++)
+                {
+                    labels[i] = _rewardLabels[i].text;
+                }
+
+                return labels;
+            }
+        }
+
         public string BuildLabelForTests => _buildLabel?.text ?? string.Empty;
+
+        public string[] TextOverflowsForTests()
+        {
+            Canvas.ForceUpdateCanvases();
+            foreach (var text in _safeArea.GetComponentsInChildren<Text>(false))
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(text.rectTransform);
+            }
+
+            return UiLayoutAudit.FindOverflows(FindTopmostActiveTextContainer());
+        }
+
+        /// <summary>
+        /// Test hook that lays the UI out against the 1920x1080 reference canvas
+        /// instead of the small batch-mode test screen.
+        /// </summary>
+        public void UseDesignLayoutForTests()
+        {
+            var canvas = _safeArea.GetComponentInParent<Canvas>();
+            if (canvas == null)
+            {
+                return;
+            }
+
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.enabled = false;
+            }
+
+            foreach (var fitter in canvas.GetComponentsInChildren<SafeAreaFitter>(true))
+            {
+                fitter.enabled = false;
+            }
+
+            canvas.renderMode = RenderMode.WorldSpace;
+            var canvasRect = canvas.GetComponent<RectTransform>();
+            canvasRect.sizeDelta = new Vector2(1920f, 1080f);
+            _safeArea.anchorMin = Vector2.zero;
+            _safeArea.anchorMax = Vector2.one;
+            _safeArea.offsetMin = Vector2.zero;
+            _safeArea.offsetMax = Vector2.zero;
+            Canvas.ForceUpdateCanvases();
+        }
+
+        private RectTransform FindTopmostActiveTextContainer()
+        {
+            RectTransform topmost = null;
+            var highestIndex = -1;
+            foreach (Transform child in _safeArea)
+            {
+                if (!child.gameObject.activeSelf ||
+                    child.GetComponentInChildren<Text>(false) == null)
+                {
+                    continue;
+                }
+
+                var index = child.GetSiblingIndex();
+                if (index > highestIndex)
+                {
+                    highestIndex = index;
+                    topmost = child as RectTransform;
+                }
+            }
+
+            return topmost ?? _safeArea;
+        }
 
         public Button SoundButtonForTests => _pauseSoundButton;
 
@@ -814,16 +996,15 @@ namespace JabaSurvivol.Gameplay
             var builder = new StringBuilder();
             foreach (var entry in entries)
             {
-                builder.Append(entry.rank)
-                    .Append(". ")
-                    .Append(entry.username)
-                    .Append("   R")
-                    .Append(entry.highestRound)
-                    .Append("   K")
-                    .Append(entry.totalKills)
-                    .Append("   ")
-                    .Append(entry.durationSeconds)
-                    .AppendLine("s");
+                builder.Append(
+                        Localization.Format(
+                            "leaderboard.row",
+                            entry.rank,
+                            entry.username,
+                            entry.highestRound,
+                            entry.totalKills,
+                            entry.durationSeconds))
+                    .AppendLine();
             }
 
             _leaderboardText.text = builder.ToString();
@@ -1416,6 +1597,20 @@ namespace JabaSurvivol.Gameplay
 
         public void SetSticks(StickState move, StickState aim)
         {
+            if (_sticksInitialized &&
+                move.Active == _lastMoveStick.Active &&
+                move.Origin == _lastMoveStick.Origin &&
+                move.Current == _lastMoveStick.Current &&
+                aim.Active == _lastAimStick.Active &&
+                aim.Origin == _lastAimStick.Origin &&
+                aim.Current == _lastAimStick.Current)
+            {
+                return;
+            }
+
+            _sticksInitialized = true;
+            _lastMoveStick = move;
+            _lastAimStick = aim;
             UpdateStick(_moveBase, _moveKnob, _moveBaseImage, move, false);
             UpdateStick(_aimBase, _aimKnob, _aimBaseImage, aim, true);
         }
@@ -1465,10 +1660,12 @@ namespace JabaSurvivol.Gameplay
             System.Action onAccount,
             System.Action onLeaderboard,
             System.Action onTelemetryToggle,
+            System.Action onLanguage,
             out Text accountStateText,
             out Button telemetryButton,
             out Text telemetryLabel,
-            out Text buildLabel)
+            out Text buildLabel,
+            out Button languageButton)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Main Menu", new Color(0.012f, 0.018f, 0.03f, 0.98f));
             var root = panel.gameObject;
@@ -1511,8 +1708,16 @@ namespace JabaSurvivol.Gameplay
             telemetryLabel = telemetryButton.GetComponentInChildren<Text>();
             telemetryButton.gameObject.SetActive(false);
 
+            languageButton = UiFactory.CreateButton(
+                root.transform,
+                "Language",
+                Localization.Get("settings.language.title"),
+                22,
+                onLanguage);
+            UiFactory.Place(languageButton.GetComponent<RectTransform>(), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(36f, -32f), new Vector2(240f, 56f));
+
             var controls = UiFactory.CreateText(root.transform, "Controls", Localization.Get("menu.controls"), 24, TextAnchor.MiddleCenter, new Color(0.55f, 0.62f, 0.72f));
-            UiFactory.Place(controls.rectTransform, new Vector2(0.5f, 0.05f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300f, 36f));
+            UiFactory.Place(controls.rectTransform, new Vector2(0.5f, 0.065f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300f, 36f));
 
             buildLabel = UiFactory.CreateText(
                 root.transform,
@@ -1525,7 +1730,7 @@ namespace JabaSurvivol.Gameplay
                 buildLabel.rectTransform,
                 new Vector2(0f, 0f),
                 new Vector2(0f, 0f),
-                new Vector2(36f, 28f),
+                new Vector2(36f, 4f),
                 new Vector2(700f, 32f));
 
             return root;
@@ -1749,11 +1954,11 @@ namespace JabaSurvivol.Gameplay
             UiFactory.Place(roundText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -26f), new Vector2(420f, 60f));
 
             enemiesText = UiFactory.CreateText(root.transform, "Enemies", string.Empty, 24, TextAnchor.MiddleCenter, new Color(0.95f, 0.72f, 0.42f));
-            UiFactory.Place(enemiesText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -74f), new Vector2(420f, 40f));
+            UiFactory.Place(enemiesText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -88f), new Vector2(420f, 40f));
 
             var roundModifier = UiFactory.CreateText(root.transform, "Round Modifier", string.Empty, 24, TextAnchor.MiddleCenter, new Color(1f, 0.62f, 0.25f));
             roundModifier.fontStyle = FontStyle.Bold;
-            UiFactory.Place(roundModifier.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -152f), new Vector2(700f, 40f));
+            UiFactory.Place(roundModifier.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -172f), new Vector2(700f, 40f));
 
             var bossPanel = UiFactory.CreatePanel(root.transform, "Boss Panel", new Color(0.09f, 0.02f, 0.07f, 0.86f), blocksRaycasts: false);
             UiFactory.Place(bossPanel, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -218f), new Vector2(860f, 92f));
@@ -1780,13 +1985,13 @@ namespace JabaSurvivol.Gameplay
             bossPanel.gameObject.SetActive(false);
 
             killsText = UiFactory.CreateText(root.transform, "Kills", string.Empty, 22, TextAnchor.MiddleCenter, new Color(0.6f, 0.68f, 0.78f));
-            UiFactory.Place(killsText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -112f), new Vector2(420f, 40f));
+            UiFactory.Place(killsText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -128f), new Vector2(420f, 40f));
 
             suppliesText = UiFactory.CreateText(root.transform, "Supplies", string.Empty, 28, TextAnchor.MiddleRight, new Color(0.55f, 0.95f, 0.75f));
             UiFactory.Place(suppliesText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-150f, -30f), new Vector2(420f, 44f));
 
             levelText = UiFactory.CreateText(root.transform, "Level", string.Empty, 20, TextAnchor.MiddleRight, new Color(0.6f, 0.68f, 0.78f));
-            UiFactory.Place(levelText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-140f, -78f), new Vector2(620f, 40f));
+            UiFactory.Place(levelText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-140f, -78f), new Vector2(500f, 40f));
 
             var pause = UiFactory.CreateButton(root.transform, "Pause", Localization.Get("hud.pause"), 28, onPause);
             UiFactory.Place(pause.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-30f, -30f), new Vector2(84f, 84f));
@@ -1797,7 +2002,7 @@ namespace JabaSurvivol.Gameplay
 
             var ammoText = UiFactory.CreateText(root.transform, "Ammo", string.Empty, 24, TextAnchor.MiddleLeft, new Color(0.92f, 0.95f, 1f));
             ammoText.fontStyle = FontStyle.Bold;
-            UiFactory.Place(ammoText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(40f, -158f), new Vector2(340f, 32f));
+            UiFactory.Place(ammoText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(40f, -158f), new Vector2(460f, 32f));
 
             var reloadBackground = UiFactory.CreateImage(root.transform, "Reload", SpriteFactory.Square, new Color(0.05f, 0.07f, 0.1f, 0.9f));
             UiFactory.Place(reloadBackground.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(40f, -196f), new Vector2(300f, 10f));
@@ -1874,8 +2079,10 @@ namespace JabaSurvivol.Gameplay
             System.Action onArmory,
             System.Action onCharacterSheet,
             System.Action onToggleSound,
+            System.Action onLanguage,
             out Text soundLabel,
-            out Button soundButton)
+            out Button soundButton,
+            out Button languageButton)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Pause Panel", new Color(0.01f, 0.02f, 0.03f, 0.9f));
             var root = panel.gameObject;
@@ -1900,11 +2107,75 @@ namespace JabaSurvivol.Gameplay
                 root.transform,
                 "Sound Toggle",
                 Localization.Get("pause.sound.on"),
-                26,
+                18,
                 onToggleSound);
-            UiFactory.Place(sound.GetComponent<RectTransform>(), new Vector2(0.5f, 0.11f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 72f));
+            UiFactory.Place(sound.GetComponent<RectTransform>(), new Vector2(0.5f, 0.11f), new Vector2(0.5f, 0.5f), new Vector2(105f, 0f), new Vector2(180f, 64f));
             soundLabel = sound.GetComponentInChildren<Text>();
             soundButton = sound.GetComponent<Button>();
+
+            languageButton = UiFactory.CreateButton(
+                root.transform,
+                "Language",
+                Localization.Get("settings.language.title"),
+                18,
+                onLanguage);
+            UiFactory.Place(languageButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.11f), new Vector2(0.5f, 0.5f), new Vector2(-105f, 0f), new Vector2(180f, 64f));
+
+            return root;
+        }
+
+        private GameObject BuildLanguagePanel(
+            System.Action<string> onSelect,
+            out Button systemButton,
+            out Button englishButton,
+            out Button spanishButton,
+            out Button closeButton)
+        {
+            var panel = UiFactory.CreatePanel(_safeArea, "Language Panel", new Color(0.008f, 0.012f, 0.022f, 1f));
+            var root = panel.gameObject;
+            root.SetActive(false);
+
+            var title = UiFactory.CreateText(
+                root.transform,
+                "Title",
+                Localization.Get("settings.language.title"),
+                60,
+                TextAnchor.MiddleCenter,
+                new Color(0.4f, 0.95f, 1f));
+            title.fontStyle = FontStyle.Bold;
+            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.78f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900f, 80f));
+
+            systemButton = UiFactory.CreateButton(
+                root.transform,
+                "System Language",
+                Localization.Get("settings.language.system"),
+                28,
+                () => onSelect(Localization.SystemLocaleValue));
+            UiFactory.Place(systemButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.56f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(520f, 78f));
+
+            englishButton = UiFactory.CreateButton(
+                root.transform,
+                "English",
+                Localization.GetDisplayName("en"),
+                28,
+                () => onSelect("en"));
+            UiFactory.Place(englishButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.43f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(520f, 78f));
+
+            spanishButton = UiFactory.CreateButton(
+                root.transform,
+                "Spanish",
+                Localization.GetDisplayName("es"),
+                28,
+                () => onSelect("es"));
+            UiFactory.Place(spanishButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.30f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(520f, 78f));
+
+            closeButton = UiFactory.CreateButton(
+                root.transform,
+                "Close",
+                Localization.Get("settings.language.close"),
+                24,
+                HideLanguagePanel);
+            UiFactory.Place(closeButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.16f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(240f, 68f));
 
             return root;
         }
@@ -2670,6 +2941,121 @@ namespace JabaSurvivol.Gameplay
             public Text Info;
         }
 
+        private void BindStaticLocalization()
+        {
+            BindLocalized(FindText(_mainMenu, "Title"), "app.title");
+            BindLocalized(FindText(_mainMenu, "Subtitle"), "menu.subtitle");
+            BindLocalized(FindText(_mainMenu, "Controls"), "menu.controls");
+            BindLocalized(_buildLabel, () => Localization.Format("menu.build", BuildInfo.Version, BuildInfo.Commit));
+            BindLocalizedButton(_mainMenu, "Start", "menu.start");
+            BindLocalizedButton(_mainMenu, "Armory", "menu.armory");
+            BindLocalizedButton(_mainMenu, "Skills", "character.open");
+            BindLocalizedButton(_mainMenu, "Leaderboard", "leaderboard.open");
+            BindLocalizedButton(_mainMenu, "Account", "account.open");
+            BindLocalizedButton(_mainMenu, "Language", "settings.language.title");
+
+            BindLocalized(FindText(_pausePanel, "Title"), "pause.title");
+            BindLocalizedButton(_pausePanel, "Resume", "pause.resume");
+            BindLocalizedButton(_pausePanel, "Armory", "pause.armory");
+            BindLocalizedButton(_pausePanel, "Skills", "character.open");
+            BindLocalizedButton(_pausePanel, "Menu", "pause.menu");
+            BindLocalizedButton(_pausePanel, "Language", "settings.language.title");
+
+            BindLocalized(FindText(_hud, "Boss Name"), "boss.name");
+            BindLocalizedButton(_hud, "Reload Button", "hud.reload");
+            BindLocalizedButton(_hud, "Switch Weapon", "hud.switch");
+            BindLocalized(FindText(_hud, "Controls Hint"), "menu.controls");
+
+            BindLocalized(FindText(_gameOverPanel, "Title"), "gameover.title");
+            BindLocalizedButton(_gameOverPanel, "Restart", "gameover.restart");
+            BindLocalizedButton(_gameOverPanel, "Menu", "gameover.menu");
+
+            BindLocalized(FindText(_victoryPanel, "Title"), "victory.title");
+            BindLocalized(FindText(_victoryPanel, "Subtitle"), "victory.subtitle");
+            BindLocalizedButton(_victoryPanel, "Next Run", "victory.next");
+            BindLocalizedButton(_victoryPanel, "Menu", "victory.menu");
+            BindLocalizedButton(_victoryPanel, "Leaderboard", "leaderboard.open");
+
+            BindLocalized(FindText(_roundEndPanel, "Hint"), "round.end.hint");
+            BindLocalizedButton(_roundEndPanel, "Skills", "character.open");
+
+            BindLocalized(FindText(_armoryPanel, "Title"), "armory.title");
+            BindLocalizedButton(_armoryPanel, "Close", "armory.close");
+            BindLocalizedButton(_armoryPanel, "Skills", "character.open");
+            BindLocalizedButton(_armoryPanel, "Weapons Tab", "armory.tab.weapons");
+            BindLocalizedButton(_armoryPanel, "Armor Tab", "armory.tab.armor");
+
+            BindLocalized(FindText(_characterSheet, "Title"), "character.title");
+            BindLocalizedButton(_characterSheet, "Close", "character.close");
+            BindLocalizedButton(_characterSheet, "Tab Strength", "character.branch.strength");
+            BindLocalizedButton(_characterSheet, "Tab Agility", "character.branch.agility");
+            BindLocalizedButton(_characterSheet, "Tab Survival", "character.branch.survival");
+            var branchKeys = new[]
+            {
+                "character.branch.strength",
+                "character.branch.agility",
+                "character.branch.survival"
+            };
+            for (var i = 0; i < _characterBranchPanels.Length && i < branchKeys.Length; i++)
+            {
+                BindLocalized(FindText(_characterBranchPanels[i], "Branch Title"), branchKeys[i]);
+            }
+
+            BindLocalized(FindText(_accountPanel, "Title"), "account.title");
+            BindLocalizedButton(_accountPanel, "Register", "account.register");
+            BindLocalizedButton(_accountPanel, "Login", "account.login");
+            BindLocalizedButton(_accountPanel, "Logout", "account.logout");
+            BindLocalizedButton(_accountPanel, "Close", "account.close");
+            BindLocalizedButton(_accountPanel, "Cloud Backup", "cloud.backup");
+            BindLocalizedButton(_accountPanel, "Cloud Restore", "cloud.restore");
+            BindLocalized(_accountUsername.placeholder as Text, "account.username");
+            BindLocalized(_accountPassword.placeholder as Text, "account.password");
+
+            BindLocalized(FindText(_cloudConflictPanel, "Title"), "cloud.conflict.title");
+            BindLocalizedButton(_cloudConflictPanel, "Use Cloud", "cloud.useCloud");
+            BindLocalizedButton(_cloudConflictPanel, "Keep Local", "cloud.keepLocal");
+
+            BindLocalized(FindText(_leaderboardPanel, "Title"), "leaderboard.title");
+            BindLocalizedButton(_leaderboardPanel, "Close", "account.close");
+
+            BindLocalized(FindText(_languagePanel, "Title"), "settings.language.title");
+            BindLocalizedButton(_languagePanel, "System Language", "settings.language.system");
+            BindLocalizedButton(_languagePanel, "Close", "settings.language.close");
+        }
+
+        private static void BindLocalized(Text text, string key)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            var binder = text.gameObject.GetComponent<LocalizedText>() ??
+                         text.gameObject.AddComponent<LocalizedText>();
+            binder.Bind(key);
+        }
+
+        private static void BindLocalized(Text text, System.Func<string> provider)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            var binder = text.gameObject.GetComponent<LocalizedText>() ??
+                         text.gameObject.AddComponent<LocalizedText>();
+            binder.Bind(provider);
+        }
+
+        private static void BindLocalizedButton(GameObject root, string buttonName, string key)
+        {
+            var button = FindGameObject(root, buttonName);
+            if (button != null)
+            {
+                BindLocalized(button.GetComponentInChildren<Text>(), key);
+            }
+        }
+
         private static Text FindText(GameObject root, string name)
         {
             var texts = root.GetComponentsInChildren<Text>(true);
@@ -2710,6 +3096,142 @@ namespace JabaSurvivol.Gameplay
             }
 
             return null;
+        }
+    }
+
+    internal static class UiLayoutAudit
+    {
+        public static string[] FindOverflows(RectTransform root)
+        {
+            var overflows = new HashSet<string>();
+            var texts = new List<TextItem>();
+            foreach (var text in root.GetComponentsInChildren<Text>(false))
+            {
+                if (text == null || !text.isActiveAndEnabled || string.IsNullOrEmpty(text.text))
+                {
+                    continue;
+                }
+
+                var rect = ToScreenRect(text.rectTransform);
+                var fontScale = EffectiveFontScale(text);
+                var preferredWidth = Mathf.Max(rect.width, text.preferredWidth * fontScale);
+                var preferredHeight = Mathf.Max(rect.height, text.preferredHeight * fontScale);
+                if (preferredWidth > rect.width + 1f || preferredHeight > rect.height + 1f)
+                {
+                    overflows.Add(
+                        $"{text.name}: '{text.text}' preferred={preferredWidth:0}x{preferredHeight:0} " +
+                        $"rect={rect.width:0}x{rect.height:0}");
+                }
+
+                texts.Add(new TextItem
+                {
+                    Transform = text.rectTransform,
+                    Name = text.name,
+                    Content = Expand(rect, preferredWidth, preferredHeight)
+                });
+            }
+
+            var controls = new List<RectTransform>();
+            foreach (var selectable in root.GetComponentsInChildren<Selectable>(false))
+            {
+                if (selectable.transform is RectTransform rectTransform)
+                {
+                    controls.Add(rectTransform);
+                }
+            }
+
+            for (var i = 0; i < texts.Count; i++)
+            {
+                var text = texts[i];
+                for (var j = 0; j < texts.Count; j++)
+                {
+                    if (i == j || IsRelated(text.Transform, texts[j].Transform))
+                    {
+                        continue;
+                    }
+
+                    if (Overlaps(text.Content, texts[j].Content))
+                    {
+                        overflows.Add(
+                            $"overlap: '{text.Name}' <-> '{texts[j].Name}'");
+                    }
+                }
+
+                for (var j = 0; j < controls.Count; j++)
+                {
+                    var control = controls[j];
+                    if (IsRelated(text.Transform, control))
+                    {
+                        continue;
+                    }
+
+                    if (Overlaps(text.Content, ToScreenRect(control)))
+                    {
+                        overflows.Add(
+                            $"overlap: '{text.Name}' <-> '{control.name}'");
+                    }
+                }
+            }
+
+            return new List<string>(overflows).ToArray();
+        }
+
+        private static Rect Expand(Rect rect, float width, float height)
+        {
+            var center = rect.center;
+            return new Rect(
+                center.x - (width * 0.5f),
+                center.y - (height * 0.5f),
+                width,
+                height);
+        }
+
+        private static float EffectiveFontScale(Text text)
+        {
+            if (!text.resizeTextForBestFit || text.fontSize <= 0)
+            {
+                return 1f;
+            }
+
+            var used = text.cachedTextGenerator.fontSizeUsedForBestFit;
+            return used > 0 ? Mathf.Clamp01(used / (float)text.fontSize) : 1f;
+        }
+
+        private static bool Overlaps(Rect first, Rect second)
+        {
+            return first.xMin < second.xMax - 1f &&
+                   first.xMax > second.xMin + 1f &&
+                   first.yMin < second.yMax - 1f &&
+                   first.yMax > second.yMin + 1f;
+        }
+
+        private static bool IsRelated(Transform first, Transform second)
+        {
+            return first == second ||
+                   first.IsChildOf(second) ||
+                   second.IsChildOf(first);
+        }
+
+        private static Rect ToScreenRect(RectTransform rectTransform)
+        {
+            var corners = new Vector3[4];
+            rectTransform.GetWorldCorners(corners);
+            var min = corners[0];
+            var max = corners[0];
+            for (var i = 1; i < corners.Length; i++)
+            {
+                min = Vector3.Min(min, corners[i]);
+                max = Vector3.Max(max, corners[i]);
+            }
+
+            return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
+        }
+
+        private sealed class TextItem
+        {
+            public RectTransform Transform;
+            public string Name;
+            public Rect Content;
         }
     }
 }

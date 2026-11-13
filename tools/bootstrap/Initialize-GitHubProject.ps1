@@ -120,7 +120,7 @@ $milestones = @(
     @{ Title = "v0.4.0 Content and Boss"; Due = "2027-01-04T23:59:59Z"; Description = "Additional enemies, boss, active skills, synergies, balance." },
     @{ Title = "v0.5.0 Backend and Cloud"; Due = "2027-01-18T23:59:59Z"; Description = "Cloud saves, leaderboards, telemetry, remote config, and backend deployment automation." },
     @{ Title = "v0.5.1 Polish and Local Beta"; Due = "2026-12-14T23:59:59Z"; Description = "Polish the single-player experience, validate the online flow with five local testers over Tailscale, and defer paid VPS and monetization work." },
-    @{ Title = "v0.6.0 Localization"; Due = "2027-02-01T23:59:59Z"; Description = "English plus additional locales, store metadata, layout tests." },
+    @{ Title = "v0.6.0 Localization"; Due = "2027-02-01T23:59:59Z"; Description = "English and Spanish, device-language default, runtime selector, key coverage, and layout checks." },
     @{ Title = "v1.0.0 Release and Donations"; Due = "2027-02-15T23:59:59Z"; Description = "Free release readiness, optional PayPal donation link, and final release. No premium currency, cosmetic store, payments sandbox, or in-game purchases." }
 )
 

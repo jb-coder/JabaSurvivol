@@ -83,6 +83,9 @@ namespace JabaSurvivol.Gameplay
         private DateTime _runStartedAt;
         private bool _runSubmitted;
         private readonly SemaphoreSlim _cloudActionGate = new(1, 1);
+        private const float ProfileSaveIntervalSeconds = 0.75f;
+        private bool _profileDirty;
+        private float _nextProfileSaveTime;
 
         public Profile Profile => _profile;
 
@@ -156,7 +159,44 @@ namespace JabaSurvivol.Gameplay
 
         public string SoundLabelForTests => _ui?.SoundLabelForTests ?? string.Empty;
 
+        public bool LanguagePanelVisibleForTests => _ui?.LanguagePanelVisible ?? false;
+
+        public UnityEngine.UI.Button LanguageButtonForTests => _ui?.LanguageButtonForTests;
+
+        public UnityEngine.UI.Button PauseLanguageButtonForTests => _ui?.PauseLanguageButtonForTests;
+
+        public UnityEngine.UI.Button LanguageSystemButtonForTests => _ui?.LanguageSystemButtonForTests;
+
+        public UnityEngine.UI.Button LanguageEnglishButtonForTests => _ui?.LanguageEnglishButtonForTests;
+
+        public UnityEngine.UI.Button LanguageSpanishButtonForTests => _ui?.LanguageSpanishButtonForTests;
+
+        public UnityEngine.UI.Button LanguageCloseButtonForTests => _ui?.LanguageCloseButtonForTests;
+
+        public string MainMenuStartLabelForTests => _ui?.MainMenuStartLabelForTests ?? string.Empty;
+
+        public string MainMenuSubtitleForTests => _ui?.MainMenuSubtitleForTests ?? string.Empty;
+
+        public string PauseTitleForTests => _ui?.PauseTitleForTests ?? string.Empty;
+
+        public string HudReloadLabelForTests => _ui?.HudReloadLabelForTests ?? string.Empty;
+
+        public string HudRoundLabelForTests => _ui?.HudRoundLabelForTests ?? string.Empty;
+
+        public string GameOverTitleForTests => _ui?.GameOverTitleForTests ?? string.Empty;
+
+        public string VictoryTitleForTests => _ui?.VictoryTitleForTests ?? string.Empty;
+
+        public string RoundEndHintForTests => _ui?.RoundEndHintForTests ?? string.Empty;
+
+        public string[] RoundEndRewardLabelsForTests =>
+            _ui?.RoundEndRewardLabelsForTests ?? System.Array.Empty<string>();
+
         public string BuildLabelForTests => _ui?.BuildLabelForTests ?? string.Empty;
+
+        public string[] TextOverflowsForTests => _ui?.TextOverflowsForTests() ?? System.Array.Empty<string>();
+
+        public void UseDesignLayoutForTests() => _ui?.UseDesignLayoutForTests();
 
         public UnityEngine.UI.Button SoundButtonForTests => _ui?.SoundButtonForTests;
 
@@ -227,6 +267,8 @@ namespace JabaSurvivol.Gameplay
         }
 
         public string SavePath => _store?.FilePath;
+
+        public int ProfileSaveCountForTests => _store?.SaveCount ?? 0;
 
         public Vector2 PlayerPosition => _playerObject != null
             ? (Vector2)_playerObject.transform.position
@@ -303,7 +345,10 @@ namespace JabaSurvivol.Gameplay
                 HandleCloudKeepLocal,
                 ShowLeaderboard,
                 ToggleTelemetry,
+                HandleLocaleSelected,
                 HideLeaderboard);
+
+            Localization.LocaleChanged += HandleLocaleChanged;
 
             _accountService = accountService ?? CreateDefaultAccountService();
             _accountService.StateChanged += HandleAccountStateChanged;
@@ -336,6 +381,8 @@ namespace JabaSurvivol.Gameplay
             {
                 return;
             }
+
+            FlushProfileIfDue();
 
             if (_levelUpRemaining > 0f)
             {
@@ -904,7 +951,10 @@ namespace JabaSurvivol.Gameplay
             _store.Save(_profile);
             _ = SyncCloudAsync();
             TrySubmitRun();
-            EnqueueTelemetry("run_end", $"{{\"highestRound\":{_run.Round},\"totalKills\":{_run.Kills},\"durationSeconds\":{RunDurationSeconds()}}}");
+            if (TelemetryActive)
+            {
+                EnqueueTelemetry("run_end", $"{{\"highestRound\":{_run.Round},\"totalKills\":{_run.Kills},\"durationSeconds\":{RunDurationSeconds()}}}");
+            }
             _ = FlushTelemetryAsync();
 
             _state = GameSessionState.Victory;
@@ -1009,7 +1059,10 @@ namespace JabaSurvivol.Gameplay
                 _run.ActiveSkill.ActiveFraction);
             _ui.SetSticks(default, default);
             _store.Save(_profile);
-            EnqueueTelemetry("run_start", $"{{\"startingRound\":{startingRound}}}");
+            if (TelemetryActive)
+            {
+                EnqueueTelemetry("run_start", $"{{\"startingRound\":{startingRound}}}");
+            }
         }
 
         public void RestartRun()
@@ -1037,6 +1090,75 @@ namespace JabaSurvivol.Gameplay
         {
             _audio.ToggleMute();
             _ui?.SetSound(!_audio.IsMuted);
+        }
+
+        private void HandleLocaleSelected(string locale)
+        {
+            if (locale == Localization.SystemLocaleValue)
+            {
+                Localization.UseSystemLocale();
+                return;
+            }
+
+            Localization.SetLocale(locale);
+        }
+
+        private void HandleLocaleChanged()
+        {
+            if (_ui == null)
+            {
+                return;
+            }
+
+            _ui.RefreshProgress(_profile);
+            _ui.SetSound(!_audio.IsMuted);
+            _ui.SetTelemetry(
+                _telemetryEnabled,
+                _telemetryService != null && _telemetryService.OptedIn);
+            _ui.SetRoundModifier(_run != null && _run.RoundModel.Definition.IsElite);
+            _ui.InvalidateHudCache();
+
+            if (_run != null)
+            {
+                _ui.UpdateHud(
+                    _run.Player,
+                    _run.Armor,
+                    _run.MaxArmor,
+                    _run.Round,
+                    _run.EnemiesRemaining,
+                    _run.Kills,
+                    _profile);
+                UpdateWeaponHud();
+                _ui.UpdateActiveSkillHud(
+                    _run.ActiveSkill.Node,
+                    _run.ActiveSkill.Rank,
+                    _run.ActiveSkill.CanActivate,
+                    _run.ActiveSkill.CooldownFraction,
+                    _run.ActiveSkill.ActiveFraction);
+
+                if (_run.BossActive && _run.Boss != null)
+                {
+                    _ui.UpdateBoss(_run.Boss.Health, _run.Boss.MaxHealth, _run.Boss.IsEnraged);
+                }
+            }
+
+            if (_accountService != null)
+            {
+                _ui.SetAccountState(_accountService.State, _accountService.Username);
+                _ui.SetCloudControls(
+                    _accountService.State == AccountState.SignedIn,
+                    _cloudSavesEnabled);
+            }
+
+            if (_ui.ArmoryVisible)
+            {
+                _ui.RefreshArmory(_profile, ArmoryDisplayWeapon());
+            }
+
+            if (_ui.CharacterSheetVisible)
+            {
+                RefreshCharacterSheetUi();
+            }
         }
 
         public void ResumeGame()
@@ -1282,7 +1404,10 @@ namespace JabaSurvivol.Gameplay
             _ui.ShowLevelUp(_profile.Level);
             _audio?.Play(GameAudioCue.LevelUp);
             _levelUpRemaining = GameBalance.LevelUpNotificationSeconds;
-            EnqueueTelemetry("level_up", $"{{\"level\":{_profile.Level}}}");
+            if (TelemetryActive)
+            {
+                EnqueueTelemetry("level_up", $"{{\"level\":{_profile.Level}}}");
+            }
         }
 
         private void HandleArmoryAction(WeaponId weaponId)
@@ -1935,9 +2060,28 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
+        private bool TelemetryActive =>
+            _telemetryEnabled && _telemetryService != null && _telemetryService.OptedIn;
+
         private void EnqueueTelemetry(string eventType, string payloadJson)
         {
-            _telemetryService?.Enqueue(eventType, payloadJson);
+            if (!TelemetryActive)
+            {
+                return;
+            }
+
+            _telemetryService.Enqueue(eventType, payloadJson);
+        }
+
+        private static string TelemetryArchetypeName(ZombieArchetype archetype)
+        {
+            return archetype switch
+            {
+                ZombieArchetype.Walker => "walker",
+                ZombieArchetype.Runner => "runner",
+                ZombieArchetype.Brute => "brute",
+                _ => "unknown"
+            };
         }
 
         private async Task FlushTelemetryAsync()
@@ -2363,6 +2507,9 @@ namespace JabaSurvivol.Gameplay
 
         private void OnDestroy()
         {
+            SaveNow();
+            Localization.LocaleChanged -= HandleLocaleChanged;
+
             if (_accountService != null)
             {
                 _accountService.StateChanged -= HandleAccountStateChanged;
@@ -2395,6 +2542,41 @@ namespace JabaSurvivol.Gameplay
             {
                 _store.Save(_profile);
             }
+
+            _profileDirty = false;
+            _nextProfileSaveTime = 0f;
+        }
+
+        private void MarkProfileDirty()
+        {
+            _profileDirty = true;
+            if (_nextProfileSaveTime <= 0f)
+            {
+                _nextProfileSaveTime = Time.unscaledTime + ProfileSaveIntervalSeconds;
+            }
+        }
+
+        private void FlushProfileIfDue()
+        {
+            if (!_profileDirty || Time.unscaledTime < _nextProfileSaveTime)
+            {
+                return;
+            }
+
+            SaveNow();
+        }
+
+        private void OnApplicationPause(bool pause)
+        {
+            if (pause)
+            {
+                SaveNow();
+            }
+        }
+
+        private void OnApplicationQuit()
+        {
+            SaveNow();
         }
 
         private void OnBulletHitZombie(float damage)
@@ -2443,8 +2625,13 @@ namespace JabaSurvivol.Gameplay
 
             _runSuppliesEarned += reward.Supplies;
             _runXpEarned += reward.Xp;
-            _store.Save(_profile);
-            EnqueueTelemetry("zombie_kill", $"{{\"round\":{_run.Round},\"archetype\":\"{archetype.ToString().ToLowerInvariant()}\"}}");
+            MarkProfileDirty();
+            if (TelemetryActive)
+            {
+                EnqueueTelemetry(
+                    "zombie_kill",
+                    $"{{\"round\":{_run.Round},\"archetype\":\"{TelemetryArchetypeName(archetype)}\"}}");
+            }
 
             if (reward.CompletedRound)
             {
@@ -2590,7 +2777,10 @@ namespace JabaSurvivol.Gameplay
             _store.Save(_profile);
             _ = SyncCloudAsync();
             TrySubmitRun();
-            EnqueueTelemetry("run_end", $"{{\"highestRound\":{_run.Round},\"totalKills\":{_run.Kills},\"durationSeconds\":{RunDurationSeconds()}}}");
+            if (TelemetryActive)
+            {
+                EnqueueTelemetry("run_end", $"{{\"highestRound\":{_run.Round},\"totalKills\":{_run.Kills},\"durationSeconds\":{RunDurationSeconds()}}}");
+            }
             _ = FlushTelemetryAsync();
             _ui.ShowGameOver(_run.Round, _run.Kills, _runSuppliesEarned);
         }

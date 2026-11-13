@@ -1,0 +1,790 @@
+{
+  "locale": "en",
+  "displayName": "English",
+  "entries": [
+    {
+      "key": "app.title",
+      "value": "JABASURVIVOL"
+    },
+    {
+      "key": "menu.subtitle",
+      "value": "SURVIVE THE NIGHT. KEEP EVERYTHING."
+    },
+    {
+      "key": "menu.start",
+      "value": "START RUN"
+    },
+    {
+      "key": "menu.armory",
+      "value": "ARMORY"
+    },
+    {
+      "key": "menu.progress",
+      "value": "SUPPLIES {0}    LEVEL {1}    BEST ROUND {2}"
+    },
+    {
+      "key": "menu.controls",
+      "value": "LEFT STICK MOVE    RIGHT STICK AIM & FIRE"
+    },
+    {
+      "key": "menu.build",
+      "value": "v{0} · {1}"
+    },
+    {
+      "key": "account.open",
+      "value": "ACCOUNT"
+    },
+    {
+      "key": "account.title",
+      "value": "ACCOUNT"
+    },
+    {
+      "key": "account.username",
+      "value": "USERNAME"
+    },
+    {
+      "key": "account.password",
+      "value": "PASSWORD"
+    },
+    {
+      "key": "account.register",
+      "value": "REGISTER"
+    },
+    {
+      "key": "account.login",
+      "value": "LOGIN"
+    },
+    {
+      "key": "account.logout",
+      "value": "LOG OUT"
+    },
+    {
+      "key": "account.close",
+      "value": "CLOSE"
+    },
+    {
+      "key": "account.state.signedout",
+      "value": "NOT SIGNED IN - LOCAL PLAY ONLY"
+    },
+    {
+      "key": "account.state.signingin",
+      "value": "SIGNING IN..."
+    },
+    {
+      "key": "account.state.signedin",
+      "value": "SIGNED IN AS {0}"
+    },
+    {
+      "key": "account.state.offline",
+      "value": "OFFLINE - LOCAL PLAY ONLY"
+    },
+    {
+      "key": "account.welcome",
+      "value": "WELCOME {0}"
+    },
+    {
+      "key": "account.error.username",
+      "value": "USERNAME MUST BE AT LEAST 3 CHARACTERS"
+    },
+    {
+      "key": "account.error.password",
+      "value": "PASSWORD MUST BE AT LEAST 8 CHARACTERS"
+    },
+    {
+      "key": "account.error.taken",
+      "value": "USERNAME IS NOT AVAILABLE"
+    },
+    {
+      "key": "account.error.invalid",
+      "value": "INVALID USERNAME OR PASSWORD"
+    },
+    {
+      "key": "account.error.network",
+      "value": "SERVER UNAVAILABLE - TRY AGAIN LATER"
+    },
+    {
+      "key": "account.error.generic",
+      "value": "THE REQUEST COULD NOT BE COMPLETED"
+    },
+    {
+      "key": "cloud.backup",
+      "value": "BACK UP"
+    },
+    {
+      "key": "cloud.restore",
+      "value": "RESTORE"
+    },
+    {
+      "key": "cloud.idle",
+      "value": "CLOUD READY"
+    },
+    {
+      "key": "cloud.disabled",
+      "value": "CLOUD SAVES DISABLED"
+    },
+    {
+      "key": "cloud.signedout",
+      "value": "SIGN IN TO BACK UP"
+    },
+    {
+      "key": "cloud.syncing",
+      "value": "SYNCING..."
+    },
+    {
+      "key": "cloud.synced",
+      "value": "CLOUD UP TO DATE"
+    },
+    {
+      "key": "cloud.conflict",
+      "value": "SAVE CONFLICT"
+    },
+    {
+      "key": "cloud.offline",
+      "value": "OFFLINE - LOCAL SAVE KEPT"
+    },
+    {
+      "key": "cloud.conflict.title",
+      "value": "SAVE CONFLICT"
+    },
+    {
+      "key": "cloud.conflict.details",
+      "value": "LOCAL REVISION {0}\nCLOUD REVISION {1}\nUPDATED {2}\n\nCHOOSE WHICH SAVE TO KEEP."
+    },
+    {
+      "key": "cloud.useCloud",
+      "value": "USE CLOUD"
+    },
+    {
+      "key": "cloud.keepLocal",
+      "value": "KEEP LOCAL"
+    },
+    {
+      "key": "cloud.msg.backup",
+      "value": "BACKUP COMPLETE"
+    },
+    {
+      "key": "cloud.msg.restored",
+      "value": "CLOUD SAVE RESTORED"
+    },
+    {
+      "key": "cloud.msg.nosave",
+      "value": "NO CLOUD SAVE FOUND"
+    },
+    {
+      "key": "cloud.msg.restoreFailed",
+      "value": "CLOUD SAVE COULD NOT BE RESTORED"
+    },
+    {
+      "key": "cloud.msg.noconflict",
+      "value": "NO CLOUD CONFLICT TO RESOLVE"
+    },
+    {
+      "key": "cloud.msg.loadFailed",
+      "value": "CLOUD SAVE COULD NOT BE LOADED"
+    },
+    {
+      "key": "cloud.msg.backupFailed",
+      "value": "BACKUP FAILED - LOCAL SAVE KEPT"
+    },
+    {
+      "key": "leaderboard.open",
+      "value": "LEADERBOARD"
+    },
+    {
+      "key": "leaderboard.title",
+      "value": "HIGHEST ROUND"
+    },
+    {
+      "key": "leaderboard.loading",
+      "value": "LOADING..."
+    },
+    {
+      "key": "leaderboard.empty",
+      "value": "NO RUNS YET"
+    },
+    {
+      "key": "leaderboard.error",
+      "value": "LEADERBOARD UNAVAILABLE"
+    },
+    {
+      "key": "leaderboard.disabled",
+      "value": "LEADERBOARDS DISABLED"
+    },
+    {
+      "key": "telemetry.off",
+      "value": "TELEMETRY: OFF"
+    },
+    {
+      "key": "telemetry.on",
+      "value": "TELEMETRY: ON"
+    },
+    {
+      "key": "hud.health",
+      "value": "HP {0}/{1}"
+    },
+    {
+      "key": "hud.armor",
+      "value": "ARMOR {0}/{1}"
+    },
+    {
+      "key": "hud.round",
+      "value": "ROUND {0}/{1}"
+    },
+    {
+      "key": "hud.enemies",
+      "value": "ENEMIES REMAINING {0}"
+    },
+    {
+      "key": "hud.supplies",
+      "value": "SUPPLIES {0}"
+    },
+    {
+      "key": "hud.level",
+      "value": "LEVEL {0}   XP {1}/{2}   POINTS {3}"
+    },
+    {
+      "key": "hud.levelup",
+      "value": "LEVEL UP! LEVEL {0}"
+    },
+    {
+      "key": "hud.kills",
+      "value": "KILLS {0}"
+    },
+    {
+      "key": "hud.reload",
+      "value": "RELOAD"
+    },
+    {
+      "key": "hud.switch",
+      "value": "SWITCH"
+    },
+    {
+      "key": "hud.ammo",
+      "value": "AMMO {0}/{1}   RESERVE {2}"
+    },
+    {
+      "key": "hud.ammo.infinite",
+      "value": "AMMO {0}/{1}   RESERVE {2}"
+    },
+    {
+      "key": "hud.reloading",
+      "value": "RELOADING"
+    },
+    {
+      "key": "hud.skill",
+      "value": "SKILL"
+    },
+    {
+      "key": "hud.skill.locked",
+      "value": "LOCKED"
+    },
+    {
+      "key": "hud.elite",
+      "value": "ELITE ROUND - REWARDS x2"
+    },
+    {
+      "key": "hud.boss",
+      "value": "BOSS"
+    },
+    {
+      "key": "hud.boss.health",
+      "value": "BOSS {0}/{1}"
+    },
+    {
+      "key": "boss.name",
+      "value": "THE WARDEN"
+    },
+    {
+      "key": "hud.pause",
+      "value": "II"
+    },
+    {
+      "key": "pause.title",
+      "value": "PAUSED"
+    },
+    {
+      "key": "pause.resume",
+      "value": "RESUME"
+    },
+    {
+      "key": "pause.menu",
+      "value": "MAIN MENU"
+    },
+    {
+      "key": "pause.armory",
+      "value": "ARMORY"
+    },
+    {
+      "key": "pause.sound.on",
+      "value": "SOUND: ON"
+    },
+    {
+      "key": "pause.sound.off",
+      "value": "SOUND: OFF"
+    },
+    {
+      "key": "armory.title",
+      "value": "ARMORY"
+    },
+    {
+      "key": "armory.close",
+      "value": "CLOSE"
+    },
+    {
+      "key": "armory.supplies",
+      "value": "SUPPLIES {0}"
+    },
+    {
+      "key": "armory.buy",
+      "value": "BUY {0}"
+    },
+    {
+      "key": "armory.equip",
+      "value": "EQUIP"
+    },
+    {
+      "key": "armory.equipped",
+      "value": "EQUIPPED"
+    },
+    {
+      "key": "armory.purchased",
+      "value": "{0} PURCHASED AND EQUIPPED"
+    },
+    {
+      "key": "armory.equipped.status",
+      "value": "{0} EQUIPPED"
+    },
+    {
+      "key": "armory.insufficient",
+      "value": "NOT ENOUGH SUPPLIES"
+    },
+    {
+      "key": "armory.stats",
+      "value": "DMG {0}   RATE {1}/s   MAG {2}   RANGE {3}   RESERVE {4}"
+    },
+    {
+      "key": "armory.reserve.infinite",
+      "value": "INF"
+    },
+    {
+      "key": "armory.upgrade.title",
+      "value": "UPGRADES - {0}"
+    },
+    {
+      "key": "armory.upgrade.card",
+      "value": "{0}\nTIER {1}/{2}\n+{4}% NEXT\n{3} SUPPLIES"
+    },
+    {
+      "key": "armory.upgrade.max",
+      "value": "{0}\nMAX TIER {1}"
+    },
+    {
+      "key": "armory.upgrade.purchased",
+      "value": "{0} TIER {1}"
+    },
+    {
+      "key": "armory.upgrade.maxed",
+      "value": "MAX TIER REACHED"
+    },
+    {
+      "key": "weapon.upgrade.damage",
+      "value": "DAMAGE"
+    },
+    {
+      "key": "weapon.upgrade.firerate",
+      "value": "FIRE RATE"
+    },
+    {
+      "key": "weapon.upgrade.magazine",
+      "value": "MAGAZINE"
+    },
+    {
+      "key": "weapon.upgrade.reload",
+      "value": "RELOAD"
+    },
+    {
+      "key": "armory.tab.weapons",
+      "value": "WEAPONS"
+    },
+    {
+      "key": "armory.tab.armor",
+      "value": "ARMOR"
+    },
+    {
+      "key": "armory.armor.none",
+      "value": "NO ARMOR"
+    },
+    {
+      "key": "armory.armor.light",
+      "value": "LIGHT ARMOR"
+    },
+    {
+      "key": "armory.armor.medium",
+      "value": "MEDIUM ARMOR"
+    },
+    {
+      "key": "armory.armor.heavy",
+      "value": "HEAVY ARMOR"
+    },
+    {
+      "key": "armory.armor.absorb",
+      "value": "ABSORB {0}"
+    },
+    {
+      "key": "armory.armor.row",
+      "value": "ABSORB {0}   TIER {1}/{2}"
+    },
+    {
+      "key": "armory.armor.upgrade.title",
+      "value": "ARMOR UPGRADE - {0}"
+    },
+    {
+      "key": "armory.armor.upgrade.card",
+      "value": "ABSORB +{0}%\nTIER {1}/{2}\n{3} SUPPLIES"
+    },
+    {
+      "key": "armory.armor.upgrade.max",
+      "value": "ABSORB +{0}% PER TIER\nMAX TIER {1}"
+    },
+    {
+      "key": "armory.armor.upgrade.none",
+      "value": "EQUIP ARMOR TO UPGRADE"
+    },
+    {
+      "key": "armory.armor.unlock",
+      "value": "UNLOCK {0}"
+    },
+    {
+      "key": "armory.armor.unlock.free",
+      "value": "UNLOCK"
+    },
+    {
+      "key": "armory.armor.equip",
+      "value": "EQUIP"
+    },
+    {
+      "key": "armory.armor.equipped",
+      "value": "EQUIPPED"
+    },
+    {
+      "key": "armory.armor.purchased",
+      "value": "{0} UNLOCKED AND EQUIPPED"
+    },
+    {
+      "key": "armory.armor.equipped.status",
+      "value": "{0} EQUIPPED"
+    },
+    {
+      "key": "armory.armor.upgraded",
+      "value": "ARMOR TIER {0}"
+    },
+    {
+      "key": "armory.armor.maxed",
+      "value": "MAX ARMOR TIER"
+    },
+    {
+      "key": "character.title",
+      "value": "CHARACTER"
+    },
+    {
+      "key": "character.close",
+      "value": "CLOSE"
+    },
+    {
+      "key": "character.open",
+      "value": "SKILLS"
+    },
+    {
+      "key": "character.level",
+      "value": "LEVEL {0}   XP {1}/{2}"
+    },
+    {
+      "key": "character.points",
+      "value": "SKILL POINTS {0}"
+    },
+    {
+      "key": "character.rank",
+      "value": "RANK {0}/{1}"
+    },
+    {
+      "key": "character.allocate",
+      "value": "+"
+    },
+    {
+      "key": "character.max",
+      "value": "MAX"
+    },
+    {
+      "key": "character.respec",
+      "value": "RESPEC"
+    },
+    {
+      "key": "character.stats",
+      "value": "HP {0}   DAMAGE x{1}   MOVE {2}   ARMOR {3}   CRIT {4}   HEADSHOT {5}   RELOAD x{6}   AMMO x{7}"
+    },
+    {
+      "key": "character.respec.done",
+      "value": "RESPEC COMPLETE: {0} POINTS RETURNED"
+    },
+    {
+      "key": "character.respec.empty",
+      "value": "NO ALLOCATED POINTS TO RESPEC"
+    },
+    {
+      "key": "character.respec.blocked",
+      "value": "RESPEC IS ONLY AVAILABLE BETWEEN RUNS"
+    },
+    {
+      "key": "character.status.allocated",
+      "value": "{0} RANK {1}"
+    },
+    {
+      "key": "character.status.nopoints",
+      "value": "NO SKILL POINTS AVAILABLE"
+    },
+    {
+      "key": "character.status.maxrank",
+      "value": "MAX RANK"
+    },
+    {
+      "key": "character.allocation.blocked",
+      "value": "ALLOCATION REQUIRES THE ARMORY, PAUSE MENU, OR ROUND END"
+    },
+    {
+      "key": "character.active.selected",
+      "value": "{0} (ACTIVE)"
+    },
+    {
+      "key": "character.active.status",
+      "value": "ACTIVE SKILL: {0}"
+    },
+    {
+      "key": "character.active.blocked",
+      "value": "ALLOCATE A RANK TO SELECT THIS SKILL"
+    },
+    {
+      "key": "synergy.berserker.name",
+      "value": "BERSERKER"
+    },
+    {
+      "key": "synergy.ghost.name",
+      "value": "GHOST"
+    },
+    {
+      "key": "synergy.bastion.name",
+      "value": "BASTION"
+    },
+    {
+      "key": "synergy.active",
+      "value": "{0} ACTIVE"
+    },
+    {
+      "key": "synergy.inactive",
+      "value": "{0} {1} {2}/{3} + {4} {5}/{6}"
+    },
+    {
+      "key": "character.branch.strength",
+      "value": "STRENGTH"
+    },
+    {
+      "key": "character.branch.agility",
+      "value": "AGILITY"
+    },
+    {
+      "key": "character.branch.survival",
+      "value": "SURVIVAL"
+    },
+    {
+      "key": "skill.strength.name",
+      "value": "STRENGTH"
+    },
+    {
+      "key": "skill.vitality.name",
+      "value": "VITALITY"
+    },
+    {
+      "key": "skill.shockwave.name",
+      "value": "SHOCKWAVE"
+    },
+    {
+      "key": "skill.speed.name",
+      "value": "SPEED"
+    },
+    {
+      "key": "skill.precision.name",
+      "value": "PRECISION"
+    },
+    {
+      "key": "skill.dash.name",
+      "value": "DASH"
+    },
+    {
+      "key": "skill.endurance.name",
+      "value": "ENDURANCE"
+    },
+    {
+      "key": "skill.engineering.name",
+      "value": "ENGINEERING"
+    },
+    {
+      "key": "skill.turret.name",
+      "value": "TURRET"
+    },
+    {
+      "key": "skill.strength.preview",
+      "value": "DAMAGE x{0} -> x{1}"
+    },
+    {
+      "key": "skill.vitality.preview",
+      "value": "MAX HP {0} -> {1}"
+    },
+    {
+      "key": "skill.speed.preview",
+      "value": "MOVE SPEED {0} -> {1}"
+    },
+    {
+      "key": "skill.precision.preview",
+      "value": "CRIT {0} -> {1}   HEADSHOT {2} -> {3}"
+    },
+    {
+      "key": "skill.endurance.preview",
+      "value": "ARMOR {0} -> {1}"
+    },
+    {
+      "key": "skill.engineering.preview",
+      "value": "RELOAD x{0} -> x{1}   AMMO x{2} -> x{3}"
+    },
+    {
+      "key": "skill.shockwave.preview",
+      "value": "DAMAGE {0} -> {1}   RADIUS {2} -> {3}   COOLDOWN {4} -> {5}"
+    },
+    {
+      "key": "skill.dash.preview",
+      "value": "DISTANCE {0} -> {1}   COOLDOWN {2} -> {3}"
+    },
+    {
+      "key": "skill.turret.preview",
+      "value": "DAMAGE {0} -> {1}   DURATION {2} -> {3}   COOLDOWN {4} -> {5}"
+    },
+    {
+      "key": "weapon.pistol.name",
+      "value": "PISTOL"
+    },
+    {
+      "key": "weapon.smg.name",
+      "value": "SMG"
+    },
+    {
+      "key": "weapon.shotgun.name",
+      "value": "SHOTGUN"
+    },
+    {
+      "key": "weapon.rifle.name",
+      "value": "RIFLE"
+    },
+    {
+      "key": "weapon.lmg.name",
+      "value": "LMG"
+    },
+    {
+      "key": "zombie.walker.name",
+      "value": "WALKER"
+    },
+    {
+      "key": "zombie.runner.name",
+      "value": "RUNNER"
+    },
+    {
+      "key": "zombie.brute.name",
+      "value": "BRUTE"
+    },
+    {
+      "key": "gameover.title",
+      "value": "YOU DIED"
+    },
+    {
+      "key": "gameover.summary",
+      "value": "ROUND {0}    KILLS {1}\nSUPPLIES EARNED {2}"
+    },
+    {
+      "key": "gameover.restart",
+      "value": "RESTART"
+    },
+    {
+      "key": "gameover.menu",
+      "value": "MAIN MENU"
+    },
+    {
+      "key": "victory.title",
+      "value": "VICTORY"
+    },
+    {
+      "key": "victory.subtitle",
+      "value": "THE WARDEN HAS FALLEN"
+    },
+    {
+      "key": "victory.summary",
+      "value": "ROUND {0}    KILLS {1}\nSUPPLIES EARNED {2}    XP EARNED {3}"
+    },
+    {
+      "key": "victory.next",
+      "value": "NEXT RUN"
+    },
+    {
+      "key": "victory.menu",
+      "value": "MAIN MENU"
+    },
+    {
+      "key": "round.end.title",
+      "value": "ROUND {0} CLEARED"
+    },
+    {
+      "key": "round.end.hint",
+      "value": "TAP A REWARD OR PRESS 1, 2, OR 3"
+    },
+    {
+      "key": "round.end.summary",
+      "value": "KILLS {0}    SUPPLIES {1}    XP {2}"
+    },
+    {
+      "key": "reward.supplies.card",
+      "value": "SUPPLIES\n+{0}"
+    },
+    {
+      "key": "reward.xp.card",
+      "value": "XP\n+{0}"
+    },
+    {
+      "key": "reward.ammo.card",
+      "value": "AMMO CRATE\n+{0}"
+    },
+    {
+      "key": "reward.armor.card",
+      "value": "ARMOR PLATE\n+{0}"
+    },
+    {
+      "key": "settings.language.title",
+      "value": "LANGUAGE"
+    },
+    {
+      "key": "settings.language.system",
+      "value": "SYSTEM DEFAULT"
+    },
+    {
+      "key": "settings.language.close",
+      "value": "CLOSE"
+    },
+    {
+      "key": "leaderboard.row",
+      "value": "{0}. {1}   R{2}   K{3}   {4}s"
+    },
+    {
+      "key": "account.error.rateLimited",
+      "value": "SERVER IS BUSY - TRY AGAIN LATER"
+    },
+    {
+      "key": "account.error.validation",
+      "value": "CHECK YOUR USERNAME AND PASSWORD"
+    }
+  ]
+}

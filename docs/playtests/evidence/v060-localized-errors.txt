@@ -1,0 +1,35 @@
+# v0.6.0 Localized Errors Evidence
+
+- Date: 2026-11-13
+- Issue: #140
+- APK: `JabaSurvivol-0.5.1-emulator-localize.apk`
+- SHA-256: `FC9273BD39FD81D966991B9C0F1C57A874990DB0B9736B7927A4284CF1F8765A`
+- Build commit: `e2e065d`
+- Emulator: `sdk_gphone64_x86_64`, API 35, x86_64, `swiftshader_indirect`, headless
+- Android version: 15
+- Version: `0.5.1`, version code `6`
+
+## Checks
+
+- Phone main menu, Spanish: `v060-localized-errors-main-es.png`
+- Phone account panel, Spanish: `v060-localized-errors-account-es.png`
+- Phone account validation error, Spanish: `v060-localized-errors-account-validation-es.png`
+
+The account panel and its validation message follow the selected locale. Submitting a two-character username shows the Spanish username-length message instead of an English fallback. The build label in the screenshots is `e2e065d`.
+
+The APK was built at `e2e065d`. Later commits add tests and evidence only; runtime code is unchanged.
+
+- Logcat: no `FATAL EXCEPTION`, `AndroidRuntime` crash, or ANR entries in `v060-localized-errors-logcat.txt`.
+
+## Automated coverage
+
+- Unity EditMode: 108 passed, 0 failed. Identity error codes map to localized messages; unknown codes use `account.error.generic`; cloud and leaderboard service messages are localized; English and Spanish keys have parity; every literal runtime localization key exists in both tables.
+- Unity PlayMode: 97 passed, 0 failed. Account state, cloud status, populated leaderboard rows, and round reward cards are asserted in Spanish.
+- .NET: 261 passed, 0 failed.
+
+## Limitations
+
+- A populated Spanish leaderboard screenshot is not committed because the emulator smoke run had no backend. PlayMode covers the localized row format with populated entries.
+- Backend identity errors were not triggered against a live server in this smoke run. EditMode covers every mapped identity code and the unknown-code fallback.
+- Cloud conflict and restore messages are covered by the service and PlayMode suites.
+- Automated emulator evidence only; no human playtest claim.

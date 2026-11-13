@@ -23,18 +23,27 @@ JabaSurvivol is a 2D top-down, round-based zombie survival game for Android phon
 - Premium currency, in-game purchases, and payments are deferred. The initial phase may show an optional PayPal donation link with no rewards or entitlements (ADR-0008).
 - Donations are voluntary, outside the game economy, and never unlock content.
 - No loot boxes, randomized paid rewards, or pay-to-win mechanics.
-- Localization is the final phase before release readiness. English is the only locale until then.
+- Localization starts in v0.6.0 with English and Spanish. English is the source locale. Every non-English locale, including Spanish, requires a reviewed ADR, a complete locale table, and human translation review before release.
 
 ## Language policy
 
-Everything committed to this repository must be in English:
+Everything committed to this repository must be in English, except approved
+locale data tables and localization reference material:
 
 - Code, comments, XML docs, test names, logs, error messages.
-- UI strings, localization keys, asset names, folder names.
+- UI source strings, localization keys, asset names, folder names.
 - Commit messages, PR titles, PR descriptions, issue titles, issue bodies.
 - Documentation, ADRs, runbooks, release notes.
 
-The user may speak Spanish in conversation. The repository remains English-only.
+Approved locale tables may contain translated product strings for their locale.
+Localization reference material under `docs/localization/` may contain
+target-language terms and short examples, with English explanatory prose.
+Unreviewed target terms must be marked as pending human review. Both require
+human review and must not change code, documentation, commits, or repository
+metadata to another language.
+
+The user may speak Spanish in conversation. The repository remains English-only
+outside the approved locale tables and localization reference material.
 
 ## Attribution policy
 
@@ -167,7 +176,8 @@ Every change enters through a pull request. No exceptions for documentation, CI,
 A task is done only when:
 
 - Acceptance criteria are met.
-- English-only policy is respected.
+- English-only repository content (approved locale tables and localization reference material excepted) is respected.
+- Human translation review is signed for every non-English locale change.
 - No AI attribution is present.
 - Unit, architecture, and relevant integration tests pass.
 - The solution builds in Release.
@@ -186,7 +196,7 @@ A task is done only when:
 - Use object pooling for zombies, projectiles, VFX, and floating text.
 - Avoid allocations in `Update`, `FixedUpdate`, and hot paths.
 - Use the Input System and touch controls. Test phone and tablet layouts, safe areas, and landscape orientation.
-- User-facing strings must use localization keys from day one. Only English is active until the localization phase.
+- User-facing strings must use localization keys from day one. English is the source locale; v0.6.0 adds Spanish with a device-language default and a runtime selector.
 - Profile on a real Android device before declaring performance work complete.
 
 ## Backend rules
@@ -219,10 +229,13 @@ A task is done only when:
 - `docs/standards/autonomy.md`
 - `docs/standards/security.md`
 - `docs/standards/localization.md`
+- `docs/localization/glossary.md`
+- `docs/playtests/evidence/localization-review-es.txt`
 - `docs/agents/autonomy-policy.md`
 - `docs/agents/review-checklist.md`
 - `docs/agents/kill-switch.md`
 - `docs/architecture/adr/0008-local-first-beta-with-donations.md`
+- `docs/architecture/adr/0009-localization-architecture.md`
 - `docs/game-design/game-design.md`
 - `docs/game-design/economy.md`
 - `docs/game-design/skills.md`

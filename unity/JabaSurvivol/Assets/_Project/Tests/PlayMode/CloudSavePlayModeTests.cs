@@ -20,6 +20,7 @@ namespace JabaSurvivol.Tests.PlayMode
         [SetUp]
         public void SetUp()
         {
+            Localization.SetLocale("en");
             _directory = Path.Combine(Path.GetTempPath(), "jabasurvivol-cloud-ui", Guid.NewGuid().ToString("N"));
             GameBootstrap.SavePathOverride = Path.Combine(_directory, ProfileStore.FileName);
             GameBootstrap.AccountServiceFactoryOverride = () => new FakeAccountService();
@@ -41,6 +42,7 @@ namespace JabaSurvivol.Tests.PlayMode
             GameBootstrap.AccountServiceFactoryOverride = null;
             GameBootstrap.CloudSaveServiceFactoryOverride = null;
             GameBootstrap.RemoteConfigOverride = null;
+            Localization.SetLocale("en");
 
             if (_bootstrap != null)
             {
@@ -52,6 +54,25 @@ namespace JabaSurvivol.Tests.PlayMode
             {
                 Directory.Delete(_directory, true);
             }
+        }
+
+        [UnityTest]
+        public IEnumerator Cloud_status_follows_the_locale()
+        {
+            Localization.SetLocale("es");
+            _cloud.SyncResult = new CloudSyncResult
+            {
+                State = CloudSyncState.Synced,
+                Message = string.Empty
+            };
+
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            yield return null;
+
+            Assert.That(
+                _bootstrap.Session.CloudStatusForTests,
+                Is.EqualTo(Localization.Get("cloud.synced")));
         }
 
         [UnityTest]

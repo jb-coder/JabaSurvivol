@@ -1,218 +1,466 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 using JabaSurvivol.Core;
+using UnityEngine;
 
 namespace JabaSurvivol.Gameplay
 {
     /// <summary>
-    /// English-only string table for the walking skeleton. Keys are stable so
-    /// the localization phase can replace the storage without touching UI code.
+    /// Locale-aware string table for user-facing text. English is the source
+    /// locale and falls back when a key or locale is unavailable.
     /// </summary>
     public static class Localization
     {
-        private static readonly Dictionary<string, string> Entries = new(StringComparer.Ordinal)
+        [Serializable]
+        public sealed class LocalizationEntry
         {
-            ["app.title"] = "JABASURVIVOL",
-            ["menu.subtitle"] = "SURVIVE THE NIGHT. KEEP EVERYTHING.",
-            ["menu.start"] = "START RUN",
-            ["menu.armory"] = "ARMORY",
-            ["menu.progress"] = "SUPPLIES {0}    LEVEL {1}    BEST ROUND {2}",
-            ["menu.controls"] = "LEFT STICK MOVE    RIGHT STICK AIM & FIRE",
-            ["menu.build"] = "v{0} · {1}",
-            ["account.open"] = "ACCOUNT",
-            ["account.title"] = "ACCOUNT",
-            ["account.username"] = "USERNAME",
-            ["account.password"] = "PASSWORD",
-            ["account.register"] = "REGISTER",
-            ["account.login"] = "LOGIN",
-            ["account.logout"] = "LOG OUT",
-            ["account.close"] = "CLOSE",
-            ["account.state.signedout"] = "NOT SIGNED IN - LOCAL PLAY ONLY",
-            ["account.state.signingin"] = "SIGNING IN...",
-            ["account.state.signedin"] = "SIGNED IN AS {0}",
-            ["account.state.offline"] = "OFFLINE - LOCAL PLAY ONLY",
-            ["account.welcome"] = "WELCOME {0}",
-            ["account.error.username"] = "USERNAME MUST BE AT LEAST 3 CHARACTERS",
-            ["account.error.password"] = "PASSWORD MUST BE AT LEAST 8 CHARACTERS",
-            ["account.error.taken"] = "USERNAME IS NOT AVAILABLE",
-            ["account.error.invalid"] = "INVALID USERNAME OR PASSWORD",
-            ["account.error.network"] = "SERVER UNAVAILABLE - TRY AGAIN LATER",
-            ["account.error.generic"] = "THE REQUEST COULD NOT BE COMPLETED",
-            ["cloud.backup"] = "BACK UP",
-            ["cloud.restore"] = "RESTORE",
-            ["cloud.idle"] = "CLOUD READY",
-            ["cloud.disabled"] = "CLOUD SAVES DISABLED",
-            ["cloud.signedout"] = "SIGN IN TO BACK UP",
-            ["cloud.syncing"] = "SYNCING...",
-            ["cloud.synced"] = "CLOUD UP TO DATE",
-            ["cloud.conflict"] = "SAVE CONFLICT",
-            ["cloud.offline"] = "OFFLINE - LOCAL SAVE KEPT",
-            ["cloud.conflict.title"] = "SAVE CONFLICT",
-            ["cloud.conflict.details"] = "LOCAL REVISION {0}\nCLOUD REVISION {1}\nUPDATED {2}\n\nCHOOSE WHICH SAVE TO KEEP.",
-            ["cloud.useCloud"] = "USE CLOUD",
-            ["cloud.keepLocal"] = "KEEP LOCAL",
-            ["cloud.msg.backup"] = "BACKUP COMPLETE",
-            ["cloud.msg.restored"] = "CLOUD SAVE RESTORED",
-            ["cloud.msg.nosave"] = "NO CLOUD SAVE FOUND",
-            ["cloud.msg.restoreFailed"] = "CLOUD SAVE COULD NOT BE RESTORED",
-            ["cloud.msg.noconflict"] = "NO CLOUD CONFLICT TO RESOLVE",
-            ["cloud.msg.loadFailed"] = "CLOUD SAVE COULD NOT BE LOADED",
-            ["cloud.msg.backupFailed"] = "BACKUP FAILED - LOCAL SAVE KEPT",
-            ["leaderboard.open"] = "LEADERBOARD",
-            ["leaderboard.title"] = "HIGHEST ROUND",
-            ["leaderboard.loading"] = "LOADING...",
-            ["leaderboard.empty"] = "NO RUNS YET",
-            ["leaderboard.error"] = "LEADERBOARD UNAVAILABLE",
-            ["leaderboard.disabled"] = "LEADERBOARDS DISABLED",
-            ["telemetry.off"] = "TELEMETRY: OFF",
-            ["telemetry.on"] = "TELEMETRY: ON",
-            ["hud.health"] = "HP {0}/{1}",
-            ["hud.armor"] = "ARMOR {0}/{1}",
-            ["hud.round"] = "ROUND {0}/{1}",
-            ["hud.enemies"] = "ENEMIES REMAINING {0}",
-            ["hud.supplies"] = "SUPPLIES {0}",
-            ["hud.level"] = "LEVEL {0}   XP {1}/{2}   POINTS {3}",
-            ["hud.levelup"] = "LEVEL UP! LEVEL {0}",
-            ["hud.kills"] = "KILLS {0}",
-            ["hud.reload"] = "RELOAD",
-            ["hud.switch"] = "SWITCH",
-            ["hud.ammo"] = "AMMO {0}/{1}   RESERVE {2}",
-            ["hud.ammo.infinite"] = "AMMO {0}/{1}   RESERVE {2}",
-            ["hud.reloading"] = "RELOADING",
-            ["hud.skill"] = "SKILL",
-            ["hud.skill.locked"] = "LOCKED",
-            ["hud.elite"] = "ELITE ROUND - REWARDS x2",
-            ["hud.boss"] = "BOSS",
-            ["hud.boss.health"] = "BOSS {0}/{1}",
-            ["boss.name"] = "THE WARDEN",
-            ["hud.pause"] = "II",
-            ["pause.title"] = "PAUSED",
-            ["pause.resume"] = "RESUME",
-            ["pause.menu"] = "MAIN MENU",
-            ["pause.armory"] = "ARMORY",
-            ["pause.sound.on"] = "SOUND: ON",
-            ["pause.sound.off"] = "SOUND: OFF",
-            ["armory.title"] = "ARMORY",
-            ["armory.close"] = "CLOSE",
-            ["armory.supplies"] = "SUPPLIES {0}",
-            ["armory.buy"] = "BUY {0}",
-            ["armory.equip"] = "EQUIP",
-            ["armory.equipped"] = "EQUIPPED",
-            ["armory.purchased"] = "{0} PURCHASED AND EQUIPPED",
-            ["armory.equipped.status"] = "{0} EQUIPPED",
-            ["armory.insufficient"] = "NOT ENOUGH SUPPLIES",
-            ["armory.stats"] = "DMG {0}   RATE {1}/s   MAG {2}   RANGE {3}   RESERVE {4}",
-            ["armory.reserve.infinite"] = "INF",
-            ["armory.upgrade.title"] = "UPGRADES - {0}",
-            ["armory.upgrade.card"] = "{0}\nTIER {1}/{2}\n+{4}% NEXT\n{3} SUPPLIES",
-            ["armory.upgrade.max"] = "{0}\nMAX TIER {1}",
-            ["armory.upgrade.purchased"] = "{0} TIER {1}",
-            ["armory.upgrade.maxed"] = "MAX TIER REACHED",
-            ["weapon.upgrade.damage"] = "DAMAGE",
-            ["weapon.upgrade.firerate"] = "FIRE RATE",
-            ["weapon.upgrade.magazine"] = "MAGAZINE",
-            ["weapon.upgrade.reload"] = "RELOAD",
-            ["armory.tab.weapons"] = "WEAPONS",
-            ["armory.tab.armor"] = "ARMOR",
-            ["armory.armor.none"] = "NO ARMOR",
-            ["armory.armor.light"] = "LIGHT ARMOR",
-            ["armory.armor.medium"] = "MEDIUM ARMOR",
-            ["armory.armor.heavy"] = "HEAVY ARMOR",
-            ["armory.armor.absorb"] = "ABSORB {0}",
-            ["armory.armor.row"] = "ABSORB {0}   TIER {1}/{2}",
-            ["armory.armor.upgrade.title"] = "ARMOR UPGRADE - {0}",
-            ["armory.armor.upgrade.card"] = "ABSORB +{0}%\nTIER {1}/{2}\n{3} SUPPLIES",
-            ["armory.armor.upgrade.max"] = "ABSORB +{0}% PER TIER\nMAX TIER {1}",
-            ["armory.armor.upgrade.none"] = "EQUIP ARMOR TO UPGRADE",
-            ["armory.armor.unlock"] = "UNLOCK {0}",
-            ["armory.armor.unlock.free"] = "UNLOCK",
-            ["armory.armor.equip"] = "EQUIP",
-            ["armory.armor.equipped"] = "EQUIPPED",
-            ["armory.armor.purchased"] = "{0} UNLOCKED AND EQUIPPED",
-            ["armory.armor.equipped.status"] = "{0} EQUIPPED",
-            ["armory.armor.upgraded"] = "ARMOR TIER {0}",
-            ["armory.armor.maxed"] = "MAX ARMOR TIER",
-            ["character.title"] = "CHARACTER",
-            ["character.close"] = "CLOSE",
-            ["character.open"] = "SKILLS",
-            ["character.level"] = "LEVEL {0}   XP {1}/{2}",
-            ["character.points"] = "SKILL POINTS {0}",
-            ["character.rank"] = "RANK {0}/{1}",
-            ["character.allocate"] = "+",
-            ["character.max"] = "MAX",
-            ["character.respec"] = "RESPEC",
-            ["character.stats"] = "HP {0}   DAMAGE x{1}   MOVE {2}   ARMOR {3}   CRIT {4}   HEADSHOT {5}   RELOAD x{6}   AMMO x{7}",
-            ["character.respec.done"] = "RESPEC COMPLETE: {0} POINTS RETURNED",
-            ["character.respec.empty"] = "NO ALLOCATED POINTS TO RESPEC",
-            ["character.respec.blocked"] = "RESPEC IS ONLY AVAILABLE BETWEEN RUNS",
-            ["character.status.allocated"] = "{0} RANK {1}",
-            ["character.status.nopoints"] = "NO SKILL POINTS AVAILABLE",
-            ["character.status.maxrank"] = "MAX RANK",
-            ["character.allocation.blocked"] = "ALLOCATION REQUIRES THE ARMORY, PAUSE MENU, OR ROUND END",
-            ["character.active.selected"] = "{0} (ACTIVE)",
-            ["character.active.status"] = "ACTIVE SKILL: {0}",
-            ["character.active.blocked"] = "ALLOCATE A RANK TO SELECT THIS SKILL",
-            ["synergy.berserker.name"] = "BERSERKER",
-            ["synergy.ghost.name"] = "GHOST",
-            ["synergy.bastion.name"] = "BASTION",
-            ["synergy.active"] = "{0} ACTIVE",
-            ["synergy.inactive"] = "{0} {1} {2}/{3} + {4} {5}/{6}",
-            ["character.branch.strength"] = "STRENGTH",
-            ["character.branch.agility"] = "AGILITY",
-            ["character.branch.survival"] = "SURVIVAL",
-            ["skill.strength.name"] = "STRENGTH",
-            ["skill.vitality.name"] = "VITALITY",
-            ["skill.shockwave.name"] = "SHOCKWAVE",
-            ["skill.speed.name"] = "SPEED",
-            ["skill.precision.name"] = "PRECISION",
-            ["skill.dash.name"] = "DASH",
-            ["skill.endurance.name"] = "ENDURANCE",
-            ["skill.engineering.name"] = "ENGINEERING",
-            ["skill.turret.name"] = "TURRET",
-            ["skill.strength.preview"] = "DAMAGE x{0} -> x{1}",
-            ["skill.vitality.preview"] = "MAX HP {0} -> {1}",
-            ["skill.speed.preview"] = "MOVE SPEED {0} -> {1}",
-            ["skill.precision.preview"] = "CRIT {0} -> {1}   HEADSHOT {2} -> {3}",
-            ["skill.endurance.preview"] = "ARMOR {0} -> {1}",
-            ["skill.engineering.preview"] = "RELOAD x{0} -> x{1}   AMMO x{2} -> x{3}",
-            ["skill.shockwave.preview"] = "DAMAGE {0} -> {1}   RADIUS {2} -> {3}   COOLDOWN {4} -> {5}",
-            ["skill.dash.preview"] = "DISTANCE {0} -> {1}   COOLDOWN {2} -> {3}",
-            ["skill.turret.preview"] = "DAMAGE {0} -> {1}   DURATION {2} -> {3}   COOLDOWN {4} -> {5}",
-            ["weapon.pistol.name"] = "PISTOL",
-            ["weapon.smg.name"] = "SMG",
-            ["weapon.shotgun.name"] = "SHOTGUN",
-            ["weapon.rifle.name"] = "RIFLE",
-            ["weapon.lmg.name"] = "LMG",
-            ["zombie.walker.name"] = "WALKER",
-            ["zombie.runner.name"] = "RUNNER",
-            ["zombie.brute.name"] = "BRUTE",
-            ["gameover.title"] = "YOU DIED",
-            ["gameover.summary"] = "ROUND {0}    KILLS {1}\nSUPPLIES EARNED {2}",
-            ["gameover.restart"] = "RESTART",
-            ["gameover.menu"] = "MAIN MENU",
-            ["victory.title"] = "VICTORY",
-            ["victory.subtitle"] = "THE WARDEN HAS FALLEN",
-            ["victory.summary"] = "ROUND {0}    KILLS {1}\nSUPPLIES EARNED {2}    XP EARNED {3}",
-            ["victory.next"] = "NEXT RUN",
-            ["victory.menu"] = "MAIN MENU",
-            ["round.end.title"] = "ROUND {0} CLEARED",
-            ["round.end.hint"] = "TAP A REWARD OR PRESS 1, 2, OR 3",
-            ["round.end.summary"] = "KILLS {0}    SUPPLIES {1}    XP {2}",
-            ["reward.supplies.card"] = "SUPPLIES\n+{0}",
-            ["reward.xp.card"] = "XP\n+{0}",
-            ["reward.ammo.card"] = "AMMO CRATE\n+{0}",
-            ["reward.armor.card"] = "ARMOR PLATE\n+{0}"
-        };
+            public string key;
+            public string value;
+        }
+
+        [Serializable]
+        public sealed class LocalizationFile
+        {
+            public string locale;
+            public string displayName;
+            public LocalizationEntry[] entries;
+        }
+
+        public const string DefaultLocale = "en";
+        public const string SystemLocaleValue = "system";
+        public const string LocalePreferenceKey = "localization.locale";
+        public const string PseudoLocale = "qps";
+
+        private const string MissingText = "...";
+        private static readonly string[] SupportedLocaleCodes = { "en", "es" };
+        private static readonly HashSet<string> LoggedMissingKeys = new(StringComparer.Ordinal);
+        private static Dictionary<string, string> _entries;
+        private static Dictionary<string, string> _fallbackEntries;
+        private static string _currentLocale;
+        private static bool _initialized;
+
+        public static event Action LocaleChanged;
+
+        public static string CurrentLocale
+        {
+            get
+            {
+                EnsureInitialized();
+                return _currentLocale;
+            }
+        }
+
+        public static CultureInfo DisplayCulture
+        {
+            get
+            {
+                EnsureInitialized();
+                return CultureInfo.GetCultureInfo(_currentLocale == "es" ? "es-ES" : "en-US");
+            }
+        }
+
+        public static IReadOnlyList<string> SupportedLocales => SupportedLocaleCodes;
+
+        public static string GetDisplayName(string locale)
+        {
+            var file = LoadLocaleFile(locale);
+            return file?.displayName ?? locale;
+        }
+
+        public static IReadOnlyCollection<string> GetKeys(string locale)
+        {
+            if (locale == PseudoLocale)
+            {
+                EnsureInitialized();
+                return _fallbackEntries.Keys;
+            }
+
+            var entries = LoadLocaleEntries(locale);
+            return entries == null ? Array.Empty<string>() : entries.Keys;
+        }
+
+        public static string ResolveLocale(string preference, SystemLanguage language, string cultureName)
+        {
+            if (preference == "en" || preference == "es")
+            {
+                return preference;
+            }
+
+            return MapSystemLanguage(language, cultureName);
+        }
+
+        public static string MapSystemLanguage(SystemLanguage language, string cultureName)
+        {
+            if (language == SystemLanguage.Spanish)
+            {
+                return "es";
+            }
+
+            if (language == SystemLanguage.English)
+            {
+                return "en";
+            }
+
+            return NormalizeCulture(cultureName) == "es" ? "es" : "en";
+        }
+
+        public static void SetLocale(string locale)
+        {
+            EnsureInitialized();
+            if (locale == SystemLocaleValue)
+            {
+                UseSystemLocale();
+                return;
+            }
+
+            if (!IsSupported(locale))
+            {
+                throw new ArgumentOutOfRangeException(nameof(locale));
+            }
+
+            PlayerPrefs.SetString(LocalePreferenceKey, locale);
+            PlayerPrefs.Save();
+            ApplyLocale(locale, raiseEvent: true);
+        }
+
+        public static void UseSystemLocale()
+        {
+            EnsureInitialized();
+            PlayerPrefs.SetString(LocalePreferenceKey, SystemLocaleValue);
+            PlayerPrefs.Save();
+            ApplyLocale(
+                MapSystemLanguage(
+                    Application.systemLanguage,
+                    CultureInfo.CurrentUICulture.TwoLetterISOLanguageName),
+                raiseEvent: true);
+        }
+
+        /// <summary>
+        /// Test hook that clears cached state and reloads the saved preference.
+        /// </summary>
+        public static void ReloadForTests()
+        {
+            _initialized = false;
+            _entries = null;
+            _fallbackEntries = null;
+            _currentLocale = null;
+            LoggedMissingKeys.Clear();
+            EnsureInitialized();
+        }
+
+        /// <summary>
+        /// Test hook that applies an expanded pseudo-locale derived from English.
+        /// It is never persisted or exposed in the language selector.
+        /// </summary>
+        public static void UsePseudoLocaleForTests()
+        {
+            EnsureInitialized();
+            _currentLocale = PseudoLocale;
+            _entries = BuildPseudoEntries(_fallbackEntries);
+            LoggedMissingKeys.Clear();
+            LocaleChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// Test hook for the fallback precedence used by <see cref="Get"/>.
+        /// </summary>
+        public static string ResolveValueForTests(
+            string key,
+            IReadOnlyDictionary<string, string> active,
+            IReadOnlyDictionary<string, string> fallback,
+            out bool usedFallback)
+        {
+            if (active != null && active.TryGetValue(key, out var value))
+            {
+                usedFallback = false;
+                return value;
+            }
+
+            if (fallback != null && fallback.TryGetValue(key, out var fallbackValue))
+            {
+                usedFallback = true;
+                return fallbackValue;
+            }
+
+            usedFallback = false;
+            return MissingText;
+        }
 
         public static string Get(string key)
         {
-            return Entries.TryGetValue(key, out var value) ? value : key;
+            EnsureInitialized();
+
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                LogMissing(key, bothTables: true);
+                return MissingText;
+            }
+
+            var value = ResolveValueForTests(key, _entries, _fallbackEntries, out var usedFallback);
+            if (usedFallback)
+            {
+                LogMissing(key, bothTables: false);
+            }
+            else if (value == MissingText)
+            {
+                LogMissing(key, bothTables: true);
+            }
+
+            return value;
         }
 
         public static string Format(string key, params object[] arguments)
         {
-            return string.Format(CultureInfo.InvariantCulture, Get(key), arguments);
+            return string.Format(DisplayCulture, Get(key), arguments);
+        }
+
+        public static string Format(string key, int arg0)
+        {
+            return string.Format(DisplayCulture, Get(key), arg0);
+        }
+
+        public static string Format(string key, int arg0, int arg1)
+        {
+            return string.Format(DisplayCulture, Get(key), arg0, arg1);
+        }
+
+        public static string Format(string key, int arg0, int arg1, int arg2)
+        {
+            return string.Format(DisplayCulture, Get(key), arg0, arg1, arg2);
+        }
+
+        public static string Format(string key, int arg0, int arg1, int arg2, int arg3)
+        {
+            return string.Format(DisplayCulture, Get(key), arg0, arg1, arg2, arg3);
+        }
+
+        public static string Format(string key, string arg0)
+        {
+            return string.Format(DisplayCulture, Get(key), arg0);
+        }
+
+        public static string Format(string key, string arg0, string arg1)
+        {
+            return string.Format(DisplayCulture, Get(key), arg0, arg1);
+        }
+
+        public static string Format(string key, string arg0, int arg1)
+        {
+            return string.Format(DisplayCulture, Get(key), arg0, arg1);
+        }
+
+        public static string Format(string key, int arg0, int arg1, string arg2)
+        {
+            return string.Format(DisplayCulture, Get(key), arg0, arg1, arg2);
+        }
+
+        private static void EnsureInitialized()
+        {
+            if (_initialized)
+            {
+                return;
+            }
+
+            _initialized = true;
+            _fallbackEntries = LoadLocaleEntries(DefaultLocale) ??
+                               new Dictionary<string, string>(StringComparer.Ordinal);
+            var preference = PlayerPrefs.GetString(LocalePreferenceKey, SystemLocaleValue);
+            var locale = ResolveLocale(
+                preference,
+                Application.systemLanguage,
+                CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
+            ApplyLocale(locale, raiseEvent: false);
+        }
+
+        private static void ApplyLocale(string locale, bool raiseEvent)
+        {
+            var entries = locale == DefaultLocale
+                ? _fallbackEntries
+                : LoadLocaleEntries(locale);
+
+            if (entries == null || entries.Count == 0)
+            {
+                locale = DefaultLocale;
+                entries = _fallbackEntries;
+            }
+
+            _currentLocale = locale;
+            _entries = entries ?? new Dictionary<string, string>(StringComparer.Ordinal);
+            LoggedMissingKeys.Clear();
+
+            if (raiseEvent)
+            {
+                LocaleChanged?.Invoke();
+            }
+        }
+
+        private static Dictionary<string, string> BuildPseudoEntries(
+            IReadOnlyDictionary<string, string> source)
+        {
+            var entries = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var pair in source)
+            {
+                entries[pair.Key] = CreatePseudoValue(pair.Value);
+            }
+
+            return entries;
+        }
+
+        private static string CreatePseudoValue(string value)
+        {
+            var targetLength = (int)Math.Ceiling(value.Length * 1.3d);
+            var builder = new StringBuilder(value.Length + 8);
+            builder.Append('[');
+
+            for (var i = 0; i < value.Length; i++)
+            {
+                var current = value[i];
+                if (current == '{')
+                {
+                    var close = value.IndexOf('}', i + 1);
+                    if (close > i)
+                    {
+                        builder.Append(value, i, close - i + 1);
+                        i = close;
+                        continue;
+                    }
+                }
+
+                builder.Append(PseudoCharacter(current));
+            }
+
+            builder.Append(']');
+            while (builder.Length < targetLength)
+            {
+                builder.Append('~');
+            }
+
+            return builder.ToString();
+        }
+
+        private static char PseudoCharacter(char value)
+        {
+            return value switch
+            {
+                'a' => 'á',
+                'e' => 'é',
+                'i' => 'í',
+                'o' => 'ó',
+                'u' => 'ú',
+                'n' => 'ñ',
+                'c' => 'ç',
+                'A' => 'Á',
+                'E' => 'É',
+                'I' => 'Í',
+                'O' => 'Ó',
+                'U' => 'Ú',
+                'N' => 'Ñ',
+                'C' => 'Ç',
+                _ => value
+            };
+        }
+
+        private static Dictionary<string, string> LoadLocaleEntries(string locale)
+        {
+            var file = LoadLocaleFile(locale);
+            if (file?.entries == null)
+            {
+                return null;
+            }
+
+            var entries = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var entry in file.entries)
+            {
+                if (entry == null ||
+                    string.IsNullOrWhiteSpace(entry.key) ||
+                    string.IsNullOrEmpty(entry.value))
+                {
+                    Debug.LogError($"Locale {locale} contains an empty key or value.");
+                    continue;
+                }
+
+                if (!entries.TryAdd(entry.key, entry.value))
+                {
+                    Debug.LogError($"Locale {locale} contains duplicate key {entry.key}.");
+                }
+            }
+
+            return entries;
+        }
+
+        private static LocalizationFile LoadLocaleFile(string locale)
+        {
+            var asset = Resources.Load<TextAsset>("Localization/" + locale);
+            if (asset == null)
+            {
+                Debug.LogError($"Missing localization resource for locale {locale}.");
+                return null;
+            }
+
+            try
+            {
+                var file = JsonUtility.FromJson<LocalizationFile>(asset.text);
+                if (file?.entries == null || file.entries.Length == 0)
+                {
+                    Debug.LogError($"Localization resource for locale {locale} is empty.");
+                    return null;
+                }
+
+                return file;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"Localization resource for locale {locale} is invalid: {exception.Message}");
+                return null;
+            }
+        }
+
+        private static bool IsSupported(string locale)
+        {
+            for (var i = 0; i < SupportedLocaleCodes.Length; i++)
+            {
+                if (SupportedLocaleCodes[i] == locale)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static string NormalizeCulture(string cultureName)
+        {
+            if (string.IsNullOrWhiteSpace(cultureName))
+            {
+                return string.Empty;
+            }
+
+            var separator = cultureName.IndexOfAny(new[] { '-', '_' });
+            var language = separator >= 0
+                ? cultureName.Substring(0, separator)
+                : cultureName;
+            return language.ToLowerInvariant();
+        }
+
+        private static void LogMissing(string key, bool bothTables)
+        {
+            var displayKey = string.IsNullOrWhiteSpace(key) ? "<empty>" : key;
+            if (!LoggedMissingKeys.Add(displayKey))
+            {
+                return;
+            }
+
+            if (bothTables)
+            {
+                Debug.LogError($"Missing localization key in all locales: {displayKey}");
+            }
+            else
+            {
+                Debug.LogWarning(
+                    $"Missing localization key in {_currentLocale}; using {DefaultLocale}: {displayKey}");
+            }
         }
 
         public static string WeaponNameKey(WeaponId weaponId)

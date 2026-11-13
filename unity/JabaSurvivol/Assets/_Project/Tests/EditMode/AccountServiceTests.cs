@@ -19,6 +19,7 @@ namespace JabaSurvivol.Tests.EditMode
         [SetUp]
         public void SetUp()
         {
+            Localization.SetLocale("en");
             _api = new FakeAuthApiClient();
             _store = new InMemorySecureTokenStore();
             _service = new AccountService(_api, _store);
@@ -28,6 +29,7 @@ namespace JabaSurvivol.Tests.EditMode
         public void TearDown()
         {
             _service.Dispose();
+            Localization.SetLocale("en");
         }
 
         [Test]
@@ -119,6 +121,45 @@ namespace JabaSurvivol.Tests.EditMode
             Assert.That(result.Success, Is.True);
             Assert.That(_service.State, Is.EqualTo(AccountState.SignedIn));
             Assert.That(_service.Username, Is.EqualTo("NewPlayer"));
+        }
+
+        [TestCase("username_taken", "account.error.taken")]
+        [TestCase("invalid_credentials", "account.error.invalid")]
+        [TestCase("unauthorized", "account.error.invalid")]
+        [TestCase("http_401", "account.error.invalid")]
+        [TestCase("invalid_username", "account.error.username")]
+        [TestCase("invalid_password", "account.error.password")]
+        [TestCase("invalid_request", "account.error.validation")]
+        [TestCase("http_400", "account.error.validation")]
+        [TestCase("rate_limited", "account.error.rateLimited")]
+        [TestCase("http_429", "account.error.rateLimited")]
+        [TestCase("network_error", "account.error.network")]
+        [TestCase("timeout", "account.error.network")]
+        public async Task Failed_login_uses_a_localized_message_for_identity_codes(
+            string code,
+            string key)
+        {
+            Localization.SetLocale("es");
+            _api.LoginResult = AuthResult.Failure(400, code, "Backend English detail.");
+
+            var result = await _service.LoginAsync("Tester", "Password1", CancellationToken.None);
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message, Is.EqualTo(Localization.Get(key)));
+            Assert.That(result.Message, Does.Not.Contain("Backend English"));
+        }
+
+        [Test]
+        public async Task Unknown_backend_error_uses_the_generic_localized_message()
+        {
+            Localization.SetLocale("es");
+            _api.LoginResult = AuthResult.Failure(500, "unexpected", "Backend English detail.");
+
+            var result = await _service.LoginAsync("Tester", "Password1", CancellationToken.None);
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message, Is.EqualTo(Localization.Get("account.error.generic")));
+            Assert.That(result.Message, Does.Not.Contain("Backend English"));
         }
 
         [Test]
