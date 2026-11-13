@@ -761,6 +761,18 @@
     {
       "key": "reward.armor.card",
       "value": "ARMOR PLATE\n+{0}"
+    },
+    {
+      "key": "settings.language.title",
+      "value": "LANGUAGE"
+    },
+    {
+      "key": "settings.language.system",
+      "value": "SYSTEM DEFAULT"
+    },
+    {
+      "key": "settings.language.close",
+      "value": "CLOSE"
     }
   ]
 }

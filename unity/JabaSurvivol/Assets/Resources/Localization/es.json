@@ -761,6 +761,18 @@
     {
       "key": "reward.armor.card",
       "value": "PLACA DE ARMADURA\n+{0}"
+    },
+    {
+      "key": "settings.language.title",
+      "value": "IDIOMA"
+    },
+    {
+      "key": "settings.language.system",
+      "value": "IDIOMA DEL SISTEMA"
+    },
+    {
+      "key": "settings.language.close",
+      "value": "CERRAR"
     }
   ]
 }
