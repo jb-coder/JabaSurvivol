@@ -1,0 +1,766 @@
+{
+  "locale": "es",
+  "displayName": "Español",
+  "entries": [
+    {
+      "key": "app.title",
+      "value": "JABASURVIVOL"
+    },
+    {
+      "key": "menu.subtitle",
+      "value": "SOBREVIVE A LA NOCHE. CONSERVA TODO."
+    },
+    {
+      "key": "menu.start",
+      "value": "INICIAR PARTIDA"
+    },
+    {
+      "key": "menu.armory",
+      "value": "ARMERÍA"
+    },
+    {
+      "key": "menu.progress",
+      "value": "SUMINISTROS {0}    NIVEL {1}    MEJOR RONDA {2}"
+    },
+    {
+      "key": "menu.controls",
+      "value": "PALANCA IZQ. MOVER    PALANCA DCHA. APUNTAR Y DISPARAR"
+    },
+    {
+      "key": "menu.build",
+      "value": "v{0} · {1}"
+    },
+    {
+      "key": "account.open",
+      "value": "CUENTA"
+    },
+    {
+      "key": "account.title",
+      "value": "CUENTA"
+    },
+    {
+      "key": "account.username",
+      "value": "USUARIO"
+    },
+    {
+      "key": "account.password",
+      "value": "CONTRASEÑA"
+    },
+    {
+      "key": "account.register",
+      "value": "REGISTRARSE"
+    },
+    {
+      "key": "account.login",
+      "value": "INICIAR SESIÓN"
+    },
+    {
+      "key": "account.logout",
+      "value": "CERRAR SESIÓN"
+    },
+    {
+      "key": "account.close",
+      "value": "CERRAR"
+    },
+    {
+      "key": "account.state.signedout",
+      "value": "SIN SESIÓN - SOLO JUEGO LOCAL"
+    },
+    {
+      "key": "account.state.signingin",
+      "value": "INICIANDO SESIÓN..."
+    },
+    {
+      "key": "account.state.signedin",
+      "value": "SESIÓN INICIADA COMO {0}"
+    },
+    {
+      "key": "account.state.offline",
+      "value": "SIN CONEXIÓN - SOLO JUEGO LOCAL"
+    },
+    {
+      "key": "account.welcome",
+      "value": "HOLA {0}"
+    },
+    {
+      "key": "account.error.username",
+      "value": "EL USUARIO DEBE TENER AL MENOS 3 CARACTERES"
+    },
+    {
+      "key": "account.error.password",
+      "value": "LA CONTRASEÑA DEBE TENER AL MENOS 8 CARACTERES"
+    },
+    {
+      "key": "account.error.taken",
+      "value": "EL USUARIO NO ESTÁ DISPONIBLE"
+    },
+    {
+      "key": "account.error.invalid",
+      "value": "USUARIO O CONTRASEÑA INCORRECTOS"
+    },
+    {
+      "key": "account.error.network",
+      "value": "SERVIDOR NO DISPONIBLE - INTÉNTALO MÁS TARDE"
+    },
+    {
+      "key": "account.error.generic",
+      "value": "NO SE PUDO COMPLETAR LA SOLICITUD"
+    },
+    {
+      "key": "cloud.backup",
+      "value": "COPIAR"
+    },
+    {
+      "key": "cloud.restore",
+      "value": "RESTAURAR"
+    },
+    {
+      "key": "cloud.idle",
+      "value": "NUBE LISTA"
+    },
+    {
+      "key": "cloud.disabled",
+      "value": "GUARDADO EN LA NUBE DESACTIVADO"
+    },
+    {
+      "key": "cloud.signedout",
+      "value": "INICIA SESIÓN PARA COPIAR"
+    },
+    {
+      "key": "cloud.syncing",
+      "value": "SINCRONIZANDO..."
+    },
+    {
+      "key": "cloud.synced",
+      "value": "NUBE ACTUALIZADA"
+    },
+    {
+      "key": "cloud.conflict",
+      "value": "CONFLICTO DE GUARDADO"
+    },
+    {
+      "key": "cloud.offline",
+      "value": "SIN CONEXIÓN - GUARDADO LOCAL CONSERVADO"
+    },
+    {
+      "key": "cloud.conflict.title",
+      "value": "CONFLICTO DE GUARDADO"
+    },
+    {
+      "key": "cloud.conflict.details",
+      "value": "REVISIÓN LOCAL {0}\nREVISIÓN EN LA NUBE {1}\nACTUALIZADO {2}\n\nELIGE QUÉ GUARDADO CONSERVAR."
+    },
+    {
+      "key": "cloud.useCloud",
+      "value": "USAR NUBE"
+    },
+    {
+      "key": "cloud.keepLocal",
+      "value": "CONSERVAR LOCAL"
+    },
+    {
+      "key": "cloud.msg.backup",
+      "value": "COPIA COMPLETA"
+    },
+    {
+      "key": "cloud.msg.restored",
+      "value": "GUARDADO EN LA NUBE RESTAURADO"
+    },
+    {
+      "key": "cloud.msg.nosave",
+      "value": "NO SE ENCONTRÓ GUARDADO EN LA NUBE"
+    },
+    {
+      "key": "cloud.msg.restoreFailed",
+      "value": "NO SE PUDO RESTAURAR EL GUARDADO EN LA NUBE"
+    },
+    {
+      "key": "cloud.msg.noconflict",
+      "value": "NO HAY CONFLICTO QUE RESOLVER"
+    },
+    {
+      "key": "cloud.msg.loadFailed",
+      "value": "NO SE PUDO CARGAR EL GUARDADO EN LA NUBE"
+    },
+    {
+      "key": "cloud.msg.backupFailed",
+      "value": "ERROR AL COPIAR - GUARDADO LOCAL CONSERVADO"
+    },
+    {
+      "key": "leaderboard.open",
+      "value": "CLASIFICACIÓN"
+    },
+    {
+      "key": "leaderboard.title",
+      "value": "MEJOR RONDA"
+    },
+    {
+      "key": "leaderboard.loading",
+      "value": "CARGANDO..."
+    },
+    {
+      "key": "leaderboard.empty",
+      "value": "AÚN NO HAY PARTIDAS"
+    },
+    {
+      "key": "leaderboard.error",
+      "value": "CLASIFICACIÓN NO DISPONIBLE"
+    },
+    {
+      "key": "leaderboard.disabled",
+      "value": "CLASIFICACIONES DESACTIVADAS"
+    },
+    {
+      "key": "telemetry.off",
+      "value": "TELEMETRÍA: DESACTIVADA"
+    },
+    {
+      "key": "telemetry.on",
+      "value": "TELEMETRÍA: ACTIVADA"
+    },
+    {
+      "key": "hud.health",
+      "value": "HP {0}/{1}"
+    },
+    {
+      "key": "hud.armor",
+      "value": "ARMADURA {0}/{1}"
+    },
+    {
+      "key": "hud.round",
+      "value": "RONDA {0}/{1}"
+    },
+    {
+      "key": "hud.enemies",
+      "value": "ENEMIGOS RESTANTES {0}"
+    },
+    {
+      "key": "hud.supplies",
+      "value": "SUMINISTROS {0}"
+    },
+    {
+      "key": "hud.level",
+      "value": "NIVEL {0}   XP {1}/{2}   PUNTOS {3}"
+    },
+    {
+      "key": "hud.levelup",
+      "value": "¡SUBISTE DE NIVEL! NIVEL {0}"
+    },
+    {
+      "key": "hud.kills",
+      "value": "BAJAS {0}"
+    },
+    {
+      "key": "hud.reload",
+      "value": "RECARGAR"
+    },
+    {
+      "key": "hud.switch",
+      "value": "CAMBIAR"
+    },
+    {
+      "key": "hud.ammo",
+      "value": "MUNICIÓN {0}/{1}   RESERVA {2}"
+    },
+    {
+      "key": "hud.ammo.infinite",
+      "value": "MUNICIÓN {0}/{1}   RESERVA {2}"
+    },
+    {
+      "key": "hud.reloading",
+      "value": "RECARGANDO"
+    },
+    {
+      "key": "hud.skill",
+      "value": "HABILIDAD"
+    },
+    {
+      "key": "hud.skill.locked",
+      "value": "BLOQUEADA"
+    },
+    {
+      "key": "hud.elite",
+      "value": "RONDA ÉLITE - RECOMPENSAS x2"
+    },
+    {
+      "key": "hud.boss",
+      "value": "JEFE"
+    },
+    {
+      "key": "hud.boss.health",
+      "value": "JEFE {0}/{1}"
+    },
+    {
+      "key": "boss.name",
+      "value": "EL GUARDIÁN"
+    },
+    {
+      "key": "hud.pause",
+      "value": "II"
+    },
+    {
+      "key": "pause.title",
+      "value": "PAUSA"
+    },
+    {
+      "key": "pause.resume",
+      "value": "REANUDAR"
+    },
+    {
+      "key": "pause.menu",
+      "value": "MENÚ PRINCIPAL"
+    },
+    {
+      "key": "pause.armory",
+      "value": "ARMERÍA"
+    },
+    {
+      "key": "pause.sound.on",
+      "value": "SONIDO: ACTIVADO"
+    },
+    {
+      "key": "pause.sound.off",
+      "value": "SONIDO: DESACTIVADO"
+    },
+    {
+      "key": "armory.title",
+      "value": "ARMERÍA"
+    },
+    {
+      "key": "armory.close",
+      "value": "CERRAR"
+    },
+    {
+      "key": "armory.supplies",
+      "value": "SUMINISTROS {0}"
+    },
+    {
+      "key": "armory.buy",
+      "value": "COMPRAR {0}"
+    },
+    {
+      "key": "armory.equip",
+      "value": "EQUIPAR"
+    },
+    {
+      "key": "armory.equipped",
+      "value": "EQUIPADO"
+    },
+    {
+      "key": "armory.purchased",
+      "value": "{0} COMPRADO Y EQUIPADO"
+    },
+    {
+      "key": "armory.equipped.status",
+      "value": "{0} EQUIPADO"
+    },
+    {
+      "key": "armory.insufficient",
+      "value": "SUMINISTROS INSUFICIENTES"
+    },
+    {
+      "key": "armory.stats",
+      "value": "DAÑO {0}   CADENCIA {1}/s   CARGADOR {2}   ALCANCE {3}   RESERVA {4}"
+    },
+    {
+      "key": "armory.reserve.infinite",
+      "value": "INF"
+    },
+    {
+      "key": "armory.upgrade.title",
+      "value": "MEJORAS - {0}"
+    },
+    {
+      "key": "armory.upgrade.card",
+      "value": "{0}\nNIVEL {1}/{2}\n+{4}% SIGUIENTE\n{3} SUMINISTROS"
+    },
+    {
+      "key": "armory.upgrade.max",
+      "value": "{0}\nNIVEL MÁX. {1}"
+    },
+    {
+      "key": "armory.upgrade.purchased",
+      "value": "{0} NIVEL {1}"
+    },
+    {
+      "key": "armory.upgrade.maxed",
+      "value": "NIVEL MÁXIMO ALCANZADO"
+    },
+    {
+      "key": "weapon.upgrade.damage",
+      "value": "DAÑO"
+    },
+    {
+      "key": "weapon.upgrade.firerate",
+      "value": "CADENCIA"
+    },
+    {
+      "key": "weapon.upgrade.magazine",
+      "value": "CARGADOR"
+    },
+    {
+      "key": "weapon.upgrade.reload",
+      "value": "RECARGA"
+    },
+    {
+      "key": "armory.tab.weapons",
+      "value": "ARMAS"
+    },
+    {
+      "key": "armory.tab.armor",
+      "value": "ARMADURA"
+    },
+    {
+      "key": "armory.armor.none",
+      "value": "SIN ARMADURA"
+    },
+    {
+      "key": "armory.armor.light",
+      "value": "ARMADURA LIGERA"
+    },
+    {
+      "key": "armory.armor.medium",
+      "value": "ARMADURA MEDIA"
+    },
+    {
+      "key": "armory.armor.heavy",
+      "value": "ARMADURA PESADA"
+    },
+    {
+      "key": "armory.armor.absorb",
+      "value": "ABSORCIÓN {0}"
+    },
+    {
+      "key": "armory.armor.row",
+      "value": "ABSORCIÓN {0}   NIVEL {1}/{2}"
+    },
+    {
+      "key": "armory.armor.upgrade.title",
+      "value": "MEJORA DE ARMADURA - {0}"
+    },
+    {
+      "key": "armory.armor.upgrade.card",
+      "value": "ABSORCIÓN +{0}%\nNIVEL {1}/{2}\n{3} SUMINISTROS"
+    },
+    {
+      "key": "armory.armor.upgrade.max",
+      "value": "ABSORCIÓN +{0}% POR NIVEL\nNIVEL MÁX. {1}"
+    },
+    {
+      "key": "armory.armor.upgrade.none",
+      "value": "EQUIPA ARMADURA PARA MEJORAR"
+    },
+    {
+      "key": "armory.armor.unlock",
+      "value": "DESBLOQUEAR {0}"
+    },
+    {
+      "key": "armory.armor.unlock.free",
+      "value": "DESBLOQUEAR"
+    },
+    {
+      "key": "armory.armor.equip",
+      "value": "EQUIPAR"
+    },
+    {
+      "key": "armory.armor.equipped",
+      "value": "EQUIPADA"
+    },
+    {
+      "key": "armory.armor.purchased",
+      "value": "{0} DESBLOQUEADA Y EQUIPADA"
+    },
+    {
+      "key": "armory.armor.equipped.status",
+      "value": "{0} EQUIPADA"
+    },
+    {
+      "key": "armory.armor.upgraded",
+      "value": "NIVEL DE ARMADURA {0}"
+    },
+    {
+      "key": "armory.armor.maxed",
+      "value": "NIVEL MÁXIMO DE ARMADURA"
+    },
+    {
+      "key": "character.title",
+      "value": "PERSONAJE"
+    },
+    {
+      "key": "character.close",
+      "value": "CERRAR"
+    },
+    {
+      "key": "character.open",
+      "value": "HABILIDADES"
+    },
+    {
+      "key": "character.level",
+      "value": "NIVEL {0}   XP {1}/{2}"
+    },
+    {
+      "key": "character.points",
+      "value": "PUNTOS DE HABILIDAD {0}"
+    },
+    {
+      "key": "character.rank",
+      "value": "RANGO {0}/{1}"
+    },
+    {
+      "key": "character.allocate",
+      "value": "+"
+    },
+    {
+      "key": "character.max",
+      "value": "MÁX."
+    },
+    {
+      "key": "character.respec",
+      "value": "REASIGNAR"
+    },
+    {
+      "key": "character.stats",
+      "value": "HP {0}   DAÑO x{1}   MOVIMIENTO {2}   ARMADURA {3}   CRÍTICO {4}   TIRO A LA CABEZA {5}   RECARGA x{6}   MUNICIÓN x{7}"
+    },
+    {
+      "key": "character.respec.done",
+      "value": "REASIGNACIÓN COMPLETA: {0} PUNTOS DEVUELTOS"
+    },
+    {
+      "key": "character.respec.empty",
+      "value": "NO HAY PUNTOS ASIGNADOS PARA REASIGNAR"
+    },
+    {
+      "key": "character.respec.blocked",
+      "value": "LA REASIGNACIÓN SOLO ESTÁ DISPONIBLE ENTRE PARTIDAS"
+    },
+    {
+      "key": "character.status.allocated",
+      "value": "{0} RANGO {1}"
+    },
+    {
+      "key": "character.status.nopoints",
+      "value": "NO HAY PUNTOS DE HABILIDAD DISPONIBLES"
+    },
+    {
+      "key": "character.status.maxrank",
+      "value": "RANGO MÁXIMO"
+    },
+    {
+      "key": "character.allocation.blocked",
+      "value": "LA ASIGNACIÓN REQUIERE ARMERÍA, MENÚ DE PAUSA O FIN DE RONDA"
+    },
+    {
+      "key": "character.active.selected",
+      "value": "{0} (ACTIVA)"
+    },
+    {
+      "key": "character.active.status",
+      "value": "HABILIDAD ACTIVA: {0}"
+    },
+    {
+      "key": "character.active.blocked",
+      "value": "ASIGNA UN RANGO PARA SELECCIONAR ESTA HABILIDAD"
+    },
+    {
+      "key": "synergy.berserker.name",
+      "value": "BERSERKER"
+    },
+    {
+      "key": "synergy.ghost.name",
+      "value": "FANTASMA"
+    },
+    {
+      "key": "synergy.bastion.name",
+      "value": "BASTIÓN"
+    },
+    {
+      "key": "synergy.active",
+      "value": "{0} ACTIVA"
+    },
+    {
+      "key": "synergy.inactive",
+      "value": "{0} {1} {2}/{3} + {4} {5}/{6}"
+    },
+    {
+      "key": "character.branch.strength",
+      "value": "FUERZA"
+    },
+    {
+      "key": "character.branch.agility",
+      "value": "AGILIDAD"
+    },
+    {
+      "key": "character.branch.survival",
+      "value": "SUPERVIVENCIA"
+    },
+    {
+      "key": "skill.strength.name",
+      "value": "FUERZA"
+    },
+    {
+      "key": "skill.vitality.name",
+      "value": "VITALIDAD"
+    },
+    {
+      "key": "skill.shockwave.name",
+      "value": "ONDA DE CHOQUE"
+    },
+    {
+      "key": "skill.speed.name",
+      "value": "VELOCIDAD"
+    },
+    {
+      "key": "skill.precision.name",
+      "value": "PRECISIÓN"
+    },
+    {
+      "key": "skill.dash.name",
+      "value": "IMPULSO"
+    },
+    {
+      "key": "skill.endurance.name",
+      "value": "RESISTENCIA"
+    },
+    {
+      "key": "skill.engineering.name",
+      "value": "INGENIERÍA"
+    },
+    {
+      "key": "skill.turret.name",
+      "value": "TORRETA"
+    },
+    {
+      "key": "skill.strength.preview",
+      "value": "DAÑO x{0} -> x{1}"
+    },
+    {
+      "key": "skill.vitality.preview",
+      "value": "HP MÁX. {0} -> {1}"
+    },
+    {
+      "key": "skill.speed.preview",
+      "value": "VELOCIDAD {0} -> {1}"
+    },
+    {
+      "key": "skill.precision.preview",
+      "value": "CRÍTICO {0} -> {1}   TIRO A LA CABEZA {2} -> {3}"
+    },
+    {
+      "key": "skill.endurance.preview",
+      "value": "ARMADURA {0} -> {1}"
+    },
+    {
+      "key": "skill.engineering.preview",
+      "value": "RECARGA x{0} -> x{1}   MUNICIÓN x{2} -> x{3}"
+    },
+    {
+      "key": "skill.shockwave.preview",
+      "value": "DAÑO {0} -> {1}   RADIO {2} -> {3}   ENFRIAMIENTO {4} -> {5}"
+    },
+    {
+      "key": "skill.dash.preview",
+      "value": "DISTANCIA {0} -> {1}   ENFRIAMIENTO {2} -> {3}"
+    },
+    {
+      "key": "skill.turret.preview",
+      "value": "DAÑO {0} -> {1}   DURACIÓN {2} -> {3}   ENFRIAMIENTO {4} -> {5}"
+    },
+    {
+      "key": "weapon.pistol.name",
+      "value": "PISTOLA"
+    },
+    {
+      "key": "weapon.smg.name",
+      "value": "SUBFUSIL"
+    },
+    {
+      "key": "weapon.shotgun.name",
+      "value": "ESCOPETA"
+    },
+    {
+      "key": "weapon.rifle.name",
+      "value": "RIFLE"
+    },
+    {
+      "key": "weapon.lmg.name",
+      "value": "AMETRALLADORA"
+    },
+    {
+      "key": "zombie.walker.name",
+      "value": "CAMINANTE"
+    },
+    {
+      "key": "zombie.runner.name",
+      "value": "CORREDOR"
+    },
+    {
+      "key": "zombie.brute.name",
+      "value": "BRUTO"
+    },
+    {
+      "key": "gameover.title",
+      "value": "HAS MUERTO"
+    },
+    {
+      "key": "gameover.summary",
+      "value": "RONDA {0}    BAJAS {1}\nSUMINISTROS GANADOS {2}"
+    },
+    {
+      "key": "gameover.restart",
+      "value": "REINICIAR"
+    },
+    {
+      "key": "gameover.menu",
+      "value": "MENÚ PRINCIPAL"
+    },
+    {
+      "key": "victory.title",
+      "value": "VICTORIA"
+    },
+    {
+      "key": "victory.subtitle",
+      "value": "EL GUARDIÁN HA CAÍDO"
+    },
+    {
+      "key": "victory.summary",
+      "value": "RONDA {0}    BAJAS {1}\nSUMINISTROS GANADOS {2}    XP GANADA {3}"
+    },
+    {
+      "key": "victory.next",
+      "value": "SIGUIENTE PARTIDA"
+    },
+    {
+      "key": "victory.menu",
+      "value": "MENÚ PRINCIPAL"
+    },
+    {
+      "key": "round.end.title",
+      "value": "RONDA {0} COMPLETADA"
+    },
+    {
+      "key": "round.end.hint",
+      "value": "TOCA UNA RECOMPENSA O PULSA 1, 2 O 3"
+    },
+    {
+      "key": "round.end.summary",
+      "value": "BAJAS {0}    SUMINISTROS {1}    XP {2}"
+    },
+    {
+      "key": "reward.supplies.card",
+      "value": "SUMINISTROS\n+{0}"
+    },
+    {
+      "key": "reward.xp.card",
+      "value": "XP\n+{0}"
+    },
+    {
+      "key": "reward.ammo.card",
+      "value": "CAJA DE MUNICIÓN\n+{0}"
+    },
+    {
+      "key": "reward.armor.card",
+      "value": "PLACA DE ARMADURA\n+{0}"
+    }
+  ]
+}

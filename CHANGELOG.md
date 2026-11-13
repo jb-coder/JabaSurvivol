@@ -6,6 +6,10 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+### Added
+
+- English and Spanish locale tables with device-language default, persisted manual override, and runtime locale state.
+
 ### Changed
 
 - Documented the accepted residual risk for the short, trusted Tailscale beta and closed the security audit with that exception.
