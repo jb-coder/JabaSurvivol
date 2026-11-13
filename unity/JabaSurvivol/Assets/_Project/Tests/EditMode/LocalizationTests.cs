@@ -96,6 +96,85 @@ namespace JabaSurvivol.Tests.EditMode
         }
 
         [Test]
+        public void Every_english_value_is_nonempty_and_not_a_key()
+        {
+            Localization.SetLocale("en");
+
+            foreach (var key in Localization.GetKeys("en"))
+            {
+                var value = Localization.Get(key);
+                Assert.That(value, Is.Not.Empty, key);
+                Assert.That(value, Is.Not.EqualTo("..."), key);
+                Assert.That(value, Is.Not.EqualTo(key), key);
+            }
+        }
+
+        [Test]
+        public void Missing_key_falls_back_to_english_before_the_placeholder()
+        {
+            var active = new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["present.key"] = "ACTIVE"
+            };
+            var fallback = new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["present.key"] = "ENGLISH",
+                ["fallback.key"] = "ENGLISH FALLBACK"
+            };
+
+            var value = Localization.ResolveValueForTests(
+                "fallback.key",
+                active,
+                fallback,
+                out var usedFallback);
+
+            Assert.That(value, Is.EqualTo("ENGLISH FALLBACK"));
+            Assert.That(usedFallback, Is.True);
+            Assert.That(value, Is.Not.EqualTo("fallback.key"));
+
+            var missing = Localization.ResolveValueForTests(
+                "missing.key",
+                active,
+                fallback,
+                out var missingUsedFallback);
+
+            Assert.That(missing, Is.EqualTo("..."));
+            Assert.That(missing, Is.Not.EqualTo("missing.key"));
+            Assert.That(missingUsedFallback, Is.False);
+        }
+
+        [Test]
+        public void Pseudo_locale_expands_every_english_value_by_at_least_thirty_percent()
+        {
+            Localization.SetLocale("en");
+            var english = Localization.GetKeys("en")
+                .ToDictionary(key => key, key => Localization.Get(key), StringComparer.Ordinal);
+
+            Localization.UsePseudoLocaleForTests();
+
+            Assert.That(Localization.CurrentLocale, Is.EqualTo(Localization.PseudoLocale));
+            Assert.That(
+                PlayerPrefs.GetString(Localization.LocalePreferenceKey),
+                Is.EqualTo("en"));
+
+            foreach (var pair in english)
+            {
+                var pseudo = Localization.Get(pair.Key);
+                var minimumLength = (int)Math.Ceiling(pair.Value.Length * 1.3d);
+
+                Assert.That(pseudo.Length, Is.GreaterThanOrEqualTo(minimumLength), pair.Key);
+                Assert.That(pseudo, Is.Not.EqualTo(pair.Value), pair.Key);
+                Assert.That(pseudo, Is.Not.EqualTo(pair.Key), pair.Key);
+                Assert.That(pseudo, Does.Contain("["), pair.Key);
+
+                foreach (Match placeholder in Regex.Matches(pair.Value, "\\{\\d+\\}"))
+                {
+                    Assert.That(pseudo, Does.Contain(placeholder.Value), pair.Key);
+                }
+            }
+        }
+
+        [Test]
         public void Device_language_mapping_prefers_supported_system_languages()
         {
             Assert.That(

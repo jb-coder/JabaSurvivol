@@ -194,6 +194,8 @@ namespace JabaSurvivol.Gameplay
 
         public string BuildLabelForTests => _ui?.BuildLabelForTests ?? string.Empty;
 
+        public string[] TextOverflowsForTests => _ui?.TextOverflowsForTests() ?? System.Array.Empty<string>();
+
         public UnityEngine.UI.Button SoundButtonForTests => _ui?.SoundButtonForTests;
 
         public float LastBulletDamageForTests { get; private set; }

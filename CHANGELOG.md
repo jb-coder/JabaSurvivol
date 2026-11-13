@@ -10,6 +10,7 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 - English and Spanish locale tables with device-language default, persisted manual override, and runtime locale state.
 - Language selector in the main and pause menus with a system-default option and live label refresh.
+- Localization key, fallback, pseudo-locale, and phone/tablet layout checks with an English and Spanish screenshot matrix.
 
 ### Changed
 

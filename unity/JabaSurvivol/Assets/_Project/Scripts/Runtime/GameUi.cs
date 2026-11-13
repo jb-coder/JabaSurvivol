@@ -714,6 +714,30 @@ namespace JabaSurvivol.Gameplay
 
         public string BuildLabelForTests => _buildLabel?.text ?? string.Empty;
 
+        public string[] TextOverflowsForTests()
+        {
+            var overflows = new System.Collections.Generic.List<string>();
+            foreach (var text in _safeArea.GetComponentsInChildren<Text>(false))
+            {
+                if (text == null || !text.isActiveAndEnabled || string.IsNullOrEmpty(text.text))
+                {
+                    continue;
+                }
+
+                var rect = text.rectTransform.rect;
+                var preferredWidth = text.preferredWidth;
+                var preferredHeight = text.preferredHeight;
+                if (preferredWidth > rect.width + 1f || preferredHeight > rect.height + 1f)
+                {
+                    overflows.Add(
+                        $"{text.name}: '{text.text}' preferred={preferredWidth:0}x{preferredHeight:0} " +
+                        $"rect={rect.width:0}x{rect.height:0}");
+                }
+            }
+
+            return overflows.ToArray();
+        }
+
         public Button SoundButtonForTests => _pauseSoundButton;
 
         public void ShowGameOver(int round, int kills, int suppliesEarned)

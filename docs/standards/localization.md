@@ -49,3 +49,18 @@ A later reviewed phase can add:
 - Run pseudo-localization layout tests with expanded text.
 - Verify phone and tablet layouts with expanded text.
 - Verify screenshots for each supported locale.
+
+### Current automated checks
+
+- Key parity and non-empty values for English and Spanish.
+- English fallback for a missing active-locale key, with the raw key never shown.
+- A test-only pseudo-locale derived from English with at least 30 percent
+  expansion, accented characters, and preserved format placeholders.
+- A PlayMode layout audit for the main menu, armory, character sheet, HUD,
+  pause, game-over, and round-end screens under the pseudo-locale.
+- A committed phone and tablet screenshot matrix for the main menu, HUD, pause,
+  armory, and result screens in English and Spanish.
+
+The pseudo-locale is never persisted and is not exposed in the language
+selector. Unresolved layout limitations must be recorded in the related issue
+and release notes.
