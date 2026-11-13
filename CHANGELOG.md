@@ -9,6 +9,7 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 ### Added
 
 - Deterministic `tools/ArtGenerator` pipeline with 65 first-party neon sprites, a hash-checked manifest, contact-sheet output, and repeat-run, manifest, alpha, and pivot tests.
+- Manifest-driven Unity import settings, category sprite atlases, `ArtCatalog`, named sorting orders, and EditMode coverage for catalog loading, pivots, and atlas packing.
 - Art direction, first-party provenance contract, and ADR-0010 for the generated art pipeline.
 
 ### Changed
