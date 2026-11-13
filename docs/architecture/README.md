@@ -13,6 +13,9 @@
 - `adr/0009-localization-architecture.md`: English and Spanish locale tables
   behind the existing localization facade, device-language default, runtime
   selector, English fallback, and human-reviewed translations.
+- `adr/0010-generated-art-pipeline.md`: deterministic in-repo sprite generation,
+  committed manifest and PNGs, manifest-driven Unity import, and a cached
+  runtime catalog.
 - `c4/`: reserved for C4 diagrams and context maps.
 
 Current target:
