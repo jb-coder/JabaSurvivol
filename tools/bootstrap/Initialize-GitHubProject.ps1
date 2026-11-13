@@ -207,20 +207,29 @@ $milestones = @(
     @{ Title = "v0.5.1 Polish and Local Beta"; Due = "2026-12-14T23:59:59Z"; Description = "Polish the single-player experience, validate the online flow with five local testers over Tailscale, and defer paid VPS and monetization work." },
     @{ Title = "v0.6.0 Localization"; Due = "2027-02-01T23:59:59Z"; Description = "English and Spanish, device-language default, runtime selector, key coverage, and layout checks." },
     @{ Title = "v0.7.0 Art and Visual Polish"; Due = "2027-04-12T23:59:59Z"; Description = "First-party generated neon art pipeline, modular characters, weapons, projectiles, combat FX, environment, UI icons, and app icon." },
-    @{ Title = "v1.0.0 Release and Donations"; Due = "2027-05-03T23:59:59Z"; Description = "Free release readiness, optional PayPal donation link, and final release. No premium currency, cosmetic store, payments sandbox, or in-game purchases." }
+    @{ Title = "v1.0.0 Release and Donations"; Due = "2027-05-03T23:59:59Z"; Description = "Free release readiness, optional PayPal donation link with no rewards or entitlements, and final release. No premium currency, cosmetic store, payments sandbox, or in-game purchases." }
 )
 
-$existingMilestones = Invoke-GhJson @("api", "repos/$Repository/milestones")
+$existingMilestones = Invoke-GhJson @("api", "repos/$Repository/milestones?state=all&per_page=100")
 foreach ($milestone in $milestones) {
     $existing = $existingMilestones | Where-Object { $_.title -eq $milestone.Title } | Select-Object -First 1
     if ($null -eq $existing) {
         & gh api -X POST "repos/$Repository/milestones" -f "title=$($milestone.Title)" -f "description=$($milestone.Description)" -f "due_on=$($milestone.Due)" | Out-Null
-        Write-Output "Created milestone $($milestone.Title)."
+        if ($LASTEXITCODE -eq 0) {
+            Write-Output "Created milestone $($milestone.Title)."
+        }
+        else {
+            Write-Output "Unable to create milestone $($milestone.Title)."
+        }
         continue
     }
 
-    $desiredDue = ([datetime] $milestone.Due).ToString("yyyy-MM-dd")
-    $currentDue = if ($null -eq $existing.due_on) { "" } else { ([datetime] $existing.due_on).ToString("yyyy-MM-dd") }
+    if ($existing.state -eq "closed") {
+        continue
+    }
+
+    $desiredDue = ([string] $milestone.Due).Substring(0, 10)
+    $currentDue = if ($null -eq $existing.due_on) { "" } else { ([string] $existing.due_on).Substring(0, 10) }
     if ($currentDue -ne $desiredDue -or $existing.description -ne $milestone.Description) {
         & gh api -X PATCH "repos/$Repository/milestones/$($existing.number)" -f "description=$($milestone.Description)" -f "due_on=$($milestone.Due)" | Out-Null
         Write-Output "Updated milestone $($milestone.Title)."
