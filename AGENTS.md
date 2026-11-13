@@ -27,14 +27,20 @@ JabaSurvivol is a 2D top-down, round-based zombie survival game for Android phon
 
 ## Language policy
 
-Everything committed to this repository must be in English:
+Everything committed to this repository must be in English, except approved
+locale data tables:
 
 - Code, comments, XML docs, test names, logs, error messages.
-- UI strings, localization keys, asset names, folder names.
+- UI source strings, localization keys, asset names, folder names.
 - Commit messages, PR titles, PR descriptions, issue titles, issue bodies.
 - Documentation, ADRs, runbooks, release notes.
 
-The user may speak Spanish in conversation. The repository remains English-only.
+Approved locale tables may contain translated product strings for their locale.
+They require human review and must not change code, documentation, commits, or
+repository metadata to another language.
+
+The user may speak Spanish in conversation. The repository remains English-only
+outside the approved locale tables.
 
 ## Attribution policy
 
@@ -167,7 +173,7 @@ Every change enters through a pull request. No exceptions for documentation, CI,
 A task is done only when:
 
 - Acceptance criteria are met.
-- English-only policy is respected.
+- English-only repository content (approved locale tables excepted) is respected.
 - No AI attribution is present.
 - Unit, architecture, and relevant integration tests pass.
 - The solution builds in Release.

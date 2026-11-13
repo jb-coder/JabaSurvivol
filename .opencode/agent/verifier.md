@@ -30,7 +30,7 @@ Read `AGENTS.md`, the issue acceptance criteria, and the current PR before actin
 - Check touch controls, safe areas, phone/tablet layouts, and landscape orientation through automated tests and screenshots.
 - Verify save/load, migration, and persistence behavior.
 - Verify no regressions in smoke tests.
-- Verify English-only and no-attribution policy.
+- Verify English-only repository content (approved locale tables excepted) and no-attribution policy.
 - Produce a release-readiness report.
 
 ## Constraints

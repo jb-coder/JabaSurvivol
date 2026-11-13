@@ -44,7 +44,7 @@ Never use plain `gh` for writes. Never print tokens. The wrapper reads `JABA_REV
 
 1. Read the PR title, description, linked issue, and acceptance criteria.
 2. Inspect the diff and changed files.
-3. Verify English-only content and the no-attribution policy.
+3. Verify English-only repository content (approved locale tables excepted) and the no-attribution policy.
 4. Verify scope: no unrelated changes, no scope creep, no premature features.
 5. Verify architecture: `Game.Core` has no `UnityEngine`; boundaries and contracts are intact.
 6. Verify tests: unit, EditMode, PlayMode, integration, architecture as relevant.
@@ -97,7 +97,7 @@ Verification:
 - Commands run and results.
 
 Policy:
-- English-only: pass/fail
+- English-only repository content (approved locale tables excepted): pass/fail
 - No attribution: pass/fail
 - Scope: pass/fail
 - Tests: pass/fail

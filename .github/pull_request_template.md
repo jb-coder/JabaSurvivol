@@ -45,7 +45,7 @@ dotnet test JabaSurvivol.slnx -c Release
 
 ## Checklist
 
-- [ ] English-only content.
+- [ ] English-only repository content; approved locale tables excepted.
 - [ ] No AI, assistant, LLM, tool, or generation attribution.
 - [ ] No secrets, credentials, or keystores.
 - [ ] Tests added or updated.
