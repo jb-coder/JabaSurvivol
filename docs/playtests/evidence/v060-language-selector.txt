@@ -2,8 +2,10 @@
 
 - Date: 2026-11-13
 - Issue: #139
-- APK: `JabaSurvivol-0.5.1-emulator-selector2.apk`
-- SHA-256: `CE5A8486E42336D5C8B84652F62B52408938F2D6CBD8A66BE442B064784DF510`
+- APK A: `JabaSurvivol-0.5.1-emulator-selector.apk`
+- SHA-256 A: `B8050156AF517A85D04AE3A1117D4A40907B462C12922ABC5C8A140E5C6C6170`
+- APK B: `JabaSurvivol-0.5.1-emulator-selector2.apk`
+- SHA-256 B: `CE5A8486E42336D5C8B84652F62B52408938F2D6CBD8A66BE442B064784DF510`
 - Emulator: `sdk_gphone64_x86_64`, API 35, x86_64, `swiftshader_indirect`, headless
 - Android version: 15
 - Version: `0.5.1`, version code `6`
@@ -21,7 +23,9 @@
 
 The selector opened from the main menu and pause menu, changed the active locale, updated the visible labels, and preserved the profile and current run. The tablet HUD widened the ammo label so the Spanish reserve text does not wrap.
 
-The APK was built from the working tree at `d462011-dirty`; the commits after that point are tests and evidence only.
+APK B was built from the working tree at `d462011-dirty` and includes the ammo width change (`9df1c43`). It predates the dynamic HUD refresh fix (`fe51fa6`); that fix is covered by the PlayMode suite at the final head. APK A was built at `d462011` before the ammo width change; the Spanish main menu and English language panel come from it. Main menus and language panels are unaffected by the HUD width change.
+
+The screenshots show the build labels from the APK that produced them: `main-en`, `pause-en`, and the tablet screenshots show `d462011-dirty`; `main-es` shows `d462011`.
 
 ## Limitations
 
