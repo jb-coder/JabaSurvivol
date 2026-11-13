@@ -6,6 +6,11 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+### Added
+
+- Deterministic `tools/ArtGenerator` pipeline with 65 first-party neon sprites, a hash-checked manifest, contact-sheet output, and repeat-run, manifest, alpha, and pivot tests.
+- Art direction, first-party provenance contract, and ADR-0010 for the generated art pipeline.
+
 ### Changed
 
 - Planned the `v0.7.0 Art and Visual Polish` milestone with a first-party generated neon art pipeline and moved the `v1.0.0` release target to 2027-05-03.
