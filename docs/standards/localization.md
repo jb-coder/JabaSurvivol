@@ -159,7 +159,7 @@ Adding a locale requires a reviewed ADR before implementation. The checklist is:
 
 ## Release checklist per locale
 
-For every supported locale, before a release:
+For every supported non-English locale, before a release:
 
 - [ ] `localization-review-<locale>.txt` status is Approved and signed.
 - [ ] The review record covers the release commit or APK.
