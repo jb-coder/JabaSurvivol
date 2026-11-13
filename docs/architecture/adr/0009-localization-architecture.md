@@ -83,8 +83,9 @@ approved locale data tables may contain translated product strings.
 
 ### 4. Runtime changes
 
-- The selector appears in the main menu and pause menu. The system option is
-  labeled `System default` in English and `Idioma del sistema` in Spanish.
+- The selector appears in the main menu and pause menu. The system option uses
+  the `settings.language.system` key; the English source value is
+  `System default` and the Spanish value lives in `es.json`.
 - `Localization.SetLocale` updates the active table and raises a locale-changed
   event.
 - `GameSession` forwards the event to `GameUi`.
@@ -167,7 +168,7 @@ and translation review.
 ### CSV or PO files
 
 Rejected for v0.6.0. Both are translator-friendly, but they require a new parser
-or workflow. The JSON array shape works with the existing `JsonUtility` path and
+or workflow. The JSON array shape works with Unity's built-in `JsonUtility` and
 is sufficient for two locales. A migration to PO or Unity Localization remains
 possible later.
 
