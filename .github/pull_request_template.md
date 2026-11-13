@@ -26,7 +26,7 @@ Closes #
 
 - [ ] English source table updated first.
 - [ ] Key and placeholder parity pass for every supported locale.
-- [ ] Spanish review record is linked and signed by the named human reviewer.
+- [ ] The review record for every non-English locale is linked and signed by the named human reviewer.
 - [ ] No unreviewed machine translation is included.
 - [ ] Phone and tablet screenshots cover the changed screens in every locale.
 - [ ] Pseudo-locale and layout checks pass.

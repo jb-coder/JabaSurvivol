@@ -32,6 +32,9 @@ Every change enters through a pull request. No direct pushes to `main` or `devel
 - No AI attribution.
 - Locale table changes include the English source, matching key/placeholder
   parity, a named human reviewer, and the completed review record.
+- New or changed non-English locale PRs stay `needs-human` and cannot merge
+  until the record is signed. The Spanish table from #147 is a historical
+  exception and remains release-blocked.
 - No unreviewed machine translation.
 
 ## Review
@@ -43,7 +46,8 @@ Every change enters through a pull request. No direct pushes to `main` or `devel
 - Auto-merge is enabled only after approval and all required checks pass.
 - `pr-reviewer` approval is not human linguistic approval. Locale table changes
   require the signed record in
-  `docs/playtests/evidence/localization-review-<locale>.txt` before release.
+  `docs/playtests/evidence/localization-review-<locale>.txt` before merge and
+  release.
 
 ## Required checks
 
@@ -56,10 +60,10 @@ The `reviewer-approval` check is created by the reviewer GitHub App on the curre
 
 Path-specific checks such as `backend-ci`, `unity-tests`, and `android-build` run when their paths change but are not required by the current ruleset until a summary gate exists.
 
-For locale-table changes, the manual release gate additionally requires the
-signed `localization-review-<locale>.txt` record, key and placeholder parity,
-pseudo-locale layout checks, and per-locale phone/tablet screenshots. These
-requirements are not waived when `unity-tests` is skipped.
+For locale-table changes, the manual gate additionally requires the signed
+`localization-review-<locale>.txt` record before merge, plus key and placeholder
+parity, pseudo-locale layout checks, and per-locale phone/tablet screenshots.
+These requirements are not waived when `unity-tests` is skipped.
 
 
 ## Merge

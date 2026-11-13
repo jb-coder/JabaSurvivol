@@ -13,8 +13,9 @@ locale-table change.
 - Keep the established UI style: short labels, uppercase where the current
   tables use uppercase, and no terminal punctuation in terse labels.
 - Preserve placeholders, newlines, and the meaning of the surrounding screen.
-- If a term needs a different translation for grammar or context, note the
-  exception in the review record instead of silently diverging.
+- If a term needs a different translation for grammar or context, add an
+  approved exception to this glossary and reference it in the review record
+  instead of silently diverging.
 - Do not introduce a new term without updating this glossary and the locale
   tables together.
 
@@ -80,7 +81,8 @@ locale-table change.
 1. Update the English source term or its context first.
 2. Update the Spanish term and every affected locale-table value.
 3. Record the change and its review status in
-   `docs/playtests/evidence/localization-review-es.txt`.
+   `docs/playtests/evidence/localization-review-es.txt` and, for a new term
+   exception, add it to this glossary with English notes.
 4. Run key, value, placeholder, pseudo-locale, and layout checks.
 5. Obtain a named human review before release.
 

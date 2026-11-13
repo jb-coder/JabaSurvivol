@@ -18,10 +18,12 @@
 
 ## Localization
 
+*Required when locale tables, user-facing strings, or translated screens change.*
+
 - [ ] English source table was updated before the translation.
 - [ ] Key parity and non-empty checks cover every supported locale.
 - [ ] Format placeholders and newlines match across locales.
-- [ ] The Spanish review record is signed by a named human reviewer.
+- [ ] The review record for every non-English locale is signed by a named human reviewer.
 - [ ] Glossary terms are followed or documented as reviewed exceptions.
 - [ ] No unreviewed machine translation is present.
 - [ ] Phone and tablet screenshots cover the changed screens in every locale.

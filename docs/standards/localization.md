@@ -12,6 +12,9 @@
 - Spanish is a complete first translation but is **pending human review**. It
   must not be described as reviewed until
   `docs/playtests/evidence/localization-review-es.txt` is signed.
+- The Spanish table was merged in #147 as a historical exception before this
+  workflow existed. It remains on `develop`, must not be released, and blocks
+  the v0.6.0 release until the review record is signed.
 
 ## Source of truth
 
@@ -52,13 +55,30 @@ happens. Do not invent a reviewer or approval.
    or reviewer approves a change.
 4. **Run checks.** Key parity, non-empty values, placeholder parity, fallback,
    pseudo-locale, and phone/tablet layout evidence must pass.
-5. **Human review.** The named human reviewer checks every changed string
+5. **Open the translation pull request.** Include the pending review record,
+   screenshots, and check results. Apply `needs-human`; the PR must not merge
+   while the record is pending.
+6. **Human review.** The named human reviewer checks every changed string
    against the glossary and the UI. The reviewer records findings and either
    signs or rejects the review record.
-6. **Translation pull request.** The PR links the review record, screenshots,
-   and check results. Unreviewed strings do not enter `develop`.
-7. **Release.** The release approver checks the signed record and per-locale
+7. **Merge.** After the record is signed, remove `needs-human` and merge through
+   the normal review and check gate. New or changed unreviewed strings do not
+   enter `develop`. The Spanish table merged in #147 is the only historical
+   exception and remains release-blocked.
+8. **Release.** The release approver checks the signed record and per-locale
    release checklist.
+
+## Merge and release gate
+
+The review gate has one rule: a non-English locale may enter `main` and ship
+only with a signed review record.
+
+- New or changed non-English strings: open the PR with a pending record and
+  `needs-human`. The PR cannot merge until the named human signs the record and
+  the label is removed.
+- Existing Spanish table from #147: already on `develop` as a historical
+  exception. It cannot ship until `localization-review-es.txt` is signed.
+- The release checklist repeats the gate so a skipped test job cannot bypass it.
 
 ## Review and approval
 

@@ -26,6 +26,9 @@
   result screens.
 - Truncation, overlap, and accented-glyph rendering.
 
+Record findings by key and glossary reference. Target-language term changes
+belong in `docs/localization/glossary.md`; keep this record in English.
+
 ## Release gate
 
 Do not ship a release that includes Spanish until the named human reviewer
