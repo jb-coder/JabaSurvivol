@@ -13,6 +13,7 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Reduced Android hot-path work by throttling profile saves, using compact save JSON, skipping inactive telemetry payloads, and removing common HUD and touch allocations.
 - Closed the v0.5.1 local beta with owner-reported validation and recorded the five-tester and tablet evidence as reviewed exceptions.
 - Planned v0.6.0 localization with English and Spanish, device-language default, runtime selector, key coverage, and layout checks.
+- Recorded ADR-0009 for JSON locale tables behind the existing facade, English fallback, runtime language changes, and human-reviewed translations.
 
 ### Fixed
 
