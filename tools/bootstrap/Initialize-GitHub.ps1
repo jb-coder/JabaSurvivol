@@ -23,6 +23,7 @@ $labels = @(
     @{ Name = 'area:ci'; Color = 'BFD4F2'; Description = 'CI and automation' },
     @{ Name = 'area:infra'; Color = 'D4C5F9'; Description = 'Infrastructure' },
     @{ Name = 'area:docs'; Color = '0075CA'; Description = 'Documentation' },
+    @{ Name = 'area:art'; Color = 'E99695'; Description = 'Art and visual assets' },
     @{ Name = 'priority:P0'; Color = 'B60205'; Description = 'Crash or data loss' },
     @{ Name = 'priority:P1'; Color = 'D93F0B'; Description = 'Core feature broken' },
     @{ Name = 'priority:P2'; Color = 'FBCA04'; Description = 'Minor issue' },

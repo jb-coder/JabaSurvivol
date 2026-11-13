@@ -14,10 +14,10 @@
 |---|---|---|
 | Status | Single select | Backlog, Ready, In Progress, In Review, Changes Requested, In QA, Done, Blocked |
 | Priority | Single select | P0, P1, P2, P3 |
-| Area | Single select | Game, API, CI, Infra, Docs |
+| Area | Single select | Game, API, CI, Infra, Docs, Art |
 | Size | Single select | S, M, L |
-| Phase | Single select | Walking Skeleton, Rounds, Armory, Skills, Content, Backend, Localization, Monetization, Release |
-| Sprint | Iteration | Six two-week iterations starting 2026-11-09 |
+| Phase | Single select | Walking Skeleton, Rounds, Armory, Skills, Content, Backend, Localization, Art, Monetization, Release |
+| Sprint | Iteration | Thirteen two-week iterations starting 2026-11-09 |
 | Target | Date | Milestone due date |
 | Milestone | Built-in | Repository milestone |
 
@@ -43,7 +43,8 @@
 | v0.5.0 Backend and Cloud | 2027-01-18 |
 | v0.5.1 Polish and Local Beta | 2026-12-14 |
 | v0.6.0 Localization | 2027-02-01 |
-| v1.0.0 Release and Donations | 2027-02-15 |
+| v0.7.0 Art and Visual Polish | 2027-04-12 |
+| v1.0.0 Release and Donations | 2027-05-03 |
 
 ## Bootstrap
 
