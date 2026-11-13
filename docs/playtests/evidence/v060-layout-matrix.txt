@@ -2,12 +2,12 @@
 
 - Date: 2026-11-13
 - Issue: #141
-- APK: `JabaSurvivol-0.5.1-emulator-layout2.apk`
-- SHA-256: `7ABA5C4BD3B85953F3842B2BC580020AE65A1468DA2263533429BBDA84F266C8`
-- Build commit: `ca4a770`
+- APK: `JabaSurvivol-0.6.0-emulator.apk`
+- SHA-256: `EC495DDCCE1D1F1F6A22F0261B6F81ED2238398D2D0C8EF0F047F15749011DF5`
+- Build commit: `3dd604f`
 - Emulator: `sdk_gphone64_x86_64`, API 35, x86_64, `swiftshader_indirect`, headless
 - Android version: 15
-- Version: `0.5.1`, version code `6`
+- Version: `0.6.0`, version code `7`
 - Phone: 2340x1080 landscape
 - Tablet: 2560x1600 landscape
 
@@ -21,7 +21,7 @@
 | Armory | `v060-layout-phone-armory-en.png` | `v060-layout-phone-armory-es.png` | `v060-layout-tablet-armory-en.png` | `v060-layout-tablet-armory-es.png` |
 | Result (game over) | `v060-layout-phone-result-en.png` | `v060-layout-phone-result-es.png` | `v060-layout-tablet-result-en.png` | `v060-layout-tablet-result-es.png` |
 
-The main-menu screenshots show build label `ca4a770`. The HUD, pause, armory, and result screenshots show the development-build watermark because the version label is only rendered on the main menu.
+The main-menu screenshots show build label `3dd604f`. The HUD, pause, armory, and result screenshots show the development-build watermark because the version label is only rendered on the main menu.
 
 ## Automated checks
 
