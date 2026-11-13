@@ -118,6 +118,30 @@ namespace JabaSurvivol.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator Language_choice_survives_bootstrap_recreation()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+
+            session.LanguageButtonForTests.onClick.Invoke();
+            yield return null;
+            session.LanguageSpanishButtonForTests.onClick.Invoke();
+            yield return null;
+            Assert.That(Localization.CurrentLocale, Is.EqualTo("es"));
+
+            Object.DestroyImmediate(_bootstrap.gameObject);
+            _bootstrap = null;
+            yield return null;
+
+            _bootstrap = CreateBootstrap();
+            yield return null;
+
+            Assert.That(Localization.CurrentLocale, Is.EqualTo("es"));
+            Assert.That(_bootstrap.Session.MainMenuStartLabelForTests, Is.Not.EqualTo("START RUN"));
+        }
+
+        [UnityTest]
         public IEnumerator Language_system_option_clears_the_override()
         {
             _bootstrap = CreateBootstrap();
