@@ -364,6 +364,13 @@ namespace JabaSurvivol.Gameplay
             HideCharacterSheet();
             HideAccount();
             HideLeaderboard();
+            InvalidateHudCache();
+            HideLevelUp();
+            HideRoundEnd();
+        }
+
+        public void InvalidateHudCache()
+        {
             _lastHealth = int.MinValue;
             _lastMaxHealth = int.MinValue;
             _lastArmor = int.MinValue;
@@ -375,6 +382,9 @@ namespace JabaSurvivol.Gameplay
             _lastLevel = int.MinValue;
             _lastXp = int.MinValue;
             _lastSkillPoints = int.MinValue;
+            _lastBossHealth = int.MinValue;
+            _lastBossMaxHealth = int.MinValue;
+            _lastBossEnraged = false;
             _lastWeaponName = string.Empty;
             _lastMagazine = int.MinValue;
             _lastMagazineSize = int.MinValue;
@@ -386,8 +396,6 @@ namespace JabaSurvivol.Gameplay
             _lastSkillReady = false;
             _lastSkillCooldownPercent = int.MinValue;
             _lastSkillActivePercent = int.MinValue;
-            HideLevelUp();
-            HideRoundEnd();
         }
 
         public void UpdateHud(PlayerState player, int armor, int maxArmor, int round, int enemiesRemaining, int kills, Profile profile)

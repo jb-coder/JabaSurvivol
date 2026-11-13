@@ -1109,6 +1109,31 @@ namespace JabaSurvivol.Gameplay
                 _telemetryEnabled,
                 _telemetryService != null && _telemetryService.OptedIn);
             _ui.SetRoundModifier(_run != null && _run.RoundModel.Definition.IsElite);
+            _ui.InvalidateHudCache();
+
+            if (_run != null)
+            {
+                _ui.UpdateHud(
+                    _run.Player,
+                    _run.Armor,
+                    _run.MaxArmor,
+                    _run.Round,
+                    _run.EnemiesRemaining,
+                    _run.Kills,
+                    _profile);
+                UpdateWeaponHud();
+                _ui.UpdateActiveSkillHud(
+                    _run.ActiveSkill.Node,
+                    _run.ActiveSkill.Rank,
+                    _run.ActiveSkill.CanActivate,
+                    _run.ActiveSkill.CooldownFraction,
+                    _run.ActiveSkill.ActiveFraction);
+
+                if (_run.BossActive && _run.Boss != null)
+                {
+                    _ui.UpdateBoss(_run.Boss.Health, _run.Boss.MaxHealth, _run.Boss.IsEnraged);
+                }
+            }
 
             if (_accountService != null)
             {

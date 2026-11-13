@@ -76,6 +76,7 @@ namespace JabaSurvivol.Tests.PlayMode
             yield return null;
             var round = session.Run.Round;
             var supplies = session.Profile.Supplies;
+            var roundLabel = session.HudRoundLabelForTests;
             session.PauseGame();
             yield return null;
 
@@ -88,6 +89,7 @@ namespace JabaSurvivol.Tests.PlayMode
 
             Assert.That(session.PauseTitleForTests, Is.Not.EqualTo("PAUSED"));
             Assert.That(session.HudReloadLabelForTests, Is.Not.EqualTo("RELOAD"));
+            Assert.That(session.HudRoundLabelForTests, Is.Not.EqualTo(roundLabel));
             Assert.That(session.Run.Round, Is.EqualTo(round));
             Assert.That(session.Profile.Supplies, Is.EqualTo(supplies));
             Assert.That(session.State, Is.EqualTo(GameSessionState.Paused));

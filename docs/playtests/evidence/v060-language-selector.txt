@@ -21,8 +21,10 @@
 
 The selector opened from the main menu and pause menu, changed the active locale, updated the visible labels, and preserved the profile and current run. The tablet HUD widened the ammo label so the Spanish reserve text does not wrap.
 
+The APK was built from the working tree at `d462011-dirty`; the commits after that point are tests and evidence only.
+
 ## Limitations
 
-- The Spanish pause screenshot was not recaptured after the ammo width change; the PlayMode suite covers the pause and HUD locale refresh.
+- A Spanish pause screenshot is not committed. The PlayMode suite covers pause and dynamic HUD locale refresh.
 - The tablet screenshots are English only. The full English/Spanish phone and tablet layout matrix remains in #141.
 - Automated emulator evidence only; no human playtest claim.
