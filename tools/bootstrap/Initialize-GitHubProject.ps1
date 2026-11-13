@@ -41,6 +41,25 @@ catch {
     Write-Output "Project link already present or not required."
 }
 
+function Get-DateOnly {
+    param([object] $Value)
+
+    if ($null -eq $Value) {
+        return ""
+    }
+
+    if ($Value -is [datetime]) {
+        return $Value.ToUniversalTime().ToString("yyyy-MM-dd")
+    }
+
+    $text = [string] $Value
+    if ($text.Length -ge 10) {
+        return $text.Substring(0, 10)
+    }
+
+    return $text
+}
+
 function Get-Fields {
     return Invoke-GhJson @("project", "field-list", [string] $number, "--owner", $Owner, "--format", "json")
 }
@@ -228,8 +247,8 @@ foreach ($milestone in $milestones) {
         continue
     }
 
-    $desiredDue = ([string] $milestone.Due).Substring(0, 10)
-    $currentDue = if ($null -eq $existing.due_on) { "" } else { ([string] $existing.due_on).Substring(0, 10) }
+    $desiredDue = Get-DateOnly $milestone.Due
+    $currentDue = Get-DateOnly $existing.due_on
     if ($currentDue -ne $desiredDue -or $existing.description -ne $milestone.Description) {
         & gh api -X PATCH "repos/$Repository/milestones/$($existing.number)" -f "description=$($milestone.Description)" -f "due_on=$($milestone.Due)" | Out-Null
         Write-Output "Updated milestone $($milestone.Title)."
