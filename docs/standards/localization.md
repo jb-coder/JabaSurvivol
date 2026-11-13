@@ -24,10 +24,12 @@
 ## Required seam
 
 - Every user-facing string uses a localization key from day one.
-- Keys are stable, English, and grouped by feature.
+- Keys follow the grammar in ADR-0009 and are grouped by feature. Existing keys
+  are frozen; renames need a migration mapping.
 - UI layouts support text expansion without breaking.
 - Backend errors use stable error codes plus an English message.
-- Dates, numbers, and currency use culture-aware formatting.
+- Displayed numbers, dates, and currency use the active locale's canonical
+  culture. Persistence, API contracts, and logs stay invariant.
 - Fonts include the glyphs needed for the active locales.
 
 ## Future localization phase
