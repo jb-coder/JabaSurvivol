@@ -67,6 +67,64 @@ namespace JabaSurvivol.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator Pseudo_locale_main_menu_has_no_text_overflow()
+        {
+            Localization.UsePseudoLocaleForTests();
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            _bootstrap.Session.UseDesignLayoutForTests();
+            yield return null;
+
+            var overflows = _bootstrap.Session.TextOverflowsForTests;
+            Assert.That(overflows, Is.Empty, string.Join("\n", overflows));
+        }
+
+        [UnityTest]
+        public IEnumerator Pseudo_locale_primary_screens_have_no_text_overflow()
+        {
+            Localization.UsePseudoLocaleForTests();
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.UseDesignLayoutForTests();
+            yield return null;
+
+            AssertNoOverflow(session, "main menu");
+
+            session.StartRun();
+            yield return null;
+            AssertNoOverflow(session, "HUD");
+
+            session.PauseGame();
+            yield return null;
+            AssertNoOverflow(session, "pause");
+
+            session.ResumeGame();
+            yield return null;
+            session.ApplyDamage(100000f);
+            yield return null;
+            AssertNoOverflow(session, "game over");
+
+            session.StartRun();
+            yield return null;
+            var budget = session.SpawnBudget;
+            for (var i = 0; i < budget; i++)
+            {
+                session.DamageZombieForTests(100000f);
+                yield return null;
+
+                if (i < budget - 1)
+                {
+                    session.SpawnZombieForTests();
+                    yield return null;
+                }
+            }
+
+            Assert.That(session.RoundEndVisible, Is.True);
+            AssertNoOverflow(session, "round end");
+        }
+
+        [UnityTest]
         public IEnumerator Language_selector_updates_pause_and_hud_without_resetting_the_run()
         {
             _bootstrap = CreateBootstrap();
@@ -224,6 +282,12 @@ namespace JabaSurvivol.Tests.PlayMode
                 };
                 Assert.That(labels[i], Is.EqualTo(Localization.Format(key, reward.Amount)));
             }
+        }
+
+        private static void AssertNoOverflow(GameSession session, string screen)
+        {
+            var overflows = session.TextOverflowsForTests;
+            Assert.That(overflows, Is.Empty, $"{screen}\n{string.Join("\n", overflows)}");
         }
 
         private static GameBootstrap CreateBootstrap()

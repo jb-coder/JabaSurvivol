@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 using JabaSurvivol.Core;
 using UnityEngine;
 
@@ -30,6 +31,7 @@ namespace JabaSurvivol.Gameplay
         public const string DefaultLocale = "en";
         public const string SystemLocaleValue = "system";
         public const string LocalePreferenceKey = "localization.locale";
+        public const string PseudoLocale = "qps";
 
         private const string MissingText = "...";
         private static readonly string[] SupportedLocaleCodes = { "en", "es" };
@@ -69,6 +71,12 @@ namespace JabaSurvivol.Gameplay
 
         public static IReadOnlyCollection<string> GetKeys(string locale)
         {
+            if (locale == PseudoLocale)
+            {
+                EnsureInitialized();
+                return _fallbackEntries.Keys;
+            }
+
             var entries = LoadLocaleEntries(locale);
             return entries == null ? Array.Empty<string>() : entries.Keys;
         }
@@ -142,6 +150,44 @@ namespace JabaSurvivol.Gameplay
             EnsureInitialized();
         }
 
+        /// <summary>
+        /// Test hook that applies an expanded pseudo-locale derived from English.
+        /// It is never persisted or exposed in the language selector.
+        /// </summary>
+        public static void UsePseudoLocaleForTests()
+        {
+            EnsureInitialized();
+            _currentLocale = PseudoLocale;
+            _entries = BuildPseudoEntries(_fallbackEntries);
+            LoggedMissingKeys.Clear();
+            LocaleChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// Test hook for the fallback precedence used by <see cref="Get"/>.
+        /// </summary>
+        public static string ResolveValueForTests(
+            string key,
+            IReadOnlyDictionary<string, string> active,
+            IReadOnlyDictionary<string, string> fallback,
+            out bool usedFallback)
+        {
+            if (active != null && active.TryGetValue(key, out var value))
+            {
+                usedFallback = false;
+                return value;
+            }
+
+            if (fallback != null && fallback.TryGetValue(key, out var fallbackValue))
+            {
+                usedFallback = true;
+                return fallbackValue;
+            }
+
+            usedFallback = false;
+            return MissingText;
+        }
+
         public static string Get(string key)
         {
             EnsureInitialized();
@@ -152,19 +198,17 @@ namespace JabaSurvivol.Gameplay
                 return MissingText;
             }
 
-            if (_entries != null && _entries.TryGetValue(key, out var value))
-            {
-                return value;
-            }
-
-            if (_fallbackEntries != null && _fallbackEntries.TryGetValue(key, out var fallback))
+            var value = ResolveValueForTests(key, _entries, _fallbackEntries, out var usedFallback);
+            if (usedFallback)
             {
                 LogMissing(key, bothTables: false);
-                return fallback;
+            }
+            else if (value == MissingText)
+            {
+                LogMissing(key, bothTables: true);
             }
 
-            LogMissing(key, bothTables: true);
-            return MissingText;
+            return value;
         }
 
         public static string Format(string key, params object[] arguments)
@@ -250,6 +294,72 @@ namespace JabaSurvivol.Gameplay
             {
                 LocaleChanged?.Invoke();
             }
+        }
+
+        private static Dictionary<string, string> BuildPseudoEntries(
+            IReadOnlyDictionary<string, string> source)
+        {
+            var entries = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var pair in source)
+            {
+                entries[pair.Key] = CreatePseudoValue(pair.Value);
+            }
+
+            return entries;
+        }
+
+        private static string CreatePseudoValue(string value)
+        {
+            var targetLength = (int)Math.Ceiling(value.Length * 1.3d);
+            var builder = new StringBuilder(value.Length + 8);
+            builder.Append('[');
+
+            for (var i = 0; i < value.Length; i++)
+            {
+                var current = value[i];
+                if (current == '{')
+                {
+                    var close = value.IndexOf('}', i + 1);
+                    if (close > i)
+                    {
+                        builder.Append(value, i, close - i + 1);
+                        i = close;
+                        continue;
+                    }
+                }
+
+                builder.Append(PseudoCharacter(current));
+            }
+
+            builder.Append(']');
+            while (builder.Length < targetLength)
+            {
+                builder.Append('~');
+            }
+
+            return builder.ToString();
+        }
+
+        private static char PseudoCharacter(char value)
+        {
+            return value switch
+            {
+                'a' => 'á',
+                'e' => 'é',
+                'i' => 'í',
+                'o' => 'ó',
+                'u' => 'ú',
+                'n' => 'ñ',
+                'c' => 'ç',
+                'A' => 'Á',
+                'E' => 'É',
+                'I' => 'Í',
+                'O' => 'Ó',
+                'U' => 'Ú',
+                'N' => 'Ñ',
+                'C' => 'Ç',
+                _ => value
+            };
         }
 
         private static Dictionary<string, string> LoadLocaleEntries(string locale)

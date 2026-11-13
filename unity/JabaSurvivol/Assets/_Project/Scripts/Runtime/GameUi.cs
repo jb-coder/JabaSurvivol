@@ -1,4 +1,5 @@
 using JabaSurvivol.Core;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using UnityEngine;
@@ -713,6 +714,73 @@ namespace JabaSurvivol.Gameplay
         }
 
         public string BuildLabelForTests => _buildLabel?.text ?? string.Empty;
+
+        public string[] TextOverflowsForTests()
+        {
+            Canvas.ForceUpdateCanvases();
+            foreach (var text in _safeArea.GetComponentsInChildren<Text>(false))
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(text.rectTransform);
+            }
+
+            return UiLayoutAudit.FindOverflows(FindTopmostActiveTextContainer());
+        }
+
+        /// <summary>
+        /// Test hook that lays the UI out against the 1920x1080 reference canvas
+        /// instead of the small batch-mode test screen.
+        /// </summary>
+        public void UseDesignLayoutForTests()
+        {
+            var canvas = _safeArea.GetComponentInParent<Canvas>();
+            if (canvas == null)
+            {
+                return;
+            }
+
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.enabled = false;
+            }
+
+            foreach (var fitter in canvas.GetComponentsInChildren<SafeAreaFitter>(true))
+            {
+                fitter.enabled = false;
+            }
+
+            canvas.renderMode = RenderMode.WorldSpace;
+            var canvasRect = canvas.GetComponent<RectTransform>();
+            canvasRect.sizeDelta = new Vector2(1920f, 1080f);
+            _safeArea.anchorMin = Vector2.zero;
+            _safeArea.anchorMax = Vector2.one;
+            _safeArea.offsetMin = Vector2.zero;
+            _safeArea.offsetMax = Vector2.zero;
+            Canvas.ForceUpdateCanvases();
+        }
+
+        private RectTransform FindTopmostActiveTextContainer()
+        {
+            RectTransform topmost = null;
+            var highestIndex = -1;
+            foreach (Transform child in _safeArea)
+            {
+                if (!child.gameObject.activeSelf ||
+                    child.GetComponentInChildren<Text>(false) == null)
+                {
+                    continue;
+                }
+
+                var index = child.GetSiblingIndex();
+                if (index > highestIndex)
+                {
+                    highestIndex = index;
+                    topmost = child as RectTransform;
+                }
+            }
+
+            return topmost ?? _safeArea;
+        }
 
         public Button SoundButtonForTests => _pauseSoundButton;
 
@@ -1649,7 +1717,7 @@ namespace JabaSurvivol.Gameplay
             UiFactory.Place(languageButton.GetComponent<RectTransform>(), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(36f, -32f), new Vector2(240f, 56f));
 
             var controls = UiFactory.CreateText(root.transform, "Controls", Localization.Get("menu.controls"), 24, TextAnchor.MiddleCenter, new Color(0.55f, 0.62f, 0.72f));
-            UiFactory.Place(controls.rectTransform, new Vector2(0.5f, 0.05f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300f, 36f));
+            UiFactory.Place(controls.rectTransform, new Vector2(0.5f, 0.065f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300f, 36f));
 
             buildLabel = UiFactory.CreateText(
                 root.transform,
@@ -1662,7 +1730,7 @@ namespace JabaSurvivol.Gameplay
                 buildLabel.rectTransform,
                 new Vector2(0f, 0f),
                 new Vector2(0f, 0f),
-                new Vector2(36f, 28f),
+                new Vector2(36f, 4f),
                 new Vector2(700f, 32f));
 
             return root;
@@ -1886,11 +1954,11 @@ namespace JabaSurvivol.Gameplay
             UiFactory.Place(roundText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -26f), new Vector2(420f, 60f));
 
             enemiesText = UiFactory.CreateText(root.transform, "Enemies", string.Empty, 24, TextAnchor.MiddleCenter, new Color(0.95f, 0.72f, 0.42f));
-            UiFactory.Place(enemiesText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -74f), new Vector2(420f, 40f));
+            UiFactory.Place(enemiesText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -88f), new Vector2(420f, 40f));
 
             var roundModifier = UiFactory.CreateText(root.transform, "Round Modifier", string.Empty, 24, TextAnchor.MiddleCenter, new Color(1f, 0.62f, 0.25f));
             roundModifier.fontStyle = FontStyle.Bold;
-            UiFactory.Place(roundModifier.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -152f), new Vector2(700f, 40f));
+            UiFactory.Place(roundModifier.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -172f), new Vector2(700f, 40f));
 
             var bossPanel = UiFactory.CreatePanel(root.transform, "Boss Panel", new Color(0.09f, 0.02f, 0.07f, 0.86f), blocksRaycasts: false);
             UiFactory.Place(bossPanel, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -218f), new Vector2(860f, 92f));
@@ -1917,13 +1985,13 @@ namespace JabaSurvivol.Gameplay
             bossPanel.gameObject.SetActive(false);
 
             killsText = UiFactory.CreateText(root.transform, "Kills", string.Empty, 22, TextAnchor.MiddleCenter, new Color(0.6f, 0.68f, 0.78f));
-            UiFactory.Place(killsText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -112f), new Vector2(420f, 40f));
+            UiFactory.Place(killsText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -128f), new Vector2(420f, 40f));
 
             suppliesText = UiFactory.CreateText(root.transform, "Supplies", string.Empty, 28, TextAnchor.MiddleRight, new Color(0.55f, 0.95f, 0.75f));
             UiFactory.Place(suppliesText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-150f, -30f), new Vector2(420f, 44f));
 
             levelText = UiFactory.CreateText(root.transform, "Level", string.Empty, 20, TextAnchor.MiddleRight, new Color(0.6f, 0.68f, 0.78f));
-            UiFactory.Place(levelText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-140f, -78f), new Vector2(620f, 40f));
+            UiFactory.Place(levelText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-140f, -78f), new Vector2(500f, 40f));
 
             var pause = UiFactory.CreateButton(root.transform, "Pause", Localization.Get("hud.pause"), 28, onPause);
             UiFactory.Place(pause.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-30f, -30f), new Vector2(84f, 84f));
@@ -3028,6 +3096,142 @@ namespace JabaSurvivol.Gameplay
             }
 
             return null;
+        }
+    }
+
+    internal static class UiLayoutAudit
+    {
+        public static string[] FindOverflows(RectTransform root)
+        {
+            var overflows = new HashSet<string>();
+            var texts = new List<TextItem>();
+            foreach (var text in root.GetComponentsInChildren<Text>(false))
+            {
+                if (text == null || !text.isActiveAndEnabled || string.IsNullOrEmpty(text.text))
+                {
+                    continue;
+                }
+
+                var rect = ToScreenRect(text.rectTransform);
+                var fontScale = EffectiveFontScale(text);
+                var preferredWidth = Mathf.Max(rect.width, text.preferredWidth * fontScale);
+                var preferredHeight = Mathf.Max(rect.height, text.preferredHeight * fontScale);
+                if (preferredWidth > rect.width + 1f || preferredHeight > rect.height + 1f)
+                {
+                    overflows.Add(
+                        $"{text.name}: '{text.text}' preferred={preferredWidth:0}x{preferredHeight:0} " +
+                        $"rect={rect.width:0}x{rect.height:0}");
+                }
+
+                texts.Add(new TextItem
+                {
+                    Transform = text.rectTransform,
+                    Name = text.name,
+                    Content = Expand(rect, preferredWidth, preferredHeight)
+                });
+            }
+
+            var controls = new List<RectTransform>();
+            foreach (var selectable in root.GetComponentsInChildren<Selectable>(false))
+            {
+                if (selectable.transform is RectTransform rectTransform)
+                {
+                    controls.Add(rectTransform);
+                }
+            }
+
+            for (var i = 0; i < texts.Count; i++)
+            {
+                var text = texts[i];
+                for (var j = 0; j < texts.Count; j++)
+                {
+                    if (i == j || IsRelated(text.Transform, texts[j].Transform))
+                    {
+                        continue;
+                    }
+
+                    if (Overlaps(text.Content, texts[j].Content))
+                    {
+                        overflows.Add(
+                            $"overlap: '{text.Name}' <-> '{texts[j].Name}'");
+                    }
+                }
+
+                for (var j = 0; j < controls.Count; j++)
+                {
+                    var control = controls[j];
+                    if (IsRelated(text.Transform, control))
+                    {
+                        continue;
+                    }
+
+                    if (Overlaps(text.Content, ToScreenRect(control)))
+                    {
+                        overflows.Add(
+                            $"overlap: '{text.Name}' <-> '{control.name}'");
+                    }
+                }
+            }
+
+            return new List<string>(overflows).ToArray();
+        }
+
+        private static Rect Expand(Rect rect, float width, float height)
+        {
+            var center = rect.center;
+            return new Rect(
+                center.x - (width * 0.5f),
+                center.y - (height * 0.5f),
+                width,
+                height);
+        }
+
+        private static float EffectiveFontScale(Text text)
+        {
+            if (!text.resizeTextForBestFit || text.fontSize <= 0)
+            {
+                return 1f;
+            }
+
+            var used = text.cachedTextGenerator.fontSizeUsedForBestFit;
+            return used > 0 ? Mathf.Clamp01(used / (float)text.fontSize) : 1f;
+        }
+
+        private static bool Overlaps(Rect first, Rect second)
+        {
+            return first.xMin < second.xMax - 1f &&
+                   first.xMax > second.xMin + 1f &&
+                   first.yMin < second.yMax - 1f &&
+                   first.yMax > second.yMin + 1f;
+        }
+
+        private static bool IsRelated(Transform first, Transform second)
+        {
+            return first == second ||
+                   first.IsChildOf(second) ||
+                   second.IsChildOf(first);
+        }
+
+        private static Rect ToScreenRect(RectTransform rectTransform)
+        {
+            var corners = new Vector3[4];
+            rectTransform.GetWorldCorners(corners);
+            var min = corners[0];
+            var max = corners[0];
+            for (var i = 1; i < corners.Length; i++)
+            {
+                min = Vector3.Min(min, corners[i]);
+                max = Vector3.Max(max, corners[i]);
+            }
+
+            return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
+        }
+
+        private sealed class TextItem
+        {
+            public RectTransform Transform;
+            public string Name;
+            public Rect Content;
         }
     }
 }

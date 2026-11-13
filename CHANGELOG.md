@@ -10,9 +10,11 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 - English and Spanish locale tables with device-language default, persisted manual override, and runtime locale state.
 - Language selector in the main and pause menus with a system-default option and live label refresh.
+- Localization key, fallback, pseudo-locale, and phone/tablet layout checks with an English and Spanish screenshot matrix.
 
 ### Changed
 
+- Made generated UI text resize to fit its bounds and adjusted HUD and main-menu spacing for expanded locales.
 - Localized leaderboard rows and identity error messages, with a safe generic fallback for unknown backend codes and no raw ProblemDetails text in the UI.
 - Documented the accepted residual risk for the short, trusted Tailscale beta and closed the security audit with that exception.
 - Added weapon scenario coverage to the balance simulation and documented the rejected round 4 brute cap; no gameplay numbers changed.
