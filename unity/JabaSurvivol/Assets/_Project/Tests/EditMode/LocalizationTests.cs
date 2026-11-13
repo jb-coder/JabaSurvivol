@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using JabaSurvivol.Gameplay;
 using NUnit.Framework;
 using UnityEngine;
@@ -41,6 +43,42 @@ namespace JabaSurvivol.Tests.EditMode
 
             Assert.That(english, Is.Not.Empty);
             Assert.That(spanish, Is.EquivalentTo(english));
+        }
+
+        [Test]
+        public void Runtime_literal_localization_keys_exist_in_both_locales()
+        {
+            var runtimeRoot = Path.Combine(Application.dataPath, "_Project", "Scripts", "Runtime");
+            var directKey = new Regex(
+                "Localization\\.(?:Get|Format)\\(\\s*\"([^\"]+)\"",
+                RegexOptions.Singleline);
+            var boundKey = new Regex(
+                "BindLocalized(?:Button)?\\([^;\\n]*?\"([a-z][A-Za-z0-9]*(?:\\.[a-z][A-Za-z0-9]*)+)\"");
+            var keys = new HashSet<string>(StringComparer.Ordinal);
+
+            foreach (var file in Directory.GetFiles(runtimeRoot, "*.cs", SearchOption.AllDirectories))
+            {
+                var source = File.ReadAllText(file);
+                foreach (Match match in directKey.Matches(source))
+                {
+                    keys.Add(match.Groups[1].Value);
+                }
+
+                foreach (Match match in boundKey.Matches(source))
+                {
+                    keys.Add(match.Groups[1].Value);
+                }
+            }
+
+            var english = new HashSet<string>(Localization.GetKeys("en"), StringComparer.Ordinal);
+            var spanish = new HashSet<string>(Localization.GetKeys("es"), StringComparer.Ordinal);
+
+            Assert.That(keys, Is.Not.Empty);
+            foreach (var key in keys)
+            {
+                Assert.That(english.Contains(key), Is.True, $"Missing English key: {key}");
+                Assert.That(spanish.Contains(key), Is.True, $"Missing Spanish key: {key}");
+            }
         }
 
         [Test]

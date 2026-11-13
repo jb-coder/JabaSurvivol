@@ -17,11 +17,13 @@
 
 The account panel and its validation message follow the selected locale. Submitting a two-character username shows the Spanish username-length message instead of an English fallback. The build label in the screenshots is `e2e065d`.
 
+The APK was built at `e2e065d`. Later commits add tests and evidence only; runtime code is unchanged.
+
 - Logcat: no `FATAL EXCEPTION`, `AndroidRuntime` crash, or ANR entries in `v060-localized-errors-logcat.txt`.
 
 ## Automated coverage
 
-- Unity EditMode: 107 passed, 0 failed. Identity error codes map to localized messages; unknown codes use `account.error.generic`; cloud and leaderboard service messages are localized; English and Spanish keys have parity.
+- Unity EditMode: 108 passed, 0 failed. Identity error codes map to localized messages; unknown codes use `account.error.generic`; cloud and leaderboard service messages are localized; English and Spanish keys have parity; every literal runtime localization key exists in both tables.
 - Unity PlayMode: 97 passed, 0 failed. Account state, cloud status, populated leaderboard rows, and round reward cards are asserted in Spanish.
 - .NET: 261 passed, 0 failed.
 
