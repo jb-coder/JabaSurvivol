@@ -56,8 +56,8 @@ A later reviewed phase can add:
 - English fallback for a missing active-locale key, with the raw key never shown.
 - A test-only pseudo-locale derived from English with at least 30 percent
   expansion, accented characters, and preserved format placeholders.
-- A PlayMode layout audit for the main menu, armory, character sheet, HUD,
-  pause, game-over, and round-end screens under the pseudo-locale.
+- A PlayMode layout audit for the main menu, HUD, pause, game-over, and
+  round-end screens under the pseudo-locale.
 - A committed phone and tablet screenshot matrix for the main menu, HUD, pause,
   armory, and result screens in English and Spanish.
 

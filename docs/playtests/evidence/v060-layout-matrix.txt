@@ -21,7 +21,7 @@
 | Armory | `v060-layout-phone-armory-en.png` | `v060-layout-phone-armory-es.png` | `v060-layout-tablet-armory-en.png` | `v060-layout-tablet-armory-es.png` |
 | Result (game over) | `v060-layout-phone-result-en.png` | `v060-layout-phone-result-es.png` | `v060-layout-tablet-result-en.png` | `v060-layout-tablet-result-es.png` |
 
-All screenshots show build label `84a5141`.
+The main-menu screenshots show build label `84a5141`. The HUD, pause, armory, and result screenshots show the development-build watermark because the version label is only rendered on the main menu.
 
 ## Automated checks
 
@@ -31,7 +31,7 @@ All screenshots show build label `84a5141`.
 - Key parity and non-empty checks cover English and Spanish.
 - A missing active-locale key resolves from English before the `...` placeholder and never returns the raw key.
 - The test-only pseudo-locale expands every English value by at least 30 percent, keeps format placeholders intact, and is not persisted.
-- The PlayMode pseudo-locale audit checks the main menu, armory, character sheet, HUD, pause, game-over, and round-end screens for preferred-size overflow.
+- The PlayMode pseudo-locale audit checks the main menu, HUD, pause, game-over, and round-end screens for preferred-size and overlap regressions.
 - Logcat: no `FATAL EXCEPTION`, `AndroidRuntime` crash, or ANR entries in `v060-layout-logcat.txt`.
 
 ## Limitations

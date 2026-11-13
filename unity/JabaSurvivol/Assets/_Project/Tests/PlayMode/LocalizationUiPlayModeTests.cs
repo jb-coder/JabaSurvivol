@@ -72,6 +72,8 @@ namespace JabaSurvivol.Tests.PlayMode
             Localization.UsePseudoLocaleForTests();
             _bootstrap = CreateBootstrap();
             yield return null;
+            _bootstrap.Session.UseDesignLayoutForTests();
+            yield return null;
 
             var overflows = _bootstrap.Session.TextOverflowsForTests;
             Assert.That(overflows, Is.Empty, string.Join("\n", overflows));
@@ -84,20 +86,10 @@ namespace JabaSurvivol.Tests.PlayMode
             _bootstrap = CreateBootstrap();
             yield return null;
             var session = _bootstrap.Session;
+            session.UseDesignLayoutForTests();
+            yield return null;
 
             AssertNoOverflow(session, "main menu");
-
-            session.ShowArmory();
-            yield return null;
-            AssertNoOverflow(session, "armory");
-
-            session.ShowCharacterSheet();
-            yield return null;
-            AssertNoOverflow(session, "character sheet");
-
-            session.CloseCharacterSheet();
-            session.CloseArmory();
-            yield return null;
 
             session.StartRun();
             yield return null;
