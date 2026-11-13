@@ -9,12 +9,26 @@
 
 ## Language and policy
 
-- [ ] English-only repository content; approved locale tables excepted.
+- [ ] English-only repository content; approved locale tables and localization reference material excepted.
 - [ ] No AI, assistant, LLM, tool, or generation attribution.
 - [ ] No tool co-author trailers.
 - [ ] No false manual-testing claims.
 - [ ] Conventional PR title.
 - [ ] Completed PR template.
+
+## Localization
+
+- [ ] English source table was updated before the translation.
+- [ ] Key parity and non-empty checks cover every supported locale.
+- [ ] Format placeholders and newlines match across locales.
+- [ ] The Spanish review record is signed by a named human reviewer.
+- [ ] Glossary terms are followed or documented as reviewed exceptions.
+- [ ] No unreviewed machine translation is present.
+- [ ] Phone and tablet screenshots cover the changed screens in every locale.
+- [ ] Pseudo-locale and layout checks pass.
+- [ ] Accented glyphs render correctly.
+- [ ] Known layout gaps are recorded.
+- [ ] `pr-reviewer` approval is not presented as linguistic approval.
 
 ## Architecture
 
@@ -67,6 +81,7 @@
 - [ ] Test commands and results are included.
 - [ ] APK artifact is included for Android-visible changes.
 - [ ] Screenshots or video are included for visual changes.
+- [ ] Per-locale screenshots and layout evidence are included for localization changes.
 - [ ] Performance evidence is included for performance-sensitive changes.
 - [ ] Save migration evidence is included for save changes.
 

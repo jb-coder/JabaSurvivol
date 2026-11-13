@@ -325,7 +325,7 @@ Unity setup instructions, scene details, and Android build steps live in [`docs/
 - Ammo and armor repairs are free or drop-based.
 - No loot boxes, randomized paid rewards, or pay-to-win mechanics.
 - No payments or premium currency in the current phase. An optional donation link may be added later and grants no in-game value.
-- English is the source language. v0.6.0 adds Spanish with a device-language default and a runtime selector; additional locales require a reviewed ADR and human translation review.
+- English is the source language. v0.6.0 adds Spanish with a device-language default and a runtime selector. Every non-English locale, including Spanish, requires human translation review before release; additional locales also require a reviewed ADR.
 - Every third-party asset is recorded in `THIRD_PARTY_NOTICES.md`.
 
 ## Documentation
@@ -338,6 +338,8 @@ Unity setup instructions, scene details, and Android build steps live in [`docs/
 | [`docs/architecture/README.md`](docs/architecture/README.md) | System shape and architecture decision records |
 | [`docs/releases/2026-11-12-v0.5.1.md`](docs/releases/2026-11-12-v0.5.1.md) | Current beta release notes and evidence |
 | [`docs/playtests/README.md`](docs/playtests/README.md) | Playtest plans, evidence, and beta feedback templates |
+| [`docs/standards/localization.md`](docs/standards/localization.md) | Translation workflow, review gate, and per-locale release checks |
+| [`docs/localization/glossary.md`](docs/localization/glossary.md) | Canonical game terms and Spanish terminology |
 | [`CHANGELOG.md`](CHANGELOG.md) | Version history |
 | [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) | Asset provenance and third-party notices |
 

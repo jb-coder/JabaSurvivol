@@ -1,0 +1,33 @@
+# Spanish (es) Localization Review
+
+- Status: Pending human review
+- Review owner: repository owner (`jb-coder`)
+- Named human reviewer: Not assigned
+- Review date: Not reviewed
+- Reviewed commit or APK: Pending
+- Locale file: `unity/JabaSurvivol/Assets/Resources/Localization/es.json`
+- Source table: `unity/JabaSurvivol/Assets/Resources/Localization/en.json`
+- Key coverage: Pending
+- Placeholder coverage: Pending
+- Glossary version: `docs/localization/glossary.md` (current working revision)
+- Translation method: Pending
+- Screens reviewed: None yet
+- Unresolved items: Full Spanish review is outstanding.
+- Approval: Not approved
+
+## Required review scope
+
+- Meaning, tone, and game context for every changed string.
+- Glossary compliance.
+- Grammar, gender, accents, and punctuation.
+- Placeholder and newline preservation.
+- Missing, stale, or untranslated values.
+- Phone and tablet screenshots for the main menu, HUD, pause, armory, and
+  result screens.
+- Truncation, overlap, and accented-glyph rendering.
+
+## Release gate
+
+Do not ship a release that includes Spanish until the named human reviewer
+fills this record, changes the status to `Approved`, and signs the approval.
+The agent reviewer and `reviewer-approval` check are not linguistic review.

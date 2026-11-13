@@ -2,7 +2,7 @@
 
 ## Operating principle
 
-Agents own the full development loop: plan, implement, test, review, merge, build, deploy, verify, and document. Human involvement is limited to one-time account provisioning, legal acceptance, payments, and optional playtesting.
+Agents own the full development loop: plan, implement, test, review, merge, build, deploy, verify, and document. Human involvement is limited to one-time account provisioning, legal acceptance, payments, optional playtesting, and the mandatory human translation review of every non-English product locale.
 
 ## Agent roles
 
@@ -56,7 +56,13 @@ Agents own the full development loop: plan, implement, test, review, merge, buil
 - Secret or license violation.
 - Destructive migration without backup.
 - P0 or P1 defect.
+- Unreviewed non-English product translation.
 - Three failed review cycles.
+
+Human translation review is the required exception to the autonomy loop. Use
+the `needs-human` label until the named reviewer signs
+`docs/playtests/evidence/localization-review-<locale>.txt`. The `pr-reviewer`
+agent never grants linguistic approval.
 
 ## Escalation without humans
 

@@ -117,6 +117,8 @@ approved locale data tables may contain translated product strings.
 - Spanish review is recorded in the locale pull request and in
   `docs/playtests/evidence/localization-review-es.txt`, including the reviewer,
   date, key coverage, and unresolved items.
+- The operational workflow is in `docs/standards/localization.md`; the term
+  list is in `docs/localization/glossary.md`.
 
 ### 7. Backend errors
 
@@ -138,7 +140,8 @@ approved locale data tables may contain translated product strings.
 ## Consequences
 
 - The `Localization` facade keeps its API and gains a JSON-backed locale store.
-- `en.json` and `es.json` become the only non-English repository content.
+- `en.json` and `es.json` remain the only non-English product content; the
+  approved localization glossary may list canonical target-language terms.
 - The UI needs a language selector and a refresh path.
 - Tests cover device-language mapping, fallback, persistence, key parity,
   missing keys, pseudo-localization, display culture, and phone/tablet layouts.
