@@ -2,9 +2,9 @@
 
 - Date: 2026-11-13
 - Issue: #141
-- APK: `JabaSurvivol-0.5.1-emulator-layout.apk`
-- SHA-256: `6B2EA5057F742B4C6243DE033BA4FA27926A3436F51F7583B60AF43296CBBF94`
-- Build commit: `84a5141`
+- APK: `JabaSurvivol-0.5.1-emulator-layout2.apk`
+- SHA-256: `7ABA5C4BD3B85953F3842B2BC580020AE65A1468DA2263533429BBDA84F266C8`
+- Build commit: `ca4a770`
 - Emulator: `sdk_gphone64_x86_64`, API 35, x86_64, `swiftshader_indirect`, headless
 - Android version: 15
 - Version: `0.5.1`, version code `6`
@@ -21,7 +21,7 @@
 | Armory | `v060-layout-phone-armory-en.png` | `v060-layout-phone-armory-es.png` | `v060-layout-tablet-armory-en.png` | `v060-layout-tablet-armory-es.png` |
 | Result (game over) | `v060-layout-phone-result-en.png` | `v060-layout-phone-result-es.png` | `v060-layout-tablet-result-en.png` | `v060-layout-tablet-result-es.png` |
 
-The main-menu screenshots show build label `84a5141`. The HUD, pause, armory, and result screenshots show the development-build watermark because the version label is only rendered on the main menu.
+The main-menu screenshots show build label `ca4a770`. The HUD, pause, armory, and result screenshots show the development-build watermark because the version label is only rendered on the main menu.
 
 ## Automated checks
 
@@ -36,7 +36,8 @@ The main-menu screenshots show build label `84a5141`. The HUD, pause, armory, an
 
 ## Limitations
 
+- The pseudo-locale overflow audit covers the main menu, HUD, pause, game-over, and round-end screens on the 1920x1080 design layout. Armory and character-sheet layouts are covered by the English/Spanish screenshot matrix and key checks, not by the pseudo-locale audit.
 - The result screenshots are game-over screens. Round-end layout is covered by the PlayMode pseudo-locale audit, not a committed screenshot.
-- The pseudo-locale overflow audit runs at the PlayMode test resolution. The English/Spanish screenshot matrix covers the actual phone and tablet sizes; a pseudo-locale tablet screenshot is not committed.
-- No unresolved truncation or overlap was found in the covered screens and resolutions.
+- The pseudo-locale overflow audit uses the 1920x1080 design layout; the English/Spanish matrix covers the actual phone and tablet sizes.
+- No unresolved truncation or overlap was found in the covered pseudo-locale screens or the English/Spanish screenshot matrix.
 - Automated emulator evidence only; no human playtest claim.
