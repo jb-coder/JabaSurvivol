@@ -9,7 +9,7 @@
 
 ## Language and policy
 
-- [ ] English-only content.
+- [ ] English-only repository content; approved locale tables excepted.
 - [ ] No AI, assistant, LLM, tool, or generation attribution.
 - [ ] No tool co-author trailers.
 - [ ] No false manual-testing claims.

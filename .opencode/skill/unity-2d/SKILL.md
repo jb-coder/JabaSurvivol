@@ -56,4 +56,4 @@ description: Use when implementing or reviewing JabaSurvivol Unity 2D gameplay, 
 - Tests pass.
 - Android APK builds.
 - No console or `logcat` errors.
-- English-only and no-attribution policy respected.
+- English-only repository content (approved locale tables excepted) and no-attribution policy respected.

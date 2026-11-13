@@ -314,8 +314,8 @@ Unity setup instructions, scene details, and Android build steps live in [`docs/
 | Milestone | Status | Focus |
 |---|---|---|
 | **v0.5.1 Local Beta** | Shipped | Core loop, boss, progression, accounts, cloud saves, leaderboards, telemetry, Android beta |
-| **v0.5.2 Beta Follow-ups** | In progress | Five-person beta participation, physical-device profiling, network checks, combat tuning |
-| **v0.6.0 Localization** | Planned | Additional locales, fonts, store metadata, and language selection |
+| **v0.5.2 Beta Follow-ups** | Closed | Beta close-out, combat tuning baseline, Android performance baseline, security risk acceptance |
+| **v0.6.0 Localization** | In progress | English and Spanish, device-language default, runtime selector, key coverage, and layout checks |
 | **v1.0.0 Release and Donations** | Planned | Release readiness and an optional donation link with no in-game rewards |
 
 ## Principles
@@ -325,7 +325,7 @@ Unity setup instructions, scene details, and Android build steps live in [`docs/
 - Ammo and armor repairs are free or drop-based.
 - No loot boxes, randomized paid rewards, or pay-to-win mechanics.
 - No payments or premium currency in the current phase. An optional donation link may be added later and grants no in-game value.
-- English is the only product language until the localization phase.
+- English is the source language. v0.6.0 adds Spanish with a device-language default and a runtime selector; additional locales require a reviewed ADR and human translation review.
 - Every third-party asset is recorded in `THIRD_PARTY_NOTICES.md`.
 
 ## Documentation

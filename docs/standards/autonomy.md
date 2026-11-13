@@ -21,7 +21,7 @@ The builder must not approve its own PR. The reviewer app must not edit code. Th
 - All required checks green.
 - No `do-not-merge`, `agent:blocked`, `needs-human`, or `agent:paused`.
 - No secrets or forbidden attribution phrases.
-- English-only content.
+- English-only repository content; approved locale tables excepted.
 - Acceptance evidence.
 
 ## Limits

@@ -23,18 +23,24 @@ JabaSurvivol is a 2D top-down, round-based zombie survival game for Android phon
 - Premium currency, in-game purchases, and payments are deferred. The initial phase may show an optional PayPal donation link with no rewards or entitlements (ADR-0008).
 - Donations are voluntary, outside the game economy, and never unlock content.
 - No loot boxes, randomized paid rewards, or pay-to-win mechanics.
-- Localization is the final phase before release readiness. English is the only locale until then.
+- Localization starts in v0.6.0 with English and Spanish. English is the source locale; additional locales require a reviewed ADR and human translation review.
 
 ## Language policy
 
-Everything committed to this repository must be in English:
+Everything committed to this repository must be in English, except approved
+locale data tables:
 
 - Code, comments, XML docs, test names, logs, error messages.
-- UI strings, localization keys, asset names, folder names.
+- UI source strings, localization keys, asset names, folder names.
 - Commit messages, PR titles, PR descriptions, issue titles, issue bodies.
 - Documentation, ADRs, runbooks, release notes.
 
-The user may speak Spanish in conversation. The repository remains English-only.
+Approved locale tables may contain translated product strings for their locale.
+They require human review and must not change code, documentation, commits, or
+repository metadata to another language.
+
+The user may speak Spanish in conversation. The repository remains English-only
+outside the approved locale tables.
 
 ## Attribution policy
 
@@ -167,7 +173,7 @@ Every change enters through a pull request. No exceptions for documentation, CI,
 A task is done only when:
 
 - Acceptance criteria are met.
-- English-only policy is respected.
+- English-only repository content (approved locale tables excepted) is respected.
 - No AI attribution is present.
 - Unit, architecture, and relevant integration tests pass.
 - The solution builds in Release.
@@ -186,7 +192,7 @@ A task is done only when:
 - Use object pooling for zombies, projectiles, VFX, and floating text.
 - Avoid allocations in `Update`, `FixedUpdate`, and hot paths.
 - Use the Input System and touch controls. Test phone and tablet layouts, safe areas, and landscape orientation.
-- User-facing strings must use localization keys from day one. Only English is active until the localization phase.
+- User-facing strings must use localization keys from day one. English is the source locale; v0.6.0 adds Spanish with a device-language default and a runtime selector.
 - Profile on a real Android device before declaring performance work complete.
 
 ## Backend rules

@@ -40,7 +40,7 @@ Read `AGENTS.md`, `docs/standards/`, and the current issue before acting.
 - Use object pooling for zombies, projectiles, VFX, and floating text.
 - Avoid allocations in `Update`, `FixedUpdate`, and hot paths.
 - Use the Input System and on-screen touch controls.
-- All user-facing strings use localization keys. Only English is active until the localization phase.
+- All user-facing strings use localization keys. English is the source locale; v0.6.0 adds Spanish with a device-language default and a runtime selector.
 - Data-driven balance via ScriptableObjects converted into core data.
 - Development cheats must be behind `DEVELOPMENT_BUILD` or editor-only guards.
 
@@ -50,5 +50,5 @@ Read `AGENTS.md`, `docs/standards/`, and the current issue before acting.
 - Tests pass.
 - APK builds.
 - No console errors.
-- English-only and no attribution policy respected.
+- English-only repository content (approved locale tables excepted) and no attribution policy respected.
 - Reviewer and verifier evidence is available.

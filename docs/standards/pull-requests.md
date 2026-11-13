@@ -27,7 +27,7 @@ Every change enters through a pull request. No direct pushes to `main` or `devel
 - Screenshots or video for visual changes.
 - Migration note for save or database changes.
 - No secrets, keystores, credentials, or build output.
-- English-only content.
+- English-only repository content; approved locale tables excepted.
 - No AI attribution.
 
 ## Review
