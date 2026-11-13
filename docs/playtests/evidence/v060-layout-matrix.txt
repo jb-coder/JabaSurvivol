@@ -1,0 +1,42 @@
+# v0.6.0 Localization Layout Evidence
+
+- Date: 2026-11-13
+- Issue: #141
+- APK: `JabaSurvivol-0.5.1-emulator-layout.apk`
+- SHA-256: `6B2EA5057F742B4C6243DE033BA4FA27926A3436F51F7583B60AF43296CBBF94`
+- Build commit: `84a5141`
+- Emulator: `sdk_gphone64_x86_64`, API 35, x86_64, `swiftshader_indirect`, headless
+- Android version: 15
+- Version: `0.5.1`, version code `6`
+- Phone: 2340x1080 landscape
+- Tablet: 2560x1600 landscape
+
+## Screenshot matrix
+
+| Screen | Phone EN | Phone ES | Tablet EN | Tablet ES |
+|---|---|---|---|---|
+| Main menu | `v060-layout-phone-main-en.png` | `v060-layout-phone-main-es.png` | `v060-layout-tablet-main-en.png` | `v060-layout-tablet-main-es.png` |
+| HUD | `v060-layout-phone-hud-en.png` | `v060-layout-phone-hud-es.png` | `v060-layout-tablet-hud-en.png` | `v060-layout-tablet-hud-es.png` |
+| Pause | `v060-layout-phone-pause-en.png` | `v060-layout-phone-pause-es.png` | `v060-layout-tablet-pause-en.png` | `v060-layout-tablet-pause-es.png` |
+| Armory | `v060-layout-phone-armory-en.png` | `v060-layout-phone-armory-es.png` | `v060-layout-tablet-armory-en.png` | `v060-layout-tablet-armory-es.png` |
+| Result (game over) | `v060-layout-phone-result-en.png` | `v060-layout-phone-result-es.png` | `v060-layout-tablet-result-en.png` | `v060-layout-tablet-result-es.png` |
+
+All screenshots show build label `84a5141`.
+
+## Automated checks
+
+- Unity EditMode: 111 passed, 0 failed.
+- Unity PlayMode: 99 passed, 0 failed.
+- .NET: 261 passed, 0 failed.
+- Key parity and non-empty checks cover English and Spanish.
+- A missing active-locale key resolves from English before the `...` placeholder and never returns the raw key.
+- The test-only pseudo-locale expands every English value by at least 30 percent, keeps format placeholders intact, and is not persisted.
+- The PlayMode pseudo-locale audit checks the main menu, armory, character sheet, HUD, pause, game-over, and round-end screens for preferred-size overflow.
+- Logcat: no `FATAL EXCEPTION`, `AndroidRuntime` crash, or ANR entries in `v060-layout-logcat.txt`.
+
+## Limitations
+
+- The result screenshots are game-over screens. Round-end layout is covered by the PlayMode pseudo-locale audit, not a committed screenshot.
+- The pseudo-locale overflow audit runs at the PlayMode test resolution. The English/Spanish screenshot matrix covers the actual phone and tablet sizes; a pseudo-locale tablet screenshot is not committed.
+- No unresolved truncation or overlap was found in the covered screens and resolutions.
+- Automated emulator evidence only; no human playtest claim.
