@@ -229,6 +229,7 @@ A task is done only when:
 - `docs/agents/review-checklist.md`
 - `docs/agents/kill-switch.md`
 - `docs/architecture/adr/0008-local-first-beta-with-donations.md`
+- `docs/architecture/adr/0009-localization-architecture.md`
 - `docs/game-design/game-design.md`
 - `docs/game-design/economy.md`
 - `docs/game-design/skills.md`

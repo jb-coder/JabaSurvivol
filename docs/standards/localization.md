@@ -4,7 +4,8 @@
 
 - English is the source locale and must remain complete.
 - v0.6.0 introduces Spanish (`es`) with a device-language default and a runtime
-  language selector.
+  language selector, as decided in
+  [`ADR-0009`](../architecture/adr/0009-localization-architecture.md).
 - Additional locales, store metadata, RTL, and non-Latin font work remain out of
   scope until a reviewed ADR approves them.
 - Do not hardcode user-facing strings.
