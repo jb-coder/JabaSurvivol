@@ -1,5 +1,6 @@
 using JabaSurvivol.Gameplay;
 using NUnit.Framework;
+using UnityEngine;
 
 [SetUpFixture]
 public sealed class PlayModeTestBootstrap
@@ -8,11 +9,17 @@ public sealed class PlayModeTestBootstrap
     public void SetUp()
     {
         GameBootstrap.OnlineDisabledForTests = true;
+        PlayerPrefs.DeleteKey(Localization.LocalePreferenceKey);
+        PlayerPrefs.Save();
+        Localization.SetLocale("en");
     }
 
     [OneTimeTearDown]
     public void TearDown()
     {
         GameBootstrap.OnlineDisabledForTests = false;
+        PlayerPrefs.DeleteKey(Localization.LocalePreferenceKey);
+        PlayerPrefs.Save();
+        Localization.ReloadForTests();
     }
 }
