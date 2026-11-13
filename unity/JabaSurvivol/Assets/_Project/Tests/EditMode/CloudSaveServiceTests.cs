@@ -20,6 +20,7 @@ namespace JabaSurvivol.Tests.EditMode
         [SetUp]
         public void SetUp()
         {
+            Localization.SetLocale("en");
             _directory = Path.Combine(Path.GetTempPath(), "jabasurvivol-cloud", Guid.NewGuid().ToString("N"));
             _store = new ProfileStore(Path.Combine(_directory, ProfileStore.FileName));
             _api = new FakeCloudSaveApi();
@@ -34,6 +35,33 @@ namespace JabaSurvivol.Tests.EditMode
             {
                 Directory.Delete(_directory, true);
             }
+
+            Localization.SetLocale("en");
+        }
+
+        [Test]
+        public async Task Disabled_cloud_message_is_localized()
+        {
+            Localization.SetLocale("es");
+            _service.Configure(false);
+
+            var result = await _service.SyncAsync(new Profile(), CancellationToken.None);
+
+            Assert.That(result.State, Is.EqualTo(CloudSyncState.Disabled));
+            Assert.That(result.Message, Is.EqualTo(Localization.Get("cloud.disabled")));
+        }
+
+        [Test]
+        public async Task Offline_cloud_message_is_localized()
+        {
+            Localization.SetLocale("es");
+            var profile = new Profile { Supplies = 10, CloudSaveRevision = 1 };
+            _api.GetResults.Enqueue(new CloudSaveApiResult { Status = CloudSaveApiStatus.NetworkError });
+
+            var result = await _service.SyncAsync(profile, CancellationToken.None);
+
+            Assert.That(result.State, Is.EqualTo(CloudSyncState.Offline));
+            Assert.That(result.Message, Is.EqualTo(Localization.Get("cloud.offline")));
         }
 
         [Test]

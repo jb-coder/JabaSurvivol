@@ -19,6 +19,7 @@ namespace JabaSurvivol.Tests.PlayMode
         [SetUp]
         public void SetUp()
         {
+            Localization.SetLocale("en");
             _directory = Path.Combine(Path.GetTempPath(), "jabasurvivol-account-ui", Guid.NewGuid().ToString("N"));
             GameBootstrap.SavePathOverride = Path.Combine(_directory, ProfileStore.FileName);
             _account = new FakeAccountService();
@@ -30,6 +31,7 @@ namespace JabaSurvivol.Tests.PlayMode
         {
             GameBootstrap.SavePathOverride = null;
             GameBootstrap.AccountServiceFactoryOverride = null;
+            Localization.SetLocale("en");
 
             if (_bootstrap != null)
             {
@@ -109,6 +111,21 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(service.State, Is.EqualTo(AccountState.Offline));
             Assert.That(_bootstrap.Session.MainMenuAccountStateForTests, Does.Contain("OFFLINE"));
         }
+        [UnityTest]
+        public IEnumerator Account_labels_follow_the_locale()
+        {
+            Localization.SetLocale("es");
+            _bootstrap = CreateBootstrap();
+            yield return null;
+
+            Assert.That(
+                _bootstrap.Session.MainMenuAccountStateForTests,
+                Is.EqualTo(Localization.Get("account.state.signedout")));
+
+            _bootstrap.Session.ShowAccountForTests();
+            Assert.That(_bootstrap.Session.AccountPanelVisibleForTests, Is.True);
+        }
+
         [UnityTest]
         public IEnumerator Starting_a_run_without_an_account_keeps_local_play_available()
         {

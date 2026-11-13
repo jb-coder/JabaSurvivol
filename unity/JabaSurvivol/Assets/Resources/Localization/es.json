@@ -773,6 +773,18 @@
     {
       "key": "settings.language.close",
       "value": "CERRAR"
+    },
+    {
+      "key": "leaderboard.row",
+      "value": "{0}. {1}   RONDA {2}   BAJAS {3}   {4}s"
+    },
+    {
+      "key": "account.error.rateLimited",
+      "value": "EL SERVIDOR ESTÁ OCUPADO - INTÉNTALO MÁS TARDE"
+    },
+    {
+      "key": "account.error.validation",
+      "value": "REVISA TU USUARIO Y CONTRASEÑA"
     }
   ]
 }
