@@ -237,10 +237,13 @@ namespace JabaSurvivol.Gameplay
             {
                 "username_taken" => Localization.Get("account.error.taken"),
                 "invalid_credentials" => Localization.Get("account.error.invalid"),
-                "unauthorized" => Localization.Get("account.error.invalid"),
-                "network_error" => Localization.Get("account.error.network"),
-                "timeout" => Localization.Get("account.error.network"),
-                _ => result.ErrorMessage
+                "unauthorized" or "http_401" => Localization.Get("account.error.invalid"),
+                "invalid_username" => Localization.Get("account.error.username"),
+                "invalid_password" => Localization.Get("account.error.password"),
+                "invalid_request" or "http_400" => Localization.Get("account.error.validation"),
+                "rate_limited" or "http_429" => Localization.Get("account.error.rateLimited"),
+                "network_error" or "timeout" => Localization.Get("account.error.network"),
+                _ => Localization.Get("account.error.generic")
             };
 
             if (string.IsNullOrWhiteSpace(message))

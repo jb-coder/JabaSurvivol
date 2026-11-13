@@ -186,6 +186,46 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(Localization.CurrentLocale, Is.EqualTo("en"));
         }
 
+        [UnityTest]
+        public IEnumerator Round_reward_cards_are_localized()
+        {
+            Localization.SetLocale("es");
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.StartRun();
+            var budget = session.SpawnBudget;
+
+            for (var i = 0; i < budget; i++)
+            {
+                session.DamageZombieForTests(100000f);
+                yield return null;
+
+                if (i < budget - 1)
+                {
+                    session.SpawnZombieForTests();
+                    yield return null;
+                }
+            }
+
+            Assert.That(session.RoundEndVisible, Is.True);
+            var labels = session.RoundEndRewardLabelsForTests;
+            Assert.That(labels.Length, Is.EqualTo(session.PendingRewardCount));
+
+            for (var i = 0; i < labels.Length; i++)
+            {
+                var reward = session.PendingRewardAt(i);
+                var key = reward.Type switch
+                {
+                    RoundRewardType.Supplies => "reward.supplies.card",
+                    RoundRewardType.Xp => "reward.xp.card",
+                    RoundRewardType.AmmoCrate => "reward.ammo.card",
+                    _ => "reward.armor.card"
+                };
+                Assert.That(labels[i], Is.EqualTo(Localization.Format(key, reward.Amount)));
+            }
+        }
+
         private static GameBootstrap CreateBootstrap()
         {
             var gameObject = new GameObject("Test Bootstrap");

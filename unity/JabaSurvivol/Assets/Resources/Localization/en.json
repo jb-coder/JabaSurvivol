@@ -773,6 +773,18 @@
     {
       "key": "settings.language.close",
       "value": "CLOSE"
+    },
+    {
+      "key": "leaderboard.row",
+      "value": "{0}. {1}   R{2}   K{3}   {4}s"
+    },
+    {
+      "key": "account.error.rateLimited",
+      "value": "SERVER IS BUSY - TRY AGAIN LATER"
+    },
+    {
+      "key": "account.error.validation",
+      "value": "CHECK YOUR USERNAME AND PASSWORD"
     }
   ]
 }

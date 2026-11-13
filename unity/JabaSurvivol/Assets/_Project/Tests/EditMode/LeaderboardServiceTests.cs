@@ -12,6 +12,18 @@ namespace JabaSurvivol.Tests.EditMode
 {
     public sealed class LeaderboardServiceTests
     {
+        [SetUp]
+        public void SetUp()
+        {
+            Localization.SetLocale("en");
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            Localization.SetLocale("en");
+        }
+
         [Test]
         public async Task Load_parses_entries_and_request_path()
         {
@@ -49,6 +61,17 @@ namespace JabaSurvivol.Tests.EditMode
 
             Assert.That(result.Success, Is.False);
             Assert.That(result.ErrorMessage, Is.Not.Empty);
+        }
+
+        [Test]
+        public async Task Load_error_message_is_localized()
+        {
+            Localization.SetLocale("es");
+            using var service = CreateService(new QueueHandler(new HttpResponseMessage(HttpStatusCode.InternalServerError)));
+
+            var result = await service.LoadAsync(CancellationToken.None);
+
+            Assert.That(result.ErrorMessage, Is.EqualTo(Localization.Get("leaderboard.error")));
         }
 
         [Test]

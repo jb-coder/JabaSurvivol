@@ -698,6 +698,20 @@ namespace JabaSurvivol.Gameplay
 
         public string RoundEndHintForTests => FindText(_roundEndPanel, "Hint")?.text ?? string.Empty;
 
+        public string[] RoundEndRewardLabelsForTests
+        {
+            get
+            {
+                var labels = new string[_rewardLabels.Length];
+                for (var i = 0; i < _rewardLabels.Length; i++)
+                {
+                    labels[i] = _rewardLabels[i].text;
+                }
+
+                return labels;
+            }
+        }
+
         public string BuildLabelForTests => _buildLabel?.text ?? string.Empty;
 
         public Button SoundButtonForTests => _pauseSoundButton;
@@ -914,16 +928,15 @@ namespace JabaSurvivol.Gameplay
             var builder = new StringBuilder();
             foreach (var entry in entries)
             {
-                builder.Append(entry.rank)
-                    .Append(". ")
-                    .Append(entry.username)
-                    .Append("   R")
-                    .Append(entry.highestRound)
-                    .Append("   K")
-                    .Append(entry.totalKills)
-                    .Append("   ")
-                    .Append(entry.durationSeconds)
-                    .AppendLine("s");
+                builder.Append(
+                        Localization.Format(
+                            "leaderboard.row",
+                            entry.rank,
+                            entry.username,
+                            entry.highestRound,
+                            entry.totalKills,
+                            entry.durationSeconds))
+                    .AppendLine();
             }
 
             _leaderboardText.text = builder.ToString();

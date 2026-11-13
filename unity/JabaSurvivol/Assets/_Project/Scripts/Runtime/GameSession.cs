@@ -189,6 +189,9 @@ namespace JabaSurvivol.Gameplay
 
         public string RoundEndHintForTests => _ui?.RoundEndHintForTests ?? string.Empty;
 
+        public string[] RoundEndRewardLabelsForTests =>
+            _ui?.RoundEndRewardLabelsForTests ?? System.Array.Empty<string>();
+
         public string BuildLabelForTests => _ui?.BuildLabelForTests ?? string.Empty;
 
         public UnityEngine.UI.Button SoundButtonForTests => _ui?.SoundButtonForTests;
