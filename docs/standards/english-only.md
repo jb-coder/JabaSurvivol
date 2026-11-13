@@ -2,22 +2,31 @@
 
 ## Scope
 
-Everything committed to this repository must be in English:
+Everything committed to this repository must be in English, except approved
+locale data tables:
 
 - Source code, comments, XML documentation, test names.
-- UI strings, localization keys, asset names, folder names.
+- UI source strings, localization keys, asset names, folder names.
 - Commit messages, PR titles and descriptions, issue titles and bodies.
 - Documentation, ADRs, runbooks, release notes.
 - Logs, error messages, metrics, and dashboard labels.
 
-The user may speak Spanish in conversation. The repository remains English-only.
+Approved locale tables under the Unity localization resources may contain the
+translated product strings for their locale.
+
+The user may speak Spanish in conversation. The repository remains English-only
+outside the approved locale tables.
 
 ## Localization
 
-- English is the only active locale until the localization phase.
+- English is the source locale and must remain complete.
+- v0.6.0 activates English and Spanish with a device-language default and a
+  runtime selector.
 - User-facing strings must use localization keys from day one.
 - Do not hardcode user-facing text in Unity scenes or scripts.
-- The localization phase adds additional locales, fonts, store metadata, and language selection.
+- Additional locales require a reviewed ADR and human translation review.
+- Translations live only in locale tables; code, documentation, commit
+  messages, and repository metadata stay English.
 
 ## Enforcement
 

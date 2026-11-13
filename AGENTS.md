@@ -23,7 +23,7 @@ JabaSurvivol is a 2D top-down, round-based zombie survival game for Android phon
 - Premium currency, in-game purchases, and payments are deferred. The initial phase may show an optional PayPal donation link with no rewards or entitlements (ADR-0008).
 - Donations are voluntary, outside the game economy, and never unlock content.
 - No loot boxes, randomized paid rewards, or pay-to-win mechanics.
-- Localization is the final phase before release readiness. English is the only locale until then.
+- Localization starts in v0.6.0 with English and Spanish. English is the source locale; additional locales require a reviewed ADR and human translation review.
 
 ## Language policy
 
@@ -186,7 +186,7 @@ A task is done only when:
 - Use object pooling for zombies, projectiles, VFX, and floating text.
 - Avoid allocations in `Update`, `FixedUpdate`, and hot paths.
 - Use the Input System and touch controls. Test phone and tablet layouts, safe areas, and landscape orientation.
-- User-facing strings must use localization keys from day one. Only English is active until the localization phase.
+- User-facing strings must use localization keys from day one. English is the source locale; v0.6.0 adds Spanish with a device-language default and a runtime selector.
 - Profile on a real Android device before declaring performance work complete.
 
 ## Backend rules
