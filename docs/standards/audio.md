@@ -7,7 +7,7 @@ the current implementation, the known defects, the event-to-cue matrix, the
 settings contract, and the release gate. Final authored music and production
 sound effects remain in v1.0.0.
 
-## Current implementation
+## Baseline before v0.7.1
 
 - `GameAudio` is a `MonoBehaviour` created by `GameSession`.
 - Clips are generated procedurally at runtime at 22050 Hz and cached.
@@ -18,6 +18,20 @@ sound effects remain in v1.0.0.
 - `GameSession` saves the profile on `OnApplicationPause` but does not suspend
   audio.
 - There is no volume control, voice limit, or per-cue cooldown.
+
+## v0.7.1 implementation
+
+- 33 procedural cues cover combat, skills, the boss, rounds, and UI.
+- A fixed pool of 12 sources bounds simultaneous one-shots.
+- Per-cue cooldowns prevent duplicate cues from stacking.
+- Master mute, master volume, and effects volume are persisted in
+  PlayerPrefs and applied to every source.
+- Pause, focus loss, and Android background suspend audio and stop active
+  one-shots. Resume restores audio only when the session is playing.
+- The main menu and pause menu open an audio panel with mute, VOL, and FX
+  controls. VOL and FX are language-neutral technical abbreviations.
+- The panel reuses the existing pause.sound.on, pause.sound.off, and
+  settings.language.close keys, so no Spanish locale table change is needed.
 
 ## Known defects and gaps
 
@@ -93,20 +107,18 @@ Rules:
 - `audio.muted` from v0.5.1 remains the source of truth for mute, so existing
   preferences keep working.
 - Audio controls are available on the main menu and the pause menu.
-- The controls use localization keys and must render in English and Spanish.
+- The controls use existing localization keys and language-neutral symbols so they render in English and Spanish without new translations.
 
-## Audio control localization keys
+## Audio control labels
 
-| Key | English source |
+The audio panel reuses existing keys:
+
+| Control | Key |
 |---|---|
-| `settings.audio.title` | AUDIO |
-| `settings.audio.master` | MASTER {0}% |
-| `settings.audio.effects` | EFFECTS {0}% |
-| `settings.audio.mute.on` | MUTE: ON |
-| `settings.audio.mute.off` | MUTE: OFF |
-| `settings.audio.down` | - |
-| `settings.audio.up` | + |
-| `settings.audio.close` | CLOSE |
+| Main menu and pause menu entry | `pause.sound.on` / `pause.sound.off` |
+| Mute button | `pause.sound.on` / `pause.sound.off` |
+| Close button | `settings.language.close` |
+| Volume rows | `VOL` and `FX` language-neutral abbreviations with percentages |
 
 ## Lifecycle contract
 
