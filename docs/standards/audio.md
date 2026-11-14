@@ -21,56 +21,59 @@ sound effects remain in v1.0.0.
 
 ## Known defects and gaps
 
-| ID | Severity | Finding | Resolution |
-|---|---|---|---|
-| A-01 | P1 | Mute only controls one source, so future UI or music sources would bypass it. | Centralize routing and apply mute and volume to every source. |
-| A-02 | P1 | There is no master or effects volume. | Add both settings with clamped defaults and persistence. |
-| A-03 | P1 | Pause, focus loss, and Android background do not suspend audio. | Add an explicit suspend and resume lifecycle. |
-| A-04 | P2 | Mute is only reachable from the in-run pause menu. | Expose audio controls on the main and pause menus. |
-| A-05 | P1 | Weapon fire, empty magazine, reloads, weapon switching, enemy impacts, active skills, boss events, round transitions, and UI actions are silent. | Add the cues listed in the matrix. |
-| A-06 | P2 | `Hit` means player damage; enemy bullet impacts are silent and ambiguous. | Keep `Hit` for player damage and add `Impact` and `BossHit` cues. |
-| A-07 | P2 | Overlapping one-shots are unbounded and can clip. | Add a source pool, per-cue cooldown, and a global voice limit. |
-| A-08 | P2 | No test asserts that every `GameAudioCue` value has a clip. | Add EditMode coverage for the cue catalog. |
-| A-09 | P3 | Audio settings are device-local because they use `PlayerPrefs`. | Accept for v0.7.1 and document; cloud settings are out of scope. |
-| A-10 | P3 | There is no Android audio-focus or latency evidence. | Add filtered logcat and emulator smoke evidence. |
+| ID | Severity | Finding | Resolution | Tracking |
+|---|---|---|---|---|
+| A-01 | P1 | Mute only controls one source, so future UI or music sources would bypass it. | Centralize routing and apply mute and volume to every source. | #176 |
+| A-02 | P1 | There is no master or effects volume. | Add both settings with clamped defaults and persistence. | #176 |
+| A-03 | P1 | Pause, focus loss, and Android background do not suspend audio. | Add an explicit suspend and resume lifecycle. | #178 |
+| A-04 | P2 | Mute is only reachable from the in-run pause menu. | Expose audio controls on the main and pause menus. | #181 |
+| A-05 | P1 | Weapon fire, empty magazine, reloads, weapon switching, player bullet impacts, active skills, boss events, round transitions, and UI actions are silent. | Add the cues listed in the matrix. | #179, #180, #181 |
+| A-06 | P2 | `Hit` means player damage; player bullet impacts on enemies are silent and ambiguous. | Keep `Hit` for player damage and add `Impact` and `BossHit` cues. | #179 |
+| A-07 | P2 | Overlapping one-shots are unbounded and can clip. | Add a source pool, per-cue cooldown, and a global voice limit. | #176 |
+| A-08 | P2 | No test asserts that every `GameAudioCue` value has a clip. | Add EditMode coverage for the cue catalog. | #182 |
+| A-09 | P3 | Audio settings are device-local because they use `PlayerPrefs`. | Accept for v0.7.1 and document; cloud settings are out of scope. | Accepted risk |
+| A-10 | P3 | There is no Android audio-focus or latency evidence. | Add filtered logcat and emulator smoke evidence. | #182 |
 
 ## Cue matrix
 
-| Event | Cue | Priority | Voice limit | Notes |
+Every row is silent while the master mute is enabled or audio is suspended.
+The mute column records that shared behavior explicitly.
+
+| Event | Cue | Priority | Voice limit | Mute behavior |
 |---|---|---|---|---|
-| Player takes damage | `Hit` | High | 2 | Existing cue. |
-| Zombie or boss bullet impact | `Impact` | Low | 4 | Distinct from player damage. |
-| Boss takes bullet damage | `BossHit` | Low | 2 | Layered over `Impact`. |
-| Zombie killed | `Kill` | High | 3 | Existing cue. |
-| Boss killed | `BossDeath` | High | 1 | Victory cue also plays. |
-| Pistol fired | `PistolFire` | High | 2 | One cue per trigger. |
-| SMG fired | `SmgFire` | High | 3 | One cue per trigger. |
-| Shotgun fired | `ShotgunFire` | High | 2 | One cue per trigger, not per pellet. |
-| Rifle fired | `RifleFire` | High | 2 | One cue per trigger. |
-| LMG fired | `LmgFire` | High | 3 | One cue per trigger. |
-| Empty magazine | `Empty` | Medium | 1 | Plays once per trigger attempt. |
-| Reload started | `ReloadStart` | Medium | 1 | |
-| Reload completed | `ReloadComplete` | Medium | 1 | |
-| Weapon switched | `WeaponSwitch` | Medium | 1 | |
-| Turret deployed | `TurretDeploy` | Medium | 1 | |
-| Turret fired | `TurretFire` | Low | 4 | Cooldown applies. |
-| Dash activated | `Dash` | Medium | 1 | |
-| Shockwave activated | `Shockwave` | Medium | 1 | |
-| Boss spawned | `BossSpawn` | High | 1 | |
-| Boss telegraph started | `BossTelegraph` | High | 1 | Must play before slam damage. |
-| Boss slam resolved | `BossSlam` | High | 1 | |
-| Boss enraged | `BossEnrage` | High | 1 | Plays on the transition only. |
-| Round started | `RoundStart` | Medium | 1 | |
-| Round cleared | `RoundClear` | High | 1 | Before the reward panel. |
-| Reward selected | `Reward` | High | 1 | Existing cue. |
-| Level up | `LevelUp` | High | 1 | Existing cue. |
-| Victory | `Victory` | High | 1 | Existing cue. |
-| Defeat | `Defeat` | High | 1 | Existing cue. |
-| UI button clicked | `UiClick` | Low | 2 | Cooldown applies. |
-| Panel opened | `UiOpen` | Low | 1 | |
-| Panel closed | `UiClose` | Low | 1 | |
-| Purchase or upgrade succeeded | `Purchase` | Medium | 1 | |
-| Rejected action or error | `Error` | Medium | 1 | |
+| Player takes damage | `Hit` | High | 2 | Silent |
+| Player bullet impacts a zombie or boss | `Impact` | Low | 4 | Silent |
+| Player bullet damages the boss | `BossHit` | Low | 2 | Silent |
+| Zombie killed | `Kill` | High | 3 | Silent |
+| Boss killed | `BossDeath` | High | 1 | Silent |
+| Pistol fired | `PistolFire` | High | 2 | Silent |
+| SMG fired | `SmgFire` | High | 3 | Silent |
+| Shotgun fired | `ShotgunFire` | High | 2 | Silent |
+| Rifle fired | `RifleFire` | High | 2 | Silent |
+| LMG fired | `LmgFire` | High | 3 | Silent |
+| Empty magazine | `Empty` | Medium | 1 | Silent |
+| Reload started | `ReloadStart` | Medium | 1 | Silent |
+| Reload completed | `ReloadComplete` | Medium | 1 | Silent |
+| Weapon switched | `WeaponSwitch` | Medium | 1 | Silent |
+| Turret deployed | `TurretDeploy` | Medium | 1 | Silent |
+| Turret fired | `TurretFire` | Low | 4 | Silent |
+| Dash activated | `Dash` | Medium | 1 | Silent |
+| Shockwave activated | `Shockwave` | Medium | 1 | Silent |
+| Boss spawned | `BossSpawn` | High | 1 | Silent |
+| Boss telegraph started | `BossTelegraph` | High | 1 | Silent |
+| Boss slam resolved | `BossSlam` | High | 1 | Silent |
+| Boss enraged | `BossEnrage` | High | 1 | Silent |
+| Round started | `RoundStart` | Medium | 1 | Silent |
+| Round cleared | `RoundClear` | High | 1 | Silent |
+| Reward selected | `Reward` | High | 1 | Silent |
+| Level up | `LevelUp` | High | 1 | Silent |
+| Boss killed and victory shown | `Victory` | High | 1 | Silent |
+| Player health reaches zero in `EndRun` | `Defeat` | High | 1 | Silent |
+| UI button clicked | `UiClick` | Low | 2 | Silent |
+| Panel opened | `UiOpen` | Low | 1 | Silent |
+| Panel closed | `UiClose` | Low | 1 | Silent |
+| Purchase or upgrade succeeded | `Purchase` | Medium | 1 | Silent |
+| Rejected action or error | `Error` | Medium | 1 | Silent |
 
 ## Settings contract
 
@@ -91,6 +94,19 @@ Rules:
   preferences keep working.
 - Audio controls are available on the main menu and the pause menu.
 - The controls use localization keys and must render in English and Spanish.
+
+## Audio control localization keys
+
+| Key | English source |
+|---|---|
+| `settings.audio.title` | AUDIO |
+| `settings.audio.master` | MASTER {0}% |
+| `settings.audio.effects` | EFFECTS {0}% |
+| `settings.audio.mute.on` | MUTE: ON |
+| `settings.audio.mute.off` | MUTE: OFF |
+| `settings.audio.down` | - |
+| `settings.audio.up` | + |
+| `settings.audio.close` | CLOSE |
 
 ## Lifecycle contract
 
