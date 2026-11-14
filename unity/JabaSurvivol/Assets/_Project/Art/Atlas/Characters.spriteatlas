@@ -36,97 +36,10 @@ SpriteAtlas:
     bindAsDefault: 1
     isAtlasV2: 0
     cachedData: {fileID: 0}
-    packedSpriteRenderDataKeys:
-    - b9de1f001b3abcc43bfc601f0ec5709b: 21300000
-    - e809a501677a8f242aa173baf838ff08: 21300000
-    - e744ab63e2cd9ec48bc4eba25798ac49: 21300000
-    - 55f9adb4b97abde4b9e7c451c146ac73: 21300000
-    - 617ac6c455163a54797b63ca144550e6: 21300000
-    - f40281e41f5963b44bca6dd49422ebe9: 21300000
-    - 8f51ab1594605fd42bd723838e48f0ea: 21300000
-    - ea19a655ee6894b45952be32be2d5879: 21300000
-    - 4072bc363c5cc37438c2c87b6297820e: 21300000
-    - de221e363596c66499db8b1bf77df756: 21300000
-    - c5e0f4465d8d3844985a864df8235db5: 21300000
-    - 5c0f5896d410a4d4ba97012fb9d65e23: 21300000
-    - d074a2c793cd41942ba32bb6d3623708: 21300000
-    - 2b9a2b2889587e74ea7686a615814593: 21300000
-    - f0ddacc8801f7494a8e151041c9eb8fc: 21300000
-    - d92a96e8761476444a9ced2b9592f0e5: 21300000
-    - fb2188e8846c14c43b6f236934906136: 21300000
-    - 6e5cf8f8bbe28d74882d1cb3fb939c46: 21300000
-    - 59cb806903e1eaa48b2686b12db7fbc7: 21300000
-    - bca8a7b9bee2b4045b53fed106343e67: 21300000
-    - 8d6a42aa542f8c04489d6b8273962c21: 21300000
-    - d02e07dbc2121574bbc7a407567cf69d: 21300000
-    - da91495c5ef5c054d86340ea533e92be: 21300000
-    - c3d08b0df6555a14090c155f018fae4f: 21300000
-    - aa818b1da49c5344b9240ecd65f0ae52: 21300000
-    - c8b08f1d07e0bc945944d3084eccc98d: 21300000
-    - 87a8097d36b73e744839b9b949fbb83d: 21300000
-    - 231b3f0e34890174a9c636794d1a86b4: 21300000
-    - 1b89c8ceae51c1a48877d233b8e9eeb2: 21300000
+    packedSpriteRenderDataKeys: []
   m_MasterAtlas: {fileID: 0}
-  m_PackedSprites:
-  - {fileID: 21300000, guid: b9de1f001b3abcc43bfc601f0ec5709b, type: 3}
-  - {fileID: 21300000, guid: e809a501677a8f242aa173baf838ff08, type: 3}
-  - {fileID: 21300000, guid: e744ab63e2cd9ec48bc4eba25798ac49, type: 3}
-  - {fileID: 21300000, guid: 55f9adb4b97abde4b9e7c451c146ac73, type: 3}
-  - {fileID: 21300000, guid: 617ac6c455163a54797b63ca144550e6, type: 3}
-  - {fileID: 21300000, guid: f40281e41f5963b44bca6dd49422ebe9, type: 3}
-  - {fileID: 21300000, guid: 8f51ab1594605fd42bd723838e48f0ea, type: 3}
-  - {fileID: 21300000, guid: ea19a655ee6894b45952be32be2d5879, type: 3}
-  - {fileID: 21300000, guid: 4072bc363c5cc37438c2c87b6297820e, type: 3}
-  - {fileID: 21300000, guid: de221e363596c66499db8b1bf77df756, type: 3}
-  - {fileID: 21300000, guid: c5e0f4465d8d3844985a864df8235db5, type: 3}
-  - {fileID: 21300000, guid: 5c0f5896d410a4d4ba97012fb9d65e23, type: 3}
-  - {fileID: 21300000, guid: d074a2c793cd41942ba32bb6d3623708, type: 3}
-  - {fileID: 21300000, guid: 2b9a2b2889587e74ea7686a615814593, type: 3}
-  - {fileID: 21300000, guid: f0ddacc8801f7494a8e151041c9eb8fc, type: 3}
-  - {fileID: 21300000, guid: d92a96e8761476444a9ced2b9592f0e5, type: 3}
-  - {fileID: 21300000, guid: fb2188e8846c14c43b6f236934906136, type: 3}
-  - {fileID: 21300000, guid: 6e5cf8f8bbe28d74882d1cb3fb939c46, type: 3}
-  - {fileID: 21300000, guid: 59cb806903e1eaa48b2686b12db7fbc7, type: 3}
-  - {fileID: 21300000, guid: bca8a7b9bee2b4045b53fed106343e67, type: 3}
-  - {fileID: 21300000, guid: 8d6a42aa542f8c04489d6b8273962c21, type: 3}
-  - {fileID: 21300000, guid: d02e07dbc2121574bbc7a407567cf69d, type: 3}
-  - {fileID: 21300000, guid: da91495c5ef5c054d86340ea533e92be, type: 3}
-  - {fileID: 21300000, guid: c3d08b0df6555a14090c155f018fae4f, type: 3}
-  - {fileID: 21300000, guid: aa818b1da49c5344b9240ecd65f0ae52, type: 3}
-  - {fileID: 21300000, guid: c8b08f1d07e0bc945944d3084eccc98d, type: 3}
-  - {fileID: 21300000, guid: 87a8097d36b73e744839b9b949fbb83d, type: 3}
-  - {fileID: 21300000, guid: 231b3f0e34890174a9c636794d1a86b4, type: 3}
-  - {fileID: 21300000, guid: 1b89c8ceae51c1a48877d233b8e9eeb2, type: 3}
-  m_PackedSpriteNamesToIndex:
-  - zombie_walker_arm
-  - player_arm
-  - zombie_runner_torso
-  - boss_warden_leg
-  - zombie_brute_torso
-  - zombie_runner_shadow
-  - zombie_brute_shadow
-  - player_shadow
-  - turret_barrel
-  - zombie_runner_leg
-  - boss_warden_core
-  - zombie_runner_arm
-  - zombie_brute_leg
-  - boss_warden_head
-  - boss_warden_torso
-  - zombie_brute_arm
-  - turret_head
-  - player_head
-  - zombie_walker_head
-  - turret_base
-  - zombie_runner_head
-  - zombie_brute_head
-  - zombie_walker_shadow
-  - player_leg
-  - player_torso
-  - zombie_walker_torso
-  - zombie_walker_leg
-  - boss_warden_shadow
-  - boss_warden_arm
+  m_PackedSprites: []
+  m_PackedSpriteNamesToIndex: []
   m_RenderDataMap: {}
   m_Tag: Characters
   m_IsVariant: 0

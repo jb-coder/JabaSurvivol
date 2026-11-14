@@ -38,61 +38,10 @@ SpriteAtlas:
     bindAsDefault: 1
     isAtlasV2: 0
     cachedData: {fileID: 0}
-    packedSpriteRenderDataKeys:
-    - d72e3590a6e4dfe43838841942d632d2: 21300000
-    - 55c7aca19384f2d489096d51795812ef: 21300000
-    - 2c79fd13175ae184b9ce9326add9ca9c: 21300000
-    - 8a62bdc3d83adc143bac52f5ef3fd740: 21300000
-    - ac3553f38e00b4b408e42c36c379adff: 21300000
-    - 50a067d5805e67e46a9fe63dc42bd7be: 21300000
-    - 8b149c36e4c8ccd428bd35c324849a5a: 21300000
-    - e9f70a562b1990d4ea2bab176d6585a7: 21300000
-    - b2fe85e6411458245a99cc21e026124f: 21300000
-    - a4b0ccf6bdc6043458637efd31075d24: 21300000
-    - ddececb76754e2248917be19d103d848: 21300000
-    - a417c77894004544abd06c31ded78e83: 21300000
-    - 7cadf00bb5ec2514db3b00a65810ab2a: 21300000
-    - 997c599b6715dba438d4acd39ca6af24: 21300000
-    - 413a62ac6492b4c408929b313cb93995: 21300000
-    - f881071f9ce91e54796c885b03b09778: 21300000
-    - ee787c8f3b47f5542a12ec41675937ef: 21300000
+    packedSpriteRenderDataKeys: []
   m_MasterAtlas: {fileID: 0}
-  m_PackedSprites:
-  - {fileID: 21300000, guid: d72e3590a6e4dfe43838841942d632d2, type: 3}
-  - {fileID: 21300000, guid: 55c7aca19384f2d489096d51795812ef, type: 3}
-  - {fileID: 21300000, guid: 2c79fd13175ae184b9ce9326add9ca9c, type: 3}
-  - {fileID: 21300000, guid: 8a62bdc3d83adc143bac52f5ef3fd740, type: 3}
-  - {fileID: 21300000, guid: ac3553f38e00b4b408e42c36c379adff, type: 3}
-  - {fileID: 21300000, guid: 50a067d5805e67e46a9fe63dc42bd7be, type: 3}
-  - {fileID: 21300000, guid: 8b149c36e4c8ccd428bd35c324849a5a, type: 3}
-  - {fileID: 21300000, guid: e9f70a562b1990d4ea2bab176d6585a7, type: 3}
-  - {fileID: 21300000, guid: b2fe85e6411458245a99cc21e026124f, type: 3}
-  - {fileID: 21300000, guid: a4b0ccf6bdc6043458637efd31075d24, type: 3}
-  - {fileID: 21300000, guid: ddececb76754e2248917be19d103d848, type: 3}
-  - {fileID: 21300000, guid: a417c77894004544abd06c31ded78e83, type: 3}
-  - {fileID: 21300000, guid: 7cadf00bb5ec2514db3b00a65810ab2a, type: 3}
-  - {fileID: 21300000, guid: 997c599b6715dba438d4acd39ca6af24, type: 3}
-  - {fileID: 21300000, guid: 413a62ac6492b4c408929b313cb93995, type: 3}
-  - {fileID: 21300000, guid: f881071f9ce91e54796c885b03b09778, type: 3}
-  - {fileID: 21300000, guid: ee787c8f3b47f5542a12ec41675937ef, type: 3}
-  m_PackedSpriteNamesToIndex:
-  - turret
-  - rifle
-  - muzzle_flash
-  - lmg
-  - elite_aura
-  - muzzle_flash_alt
-  - pellet
-  - death_burst
-  - lmg
-  - rifle
-  - pistol
-  - smg
-  - shotgun
-  - impact
-  - smg
-  - hit_flash
-  - pistol
+  m_PackedSprites: []
+  m_PackedSpriteNamesToIndex: []
   m_RenderDataMap: {}
   m_Tag: WeaponsFx
   m_IsVariant: 0

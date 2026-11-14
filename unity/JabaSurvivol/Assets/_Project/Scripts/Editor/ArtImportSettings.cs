@@ -80,6 +80,9 @@ namespace JabaSurvivol.Editor
             settings.spritePixelsPerUnit = PixelsPerUnit;
             settings.spriteAlignment = (int)SpriteAlignment.Custom;
             settings.spritePivot = new Vector2(entry.pivotX, entry.pivotY);
+            settings.spriteMeshType = string.Equals(entry.category, "environment", StringComparison.Ordinal)
+                ? SpriteMeshType.FullRect
+                : SpriteMeshType.Tight;
             settings.filterMode = FilterMode.Bilinear;
             settings.wrapMode = TextureWrapMode.Clamp;
             settings.mipmapEnabled = false;

@@ -36,49 +36,10 @@ SpriteAtlas:
     bindAsDefault: 1
     isAtlasV2: 0
     cachedData: {fileID: 0}
-    packedSpriteRenderDataKeys:
-    - 5b7a0b63b234f2342b9eff3fa5e6506f: 21300000
-    - c2d7c2548e484f54a80dd483c1d17226: 21300000
-    - aa0f9e15aef6fc147a04c58816da7d3c: 21300000
-    - c73982854601d3a4e849581cc430fa1e: 21300000
-    - b75764f5d2db2ab43a1f92f5a1d8e990: 21300000
-    - 9d4545868896c2d4b862a5cc947bf2db: 21300000
-    - 8fe421c7b95f7fb4382e3141038f777a: 21300000
-    - d747c6a8e5d08df4cb13a5cf2f9c5a14: 21300000
-    - 998d95d9ba0100e4cb81e7378550f9e9: 21300000
-    - fae8542df26d3b8418f4afae62caa356: 21300000
-    - 4bbe9f6d75194174ab8b9c99d179e026: 21300000
-    - 834f292e36f23a846bfd1caa901a2cdd: 21300000
-    - 87bd63ffbe7ab7d43982c2393b1cec4f: 21300000
+    packedSpriteRenderDataKeys: []
   m_MasterAtlas: {fileID: 0}
-  m_PackedSprites:
-  - {fileID: 21300000, guid: 5b7a0b63b234f2342b9eff3fa5e6506f, type: 3}
-  - {fileID: 21300000, guid: c2d7c2548e484f54a80dd483c1d17226, type: 3}
-  - {fileID: 21300000, guid: aa0f9e15aef6fc147a04c58816da7d3c, type: 3}
-  - {fileID: 21300000, guid: c73982854601d3a4e849581cc430fa1e, type: 3}
-  - {fileID: 21300000, guid: b75764f5d2db2ab43a1f92f5a1d8e990, type: 3}
-  - {fileID: 21300000, guid: 9d4545868896c2d4b862a5cc947bf2db, type: 3}
-  - {fileID: 21300000, guid: 8fe421c7b95f7fb4382e3141038f777a, type: 3}
-  - {fileID: 21300000, guid: d747c6a8e5d08df4cb13a5cf2f9c5a14, type: 3}
-  - {fileID: 21300000, guid: 998d95d9ba0100e4cb81e7378550f9e9, type: 3}
-  - {fileID: 21300000, guid: fae8542df26d3b8418f4afae62caa356, type: 3}
-  - {fileID: 21300000, guid: 4bbe9f6d75194174ab8b9c99d179e026, type: 3}
-  - {fileID: 21300000, guid: 834f292e36f23a846bfd1caa901a2cdd, type: 3}
-  - {fileID: 21300000, guid: 87bd63ffbe7ab7d43982c2393b1cec4f, type: 3}
-  m_PackedSpriteNamesToIndex:
-  - reward_armor
-  - weapon_shotgun
-  - weapon_rifle
-  - reward_xp
-  - skill_shockwave
-  - weapon_smg
-  - skill_dash
-  - skill_turret
-  - weapon_pistol
-  - reward_supplies
-  - reward_ammo
-  - reward_upgrade
-  - weapon_lmg
+  m_PackedSprites: []
+  m_PackedSpriteNamesToIndex: []
   m_RenderDataMap: {}
   m_Tag: UI
   m_IsVariant: 0

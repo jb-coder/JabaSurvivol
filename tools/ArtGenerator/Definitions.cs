@@ -25,6 +25,7 @@ internal static class Definitions
         AddEffects(definitions);
         AddIcons(definitions);
         AddEnvironment(definitions);
+        AddAppIcon(definitions);
 
         return definitions;
     }
@@ -877,6 +878,64 @@ internal static class Definitions
         }
     }
 
+
+    private static void AddAppIcon(ICollection<SpriteDefinition> definitions)
+    {
+        definitions.Add(new SpriteDefinition(
+            "App/icon.png", 512, 512, 0.5f, 0.5f, "app",
+            DrawAppIcon));
+    }
+
+    private static void DrawAppIcon(SKCanvas canvas)
+    {
+        var center = 256f;
+        Draw.GradientRect(
+            canvas,
+            new SKRect(16f, 16f, 496f, 496f),
+            Palette.Floor,
+            Palette.Background,
+            Palette.Outline,
+            96f,
+            18f);
+
+        using var glowPaint = new SKPaint
+        {
+            IsAntialias = true,
+            Style = SKPaintStyle.Stroke,
+            StrokeWidth = 34f,
+            Color = Palette.Cyan.WithAlpha(55)
+        };
+        canvas.DrawCircle(center, center, 164f, glowPaint);
+
+        using var ringPaint = new SKPaint
+        {
+            IsAntialias = true,
+            Style = SKPaintStyle.Stroke,
+            StrokeWidth = 14f,
+            Color = Palette.Cyan
+        };
+        canvas.DrawCircle(center, center, 164f, ringPaint);
+
+        for (var i = 0; i < 3; i++)
+        {
+            var y = center - 56f + (i * 56f);
+            Draw.Polygon(
+                canvas,
+                new[]
+                {
+                    new SKPoint(center - 96f, y - 26f),
+                    new SKPoint(center - 24f, y),
+                    new SKPoint(center - 96f, y + 26f),
+                    new SKPoint(center - 58f, y)
+                },
+                i == 1 ? Palette.Amber : Palette.Ice,
+                Palette.Outline,
+                7f);
+        }
+
+        Draw.Ellipse(canvas, center + 74f, center, 30f, 30f, Palette.Magenta, Palette.Outline, 8f);
+        Draw.Ellipse(canvas, center + 66f, center - 8f, 9f, 9f, Palette.White);
+    }
     private static void AddEnvironment(ICollection<SpriteDefinition> definitions)
     {
         definitions.Add(new SpriteDefinition(

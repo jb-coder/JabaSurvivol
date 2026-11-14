@@ -3,6 +3,17 @@
   "paletteVersion": "2026-11-13.1",
   "assets": [
     {
+      "path": "App/icon.png",
+      "resourcePath": "Art/App/icon",
+      "width": 512,
+      "height": 512,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "app",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "df1664adf89807b269b0f049e8e55cff6cdbe210449ea6b6a6e2db170d2c12b1"
+    },
+    {
       "path": "Characters/boss_warden_arm.png",
       "resourcePath": "Art/Characters/boss_warden_arm",
       "width": 512,
