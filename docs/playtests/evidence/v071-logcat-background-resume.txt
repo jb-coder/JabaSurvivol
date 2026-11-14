@@ -1,0 +1,15 @@
+
+11-14 20:54:47.726  5379  5397 D AAudio  : AAudioStream_requestStop(s#1) called
+11-14 20:54:47.726  5379  5397 D AAudioStream: setState(s#1) from 4 to 9
+11-14 20:54:47.726  5379  5397 D AudioTrack: stop(20): called with 5942400 frames delivered
+11-14 20:54:47.727  5379  5397 D AAudioStream: setState(s#1) from 9 to 10
+11-14 20:54:47.733  5379  5397 I Unity   : SetGameState: isLoading: false, mode: CONTENT, label: -6, quality: 2
+11-14 20:54:50.261  5379  5397 I Unity   : SetGameState: isLoading: false, mode: UNKNOWN, label: 0, quality: 2
+11-14 20:54:50.266  5379  5397 D AAudio  : AAudioStream_requestStart(s#1) called --------------
+11-14 20:54:50.267  5379  5397 D AAudioStream: setState(s#1) from 10 to 3
+11-14 20:54:50.279  5379  5397 D AAudio  : AAudioStream_requestStart(s#1) returned 0 ---------
+11-14 20:54:50.289  5379  5390 D AudioStreamLegacy: onAudioDeviceUpdate(deviceId = 2)
+11-14 20:54:50.296  5379  5379 D MediaRouter: onRestoreRoute() : route=RouteInfo{ name=Phone, description=null, status=null, category=RouteCategory{ name=System types=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO  groupable=false }, supportedTypes=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO , presentationDisplay=null }
+11-14 20:54:50.296  5379  5379 V MediaRouter: Selecting route: RouteInfo{ name=Phone, description=null, status=null, category=RouteCategory{ name=System types=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO  groupable=false }, supportedTypes=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO , presentationDisplay=null }
+11-14 20:54:50.330  5379  5445 D AAudioStream: setState(s#1) from 3 to 4
+
