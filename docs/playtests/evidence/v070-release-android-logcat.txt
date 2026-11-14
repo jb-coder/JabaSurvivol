@@ -1,0 +1,6 @@
+
+11-14 11:12:01.911 14113 14134 I Unity   : PERF drawCalls=12 gcAllocated=0 monoUsed=12640256 totalAllocated=91941535 frame=494
+11-14 11:12:01.911 14113 14134 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-14 11:12:07.027 14113 14134 I Unity   : PERF drawCalls=12 gcAllocated=0 monoUsed=12644352 totalAllocated=91881407 frame=524
+11-14 11:12:07.027 14113 14134 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+

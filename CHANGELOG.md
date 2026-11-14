@@ -4,6 +4,25 @@ All notable changes to this project are documented in this file.
 
 The format is based on Keep a Changelog and the project follows Semantic Versioning.
 
+## [0.7.0] - 2026-11-14
+
+### Added
+
+- Deterministic `tools/ArtGenerator` pipeline with 66 first-party neon sprites, a hash-checked manifest, contact-sheet output, and repeat-run, manifest, alpha, and pivot tests.
+- Manifest-driven Unity import settings, category sprite atlases, `ArtCatalog`, named sorting orders, and EditMode coverage for catalog loading, pivots, and atlas packing.
+- Modular authored player, Walker, Runner, Brute, Warden, and turret rigs with procedural walk, aim, recoil, elite aura, and enrage feedback.
+- Visual-showcase capture tool and PlayMode coverage for player aim, zombie pooling, elite aura, boss enrage, and turret deployment.
+- Authored weapon, reward, active-skill, HUD, armory, and character-sheet icons with PlayMode coverage.
+- Tiled neon arena floor, walls, deterministic non-colliding props, and an Android application plus adaptive icon.
+- Distinct weapon, projectile, turret, muzzle-flash, impact, and death-burst visuals with pooled effects and PlayMode coverage.
+- v0.7.0 art verification matrix, Android performance probe, filtered logcat, and bilingual phone/tablet evidence.
+- Art direction, first-party provenance contract, and ADR-0010 for the generated art pipeline.
+
+### Changed
+
+- Android and core package version bumped to `0.7.0` with version code `8`.
+- Planned the `v0.7.0 Art and Visual Polish` milestone with a first-party generated neon art pipeline and moved the `v1.0.0` release target to 2027-05-03.
+
 ## [0.6.0] - 2026-11-13
 
 ### Added

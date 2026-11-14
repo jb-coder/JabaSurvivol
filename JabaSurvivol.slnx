@@ -26,6 +26,9 @@
   <Folder Name="/tests/ArchitectureTests/">
     <Project Path="tests/ArchitectureTests/JabaSurvivol.ArchitectureTests.csproj" />
   </Folder>
+  <Folder Name="/tests/ArtGenerator.Tests/">
+    <Project Path="tests/ArtGenerator.Tests/JabaSurvivol.ArtGenerator.Tests.csproj" />
+  </Folder>
   <Folder Name="/tests/Game.Core.Tests/">
     <Project Path="tests/Game.Core.Tests/JabaSurvivol.Core.Tests.csproj" />
   </Folder>
@@ -36,6 +39,7 @@
     <Project Path="tests/SmokeTests/JabaSurvivol.SmokeTests.csproj" />
   </Folder>
   <Folder Name="/tools/">
+    <Project Path="tools/ArtGenerator/ArtGenerator.csproj" />
     <Project Path="tools/BalanceSimulation/BalanceSimulation.csproj" />
   </Folder>
 </Solution>

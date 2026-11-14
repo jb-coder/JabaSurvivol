@@ -9,21 +9,18 @@ namespace JabaSurvivol.Gameplay
     /// </summary>
     public sealed class ZombieActor
     {
-        public ZombieActor(ZombieArchetype archetype, GameObject gameObject, SpriteRenderer renderer, GameObject eliteRing)
+        public ZombieActor(ZombieArchetype archetype, GameObject gameObject, CharacterVisual visual)
         {
             Archetype = archetype;
             GameObject = gameObject;
-            Renderer = renderer;
-            EliteRing = eliteRing;
+            Visual = visual;
         }
 
         public ZombieArchetype Archetype { get; }
 
         public GameObject GameObject { get; }
 
-        public SpriteRenderer Renderer { get; }
-
-        public GameObject EliteRing { get; }
+        public CharacterVisual Visual { get; }
 
         public bool Active => GameObject.activeSelf;
     }
@@ -52,8 +49,8 @@ namespace JabaSurvivol.Gameplay
         {
             var actor = _actors[(int)archetype];
             actor.GameObject.transform.localScale = Vector3.one * visualScale;
-            actor.Renderer.color = ColorFor(archetype, isElite);
-            actor.EliteRing.SetActive(isElite);
+            actor.Visual.ResetVisual();
+            actor.Visual.SetElite(isElite);
             actor.GameObject.SetActive(true);
             return actor;
         }
@@ -95,22 +92,9 @@ namespace JabaSurvivol.Gameplay
         {
             var gameObject = new GameObject($"Zombie {archetype}");
             gameObject.transform.SetParent(parent, false);
-            var renderer = gameObject.AddComponent<SpriteRenderer>();
-            renderer.sprite = SpriteFactory.Circle;
-            renderer.color = ColorFor(archetype, false);
-            renderer.sortingOrder = 15;
-
-            var eliteRing = new GameObject("Elite Ring");
-            eliteRing.transform.SetParent(gameObject.transform, false);
-            eliteRing.transform.localScale = Vector3.one * 1.45f;
-            var ringRenderer = eliteRing.AddComponent<SpriteRenderer>();
-            ringRenderer.sprite = SpriteFactory.Ring;
-            ringRenderer.color = new Color(1f, 0.85f, 0.3f, 0.8f);
-            ringRenderer.sortingOrder = 16;
-            eliteRing.SetActive(false);
-
+            var visual = CharacterVisual.CreateZombie(gameObject.transform, archetype);
             gameObject.SetActive(false);
-            return new ZombieActor(archetype, gameObject, renderer, eliteRing);
+            return new ZombieActor(archetype, gameObject, visual);
         }
     }
 
@@ -124,6 +108,9 @@ namespace JabaSurvivol.Gameplay
 
         private readonly GameObject[] _objects;
         private readonly SpriteRenderer[] _renderers;
+        private readonly SpriteRenderer[] _burstRenderers;
+        private readonly Transform[] _burstTransforms;
+        private readonly Sprite _burst;
         private readonly float[] _remaining;
         private readonly float[] _startScale;
         private readonly Color[] _colors;
@@ -132,6 +119,9 @@ namespace JabaSurvivol.Gameplay
         {
             _objects = new GameObject[PoolSize];
             _renderers = new SpriteRenderer[PoolSize];
+            _burstRenderers = new SpriteRenderer[PoolSize];
+            _burstTransforms = new Transform[PoolSize];
+            _burst = ArtCatalog.Get("Effects/death_burst");
             _remaining = new float[PoolSize];
             _startScale = new float[PoolSize];
             _colors = new Color[PoolSize];
@@ -144,8 +134,15 @@ namespace JabaSurvivol.Gameplay
                 renderer.sprite = SpriteFactory.Ring;
                 renderer.sortingOrder = 14;
                 effect.SetActive(false);
+                var burst = new GameObject("Burst");
+                burst.transform.SetParent(effect.transform, false);
+                var burstRenderer = burst.AddComponent<SpriteRenderer>();
+                burstRenderer.sprite = _burst;
+                burstRenderer.sortingOrder = 15;
                 _objects[i] = effect;
                 _renderers[i] = renderer;
+                _burstRenderers[i] = burstRenderer;
+                _burstTransforms[i] = burst.transform;
             }
         }
 
@@ -161,6 +158,9 @@ namespace JabaSurvivol.Gameplay
                 _objects[i].transform.position = position;
                 _objects[i].transform.localScale = Vector3.one * scale;
                 _renderers[i].color = color;
+                _burstTransforms[i].localRotation = Quaternion.Euler(0f, 0f, i * 37f);
+                _burstTransforms[i].localScale = Vector3.one * 0.9f;
+                _burstRenderers[i].color = color;
                 _remaining[i] = Lifetime;
                 _startScale[i] = scale;
                 _colors[i] = color;
@@ -190,6 +190,10 @@ namespace JabaSurvivol.Gameplay
                 var color = _colors[i];
                 color.a = 1f - progress;
                 _renderers[i].color = color;
+                var burst = _burstRenderers[i].color;
+                burst.a = 1f - progress;
+                _burstRenderers[i].color = burst;
+                _burstTransforms[i].localScale = Vector3.one * (0.9f + (progress * 0.7f));
             }
         }
 

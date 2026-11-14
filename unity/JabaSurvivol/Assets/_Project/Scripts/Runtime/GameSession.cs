@@ -30,22 +30,24 @@ namespace JabaSurvivol.Gameplay
         private GameUi _ui;
         private GameAudio _audio;
         private GameObject _playerObject;
+        private CharacterVisual _playerVisual;
         private Transform _aimPivot;
         private ZombieActor _zombieActor;
         private ZombieEncounterStats _zombieStats;
         private ZombieState _zombie;
         private ZombieActorPool _zombieActors;
         private DeathEffectPool _deathEffects;
+        private MuzzleFlashPool _muzzleFlashes;
+        private ImpactEffectPool _impacts;
         private GameObject _bossObject;
-        private SpriteRenderer _bossRenderer;
+        private CharacterVisual _bossVisual;
         private GameObject _bossTelegraphRing;
         private SpriteRenderer _bossTelegraphRenderer;
         private float _bossTelegraphRemaining;
         private float _bossAttackCooldown;
         private bool _bossEnraged;
         private GameObject _turretObject;
-        private SpriteRenderer _turretRenderer;
-        private Transform _turretAimPivot;
+        private CharacterVisual _turretVisual;
         private Vector2 _turretPosition;
         private int _turretShotsFired;
         private BulletPool _bullets;
@@ -157,7 +159,24 @@ namespace JabaSurvivol.Gameplay
 
         public GameAudio AudioForTests => _audio;
 
+        public UnityEngine.Sprite HudWeaponIconForTests => _ui?.HudWeaponIconForTests;
+
+        public UnityEngine.Sprite ActiveSkillIconForTests => _ui?.ActiveSkillIconForTests;
+
+        public UnityEngine.Sprite RewardIconForTests(int index) => _ui?.RewardIconForTests(index);
+
+        public UnityEngine.Sprite ArmoryWeaponIconForTests(WeaponId weaponId) => _ui?.ArmoryWeaponIconForTests(weaponId);
+
+        public UnityEngine.Sprite SelectActiveSkillIconForTests(SkillNode node) => _ui?.SelectActiveSkillIconForTests(node);
+
+        public void ShowRoundEndForTests(RoundRewardOption[] options)
+        {
+            _ui?.ShowRoundEnd(1, 0, 0, 0, options);
+        }
+
         public string SoundLabelForTests => _ui?.SoundLabelForTests ?? string.Empty;
+
+
 
         public bool LanguagePanelVisibleForTests => _ui?.LanguagePanelVisible ?? false;
 
@@ -204,6 +223,14 @@ namespace JabaSurvivol.Gameplay
 
         public Vector2 LastShotDirectionForTests { get; private set; }
 
+        public CharacterVisual PlayerVisual => _playerVisual;
+
+        public CharacterVisual ZombieVisual => _zombieActor != null ? _zombieActor.Visual : null;
+
+        public CharacterVisual BossVisual => _bossVisual;
+
+        public CharacterVisual TurretVisual => _turretVisual;
+
         public bool PlayerActive => _playerObject != null && _playerObject.activeSelf;
 
         public bool ZombieActive => _zombieActive;
@@ -239,6 +266,34 @@ namespace JabaSurvivol.Gameplay
             : 0;
 
         public int ActiveDeathEffects => _deathEffects?.ActiveCount ?? 0;
+
+        public int ActiveBulletCount => _bullets?.ActiveCount ?? 0;
+
+        public int ActiveMuzzleFlashes => _muzzleFlashes?.ActiveCount ?? 0;
+
+        public int ActiveImpacts => _impacts?.ActiveCount ?? 0;
+
+        public string PlayerWeaponSpriteName => _playerVisual?.WeaponMount != null
+            ? _playerVisual.WeaponMount.GetComponent<SpriteRenderer>()?.sprite?.name
+            : null;
+
+        public string FirstBulletSpriteName
+        {
+            get
+            {
+                if (_bullets == null)
+                {
+                    return null;
+                }
+
+                var index = _bullets.FirstActiveIndexForTests();
+                return _bullets.SpriteForTests(index)?.name;
+            }
+        }
+
+        public Quaternion FirstBulletRotation => _bullets != null
+            ? _bullets.RotationForTests(_bullets.FirstActiveIndexForTests())
+            : Quaternion.identity;
 
         public bool RoundModifierVisible => _ui != null && _ui.RoundModifierVisible;
 
@@ -499,6 +554,8 @@ namespace JabaSurvivol.Gameplay
             }
 
             _deathEffects.Update(deltaTime);
+            _muzzleFlashes?.Update(deltaTime);
+            _impacts?.Update(deltaTime);
             _run.TickWeapons(deltaTime);
             _run.TickActiveSkill(deltaTime);
             _run.TickSynergies(deltaTime);
@@ -592,10 +649,8 @@ namespace JabaSurvivol.Gameplay
                 _aimDirection = frame.Aim.normalized;
             }
 
-            _aimPivot.localRotation = Quaternion.Euler(
-                0f,
-                0f,
-                Mathf.Atan2(_aimDirection.y, _aimDirection.x) * Mathf.Rad2Deg);
+            _playerVisual?.SetMotion(frame.Move, frame.Move.magnitude);
+            _playerVisual?.SetAim(_aimDirection);
 
             _fireCooldown = Mathf.Max(0f, _fireCooldown - deltaTime);
             if (frame.FireHeld && _fireCooldown <= 0f)
@@ -610,22 +665,32 @@ namespace JabaSurvivol.Gameplay
                     _fireCooldown = 0.15f;
                 }
             }
+
+            _playerVisual?.Tick(deltaTime);
         }
 
         private void Fire()
         {
             _fireCooldown = _weapon.FireInterval;
             var damage = _stats.EffectiveWeaponDamage;
+            var weaponId = _run != null ? _run.CurrentWeapon : _profile.EquippedWeapon;
+            var visual = WeaponVisualCatalog.Get(weaponId);
             LastBulletDamageForTests = damage;
+            _playerVisual?.SetRecoil(1f);
 
-            var origin = (Vector2)_playerObject.transform.position + (_aimDirection * 0.55f);
+            var origin = (Vector2)_playerObject.transform.position + (_aimDirection * visual.MuzzleOffset);
             var lifetime = _weapon.Range / _weapon.ProjectileSpeed;
+            var flashRotation = Mathf.Atan2(_aimDirection.y, _aimDirection.x) * Mathf.Rad2Deg;
+            _muzzleFlashes?.Spawn(
+                origin,
+                flashRotation,
+                string.Equals(visual.MuzzleFlashSprite, "Effects/muzzle_flash_alt", System.StringComparison.Ordinal));
 
             if (_weapon.PelletCount <= 1)
             {
                 var direction = Rotate(_aimDirection, NextSpreadAngle(_weapon.SpreadDegrees));
                 LastShotDirectionForTests = direction;
-                _bullets.Spawn(origin, direction, _weapon.ProjectileSpeed, lifetime, damage);
+                _bullets.Spawn(origin, direction, _weapon.ProjectileSpeed, lifetime, damage, visual.BulletStyle);
                 return;
             }
 
@@ -639,10 +704,9 @@ namespace JabaSurvivol.Gameplay
                     LastShotDirectionForTests = direction;
                 }
 
-                _bullets.Spawn(origin, direction, _weapon.ProjectileSpeed, lifetime, damage);
+                _bullets.Spawn(origin, direction, _weapon.ProjectileSpeed, lifetime, damage, visual.BulletStyle);
             }
         }
-
         private float NextSpreadAngle(float spreadDegrees)
         {
             if (spreadDegrees <= 0f)
@@ -705,6 +769,7 @@ namespace JabaSurvivol.Gameplay
 
             _weapon = _run.CurrentWeaponState.Stats;
             RefreshStats();
+            RefreshWeaponVisual();
             _fireCooldown = 0f;
             return true;
         }
@@ -765,8 +830,16 @@ namespace JabaSurvivol.Gameplay
                 zombieObject.transform.localRotation = Quaternion.Euler(
                     0f,
                     0f,
-                    (Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg) - 90f);
+                    Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
+                _zombieActor.Visual.SetMotion(Vector2.right, 1f);
             }
+            else
+            {
+                _zombieActor.Visual.SetMotion(Vector2.zero, 0f);
+            }
+
+            _zombieActor.Visual.SetAim(Vector2.right);
+            _zombieActor.Visual.Tick(deltaTime);
 
             _contactCooldown = Mathf.Max(0f, _contactCooldown - deltaTime);
             if (_contactCooldown <= 0f && CombatMath.CirclesOverlap(
@@ -793,7 +866,8 @@ namespace JabaSurvivol.Gameplay
             _bossObject.SetActive(true);
             _bossObject.transform.position = PickSpawnPosition(definition.SlamRadius * 0.5f);
             _bossObject.transform.localScale = Vector3.one * definition.VisualScale;
-            _bossRenderer.color = new Color(0.95f, 0.35f, 0.72f);
+            _bossVisual?.ResetVisual();
+            _bossVisual?.SetEnraged(false);
             _bossTelegraphRemaining = 0f;
             _bossAttackCooldown = definition.SlamIntervalSeconds;
             _bossEnraged = false;
@@ -816,9 +890,7 @@ namespace JabaSurvivol.Gameplay
             var playerPosition = (Vector2)_playerObject.transform.position;
 
             _bossEnraged = boss.IsEnraged;
-            _bossRenderer.color = _bossEnraged
-                ? new Color(1f, 0.22f, 0.32f)
-                : new Color(0.95f, 0.35f, 0.72f);
+            _bossVisual?.SetEnraged(_bossEnraged);
 
             if (_bossTelegraphRemaining > 0f)
             {
@@ -893,6 +965,18 @@ namespace JabaSurvivol.Gameplay
                 ApplyDamage(definition.ContactDamage);
             }
 
+            if (_bossVisual != null)
+            {
+                var facing = playerPosition - (Vector2)_bossObject.transform.position;
+                if (facing.sqrMagnitude > 0.0001f)
+                {
+                    _bossVisual.SetAim(facing);
+                }
+
+                _bossVisual.SetMotion(Vector2.right, _bossTelegraphRemaining > 0f ? 0f : 1f);
+                _bossVisual.Tick(deltaTime);
+            }
+
             if (_state == GameSessionState.Playing)
             {
                 _ui.UpdateBoss(boss.Health, boss.MaxHealth, _bossEnraged);
@@ -961,6 +1045,8 @@ namespace JabaSurvivol.Gameplay
             _zombieActive = false;
             _playerObject.SetActive(false);
             _bullets.Clear();
+            _muzzleFlashes?.Clear();
+            _impacts?.Clear();
             _audio?.Play(GameAudioCue.Victory);
             _ui.HideBoss();
             _ui.ShowVictory(_run.Round, _run.Kills, _runSuppliesEarned, _runXpEarned);
@@ -1014,6 +1100,7 @@ namespace JabaSurvivol.Gameplay
                 _stats.AmmoCapacityMultiplier,
                 _stats.ReloadSpeedMultiplier);
             _weapon = _run.CurrentWeaponState.Stats;
+            RefreshWeaponVisual();
             _runSuppliesEarned = 0;
             _runXpEarned = 0;
             _currentRunId = Guid.NewGuid();
@@ -1031,19 +1118,24 @@ namespace JabaSurvivol.Gameplay
             _playerObject.transform.position = Vector3.zero;
             _aimDirection = Vector2.right;
             _lastMoveDirection = Vector2.zero;
+            _playerVisual?.ResetVisual();
             _aimPivot.localRotation = Quaternion.identity;
             _fireCooldown = 0f;
             _contactCooldown = 0f;
             _bullets.Clear();
             _deathEffects.Clear();
+            _muzzleFlashes?.Clear();
+            _impacts?.Clear();
             _zombieActors.ReturnAll();
             _zombieActive = false;
             _bossObject.SetActive(false);
+            _bossVisual?.ResetVisual();
             _bossTelegraphRing.SetActive(false);
             _bossTelegraphRemaining = 0f;
             _bossAttackCooldown = 0f;
             _bossEnraged = false;
             _turretObject.SetActive(false);
+            _turretVisual?.ResetVisual();
             _turretShotsFired = 0;
 
             SpawnZombie();
@@ -1193,6 +1285,8 @@ namespace JabaSurvivol.Gameplay
             _zombieActors.ReturnAll();
             _deathEffects.Clear();
             _bullets.Clear();
+            _muzzleFlashes?.Clear();
+            _impacts?.Clear();
             if (_turretObject != null)
             {
                 _turretObject.SetActive(false);
@@ -1224,6 +1318,19 @@ namespace JabaSurvivol.Gameplay
             _armoryReturnState = _state;
             _ui.ShowArmory(_profile, ArmoryDisplayWeapon());
             _ui.SetSticks(default, default);
+        }
+
+        private void RefreshWeaponVisual()
+        {
+            if (_playerVisual == null)
+            {
+                return;
+            }
+
+            var weaponId = _run != null && !_run.IsGameOver
+                ? _run.CurrentWeapon
+                : _profile.EquippedWeapon;
+            _playerVisual.SetWeapon(ArtCatalog.Get(WeaponVisualCatalog.Get(weaponId).WeaponSprite));
         }
 
         private WeaponId ArmoryDisplayWeapon()
@@ -1698,6 +1805,7 @@ namespace JabaSurvivol.Gameplay
             }
 
             RefreshStats();
+            RefreshWeaponVisual();
             _store.Save(_profile);
             return true;
         }
@@ -1850,6 +1958,7 @@ namespace JabaSurvivol.Gameplay
                 {
                     _turretPosition = (Vector2)_playerObject.transform.position;
                     _turretObject.transform.position = _turretPosition;
+                    _turretVisual?.ResetVisual();
                     _turretObject.SetActive(true);
                 }
 
@@ -1859,19 +1968,24 @@ namespace JabaSurvivol.Gameplay
                     if (direction.sqrMagnitude > 0.0001f)
                     {
                         direction.Normalize();
-                        _turretAimPivot.localRotation = Quaternion.Euler(
-                            0f,
-                            0f,
-                            (Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg));
+                        _turretVisual?.SetAim(direction);
                         _bullets.Spawn(
                             _turretPosition,
                             direction,
                             GameBalance.TurretProjectileSpeed,
                             GameBalance.TurretRange / GameBalance.TurretProjectileSpeed,
-                            damage);
+                            damage,
+                            BulletStyle.Turret);
+                        _muzzleFlashes?.Spawn(
+                            _turretPosition + (direction * 0.34f),
+                            Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg,
+                            alt: true);
+                        _turretVisual?.SetRecoil(1f);
                         _turretShotsFired++;
                     }
                 }
+
+                _turretVisual?.Tick(deltaTime);
             }
             else if (_turretObject.activeSelf)
             {
@@ -1944,6 +2058,7 @@ namespace JabaSurvivol.Gameplay
 
             var state = _run.CurrentWeaponState;
             _ui.UpdateWeaponHud(
+                state.Id,
                 Localization.WeaponName(state.Id),
                 state.Magazine,
                 state.MagazineSize,
@@ -2828,32 +2943,16 @@ namespace JabaSurvivol.Gameplay
             _playerObject = new GameObject("Player");
             _playerObject.transform.SetParent(_worldRoot, false);
             _playerObject.transform.localScale = new Vector3(0.9f, 0.9f, 1f);
-            var playerRenderer = _playerObject.AddComponent<SpriteRenderer>();
-            playerRenderer.sprite = SpriteFactory.Circle;
-            playerRenderer.color = new Color(0.24f, 0.86f, 0.98f);
-            playerRenderer.sortingOrder = 20;
-
-            _aimPivot = new GameObject("Aim Pivot").transform;
-            _aimPivot.SetParent(_playerObject.transform, false);
-
-            var barrel = new GameObject("Barrel");
-            barrel.transform.SetParent(_aimPivot, false);
-            barrel.transform.localPosition = new Vector3(0.36f, 0f, 0f);
-            barrel.transform.localScale = new Vector3(0.48f, 0.14f, 1f);
-            var barrelRenderer = barrel.AddComponent<SpriteRenderer>();
-            barrelRenderer.sprite = SpriteFactory.Square;
-            barrelRenderer.color = new Color(0.85f, 0.98f, 1f);
-            barrelRenderer.sortingOrder = 21;
+            _playerVisual = CharacterVisual.CreatePlayer(_playerObject.transform);
+            _playerVisual.SetWeapon(ArtCatalog.Get("Weapons/pistol"));
+            _aimPivot = _playerVisual.AimPivot;
 
             _zombieActors = new ZombieActorPool(_worldRoot);
             _deathEffects = new DeathEffectPool(_worldRoot);
 
             _bossObject = new GameObject("Boss");
             _bossObject.transform.SetParent(_worldRoot, false);
-            _bossRenderer = _bossObject.AddComponent<SpriteRenderer>();
-            _bossRenderer.sprite = SpriteFactory.Circle;
-            _bossRenderer.color = new Color(0.95f, 0.35f, 0.72f);
-            _bossRenderer.sortingOrder = 18;
+            _bossVisual = CharacterVisual.CreateBoss(_bossObject.transform);
 
             var bossRing = new GameObject("Boss Ring");
             bossRing.transform.SetParent(_bossObject.transform, false);
@@ -2875,24 +2974,12 @@ namespace JabaSurvivol.Gameplay
             _turretObject = new GameObject("Turret");
             _turretObject.transform.SetParent(_worldRoot, false);
             _turretObject.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
-            _turretRenderer = _turretObject.AddComponent<SpriteRenderer>();
-            _turretRenderer.sprite = SpriteFactory.Circle;
-            _turretRenderer.color = new Color(0.35f, 1f, 0.72f);
-            _turretRenderer.sortingOrder = 22;
-
-            _turretAimPivot = new GameObject("Turret Barrel").transform;
-            _turretAimPivot.SetParent(_turretObject.transform, false);
-            var turretBarrel = new GameObject("Turret Barrel Visual");
-            turretBarrel.transform.SetParent(_turretAimPivot, false);
-            turretBarrel.transform.localPosition = new Vector3(0.32f, 0f, 0f);
-            turretBarrel.transform.localScale = new Vector3(0.44f, 0.13f, 1f);
-            var turretBarrelRenderer = turretBarrel.AddComponent<SpriteRenderer>();
-            turretBarrelRenderer.sprite = SpriteFactory.Square;
-            turretBarrelRenderer.color = new Color(0.9f, 1f, 0.94f);
-            turretBarrelRenderer.sortingOrder = 23;
+            _turretVisual = CharacterVisual.CreateTurret(_turretObject.transform);
             _turretObject.SetActive(false);
 
-            _bullets = new BulletPool(_worldRoot);
+            _impacts = new ImpactEffectPool(_worldRoot);
+            _muzzleFlashes = new MuzzleFlashPool(_worldRoot);
+            _bullets = new BulletPool(_worldRoot, _impacts);
         }
     }
 }

@@ -41,6 +41,25 @@ catch {
     Write-Output "Project link already present or not required."
 }
 
+function Get-DateOnly {
+    param([object] $Value)
+
+    if ($null -eq $Value) {
+        return ""
+    }
+
+    if ($Value -is [datetime]) {
+        return $Value.ToUniversalTime().ToString("yyyy-MM-dd")
+    }
+
+    $text = [string] $Value
+    if ($text.Length -ge 10) {
+        return $text.Substring(0, 10)
+    }
+
+    return $text
+}
+
 function Get-Fields {
     return Invoke-GhJson @("project", "field-list", [string] $number, "--owner", $Owner, "--format", "json")
 }
@@ -71,9 +90,9 @@ if ($null -ne $statusField) {
 
 $singleSelectFields = @(
     @{ Name = "Priority"; Options = @("P0", "P1", "P2", "P3") },
-    @{ Name = "Area"; Options = @("Game", "API", "CI", "Infra", "Docs") },
+    @{ Name = "Area"; Options = @("Game", "API", "CI", "Infra", "Docs", "Art") },
     @{ Name = "Size"; Options = @("S", "M", "L") },
-    @{ Name = "Phase"; Options = @("Walking Skeleton", "Rounds", "Armory", "Skills", "Content", "Backend", "Localization", "Monetization", "Release") }
+    @{ Name = "Phase"; Options = @("Walking Skeleton", "Rounds", "Armory", "Skills", "Content", "Backend", "Localization", "Art", "Monetization", "Release") }
 )
 
 foreach ($definition in $singleSelectFields) {
@@ -84,6 +103,44 @@ foreach ($definition in $singleSelectFields) {
     }
 }
 
+$fields = Get-Fields
+
+foreach ($definition in $singleSelectFields) {
+    $field = $fields.fields | Where-Object { $_.name -eq $definition.Name } | Select-Object -First 1
+    if ($null -eq $field -or $null -eq $field.options) {
+        continue
+    }
+
+    $existingNames = @($field.options | ForEach-Object { $_.name })
+    $missingOptions = @($definition.Options | Where-Object { $existingNames -notcontains $_ })
+    if ($missingOptions.Count -eq 0) {
+        continue
+    }
+
+    $options = @()
+    foreach ($option in $field.options) {
+        $description = if ($null -eq $option.description) { "" } else { [string] $option.description }
+        $color = if ([string]::IsNullOrWhiteSpace($option.color)) { "GRAY" } else { [string] $option.color }
+        $options += @{
+            Name = $option.name
+            Color = $color
+            Description = $description.Replace("\", "\\").Replace('"', '\"')
+        }
+    }
+
+    foreach ($optionName in $missingOptions) {
+        $options += @{ Name = $optionName; Color = "GRAY"; Description = "Added for the $($definition.Name) field" }
+    }
+
+    $optionsJson = ($options | ForEach-Object {
+        "{ name: `"$($_.Name)`", color: $($_.Color), description: `"$($_.Description)`" }"
+    }) -join ","
+
+    $query = "mutation { updateProjectV2Field(input: { fieldId: `"$($field.id)`", singleSelectOptions: [$optionsJson] }) { projectV2Field { ... on ProjectV2SingleSelectField { id name } } } }"
+    & gh api graphql -f "query=$query" | Out-Null
+    Write-Output "Added $($definition.Name) options: $($missingOptions -join ', ')."
+}
+
 $targetField = $fields.fields | Where-Object { $_.name -eq "Target" } | Select-Object -First 1
 if ($null -eq $targetField) {
     & gh project field-create $number --owner $Owner --name "Target" --data-type DATE --format json | Out-Null
@@ -92,12 +149,14 @@ if ($null -eq $targetField) {
 
 $fields = Get-Fields
 $sprintField = $fields.fields | Where-Object { $_.name -eq "Sprint" } | Select-Object -First 1
+$desiredSprintCount = 13
+
 if ($null -eq $sprintField) {
     $today = (Get-Date).Date
     $daysUntilMonday = (8 - [int] $today.DayOfWeek) % 7
     $startDate = $today.AddDays($daysUntilMonday)
     $iterations = @()
-    for ($i = 1; $i -le 6; $i++) {
+    for ($i = 1; $i -le $desiredSprintCount; $i++) {
         $iterations += @{
             Title = "Sprint $i"
             StartDate = $startDate.AddDays(($i - 1) * 14).ToString("yyyy-MM-dd")
@@ -112,6 +171,51 @@ if ($null -eq $sprintField) {
     & gh api graphql -f "query=$query" | Out-Null
     Write-Output "Created Sprint field."
 }
+else {
+    $iterationQuery = "query { node(id: `"$($sprintField.id)`") { ... on ProjectV2IterationField { configuration { startDay duration iterations { id title startDate duration } } } } }"
+    $iterationResult = & gh api graphql -f "query=$iterationQuery" | ConvertFrom-Json
+    $configuration = $iterationResult.data.node.configuration
+    $existingIterations = @($configuration.iterations)
+    $duration = [int] $configuration.duration
+
+    if ($existingIterations.Count -lt $desiredSprintCount) {
+        $iterations = @()
+        foreach ($iteration in $existingIterations) {
+            $iterations += @{
+                Id = $iteration.id
+                Title = $iteration.title
+                StartDate = ([datetime] $iteration.startDate).ToString("yyyy-MM-dd")
+                Duration = [int] $iteration.duration
+            }
+        }
+
+        if ($existingIterations.Count -gt 0) {
+            $firstStartDate = [datetime] $existingIterations[0].startDate
+        }
+        else {
+            $today = (Get-Date).Date
+            $daysUntilMonday = (8 - [int] $today.DayOfWeek) % 7
+            $firstStartDate = $today.AddDays($daysUntilMonday)
+        }
+
+        for ($i = $existingIterations.Count + 1; $i -le $desiredSprintCount; $i++) {
+            $iterations += @{
+                Title = "Sprint $i"
+                StartDate = $firstStartDate.AddDays(($i - 1) * $duration).ToString("yyyy-MM-dd")
+                Duration = $duration
+            }
+        }
+
+        $iterationsJson = ($iterations | ForEach-Object {
+            $id = if ($_.ContainsKey("Id")) { "id: `"$($_.Id)`", " } else { "" }
+            "{ $id title: `"$($_.Title)`", startDate: `"$($_.StartDate)`", duration: $($_.Duration) }"
+        }) -join ","
+
+        $query = "mutation { updateProjectV2Field(input: { fieldId: `"$($sprintField.id)`", iterationConfiguration: { startDate: `"$($firstStartDate.ToString('yyyy-MM-dd'))`", duration: $duration, iterations: [$iterationsJson] } }) { projectV2Field { ... on ProjectV2IterationField { id name } } } }"
+        & gh api graphql -f "query=$query" | Out-Null
+        Write-Output "Extended Sprint iterations to $desiredSprintCount."
+    }
+}
 
 $milestones = @(
     @{ Title = "v0.1.0 Walking Skeleton"; Due = "2026-11-23T23:59:59Z"; Description = "Unity project, touch controls, shooting, one zombie, supplies, game over, first APK." },
@@ -121,15 +225,33 @@ $milestones = @(
     @{ Title = "v0.5.0 Backend and Cloud"; Due = "2027-01-18T23:59:59Z"; Description = "Cloud saves, leaderboards, telemetry, remote config, and backend deployment automation." },
     @{ Title = "v0.5.1 Polish and Local Beta"; Due = "2026-12-14T23:59:59Z"; Description = "Polish the single-player experience, validate the online flow with five local testers over Tailscale, and defer paid VPS and monetization work." },
     @{ Title = "v0.6.0 Localization"; Due = "2027-02-01T23:59:59Z"; Description = "English and Spanish, device-language default, runtime selector, key coverage, and layout checks." },
-    @{ Title = "v1.0.0 Release and Donations"; Due = "2027-02-15T23:59:59Z"; Description = "Free release readiness, optional PayPal donation link, and final release. No premium currency, cosmetic store, payments sandbox, or in-game purchases." }
+    @{ Title = "v0.7.0 Art and Visual Polish"; Due = "2027-04-12T23:59:59Z"; Description = "First-party generated neon art pipeline, modular characters, weapons, projectiles, combat FX, environment, UI icons, and app icon." },
+    @{ Title = "v1.0.0 Release and Donations"; Due = "2027-05-03T23:59:59Z"; Description = "Free release readiness, optional PayPal donation link with no rewards or entitlements, and final release. No premium currency, cosmetic store, payments sandbox, or in-game purchases." }
 )
 
-$existingMilestones = Invoke-GhJson @("api", "repos/$Repository/milestones")
+$existingMilestones = Invoke-GhJson @("api", "repos/$Repository/milestones?state=all&per_page=100")
 foreach ($milestone in $milestones) {
     $existing = $existingMilestones | Where-Object { $_.title -eq $milestone.Title } | Select-Object -First 1
     if ($null -eq $existing) {
         & gh api -X POST "repos/$Repository/milestones" -f "title=$($milestone.Title)" -f "description=$($milestone.Description)" -f "due_on=$($milestone.Due)" | Out-Null
-        Write-Output "Created milestone $($milestone.Title)."
+        if ($LASTEXITCODE -eq 0) {
+            Write-Output "Created milestone $($milestone.Title)."
+        }
+        else {
+            Write-Output "Unable to create milestone $($milestone.Title)."
+        }
+        continue
+    }
+
+    if ($existing.state -eq "closed") {
+        continue
+    }
+
+    $desiredDue = Get-DateOnly $milestone.Due
+    $currentDue = Get-DateOnly $existing.due_on
+    if ($currentDue -ne $desiredDue -or $existing.description -ne $milestone.Description) {
+        & gh api -X PATCH "repos/$Repository/milestones/$($existing.number)" -f "description=$($milestone.Description)" -f "due_on=$($milestone.Due)" | Out-Null
+        Write-Output "Updated milestone $($milestone.Title)."
     }
 }
 
@@ -137,6 +259,7 @@ $labels = @(
     @{ Name = "size:S"; Color = "C2E0C6"; Description = "Small task" },
     @{ Name = "size:M"; Color = "FBCA04"; Description = "Medium task" },
     @{ Name = "size:L"; Color = "D93F0B"; Description = "Large task" },
+    @{ Name = "area:art"; Color = "E99695"; Description = "Art and visual assets" },
     @{ Name = "status:ready"; Color = "0E8A16"; Description = "Ready to start" },
     @{ Name = "needs-human"; Color = "B60205"; Description = "Requires human action for accounts, billing, legal, or identity" }
 )

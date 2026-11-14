@@ -1,25 +1,27 @@
 {
-    "name": "JabaSurvivol.Tests.EditMode",
-    "rootNamespace": "JabaSurvivol.Tests.EditMode",
-    "references": [
-        "JabaSurvivol.Core",
-        "JabaSurvivol.Gameplay",
-        "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
-    ],
-    "includePlatforms": [
-        "Editor"
-    ],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": true,
-    "precompiledReferences": [
-        "nunit.framework.dll"
-    ],
-    "autoReferenced": false,
-    "defineConstraints": [
-        "UNITY_INCLUDE_TESTS"
-    ],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "JabaSurvivol.Tests.EditMode",
+  "rootNamespace": "JabaSurvivol.Tests.EditMode",
+  "references": [
+    "JabaSurvivol.Core",
+    "JabaSurvivol.Gameplay",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner",
+    "JabaSurvivol.Editor",
+    "Unity.2D.Sprite.Editor"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

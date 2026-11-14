@@ -22,6 +22,7 @@ namespace JabaSurvivol.Editor
         public static void Configure()
         {
             ConfigurePlayer();
+            ConfigureIcons();
             ConfigureRendering();
             ConfigureScene();
             AssetDatabase.SaveAssets();
@@ -38,12 +39,40 @@ namespace JabaSurvivol.Editor
             Debug.Log("JabaSurvivol main scene recreated.");
         }
 
+
+        [MenuItem("JabaSurvivol/Configure App Icons")]
+        public static void ConfigureIcons()
+        {
+            var icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Resources/Art/App/icon.png");
+            if (icon == null)
+            {
+                Debug.LogWarning("App icon not found at Assets/Resources/Art/App/icon.png.");
+                return;
+            }
+
+            PlayerSettings.SetIcons(NamedBuildTarget.Android, new[] { icon }, IconKind.Application);
+            foreach (var kind in PlayerSettings.GetSupportedIconKinds(NamedBuildTarget.Android))
+            {
+                if (!kind.ToString().Contains("Adaptive", System.StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                var icons = PlayerSettings.GetPlatformIcons(NamedBuildTarget.Android, kind);
+                foreach (var slot in icons)
+                {
+                    slot.SetTexture(icon);
+                }
+
+                PlayerSettings.SetPlatformIcons(NamedBuildTarget.Android, kind, icons);
+            }
+        }
         private static void ConfigurePlayer()
         {
             PlayerSettings.companyName = "JabaSurvivol";
             PlayerSettings.productName = "JabaSurvivol";
-            PlayerSettings.bundleVersion = "0.6.0";
-            PlayerSettings.Android.bundleVersionCode = 7;
+            PlayerSettings.bundleVersion = "0.7.0";
+            PlayerSettings.Android.bundleVersionCode = 8;
             PlayerSettings.colorSpace = ColorSpace.Linear;
 
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.jabasurvivol.game");

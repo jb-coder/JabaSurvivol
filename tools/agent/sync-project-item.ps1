@@ -158,6 +158,7 @@ foreach ($label in $labels) {
         "area:ci" { $area = "CI"; break }
         "area:infra" { $area = "Infra"; break }
         "area:docs" { $area = "Docs"; break }
+        "area:art" { $area = "Art"; break }
     }
 
     if ($area) { break }
@@ -178,6 +179,7 @@ if ($milestoneTitle) {
         "v0.5.0*" { $phase = "Backend" }
         "v0.5.1*" { $phase = "Content" }
         "v0.6.0*" { $phase = "Localization" }
+        "v0.7.0*" { $phase = "Art" }
         "v1.0.0*" { $phase = "Release" }
     }
 }
