@@ -80,12 +80,12 @@ namespace JabaSurvivol.Editor
             settings.spritePixelsPerUnit = PixelsPerUnit;
             settings.spriteAlignment = (int)SpriteAlignment.Custom;
             settings.spritePivot = new Vector2(entry.pivotX, entry.pivotY);
-            settings.maxTextureSize = MaxTextureSize;
             settings.filterMode = FilterMode.Bilinear;
             settings.wrapMode = TextureWrapMode.Clamp;
             settings.mipmapEnabled = false;
             settings.alphaIsTransparency = true;
             importer.SetTextureSettings(settings);
+            importer.maxTextureSize = MaxTextureSize;
 
             var android = importer.GetPlatformTextureSettings("Android");
             android.overridden = true;
