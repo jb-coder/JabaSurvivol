@@ -47,14 +47,17 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _levelText;
         private readonly Text _levelUpText;
         private readonly Text _weaponText;
+        private readonly Image _weaponIcon;
         private readonly Text _ammoText;
         private readonly Text _reloadText;
         private readonly Image _reloadFill;
         private readonly Button _activeSkillButton;
         private readonly Image _activeSkillCooldown;
+        private readonly Image _activeSkillIcon;
         private readonly Text _activeSkillLabel;
         private readonly Button[] _selectActiveButtons;
         private readonly Text[] _selectActiveLabels;
+        private readonly Image[] _selectActiveIcons;
         private readonly Text _gameOverSummary;
         private readonly Text _victorySummary;
         private readonly Text _bossNameText;
@@ -101,6 +104,7 @@ namespace JabaSurvivol.Gameplay
         private readonly CharacterNodeRow[] _characterNodeRows;
         private readonly Button[] _rewardButtons;
         private readonly Text[] _rewardLabels;
+        private readonly Image[] _rewardIcons;
         private readonly ArmoryRow[] _armoryRows;
         private readonly ArmoryUpgradeRow[] _armoryUpgradeRows;
         private readonly ArmorRow[] _armoryArmorRows;
@@ -128,6 +132,7 @@ namespace JabaSurvivol.Gameplay
         private int _lastBossMaxHealth = int.MinValue;
         private bool _lastBossEnraged;
         private string _lastWeaponName = string.Empty;
+        private WeaponId _lastWeaponId = (WeaponId)(-1);
         private int _lastMagazine = int.MinValue;
         private int _lastMagazineSize = int.MinValue;
         private int _lastReserve = int.MinValue;
@@ -206,11 +211,13 @@ namespace JabaSurvivol.Gameplay
             _hud = BuildHud(onPause, onReload, onSwitchWeapon, onActiveSkill, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
             _roundModifierText = FindText(_hud, "Round Modifier");
             _weaponText = FindText(_hud, "Weapon");
+            _weaponIcon = FindImage(_hud, "Weapon Icon");
             _ammoText = FindText(_hud, "Ammo");
             _reloadText = FindText(_hud, "Reload Status");
             _reloadFill = FindImage(_hud, "Reload Fill");
             _activeSkillButton = FindGameObject(_hud, "Active Skill Button")?.GetComponent<Button>();
             _activeSkillCooldown = FindImage(_hud, "Active Skill Cooldown");
+            _activeSkillIcon = FindImage(_hud, "Active Skill Icon");
             _activeSkillLabel = FindText(_hud, "Active Skill Label");
             _bossPanel = FindGameObject(_hud, "Boss Panel");
             _bossNameText = FindText(_hud, "Boss Name");
@@ -240,7 +247,8 @@ namespace JabaSurvivol.Gameplay
                 out _roundEndTitle,
                 out _roundEndSummary,
                 out _rewardButtons,
-                out _rewardLabels);
+                out _rewardLabels,
+                out _rewardIcons);
             _armoryPanel = BuildArmoryPanel(
                 onArmoryAction,
                 onArmoryUpgrade,
@@ -304,12 +312,14 @@ namespace JabaSurvivol.Gameplay
 
             _selectActiveButtons = new Button[3];
             _selectActiveLabels = new Text[3];
+            _selectActiveIcons = new Image[3];
             var activeNodes = new[] { SkillNode.Shockwave, SkillNode.Dash, SkillNode.Turret };
             for (var i = 0; i < activeNodes.Length; i++)
             {
                 var selectButton = FindGameObject(_characterSheet, $"Select {activeNodes[i]}");
                 _selectActiveButtons[i] = selectButton?.GetComponent<Button>();
                 _selectActiveLabels[i] = selectButton?.GetComponentInChildren<Text>();
+                _selectActiveIcons[i] = FindImage(_characterSheet, $"Select {activeNodes[i]} Icon");
             }
 
             _levelUpText = UiFactory.CreateText(
@@ -509,6 +519,7 @@ namespace JabaSurvivol.Gameplay
         /// Values are cached so steady-state frames do not allocate.
         /// </summary>
         public void UpdateWeaponHud(
+            WeaponId weaponId,
             string weaponName,
             int magazine,
             int magazineSize,
@@ -523,18 +534,24 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
-            if (!string.Equals(weaponName, _lastWeaponName, System.StringComparison.Ordinal) ||
+            if (weaponId != _lastWeaponId ||
+                !string.Equals(weaponName, _lastWeaponName, System.StringComparison.Ordinal) ||
                 magazine != _lastMagazine ||
                 magazineSize != _lastMagazineSize ||
                 reserve != _lastReserve ||
                 infiniteReserve != _lastInfiniteReserve)
             {
+                _lastWeaponId = weaponId;
                 _lastWeaponName = weaponName;
                 _lastMagazine = magazine;
                 _lastMagazineSize = magazineSize;
                 _lastReserve = reserve;
                 _lastInfiniteReserve = infiniteReserve;
                 _weaponText.text = weaponName;
+                if (_weaponIcon != null)
+                {
+                    _weaponIcon.sprite = ArtCatalog.Get(WeaponIconKey(weaponId));
+                }
                 _ammoText.text = infiniteReserve
                     ? Localization.Format(
                         "hud.ammo.infinite",
@@ -590,6 +607,11 @@ namespace JabaSurvivol.Gameplay
             _activeSkillLabel.text = rank <= 0
                 ? Localization.Get("hud.skill.locked")
                 : Localization.SkillName(node);
+            if (_activeSkillIcon != null)
+            {
+                _activeSkillIcon.sprite = ArtCatalog.Get(SkillIconKey(node));
+            }
+
             _activeSkillButton.interactable = ready;
             _activeSkillCooldown.fillAmount = Mathf.Clamp01(cooldownFraction);
             _activeSkillCooldown.color = activeFraction > 0f
@@ -713,7 +735,47 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
+        public Sprite HudWeaponIconForTests => _weaponIcon != null ? _weaponIcon.sprite : null;
+
+        public Sprite ActiveSkillIconForTests => _activeSkillIcon != null ? _activeSkillIcon.sprite : null;
+
+        public Sprite RewardIconForTests(int index)
+        {
+            return index >= 0 && index < _rewardIcons.Length && _rewardIcons[index] != null
+                ? _rewardIcons[index].sprite
+                : null;
+        }
+
+        public Sprite ArmoryWeaponIconForTests(WeaponId weaponId)
+        {
+            for (var i = 0; i < _armoryRows.Length; i++)
+            {
+                if (_armoryRows[i].WeaponId == weaponId && _armoryRows[i].Icon != null)
+                {
+                    return _armoryRows[i].Icon.sprite;
+                }
+            }
+
+            return null;
+        }
+
+        public Sprite SelectActiveSkillIconForTests(SkillNode node)
+        {
+            var index = node switch
+            {
+                SkillNode.Shockwave => 0,
+                SkillNode.Dash => 1,
+                SkillNode.Turret => 2,
+                _ => -1
+            };
+
+            return index >= 0 && index < _selectActiveIcons.Length && _selectActiveIcons[index] != null
+                ? _selectActiveIcons[index].sprite
+                : null;
+        }
+
         public string BuildLabelForTests => _buildLabel?.text ?? string.Empty;
+
 
         public string[] TextOverflowsForTests()
         {
@@ -1572,6 +1634,10 @@ namespace JabaSurvivol.Gameplay
                 }
 
                 _rewardLabels[i].text = FormatRewardCard(options[i]);
+                if (_rewardIcons[i] != null)
+                {
+                    _rewardIcons[i].sprite = ArtCatalog.Get(RewardIconKey(options[i].Type));
+                }
             }
 
             _roundEndPanel.SetActive(true);
@@ -1580,6 +1646,39 @@ namespace JabaSurvivol.Gameplay
         public void HideRoundEnd()
         {
             _roundEndPanel.SetActive(false);
+        }
+
+        private static string WeaponIconKey(WeaponId weaponId)
+        {
+            return weaponId switch
+            {
+                WeaponId.Smg => "UI/weapon_smg",
+                WeaponId.Shotgun => "UI/weapon_shotgun",
+                WeaponId.Rifle => "UI/weapon_rifle",
+                WeaponId.Lmg => "UI/weapon_lmg",
+                _ => "UI/weapon_pistol"
+            };
+        }
+
+        private static string SkillIconKey(SkillNode node)
+        {
+            return node switch
+            {
+                SkillNode.Dash => "UI/skill_dash",
+                SkillNode.Shockwave => "UI/skill_shockwave",
+                _ => "UI/skill_turret"
+            };
+        }
+
+        private static string RewardIconKey(RoundRewardType type)
+        {
+            return type switch
+            {
+                RoundRewardType.Supplies => "UI/reward_supplies",
+                RoundRewardType.Xp => "UI/reward_xp",
+                RoundRewardType.AmmoCrate => "UI/reward_ammo",
+                _ => "UI/reward_armor"
+            };
         }
 
         private static string FormatRewardCard(RoundRewardOption reward)
@@ -1988,7 +2087,10 @@ namespace JabaSurvivol.Gameplay
             UiFactory.Place(killsText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -128f), new Vector2(420f, 40f));
 
             suppliesText = UiFactory.CreateText(root.transform, "Supplies", string.Empty, 28, TextAnchor.MiddleRight, new Color(0.55f, 0.95f, 0.75f));
-            UiFactory.Place(suppliesText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-150f, -30f), new Vector2(420f, 44f));
+            UiFactory.Place(suppliesText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-158f, -30f), new Vector2(420f, 44f));
+
+            var suppliesIcon = UiFactory.CreateImage(root.transform, "Supplies Icon", ArtCatalog.Get("UI/reward_supplies"), Color.white);
+            UiFactory.Place(suppliesIcon.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-112f, -30f), new Vector2(36f, 36f));
 
             levelText = UiFactory.CreateText(root.transform, "Level", string.Empty, 20, TextAnchor.MiddleRight, new Color(0.6f, 0.68f, 0.78f));
             UiFactory.Place(levelText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-140f, -78f), new Vector2(500f, 40f));
@@ -1996,9 +2098,12 @@ namespace JabaSurvivol.Gameplay
             var pause = UiFactory.CreateButton(root.transform, "Pause", Localization.Get("hud.pause"), 28, onPause);
             UiFactory.Place(pause.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-30f, -30f), new Vector2(84f, 84f));
 
+            var weaponIcon = UiFactory.CreateImage(root.transform, "Weapon Icon", ArtCatalog.Get("UI/weapon_pistol"), Color.white);
+            UiFactory.Place(weaponIcon.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(40f, -128f), new Vector2(38f, 38f));
+
             var weaponText = UiFactory.CreateText(root.transform, "Weapon", string.Empty, 22, TextAnchor.MiddleLeft, new Color(0.45f, 0.9f, 1f));
             weaponText.fontStyle = FontStyle.Bold;
-            UiFactory.Place(weaponText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(40f, -128f), new Vector2(340f, 28f));
+            UiFactory.Place(weaponText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(88f, -128f), new Vector2(300f, 28f));
 
             var ammoText = UiFactory.CreateText(root.transform, "Ammo", string.Empty, 24, TextAnchor.MiddleLeft, new Color(0.92f, 0.95f, 1f));
             ammoText.fontStyle = FontStyle.Bold;
@@ -2034,8 +2139,16 @@ namespace JabaSurvivol.Gameplay
             cooldown.fillMethod = Image.FillMethod.Radial360;
             cooldown.fillOrigin = (int)Image.Origin360.Top;
             cooldown.fillAmount = 0f;
+
+            var skillIcon = UiFactory.CreateImage(activeSkill.transform, "Active Skill Icon", ArtCatalog.Get("UI/skill_turret"), Color.white);
+            UiFactory.Place(skillIcon.rectTransform, new Vector2(0.5f, 0.64f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(64f, 64f));
+
             var skillLabel = activeSkill.GetComponentInChildren<Text>();
             skillLabel.name = "Active Skill Label";
+            skillLabel.rectTransform.anchorMin = new Vector2(0f, 0f);
+            skillLabel.rectTransform.anchorMax = new Vector2(1f, 0.40f);
+            skillLabel.rectTransform.offsetMin = Vector2.zero;
+            skillLabel.rectTransform.offsetMax = Vector2.zero;
             skillLabel.transform.SetAsLastSibling();
 
             var hint = UiFactory.CreateText(root.transform, "Controls Hint", Localization.Get("menu.controls"), 20, TextAnchor.MiddleCenter, new Color(0.48f, 0.56f, 0.66f));
@@ -2317,7 +2430,8 @@ namespace JabaSurvivol.Gameplay
             out Text title,
             out Text summary,
             out Button[] buttons,
-            out Text[] labels)
+            out Text[] labels,
+            out Image[] icons)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Round End Panel", new Color(0.012f, 0.02f, 0.035f, 0.98f));
             var root = panel.gameObject;
@@ -2334,6 +2448,7 @@ namespace JabaSurvivol.Gameplay
 
             buttons = new Button[GameBalance.RoundRewardOptionCount];
             labels = new Text[GameBalance.RoundRewardOptionCount];
+            icons = new Image[GameBalance.RoundRewardOptionCount];
             var anchors = new[] { 0.22f, 0.5f, 0.78f };
 
             for (var i = 0; i < buttons.Length; i++)
@@ -2351,7 +2466,25 @@ namespace JabaSurvivol.Gameplay
                     new Vector2(0.5f, 0.5f),
                     Vector2.zero,
                     new Vector2(480f, 260f));
+
+                var icon = UiFactory.CreateImage(
+                    button.transform,
+                    $"Reward {i + 1} Icon",
+                    ArtCatalog.Get("UI/reward_supplies"),
+                    Color.white);
+                UiFactory.Place(
+                    icon.rectTransform,
+                    new Vector2(0.5f, 0.72f),
+                    new Vector2(0.5f, 0.5f),
+                    Vector2.zero,
+                    new Vector2(96f, 96f));
+
                 labels[i] = button.GetComponentInChildren<Text>();
+                labels[i].rectTransform.anchorMin = new Vector2(0f, 0f);
+                labels[i].rectTransform.anchorMax = new Vector2(1f, 0.42f);
+                labels[i].rectTransform.offsetMin = new Vector2(18f, 10f);
+                labels[i].rectTransform.offsetMax = new Vector2(-18f, 0f);
+                icons[i] = icon;
                 buttons[i] = button;
             }
 
@@ -2612,6 +2745,24 @@ namespace JabaSurvivol.Gameplay
                     new Vector2(0.5f, 0.5f),
                     Vector2.zero,
                     new Vector2(280f, 54f));
+
+                var icon = UiFactory.CreateImage(
+                    select.transform,
+                    $"Select {node} Icon",
+                    ArtCatalog.Get(SkillIconKey(node)),
+                    Color.white);
+                UiFactory.Place(
+                    icon.rectTransform,
+                    new Vector2(0f, 0.5f),
+                    new Vector2(0f, 0.5f),
+                    new Vector2(12f, 0f),
+                    new Vector2(40f, 40f));
+
+                var label = select.GetComponentInChildren<Text>();
+                label.rectTransform.anchorMin = new Vector2(0f, 0f);
+                label.rectTransform.anchorMax = new Vector2(1f, 1f);
+                label.rectTransform.offsetMin = new Vector2(60f, 0f);
+                label.rectTransform.offsetMax = new Vector2(-12f, 0f);
             }
 
             root.SetActive(false);
@@ -2727,6 +2878,18 @@ namespace JabaSurvivol.Gameplay
                     Vector2.zero,
                     new Vector2(1660f, 84f));
 
+                var icon = UiFactory.CreateImage(
+                    rowImage.transform,
+                    "Icon",
+                    ArtCatalog.Get(WeaponIconKey(weapon.Id)),
+                    Color.white);
+                UiFactory.Place(
+                    icon.rectTransform,
+                    new Vector2(0f, 0.5f),
+                    new Vector2(0f, 0.5f),
+                    new Vector2(28f, 0f),
+                    new Vector2(76f, 64f));
+
                 var name = UiFactory.CreateText(
                     rowImage.transform,
                     "Name",
@@ -2735,7 +2898,7 @@ namespace JabaSurvivol.Gameplay
                     TextAnchor.MiddleLeft,
                     Color.white);
                 name.fontStyle = FontStyle.Bold;
-                UiFactory.Place(name.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(28f, 0f), new Vector2(280f, 78f));
+                UiFactory.Place(name.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(120f, 0f), new Vector2(260f, 78f));
 
                 var info = UiFactory.CreateText(
                     rowImage.transform,
@@ -2744,7 +2907,7 @@ namespace JabaSurvivol.Gameplay
                     20,
                     TextAnchor.MiddleLeft,
                     new Color(0.72f, 0.8f, 0.9f));
-                UiFactory.Place(info.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(310f, 0f), new Vector2(920f, 78f));
+                UiFactory.Place(info.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(390f, 0f), new Vector2(840f, 78f));
 
                 var button = UiFactory.CreateButton(
                     rowImage.transform,
@@ -2765,7 +2928,8 @@ namespace JabaSurvivol.Gameplay
                     Button = button,
                     Label = button.GetComponentInChildren<Text>(),
                     Name = name,
-                    Info = info
+                    Info = info,
+                    Icon = icon
                 };
             }
 
@@ -2923,6 +3087,7 @@ namespace JabaSurvivol.Gameplay
             public Text Label;
             public Text Name;
             public Text Info;
+            public Image Icon;
         }
 
         private sealed class ArmoryUpgradeRow

@@ -157,7 +157,24 @@ namespace JabaSurvivol.Gameplay
 
         public GameAudio AudioForTests => _audio;
 
+        public UnityEngine.Sprite HudWeaponIconForTests => _ui?.HudWeaponIconForTests;
+
+        public UnityEngine.Sprite ActiveSkillIconForTests => _ui?.ActiveSkillIconForTests;
+
+        public UnityEngine.Sprite RewardIconForTests(int index) => _ui?.RewardIconForTests(index);
+
+        public UnityEngine.Sprite ArmoryWeaponIconForTests(WeaponId weaponId) => _ui?.ArmoryWeaponIconForTests(weaponId);
+
+        public UnityEngine.Sprite SelectActiveSkillIconForTests(SkillNode node) => _ui?.SelectActiveSkillIconForTests(node);
+
+        public void ShowRoundEndForTests(RoundRewardOption[] options)
+        {
+            _ui?.ShowRoundEnd(1, 0, 0, 0, options);
+        }
+
         public string SoundLabelForTests => _ui?.SoundLabelForTests ?? string.Empty;
+
+
 
         public bool LanguagePanelVisibleForTests => _ui?.LanguagePanelVisible ?? false;
 
@@ -1976,6 +1993,7 @@ namespace JabaSurvivol.Gameplay
 
             var state = _run.CurrentWeaponState;
             _ui.UpdateWeaponHud(
+                state.Id,
                 Localization.WeaponName(state.Id),
                 state.Magazine,
                 state.MagazineSize,
