@@ -345,4 +345,3 @@ foreach ($pullRequest in $openPullRequests) {
 Write-Output "Project ready: $($project.url)"
 Write-Output "Number: $number"
 Write-Output "Open views: https://github.com/users/$Owner/projects/$number"
-
