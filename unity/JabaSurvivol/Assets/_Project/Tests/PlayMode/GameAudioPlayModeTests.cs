@@ -224,8 +224,7 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(session.AudioPanelVisibleForTests, Is.True);
             Assert.That(ContainsRecentCue(session, GameAudioCue.UiOpen), Is.True);
             Assert.That(session.SoundLabelForTests, Is.EqualTo("SOUND: ON"));
-            Assert.That(session.AudioMasterLabelForTests, Is.EqualTo("VOL 100%"));
-            Assert.That(session.AudioEffectsLabelForTests, Is.EqualTo("FX 80%"));
+            Assert.That(session.AudioMasterLabelForTests, Is.EqualTo("100%"));
 
             session.AudioMuteButtonForTests.onClick.Invoke();
             Assert.That(session.AudioForTests.IsMuted, Is.True);
@@ -236,11 +235,7 @@ namespace JabaSurvivol.Tests.PlayMode
 
             session.AudioMasterMinusButtonForTests.onClick.Invoke();
             Assert.That(session.AudioForTests.MasterVolume, Is.EqualTo(0.9f).Within(0.001f));
-            Assert.That(session.AudioMasterLabelForTests, Is.EqualTo("VOL 90%"));
-
-            session.AudioEffectsMinusButtonForTests.onClick.Invoke();
-            Assert.That(session.AudioForTests.EffectsVolume, Is.EqualTo(0.7f).Within(0.001f));
-            Assert.That(session.AudioEffectsLabelForTests, Is.EqualTo("FX 70%"));
+            Assert.That(session.AudioMasterLabelForTests, Is.EqualTo("90%"));
 
             session.ResetAudioHistoryForTests();
             session.AudioCloseButtonForTests.onClick.Invoke();

@@ -262,7 +262,7 @@ The v0.7.1 release was verified with:
 |---|---|
 | Release build | 0 warnings, 0 errors |
 | .NET tests | 267 passed: 173 core, 86 integration, 1 architecture, 1 smoke, 6 art generator |
-| Unity EditMode | 119 passed |
+| Unity EditMode | 120 passed |
 | Unity PlayMode | 133 passed |
 | Formatting | `dotnet format --verify-no-changes` passed |
 | Android APK | v0.7.1, version code 9, `arm64-v8a`, minimum API 26, target API 36 |
@@ -373,6 +373,3 @@ This repository is proprietary and confidential. No part of it may be copied, mo
 <sub>Built with Unity 6.3 LTS, .NET 10, and a persistence-first design.</sub>
 
 </div>
-
-
-

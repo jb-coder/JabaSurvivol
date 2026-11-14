@@ -23,7 +23,7 @@ ARM64-only.
 | `dotnet build JabaSurvivol.slnx -c Release` | 0 warnings, 0 errors |
 | `dotnet test JabaSurvivol.slnx -c Release` | 267 passed: 173 core, 86 integration, 1 architecture, 1 smoke, 6 art generator |
 | `dotnet format JabaSurvivol.slnx --verify-no-changes` | passed |
-| Unity EditMode | 119 passed, 0 failed |
+| Unity EditMode | 120 passed, 0 failed |
 | Unity PlayMode | 133 passed, 0 failed |
 
 New PlayMode coverage includes the complete 33-cue catalog, every weapon fire
@@ -46,7 +46,7 @@ Device: `jaba_survivol_api35`, Android API 35 emulator.
 | Main menu | Rendered in English and Spanish |
 | Audio panel | Rendered on phone and tablet, English and Spanish |
 | Mute toggle | Label changed from `SOUND: ON` to `SOUND: OFF` and back |
-| Volume controls | `VOL 100%` to `VOL 90%`; `FX 80%` to `FX 70%` |
+| Master volume | `100%` to `90%` |
 | Gameplay | Round 1 HUD, arena, player, zombie, and touch sticks rendered |
 | Pause | Pause menu rendered and resumed |
 | Background and resume | Home and relaunch returned to the same run |
@@ -97,5 +97,3 @@ missing-clip line was observed.
   sound effects remain in v1.0.0.
 - The production APK is ARM64-only and was not installed on the x86_64
   emulator.
-- The audio panel uses language-neutral `VOL` and `FX` abbreviations to avoid
-  adding unreviewed Spanish locale strings.

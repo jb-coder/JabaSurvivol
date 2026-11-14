@@ -25,7 +25,7 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Mute no longer controls only a single source and now applies to the whole audio service.
 - Rapid one-shots can no longer stack without a source and cooldown bound.
 - Returning to the main menu stops active run audio.
-- The release build now reads version `0.7.1` from `ProjectSetup` instead of overwriting it with `0.7.0`.
+- The build configuration now sets version `0.7.1` and version code `9`, so Android builds report the release version.
 
 ## [0.7.0] - 2026-11-14
 

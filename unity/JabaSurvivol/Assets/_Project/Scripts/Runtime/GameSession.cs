@@ -238,15 +238,9 @@ namespace JabaSurvivol.Gameplay
 
         public UnityEngine.UI.Button AudioMasterPlusButtonForTests => _ui?.AudioMasterPlusButtonForTests;
 
-        public UnityEngine.UI.Button AudioEffectsMinusButtonForTests => _ui?.AudioEffectsMinusButtonForTests;
-
-        public UnityEngine.UI.Button AudioEffectsPlusButtonForTests => _ui?.AudioEffectsPlusButtonForTests;
-
         public UnityEngine.UI.Button AudioCloseButtonForTests => _ui?.AudioCloseButtonForTests;
 
         public string AudioMasterLabelForTests => _ui?.AudioMasterLabelForTests ?? string.Empty;
-
-        public string AudioEffectsLabelForTests => _ui?.AudioEffectsLabelForTests ?? string.Empty;
 
         public void SetApplicationPausedForTests(bool paused) => OnApplicationPause(paused);
 
@@ -410,7 +404,6 @@ namespace JabaSurvivol.Gameplay
                 ResumeGame,
                 ToggleSound,
                 AdjustMasterVolume,
-                AdjustEffectsVolume,
                 () => ReloadWeapon(),
                 () => SwitchWeapon(),
                 () => ActivateActiveSkill(),
@@ -1288,18 +1281,11 @@ namespace JabaSurvivol.Gameplay
             SyncAudioUi();
         }
 
-        private void AdjustEffectsVolume(float volume)
-        {
-            _audio.SetEffectsVolume(volume);
-            SyncAudioUi();
-        }
-
         private void SyncAudioUi()
         {
             _ui?.SetAudio(
                 _audio.IsMuted,
-                _audio.MasterVolume,
-                _audio.EffectsVolume);
+                _audio.MasterVolume);
         }
 
         private void HandleLocaleSelected(string locale)
