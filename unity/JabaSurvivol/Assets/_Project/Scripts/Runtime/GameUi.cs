@@ -44,7 +44,6 @@ namespace JabaSurvivol.Gameplay
         private readonly System.Action<string> _onLocaleSelected;
         private float _masterVolume = GameAudio.DefaultMasterVolume;
         private float _effectsVolume = GameAudio.DefaultEffectsVolume;
-        private bool _audioMuted;
         private readonly GameObject _gameOverPanel;
         private readonly GameObject _victoryPanel;
         private readonly GameObject _bossPanel;
@@ -794,7 +793,6 @@ namespace JabaSurvivol.Gameplay
         /// </summary>
         public void SetSound(bool enabled)
         {
-            _audioMuted = !enabled;
             var label = Localization.Get(enabled ? "pause.sound.on" : "pause.sound.off");
             if (_pauseSoundLabel != null)
             {
@@ -901,6 +899,34 @@ namespace JabaSurvivol.Gameplay
                 : null;
         }
 
+        public bool ClickArmoryWeaponActionForTests(WeaponId weaponId)
+        {
+            for (var i = 0; i < _armoryRows.Length; i++)
+            {
+                if (_armoryRows[i].WeaponId == weaponId && _armoryRows[i].Button != null)
+                {
+                    _armoryRows[i].Button.onClick.Invoke();
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool ClickArmoryUpgradeForTests(WeaponUpgradeStat stat)
+        {
+            for (var i = 0; i < _armoryUpgradeRows.Length; i++)
+            {
+                if (_armoryUpgradeRows[i].Stat == stat && _armoryUpgradeRows[i].Button != null)
+                {
+                    _armoryUpgradeRows[i].Button.onClick.Invoke();
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public Sprite ArmoryWeaponIconForTests(WeaponId weaponId)
         {
             for (var i = 0; i < _armoryRows.Length; i++)
@@ -999,7 +1025,9 @@ namespace JabaSurvivol.Gameplay
             return topmost ?? _safeArea;
         }
 
-        public Button SoundButtonForTests => _audioMuteButton;
+        public Button SoundButtonForTests => _pauseSoundButton;
+
+        public Button PauseAudioButtonForTests => _audioButtonPause;
 
         public void ShowGameOver(int round, int kills, int suppliesEarned)
         {

@@ -168,6 +168,12 @@ namespace JabaSurvivol.Gameplay
 
         public UnityEngine.Sprite ArmoryWeaponIconForTests(WeaponId weaponId) => _ui?.ArmoryWeaponIconForTests(weaponId);
 
+        public bool ClickArmoryWeaponActionForTests(WeaponId weaponId) =>
+            _ui != null && _ui.ClickArmoryWeaponActionForTests(weaponId);
+
+        public bool ClickArmoryUpgradeForTests(WeaponUpgradeStat stat) =>
+            _ui != null && _ui.ClickArmoryUpgradeForTests(stat);
+
         public UnityEngine.Sprite SelectActiveSkillIconForTests(SkillNode node) => _ui?.SelectActiveSkillIconForTests(node);
 
         public void ShowRoundEndForTests(RoundRewardOption[] options)
@@ -2207,15 +2213,7 @@ namespace JabaSurvivol.Gameplay
         /// </summary>
         public void DamageZombieForTests(float amount)
         {
-            if (!_zombieActive || _zombie == null)
-            {
-                return;
-            }
-
-            if (_zombie.ApplyDamage(amount))
-            {
-                OnZombieKilled();
-            }
+            OnBulletHitZombie(amount);
         }
 
         private static IAccountService CreateDefaultAccountService()
@@ -2761,7 +2759,10 @@ namespace JabaSurvivol.Gameplay
         {
             SaveNow();
             UiFactory.PlayUiCue = null;
-            _audio?.StopAll();
+            if (_audio != null)
+            {
+                _audio.StopAll();
+            }
             Localization.LocaleChanged -= HandleLocaleChanged;
 
             if (_accountService != null)

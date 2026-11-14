@@ -198,10 +198,14 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(session.SoundLabelForTests, Is.EqualTo("SOUND: ON"));
 
             session.SoundButtonForTests.onClick.Invoke();
+            yield return null;
+            Assert.That(session.AudioPanelVisibleForTests, Is.True);
+
+            session.AudioMuteButtonForTests.onClick.Invoke();
             Assert.That(session.SoundLabelForTests, Is.EqualTo("SOUND: OFF"));
             Assert.That(session.AudioForTests.IsMuted, Is.True);
 
-            session.SoundButtonForTests.onClick.Invoke();
+            session.AudioMuteButtonForTests.onClick.Invoke();
             Assert.That(session.SoundLabelForTests, Is.EqualTo("SOUND: ON"));
             Assert.That(session.AudioForTests.IsMuted, Is.False);
         }
@@ -247,28 +251,56 @@ namespace JabaSurvivol.Tests.PlayMode
             yield return null;
 
             var session = _bootstrap.Session;
+            var audio = session.AudioForTests;
+            audio.SetMasterVolume(0.7f);
+            audio.SetEffectsVolume(0.6f);
+            audio.SetMuted(false);
             session.StartRun();
             yield return null;
 
-            Assert.That(session.AudioForTests.IsSuspended, Is.False);
+            Assert.That(audio.IsSuspended, Is.False);
+            Assert.That(audio.IsMuted, Is.False);
+            Assert.That(PlayerPrefs.GetFloat(GameAudio.MasterVolumeKey), Is.EqualTo(0.7f));
+            Assert.That(PlayerPrefs.GetFloat(GameAudio.EffectsVolumeKey), Is.EqualTo(0.6f));
+            Assert.That(PlayerPrefs.GetInt(GameAudio.MutedKey), Is.EqualTo(0));
+
+            audio.Play(GameAudioCue.BossTelegraph);
+            Assert.That(audio.ActiveVoiceCountForTests, Is.GreaterThan(0));
 
             session.PauseGame();
-            Assert.That(session.AudioForTests.IsSuspended, Is.True);
+            Assert.That(audio.IsSuspended, Is.True);
+            Assert.That(audio.ActiveVoiceCountForTests, Is.EqualTo(0));
+            Assert.That(audio.IsMuted, Is.False);
+            Assert.That(audio.MasterVolume, Is.EqualTo(0.7f));
+            Assert.That(audio.EffectsVolume, Is.EqualTo(0.6f));
 
             session.ResumeGame();
-            Assert.That(session.AudioForTests.IsSuspended, Is.False);
+            Assert.That(audio.IsSuspended, Is.False);
+            Assert.That(audio.MasterVolume, Is.EqualTo(0.7f));
+            Assert.That(audio.EffectsVolume, Is.EqualTo(0.6f));
 
             session.SetApplicationPausedForTests(true);
-            Assert.That(session.AudioForTests.IsSuspended, Is.True);
-
+            Assert.That(audio.IsSuspended, Is.True);
             session.SetApplicationPausedForTests(false);
-            Assert.That(session.AudioForTests.IsSuspended, Is.False);
+            Assert.That(audio.IsSuspended, Is.False);
 
             session.SetApplicationFocusedForTests(false);
-            Assert.That(session.AudioForTests.IsSuspended, Is.True);
-
+            Assert.That(audio.IsSuspended, Is.True);
             session.SetApplicationFocusedForTests(true);
-            Assert.That(session.AudioForTests.IsSuspended, Is.False);
+            Assert.That(audio.IsSuspended, Is.False);
+
+            audio.SetMuted(true);
+            session.PauseGame();
+            session.ResumeGame();
+            Assert.That(audio.IsMuted, Is.True);
+            Assert.That(PlayerPrefs.GetInt(GameAudio.MutedKey), Is.EqualTo(1));
+            audio.SetMuted(false);
+
+            audio.Play(GameAudioCue.BossTelegraph);
+            session.ReturnToMenu();
+            Assert.That(audio.ActiveVoiceCountForTests, Is.EqualTo(0));
+            Assert.That(audio.MasterVolume, Is.EqualTo(0.7f));
+            Assert.That(audio.EffectsVolume, Is.EqualTo(0.6f));
         }
 
         [UnityTest]
@@ -337,6 +369,12 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(ContainsRecentCue(session, GameAudioCue.BossSpawn), Is.True);
 
             session.ResetAudioHistoryForTests();
+            session.DamageBossForTests(10f);
+            Assert.That(ContainsRecentCue(session, GameAudioCue.Impact), Is.True);
+            Assert.That(ContainsRecentCue(session, GameAudioCue.BossHit), Is.True);
+            Assert.That(ContainsRecentCue(session, GameAudioCue.Hit), Is.False);
+
+            session.ResetAudioHistoryForTests();
             session.SetBossAttackCooldownForTests(0f);
             yield return null;
             Assert.That(ContainsRecentCue(session, GameAudioCue.BossTelegraph), Is.True);
@@ -355,6 +393,184 @@ namespace JabaSurvivol.Tests.PlayMode
             yield return null;
             Assert.That(ContainsRecentCue(session, GameAudioCue.BossDeath), Is.True);
             Assert.That(ContainsRecentCue(session, GameAudioCue.Victory), Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator Every_weapon_fires_its_own_cue()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+
+            var session = _bootstrap.Session;
+            session.Profile.UnlockWeapon(WeaponId.Smg);
+            session.Profile.UnlockWeapon(WeaponId.Shotgun);
+            session.Profile.UnlockWeapon(WeaponId.Rifle);
+            session.Profile.UnlockWeapon(WeaponId.Lmg);
+            session.StartRun();
+            yield return null;
+
+            for (var i = 0; i < 5; i++)
+            {
+                if (i > 0)
+                {
+                    Assert.That(session.SwitchWeapon(), Is.True);
+                    yield return null;
+                }
+
+                session.ResetAudioHistoryForTests();
+                session.FireForTests();
+
+                var expected = ExpectedFireCue(session.CurrentWeapon);
+                Assert.That(RecentCue(session, 0), Is.EqualTo(expected), session.CurrentWeapon.ToString());
+
+                if (session.CurrentWeapon == WeaponId.Shotgun)
+                {
+                    Assert.That(CountRecentCue(session, GameAudioCue.ShotgunFire), Is.EqualTo(1));
+                }
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator Empty_magazine_emits_a_cue()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+
+            var session = _bootstrap.Session;
+            session.StartRun();
+            yield return null;
+            session.ResetAudioHistoryForTests();
+
+            Assert.That(session.ReloadWeapon(), Is.False);
+            Assert.That(RecentCue(session, 0), Is.EqualTo(GameAudioCue.Empty));
+        }
+
+        [UnityTest]
+        public IEnumerator Player_damage_zombie_impact_and_kill_emit_distinct_cues()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+
+            var session = _bootstrap.Session;
+            session.StartRun();
+            yield return null;
+
+            session.ResetAudioHistoryForTests();
+            session.ApplyDamage(1f);
+            Assert.That(RecentCue(session, 0), Is.EqualTo(GameAudioCue.Hit));
+
+            session.ResetAudioHistoryForTests();
+            session.DamageZombieForTests(1f);
+            Assert.That(RecentCue(session, 0), Is.EqualTo(GameAudioCue.Impact));
+            Assert.That(ContainsRecentCue(session, GameAudioCue.Hit), Is.False);
+
+            session.ResetAudioHistoryForTests();
+            session.DamageZombieForTests(session.ZombieHealthForTests);
+            Assert.That(ContainsRecentCue(session, GameAudioCue.Impact), Is.True);
+            Assert.That(ContainsRecentCue(session, GameAudioCue.Kill), Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator Turret_and_shockwave_emit_cues()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+
+            var session = _bootstrap.Session;
+            session.Profile.SetSkillRank(SkillNode.Turret, 5);
+            session.Profile.SetActiveSkill(SkillNode.Turret);
+            session.StartRun();
+            yield return null;
+
+            session.ResetAudioHistoryForTests();
+            Assert.That(session.ActivateActiveSkillForTests(), Is.True);
+            Assert.That(RecentCue(session, 0), Is.EqualTo(GameAudioCue.TurretDeploy));
+
+            session.SetZombiePositionForTests(new Vector2(2f, 0f));
+            session.ResetAudioHistoryForTests();
+            for (var i = 0; i < 240 && session.TurretShotsFiredForTests == 0; i++)
+            {
+                yield return null;
+            }
+
+            Assert.That(ContainsRecentCue(session, GameAudioCue.TurretFire), Is.True);
+
+            session.Profile.SetSkillRank(SkillNode.Shockwave, 1);
+            session.Profile.SetActiveSkill(SkillNode.Shockwave);
+            session.StartRun();
+            yield return null;
+            session.SetZombiePositionForTests(new Vector2(1f, 0f));
+            session.ResetAudioHistoryForTests();
+
+            Assert.That(session.ActivateActiveSkillForTests(), Is.True);
+            Assert.That(RecentCue(session, 0), Is.EqualTo(GameAudioCue.Shockwave));
+        }
+
+        [UnityTest]
+        public IEnumerator Defeat_and_reward_emit_cues()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+
+            var session = _bootstrap.Session;
+            session.StartRun();
+            yield return null;
+            session.ResetAudioHistoryForTests();
+            session.ApplyDamage(GameBalance.PlayerMaxHealth * 2f);
+            yield return null;
+
+            Assert.That(ContainsRecentCue(session, GameAudioCue.Defeat), Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator Reward_selection_emits_a_cue()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+
+            var session = _bootstrap.Session;
+            session.StartRun();
+            yield return null;
+            yield return ClearRegularEnemies(session);
+
+            session.ResetAudioHistoryForTests();
+            Assert.That(session.SelectRoundReward(0), Is.True);
+            Assert.That(ContainsRecentCue(session, GameAudioCue.Reward), Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator Armory_purchase_and_error_emit_cues()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+
+            var session = _bootstrap.Session;
+            session.ShowArmory();
+            yield return null;
+
+            session.ResetAudioHistoryForTests();
+            Assert.That(session.ClickArmoryWeaponActionForTests(WeaponId.Smg), Is.True);
+            Assert.That(ContainsRecentCue(session, GameAudioCue.Error), Is.True);
+
+            session.Profile.AddSupplies(10000);
+            session.ResetAudioHistoryForTests();
+            Assert.That(session.ClickArmoryWeaponActionForTests(WeaponId.Smg), Is.True);
+            Assert.That(ContainsRecentCue(session, GameAudioCue.Purchase), Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator Stop_all_releases_sources()
+        {
+            var audio = CreateAudio();
+            yield return null;
+
+            audio.Play(GameAudioCue.BossTelegraph);
+            audio.Play(GameAudioCue.BossSlam);
+            Assert.That(audio.ActiveVoiceCountForTests, Is.GreaterThan(0));
+
+            audio.StopAll();
+            yield return null;
+            Assert.That(audio.ActiveVoiceCountForTests, Is.EqualTo(0));
         }
 
         [UnityTest]
@@ -409,6 +625,38 @@ namespace JabaSurvivol.Tests.PlayMode
             }
 
             return false;
+        }
+
+        private static GameAudioCue ExpectedFireCue(WeaponId weaponId)
+        {
+            switch (weaponId)
+            {
+                case WeaponId.Smg:
+                    return GameAudioCue.SmgFire;
+                case WeaponId.Shotgun:
+                    return GameAudioCue.ShotgunFire;
+                case WeaponId.Rifle:
+                    return GameAudioCue.RifleFire;
+                case WeaponId.Lmg:
+                    return GameAudioCue.LmgFire;
+                default:
+                    return GameAudioCue.PistolFire;
+            }
+        }
+
+        private static int CountRecentCue(GameSession session, GameAudioCue cue)
+        {
+            var audio = session.AudioForTests;
+            var count = 0;
+            for (var i = 0; i < audio.RecentCueCountForTests && i < 8; i++)
+            {
+                if (audio.RecentCueForTests(i) == cue)
+                {
+                    count++;
+                }
+            }
+
+            return count;
         }
 
         private static IEnumerator ClearRegularEnemies(GameSession session)

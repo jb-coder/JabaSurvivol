@@ -299,6 +299,10 @@ namespace JabaSurvivol.Gameplay
         public void ResetHistoryForTests()
         {
             _recentCueCount = 0;
+            for (var i = 0; i < _lastPlayTimes.Length; i++)
+            {
+                _lastPlayTimes[i] = -1000f;
+            }
         }
 
         public bool HasClipForTests(GameAudioCue cue)
