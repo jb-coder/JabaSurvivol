@@ -9,21 +9,18 @@ namespace JabaSurvivol.Gameplay
     /// </summary>
     public sealed class ZombieActor
     {
-        public ZombieActor(ZombieArchetype archetype, GameObject gameObject, SpriteRenderer renderer, GameObject eliteRing)
+        public ZombieActor(ZombieArchetype archetype, GameObject gameObject, CharacterVisual visual)
         {
             Archetype = archetype;
             GameObject = gameObject;
-            Renderer = renderer;
-            EliteRing = eliteRing;
+            Visual = visual;
         }
 
         public ZombieArchetype Archetype { get; }
 
         public GameObject GameObject { get; }
 
-        public SpriteRenderer Renderer { get; }
-
-        public GameObject EliteRing { get; }
+        public CharacterVisual Visual { get; }
 
         public bool Active => GameObject.activeSelf;
     }
@@ -52,8 +49,8 @@ namespace JabaSurvivol.Gameplay
         {
             var actor = _actors[(int)archetype];
             actor.GameObject.transform.localScale = Vector3.one * visualScale;
-            actor.Renderer.color = ColorFor(archetype, isElite);
-            actor.EliteRing.SetActive(isElite);
+            actor.Visual.ResetVisual();
+            actor.Visual.SetElite(isElite);
             actor.GameObject.SetActive(true);
             return actor;
         }
@@ -95,22 +92,9 @@ namespace JabaSurvivol.Gameplay
         {
             var gameObject = new GameObject($"Zombie {archetype}");
             gameObject.transform.SetParent(parent, false);
-            var renderer = gameObject.AddComponent<SpriteRenderer>();
-            renderer.sprite = SpriteFactory.Circle;
-            renderer.color = ColorFor(archetype, false);
-            renderer.sortingOrder = 15;
-
-            var eliteRing = new GameObject("Elite Ring");
-            eliteRing.transform.SetParent(gameObject.transform, false);
-            eliteRing.transform.localScale = Vector3.one * 1.45f;
-            var ringRenderer = eliteRing.AddComponent<SpriteRenderer>();
-            ringRenderer.sprite = SpriteFactory.Ring;
-            ringRenderer.color = new Color(1f, 0.85f, 0.3f, 0.8f);
-            ringRenderer.sortingOrder = 16;
-            eliteRing.SetActive(false);
-
+            var visual = CharacterVisual.CreateZombie(gameObject.transform, archetype);
             gameObject.SetActive(false);
-            return new ZombieActor(archetype, gameObject, renderer, eliteRing);
+            return new ZombieActor(archetype, gameObject, visual);
         }
     }
 
