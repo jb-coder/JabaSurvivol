@@ -14,6 +14,7 @@ v0.3.0
 v0.4.0
 v0.5.1
 v0.6.0
+v0.7.0
 ```
 
 ## Release checklist
@@ -47,3 +48,16 @@ For every supported non-English locale:
 - [ ] Accented glyphs render with the active font.
 - [ ] Known layout gaps are listed in the release notes.
 - [ ] No unreviewed or stale translation is included.
+
+## Audio release gate
+
+For every release that changes audio behavior:
+
+- [ ] `docs/standards/audio.md` reflects the current cue matrix and settings contract.
+- [ ] Every `GameAudioCue` value maps to a non-empty generated clip.
+- [ ] Mute and volume apply to every source and persist across restarts.
+- [ ] Pause, focus loss, and Android background suspend audio.
+- [ ] Main menu and pause menu expose the audio controls in every supported locale.
+- [ ] Android filtered logcat has no audio errors.
+- [ ] Final authored audio remains deferred to v1.0.0 unless the release notes say otherwise.
+
