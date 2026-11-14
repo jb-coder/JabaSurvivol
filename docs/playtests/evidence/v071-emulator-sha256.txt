@@ -1,1 +1,1 @@
-4e4a0a63193fe7dfb8e9536776fb8da1d87786c07fa71fccad2f473cf4c7ff87  JabaSurvivol-emulator-0.7.1.apk
+bb59aec6649dd234a07b7028bca0c8a8f700db91ab8a4a16710e42b4350ab83f  JabaSurvivol-emulator-0.7.1.apk

@@ -9,8 +9,8 @@
 
 | Artifact | Version | Version code | ABI | Min API | Target API | Size | SHA-256 |
 |---|---|---:|---|---:|---:|---:|---|
-| Production APK | 0.7.1 | 9 | arm64-v8a | 26 | 36 | 35,185,867 bytes | `b63ca363d8e2e5c58d2c708ed355980fd4e9fc9a4a58c470d3a2ed4a2134bee5` |
-| Emulator APK | 0.7.1 | 9 | arm64-v8a, x86_64 | 26 | 36 | 82,014,483 bytes | `4e4a0a63193fe7dfb8e9536776fb8da1d87786c07fa71fccad2f473cf4c7ff87` |
+| Production APK | 0.7.1 | 9 | arm64-v8a | 26 | 36 | 35,184,531 bytes | `4118f15b0acd72e6ffb72eff0e827c1a974e7952b8abffc9a07411f7166c5148` |
+| Emulator APK | 0.7.1 | 9 | arm64-v8a, x86_64 | 26 | 36 | 103,243,483 bytes | `bb59aec6649dd234a07b7028bca0c8a8f700db91ab8a4a16710e42b4350ab83f` |
 
 The emulator APK was installed and launched. The production APK was badged
 and hashed; it was not installed on the x86_64 emulator because it is
@@ -68,7 +68,6 @@ missing-clip line was observed.
 - `v071-phone-audio-muted-es.png`
 - `v071-phone-gameplay-es.png`
 - `v071-phone-pause-es.png`
-- `v071-phone-pause-audio-es.png`
 - `v071-phone-resume-es.png`
 
 ### Tablet
