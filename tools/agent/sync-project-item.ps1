@@ -180,6 +180,7 @@ if ($milestoneTitle) {
         "v0.5.1*" { $phase = "Content" }
         "v0.6.0*" { $phase = "Localization" }
         "v0.7.0*" { $phase = "Art" }
+        "v0.7.1*" { $phase = "Art" }
         "v1.0.0*" { $phase = "Release" }
     }
 }
