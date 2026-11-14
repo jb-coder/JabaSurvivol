@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using JabaSurvivol.Core;
 using UnityEngine;
 
@@ -30,6 +31,12 @@ namespace JabaSurvivol.Gameplay
         private Camera _camera;
 
         public GameSession Session { get; private set; }
+
+        public SpriteRenderer FloorRendererForTests { get; private set; }
+
+        public int ArenaWallCountForTests { get; private set; }
+
+        public int ArenaPropCountForTests { get; private set; }
 
         private void Awake()
         {
@@ -166,57 +173,95 @@ namespace JabaSurvivol.Gameplay
             return cameraComponent;
         }
 
-        private static void BuildArena(Transform parent)
+        private void BuildArena(Transform parent)
         {
             var floor = new GameObject("Floor");
             floor.transform.SetParent(parent, false);
-            floor.transform.localScale = new Vector3(
+            FloorRendererForTests = floor.AddComponent<SpriteRenderer>();
+            FloorRendererForTests.sprite = ArtCatalog.Get("Environment/floor_tile");
+            FloorRendererForTests.drawMode = SpriteDrawMode.Tiled;
+            FloorRendererForTests.tileMode = SpriteTileMode.Continuous;
+            FloorRendererForTests.size = new Vector2(
                 GameBalance.ArenaHalfWidth * 2f,
-                GameBalance.ArenaHalfHeight * 2f,
-                1f);
-            var floorRenderer = floor.AddComponent<SpriteRenderer>();
-            floorRenderer.sprite = SpriteFactory.Square;
-            floorRenderer.color = new Color(0.04f, 0.055f, 0.085f);
-            floorRenderer.sortingOrder = -30;
+                GameBalance.ArenaHalfHeight * 2f);
+            FloorRendererForTests.sortingOrder = SortingOrders.Floor;
 
-            for (var x = -8; x <= 8; x += 2)
+            AddWall(
+                parent,
+                "Arena Wall Top",
+                new Vector3(0f, GameBalance.ArenaHalfHeight, 0f),
+                new Vector2((GameBalance.ArenaHalfWidth * 2f) + 0.4f, 0.25f),
+                "Environment/wall_horizontal");
+            AddWall(
+                parent,
+                "Arena Wall Bottom",
+                new Vector3(0f, -GameBalance.ArenaHalfHeight, 0f),
+                new Vector2((GameBalance.ArenaHalfWidth * 2f) + 0.4f, 0.25f),
+                "Environment/wall_horizontal");
+            AddWall(
+                parent,
+                "Arena Wall Left",
+                new Vector3(-GameBalance.ArenaHalfWidth, 0f, 0f),
+                new Vector2(0.25f, (GameBalance.ArenaHalfHeight * 2f) + 0.4f),
+                "Environment/wall_vertical");
+            AddWall(
+                parent,
+                "Arena Wall Right",
+                new Vector3(GameBalance.ArenaHalfWidth, 0f, 0f),
+                new Vector2(0.25f, (GameBalance.ArenaHalfHeight * 2f) + 0.4f),
+                "Environment/wall_vertical");
+            ArenaWallCountForTests = 4;
+
+            var props = new[]
             {
-                AddLine(parent, $"Grid X {x}", new Vector3(x, 0f, 0f), new Vector3(0.028f, GameBalance.ArenaHalfHeight * 2f, 1f));
+                ("Prop Barrel Left", "Environment/prop_barrel", new Vector2(-6.4f, -3.2f), 0.78f),
+                ("Prop Crate Right", "Environment/prop_crate", new Vector2(6.2f, 3.1f), 0.74f),
+                ("Prop Debris Left", "Environment/prop_debris", new Vector2(-6.0f, 2.9f), 0.7f),
+                ("Prop Barrel Right", "Environment/prop_barrel", new Vector2(6.4f, -3.0f), 0.7f),
+                ("Prop Crate Top", "Environment/prop_crate", new Vector2(2.4f, 3.6f), 0.62f),
+                ("Prop Debris Bottom", "Environment/prop_debris", new Vector2(-2.6f, -3.7f), 0.6f)
+            };
+
+            foreach (var (name, sprite, position, scale) in props)
+            {
+                AddProp(parent, name, sprite, position, scale);
             }
 
-            for (var y = -4; y <= 4; y += 2)
-            {
-                AddLine(parent, $"Grid Y {y}", new Vector3(0f, y, 0f), new Vector3(GameBalance.ArenaHalfWidth * 2f, 0.028f, 1f));
-            }
-
-            AddBorder(parent, "Border Top", new Vector3(0f, GameBalance.ArenaHalfHeight, 0f), new Vector3((GameBalance.ArenaHalfWidth * 2f) + 0.12f, 0.09f, 1f));
-            AddBorder(parent, "Border Bottom", new Vector3(0f, -GameBalance.ArenaHalfHeight, 0f), new Vector3((GameBalance.ArenaHalfWidth * 2f) + 0.12f, 0.09f, 1f));
-            AddBorder(parent, "Border Left", new Vector3(-GameBalance.ArenaHalfWidth, 0f, 0f), new Vector3(0.09f, (GameBalance.ArenaHalfHeight * 2f) + 0.12f, 1f));
-            AddBorder(parent, "Border Right", new Vector3(GameBalance.ArenaHalfWidth, 0f, 0f), new Vector3(0.09f, (GameBalance.ArenaHalfHeight * 2f) + 0.12f, 1f));
+            ArenaPropCountForTests = props.Length;
         }
 
-        private static void AddLine(Transform parent, string name, Vector3 position, Vector3 scale)
+        private static void AddWall(
+            Transform parent,
+            string name,
+            Vector3 position,
+            Vector2 size,
+            string spritePath)
         {
-            var line = new GameObject(name);
-            line.transform.SetParent(parent, false);
-            line.transform.localPosition = position;
-            line.transform.localScale = scale;
-            var renderer = line.AddComponent<SpriteRenderer>();
-            renderer.sprite = SpriteFactory.Square;
-            renderer.color = new Color(0.07f, 0.095f, 0.14f);
-            renderer.sortingOrder = -25;
+            var wall = new GameObject(name);
+            wall.transform.SetParent(parent, false);
+            wall.transform.localPosition = position;
+            var renderer = wall.AddComponent<SpriteRenderer>();
+            renderer.sprite = ArtCatalog.Get(spritePath);
+            renderer.drawMode = SpriteDrawMode.Tiled;
+            renderer.tileMode = SpriteTileMode.Continuous;
+            renderer.size = size;
+            renderer.sortingOrder = SortingOrders.WallsAndProps;
         }
 
-        private static void AddBorder(Transform parent, string name, Vector3 position, Vector3 scale)
+        private static void AddProp(
+            Transform parent,
+            string name,
+            string spritePath,
+            Vector2 position,
+            float scale)
         {
-            var border = new GameObject(name);
-            border.transform.SetParent(parent, false);
-            border.transform.localPosition = position;
-            border.transform.localScale = scale;
-            var renderer = border.AddComponent<SpriteRenderer>();
-            renderer.sprite = SpriteFactory.Square;
-            renderer.color = new Color(0.1f, 0.42f, 0.55f);
-            renderer.sortingOrder = -20;
+            var prop = new GameObject(name);
+            prop.transform.SetParent(parent, false);
+            prop.transform.localPosition = position;
+            prop.transform.localScale = Vector3.one * scale;
+            var renderer = prop.AddComponent<SpriteRenderer>();
+            renderer.sprite = ArtCatalog.Get(spritePath);
+            renderer.sortingOrder = SortingOrders.WallsAndProps + 1;
         }
     }
 }

@@ -2,6 +2,7 @@ using JabaSurvivol.Editor;
 using JabaSurvivol.Gameplay;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEditor.U2D;
 using UnityEngine;
 using UnityEngine.U2D;
@@ -58,6 +59,46 @@ namespace JabaSurvivol.Tests.EditMode
             Assert.That(settings.spritePivot.y, Is.EqualTo(entry.pivotY).Within(0.001f));
         }
 
+
+        [Test]
+        public void Environment_tiles_use_full_rect_meshes_for_tiling()
+        {
+            var importer = AssetImporter.GetAtPath(ArtImportSettings.AssetRoot + "/Environment/floor_tile.png") as TextureImporter;
+            Assert.That(importer, Is.Not.Null);
+            var settings = new TextureImporterSettings();
+            importer.ReadTextureSettings(settings);
+            Assert.That(settings.spriteMeshType, Is.EqualTo(SpriteMeshType.FullRect));
+        }
+
+        [Test]
+        public void Android_application_and_adaptive_icons_are_configured()
+        {
+            ProjectSetup.ConfigureIcons();
+
+            var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(ArtImportSettings.AssetRoot + "/App/icon.png");
+            Assert.That(icon, Is.Not.Null);
+            var applicationIcons = PlayerSettings.GetIcons(NamedBuildTarget.Android, IconKind.Application);
+            Assert.That(applicationIcons, Is.Not.Null);
+            Assert.That(applicationIcons.Length, Is.GreaterThan(0));
+            Assert.That(applicationIcons[0], Is.Not.Null);
+
+            var adaptiveFound = false;
+            foreach (var kind in PlayerSettings.GetSupportedIconKinds(NamedBuildTarget.Android))
+            {
+                if (!kind.ToString().Contains("Adaptive", System.StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                adaptiveFound = true;
+                foreach (var slot in PlayerSettings.GetPlatformIcons(NamedBuildTarget.Android, kind))
+                {
+                    Assert.That(slot.GetTexture(), Is.Not.Null);
+                }
+            }
+
+            Assert.That(adaptiveFound, Is.True);
+        }
         [Test]
         public void Category_atlases_are_present_and_packed()
         {

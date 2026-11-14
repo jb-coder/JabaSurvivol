@@ -28,6 +28,7 @@ public sealed class ArtPipelineTests
         Assert.Contains(manifest.Assets, asset => asset.Category == "effect");
         Assert.Contains(manifest.Assets, asset => asset.Category == "ui");
         Assert.Contains(manifest.Assets, asset => asset.Category == "environment");
+        Assert.Contains(manifest.Assets, asset => asset.Category == "app");
     }
 
     [Fact]
