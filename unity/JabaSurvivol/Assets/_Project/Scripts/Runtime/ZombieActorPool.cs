@@ -108,6 +108,9 @@ namespace JabaSurvivol.Gameplay
 
         private readonly GameObject[] _objects;
         private readonly SpriteRenderer[] _renderers;
+        private readonly SpriteRenderer[] _burstRenderers;
+        private readonly Transform[] _burstTransforms;
+        private readonly Sprite _burst;
         private readonly float[] _remaining;
         private readonly float[] _startScale;
         private readonly Color[] _colors;
@@ -116,6 +119,9 @@ namespace JabaSurvivol.Gameplay
         {
             _objects = new GameObject[PoolSize];
             _renderers = new SpriteRenderer[PoolSize];
+            _burstRenderers = new SpriteRenderer[PoolSize];
+            _burstTransforms = new Transform[PoolSize];
+            _burst = ArtCatalog.Get("Effects/death_burst");
             _remaining = new float[PoolSize];
             _startScale = new float[PoolSize];
             _colors = new Color[PoolSize];
@@ -128,8 +134,15 @@ namespace JabaSurvivol.Gameplay
                 renderer.sprite = SpriteFactory.Ring;
                 renderer.sortingOrder = 14;
                 effect.SetActive(false);
+                var burst = new GameObject("Burst");
+                burst.transform.SetParent(effect.transform, false);
+                var burstRenderer = burst.AddComponent<SpriteRenderer>();
+                burstRenderer.sprite = _burst;
+                burstRenderer.sortingOrder = 15;
                 _objects[i] = effect;
                 _renderers[i] = renderer;
+                _burstRenderers[i] = burstRenderer;
+                _burstTransforms[i] = burst.transform;
             }
         }
 
@@ -145,6 +158,9 @@ namespace JabaSurvivol.Gameplay
                 _objects[i].transform.position = position;
                 _objects[i].transform.localScale = Vector3.one * scale;
                 _renderers[i].color = color;
+                _burstTransforms[i].localRotation = Quaternion.Euler(0f, 0f, i * 37f);
+                _burstTransforms[i].localScale = Vector3.one * 0.9f;
+                _burstRenderers[i].color = color;
                 _remaining[i] = Lifetime;
                 _startScale[i] = scale;
                 _colors[i] = color;
@@ -174,6 +190,10 @@ namespace JabaSurvivol.Gameplay
                 var color = _colors[i];
                 color.a = 1f - progress;
                 _renderers[i].color = color;
+                var burst = _burstRenderers[i].color;
+                burst.a = 1f - progress;
+                _burstRenderers[i].color = burst;
+                _burstTransforms[i].localScale = Vector3.one * (0.9f + (progress * 0.7f));
             }
         }
 
