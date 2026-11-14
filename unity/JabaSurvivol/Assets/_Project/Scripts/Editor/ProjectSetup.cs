@@ -71,8 +71,8 @@ namespace JabaSurvivol.Editor
         {
             PlayerSettings.companyName = "JabaSurvivol";
             PlayerSettings.productName = "JabaSurvivol";
-            PlayerSettings.bundleVersion = "0.6.0";
-            PlayerSettings.Android.bundleVersionCode = 7;
+            PlayerSettings.bundleVersion = "0.7.0";
+            PlayerSettings.Android.bundleVersionCode = 8;
             PlayerSettings.colorSpace = ColorSpace.Linear;
 
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.jabasurvivol.game");
