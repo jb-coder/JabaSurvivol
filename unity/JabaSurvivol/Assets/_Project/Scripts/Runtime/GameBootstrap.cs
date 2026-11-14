@@ -71,6 +71,10 @@ namespace JabaSurvivol.Gameplay
                 input,
                 _worldRoot,
                 AccountServiceFactoryOverride?.Invoke());
+#if DEVELOPMENT_BUILD
+            gameObject.AddComponent<PerformanceProbe>();
+            ApplyDebugScenario();
+#endif
         }
 
         private void OnApplicationPause(bool pauseStatus)
@@ -100,6 +104,95 @@ namespace JabaSurvivol.Gameplay
         }
 
 #if DEVELOPMENT_BUILD
+        private void ApplyDebugScenario()
+        {
+            var scenario = ReadDebugScenario();
+            if (string.IsNullOrWhiteSpace(scenario))
+            {
+                return;
+            }
+
+            StartCoroutine(ApplyDebugScenarioAfterFrame(scenario));
+        }
+
+        private IEnumerator ApplyDebugScenarioAfterFrame(string scenario)
+        {
+            yield return null;
+
+            switch (scenario)
+            {
+                case "boss":
+                    Session.StartRunForTests(GameBalance.BossRound);
+                    yield return null;
+                    var budget = Session.SpawnBudget;
+                    for (var i = 0; i < budget; i++)
+                    {
+                        Session.DamageZombieForTests(100000f);
+                        yield return null;
+                        if (i < budget - 1)
+                        {
+                            Session.SpawnZombieForTests();
+                            yield return null;
+                        }
+                    }
+
+                    Session.SpawnBossForTests();
+                    break;
+
+                case "reward":
+                    Session.StartRun();
+                    yield return null;
+                    Session.ShowRoundEndForTests(new[]
+                    {
+                        new RoundRewardOption(RoundRewardType.Supplies, 100),
+                        new RoundRewardOption(RoundRewardType.Xp, 50),
+                        new RoundRewardOption(RoundRewardType.AmmoCrate, 1)
+                    });
+                    break;
+
+                case "armory":
+                    Session.StartRun();
+                    yield return null;
+                    Session.PauseGame();
+                    Session.ShowArmory();
+                    break;
+
+                case "character":
+                    Session.StartRun();
+                    yield return null;
+                    Session.PauseGame();
+                    Session.ShowCharacterSheet();
+                    break;
+
+                case "pause":
+                    Session.StartRun();
+                    yield return null;
+                    Session.PauseGame();
+                    break;
+            }
+        }
+
+        private static string ReadDebugScenario()
+        {
+            if (Application.platform != RuntimePlatform.Android)
+            {
+                return string.Empty;
+            }
+
+            try
+            {
+                using var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+                using var activity = player.GetStatic<AndroidJavaObject>("currentActivity");
+                using var intent = activity.Call<AndroidJavaObject>("getIntent");
+                return intent?.Call<string>("getStringExtra", "jabaScenario") ?? string.Empty;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning("Debug scenario read failed: " + exception.GetType().Name);
+                return string.Empty;
+            }
+        }
+
         private static void SeedDevelopmentSession()
         {
             if (Application.platform != RuntimePlatform.Android)
