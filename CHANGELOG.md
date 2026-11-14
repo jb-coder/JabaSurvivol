@@ -12,6 +12,7 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - Manifest-driven Unity import settings, category sprite atlases, `ArtCatalog`, named sorting orders, and EditMode coverage for catalog loading, pivots, and atlas packing.
 - Modular authored player, Walker, Runner, Brute, Warden, and turret rigs with procedural walk, aim, recoil, elite aura, and enrage feedback.
 - Visual-showcase capture tool and PlayMode coverage for player aim, zombie pooling, elite aura, boss enrage, and turret deployment.
+- Authored weapon, reward, active-skill, HUD, armory, and character-sheet icons with PlayMode coverage.
 - Art direction, first-party provenance contract, and ADR-0010 for the generated art pipeline.
 
 ### Changed
