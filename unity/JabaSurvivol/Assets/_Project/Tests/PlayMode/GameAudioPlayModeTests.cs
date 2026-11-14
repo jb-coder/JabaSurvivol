@@ -217,10 +217,12 @@ namespace JabaSurvivol.Tests.PlayMode
             yield return null;
 
             var session = _bootstrap.Session;
+            session.ResetAudioHistoryForTests();
             session.AudioButtonMainForTests.onClick.Invoke();
             yield return null;
 
             Assert.That(session.AudioPanelVisibleForTests, Is.True);
+            Assert.That(ContainsRecentCue(session, GameAudioCue.UiOpen), Is.True);
             Assert.That(session.SoundLabelForTests, Is.EqualTo("SOUND: ON"));
             Assert.That(session.AudioMasterLabelForTests, Is.EqualTo("VOL 100%"));
             Assert.That(session.AudioEffectsLabelForTests, Is.EqualTo("FX 80%"));
@@ -240,8 +242,10 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(session.AudioForTests.EffectsVolume, Is.EqualTo(0.7f).Within(0.001f));
             Assert.That(session.AudioEffectsLabelForTests, Is.EqualTo("FX 70%"));
 
+            session.ResetAudioHistoryForTests();
             session.AudioCloseButtonForTests.onClick.Invoke();
             Assert.That(session.AudioPanelVisibleForTests, Is.False);
+            Assert.That(ContainsRecentCue(session, GameAudioCue.UiClose), Is.True);
         }
 
         [UnityTest]
@@ -437,10 +441,31 @@ namespace JabaSurvivol.Tests.PlayMode
             yield return null;
 
             var session = _bootstrap.Session;
+            session.Profile.UnlockWeapon(WeaponId.Smg);
             session.StartRun();
             yield return null;
-            session.ResetAudioHistoryForTests();
+            Assert.That(session.SwitchWeapon(), Is.True);
 
+            var state = session.Run.CurrentWeaponState;
+            while (state.Magazine > 0)
+            {
+                state.TryFire();
+            }
+
+            while (state.Reserve > 0)
+            {
+                Assert.That(state.StartReload(), Is.True);
+                state.Tick(1000f);
+                while (state.Magazine > 0)
+                {
+                    state.TryFire();
+                }
+            }
+
+            Assert.That(state.Magazine, Is.EqualTo(0));
+            Assert.That(state.Reserve, Is.EqualTo(0));
+
+            session.ResetAudioHistoryForTests();
             Assert.That(session.ReloadWeapon(), Is.False);
             Assert.That(RecentCue(session, 0), Is.EqualTo(GameAudioCue.Empty));
         }

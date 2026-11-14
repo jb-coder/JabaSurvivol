@@ -144,11 +144,17 @@ The audio panel reuses existing keys:
 
 ## Verification
 
-- EditMode coverage for cue generation, cue catalog completeness, volume
-  clamping, and preference migration.
-- PlayMode coverage for mute, volume, suspend and resume, voice limits, and
-  event-to-cue mapping.
-- English and Spanish audio-control labels and phone and tablet layouts.
+Automated coverage in the implementation PR:
+
+- PlayMode coverage for cue generation, cue catalog completeness, volume
+  clamping and persistence, mute, suspend and resume, voice limits, source
+  release, and every event-to-cue mapping.
+- Pseudo-locale coverage for the audio panel layout.
+- PlayMode coverage for the main-menu and pause-menu audio controls.
+
+Release evidence tracked in #182:
+
+- English and Spanish phone and tablet screenshots.
 - Android APK build, install, launch, mute, combat, pause, background, resume,
   and filtered logcat.
 - Evidence stored under `docs/playtests/` with honest automated-verification
