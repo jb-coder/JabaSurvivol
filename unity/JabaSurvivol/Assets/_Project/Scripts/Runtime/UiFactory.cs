@@ -14,6 +14,11 @@ namespace JabaSurvivol.Gameplay
     {
         private static Font _font;
 
+        /// <summary>
+        /// Optional UI cue sink. It is assigned by the active game session.
+        /// </summary>
+        public static Action<GameAudioCue> PlayUiCue;
+
         public static GameObject CreateCanvas(string name, Transform parent)
         {
             var canvasObject = new GameObject(
@@ -126,7 +131,11 @@ namespace JabaSurvivol.Gameplay
                 colorMultiplier = 1f,
                 fadeDuration = 0.08f
             };
-            button.onClick.AddListener(() => onClick?.Invoke());
+            button.onClick.AddListener(() =>
+            {
+                PlayUiCue?.Invoke(GameAudioCue.UiClick);
+                onClick?.Invoke();
+            });
 
             var text = CreateText(buttonObject.transform, "Label", label, fontSize, TextAnchor.MiddleCenter, Color.white);
             Stretch(text.rectTransform);

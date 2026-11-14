@@ -7,7 +7,7 @@ the current implementation, the known defects, the event-to-cue matrix, the
 settings contract, and the release gate. Final authored music and production
 sound effects remain in v1.0.0.
 
-## Current implementation
+## Baseline before v0.7.1
 
 - `GameAudio` is a `MonoBehaviour` created by `GameSession`.
 - Clips are generated procedurally at runtime at 22050 Hz and cached.
@@ -18,6 +18,20 @@ sound effects remain in v1.0.0.
 - `GameSession` saves the profile on `OnApplicationPause` but does not suspend
   audio.
 - There is no volume control, voice limit, or per-cue cooldown.
+
+## v0.7.1 implementation
+
+- 33 procedural cues cover combat, skills, the boss, rounds, and UI.
+- A fixed pool of 12 sources bounds simultaneous one-shots.
+- Per-cue cooldowns prevent duplicate cues from stacking.
+- Master mute, master volume, and effects volume are persisted in
+  PlayerPrefs and applied to every source.
+- Pause, focus loss, and Android background suspend audio and stop active
+  one-shots. Resume restores audio only when the session is playing.
+- The main menu and pause menu open an audio panel with mute, VOL, and FX
+  controls. VOL and FX are language-neutral technical abbreviations.
+- The panel reuses the existing pause.sound.on, pause.sound.off, and
+  settings.language.close keys, so no Spanish locale table change is needed.
 
 ## Known defects and gaps
 
@@ -37,43 +51,45 @@ sound effects remain in v1.0.0.
 ## Cue matrix
 
 Every row is silent while the master mute is enabled or audio is suspended.
-The mute column records that shared behavior explicitly.
+The mute column records that shared behavior explicitly. The implementation uses one
+global pool of 12 sources and a shared 0.03 s per-cue cooldown. Priority is a
+gameplay-importance hint, not a separate per-cue voice budget.
 
-| Event | Cue | Priority | Voice limit | Mute behavior |
-|---|---|---|---|---|
-| Player takes damage | `Hit` | High | 2 | Silent |
-| Player bullet impacts a zombie or boss | `Impact` | Low | 4 | Silent |
-| Player bullet damages the boss | `BossHit` | Low | 2 | Silent |
-| Zombie killed | `Kill` | High | 3 | Silent |
-| Boss killed | `BossDeath` | High | 1 | Silent |
-| Pistol fired | `PistolFire` | High | 2 | Silent |
-| SMG fired | `SmgFire` | High | 3 | Silent |
-| Shotgun fired | `ShotgunFire` | High | 2 | Silent |
-| Rifle fired | `RifleFire` | High | 2 | Silent |
-| LMG fired | `LmgFire` | High | 3 | Silent |
-| Empty magazine | `Empty` | Medium | 1 | Silent |
-| Reload started | `ReloadStart` | Medium | 1 | Silent |
-| Reload completed | `ReloadComplete` | Medium | 1 | Silent |
-| Weapon switched | `WeaponSwitch` | Medium | 1 | Silent |
-| Turret deployed | `TurretDeploy` | Medium | 1 | Silent |
-| Turret fired | `TurretFire` | Low | 4 | Silent |
-| Dash activated | `Dash` | Medium | 1 | Silent |
-| Shockwave activated | `Shockwave` | Medium | 1 | Silent |
-| Boss spawned | `BossSpawn` | High | 1 | Silent |
-| Boss telegraph started | `BossTelegraph` | High | 1 | Silent |
-| Boss slam resolved | `BossSlam` | High | 1 | Silent |
-| Boss enraged | `BossEnrage` | High | 1 | Silent |
-| Round started | `RoundStart` | Medium | 1 | Silent |
-| Round cleared | `RoundClear` | High | 1 | Silent |
-| Reward selected | `Reward` | High | 1 | Silent |
-| Level up | `LevelUp` | High | 1 | Silent |
-| Boss killed and victory shown | `Victory` | High | 1 | Silent |
-| Player health reaches zero in `EndRun` | `Defeat` | High | 1 | Silent |
-| UI button clicked | `UiClick` | Low | 2 | Silent |
-| Panel opened | `UiOpen` | Low | 1 | Silent |
-| Panel closed | `UiClose` | Low | 1 | Silent |
-| Purchase or upgrade succeeded | `Purchase` | Medium | 1 | Silent |
-| Rejected action or error | `Error` | Medium | 1 | Silent |
+| Event | Cue | Priority | Mute behavior |
+|---|---|---|---|
+| Player takes damage | `Hit` | High | Silent |
+| Player bullet impacts a zombie or boss | `Impact` | Low | Silent |
+| Player bullet damages the boss | `BossHit` | Low | Silent |
+| Zombie killed | `Kill` | High | Silent |
+| Boss killed | `BossDeath` | High | Silent |
+| Pistol fired | `PistolFire` | High | Silent |
+| SMG fired | `SmgFire` | High | Silent |
+| Shotgun fired | `ShotgunFire` | High | Silent |
+| Rifle fired | `RifleFire` | High | Silent |
+| LMG fired | `LmgFire` | High | Silent |
+| Empty magazine | `Empty` | Medium | Silent |
+| Reload started | `ReloadStart` | Medium | Silent |
+| Reload completed | `ReloadComplete` | Medium | Silent |
+| Weapon switched | `WeaponSwitch` | Medium | Silent |
+| Turret deployed | `TurretDeploy` | Medium | Silent |
+| Turret fired | `TurretFire` | Low | Silent |
+| Dash activated | `Dash` | Medium | Silent |
+| Shockwave activated | `Shockwave` | Medium | Silent |
+| Boss spawned | `BossSpawn` | High | Silent |
+| Boss telegraph started | `BossTelegraph` | High | Silent |
+| Boss slam resolved | `BossSlam` | High | Silent |
+| Boss enraged | `BossEnrage` | High | Silent |
+| Round started | `RoundStart` | Medium | Silent |
+| Round cleared | `RoundClear` | High | Silent |
+| Reward selected | `Reward` | High | Silent |
+| Level up | `LevelUp` | High | Silent |
+| Boss killed and victory shown | `Victory` | High | Silent |
+| Player health reaches zero in `EndRun` | `Defeat` | High | Silent |
+| UI button clicked | `UiClick` | Low | Silent |
+| Panel opened | `UiOpen` | Low | Silent |
+| Panel closed | `UiClose` | Low | Silent |
+| Purchase or upgrade succeeded | `Purchase` | Medium | Silent |
+| Rejected action or error | `Error` | Medium | Silent |
 
 ## Settings contract
 
@@ -93,20 +109,18 @@ Rules:
 - `audio.muted` from v0.5.1 remains the source of truth for mute, so existing
   preferences keep working.
 - Audio controls are available on the main menu and the pause menu.
-- The controls use localization keys and must render in English and Spanish.
+- The controls use existing localization keys and language-neutral symbols so they render in English and Spanish without new translations.
 
-## Audio control localization keys
+## Audio control labels
 
-| Key | English source |
+The audio panel reuses existing keys:
+
+| Control | Key |
 |---|---|
-| `settings.audio.title` | AUDIO |
-| `settings.audio.master` | MASTER {0}% |
-| `settings.audio.effects` | EFFECTS {0}% |
-| `settings.audio.mute.on` | MUTE: ON |
-| `settings.audio.mute.off` | MUTE: OFF |
-| `settings.audio.down` | - |
-| `settings.audio.up` | + |
-| `settings.audio.close` | CLOSE |
+| Main menu and pause menu entry | `pause.sound.on` / `pause.sound.off` |
+| Mute button | `pause.sound.on` / `pause.sound.off` |
+| Close button | `settings.language.close` |
+| Volume rows | `VOL` and `FX` language-neutral abbreviations with percentages |
 
 ## Lifecycle contract
 
@@ -130,11 +144,17 @@ Rules:
 
 ## Verification
 
-- EditMode coverage for cue generation, cue catalog completeness, volume
-  clamping, and preference migration.
-- PlayMode coverage for mute, volume, suspend and resume, voice limits, and
-  event-to-cue mapping.
-- English and Spanish audio-control labels and phone and tablet layouts.
+Automated coverage in the implementation PR:
+
+- PlayMode coverage for cue generation, cue catalog completeness, volume
+  clamping and persistence, mute, suspend and resume, voice limits, source
+  release, and every event-to-cue mapping.
+- Pseudo-locale coverage for the audio panel layout.
+- PlayMode coverage for the main-menu and pause-menu audio controls.
+
+Release evidence tracked in #182:
+
+- English and Spanish phone and tablet screenshots.
 - Android APK build, install, launch, mute, combat, pause, background, resume,
   and filtered logcat.
 - Evidence stored under `docs/playtests/` with honest automated-verification

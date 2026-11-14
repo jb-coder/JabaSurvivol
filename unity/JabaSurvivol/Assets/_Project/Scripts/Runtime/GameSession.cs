@@ -67,6 +67,7 @@ namespace JabaSurvivol.Gameplay
         private GameSessionState _armoryReturnState;
         private int _spreadSequence;
         private float _levelUpRemaining;
+        private bool _wasReloading;
         private bool _lastBerserkerActive;
         private bool _lastGhostActive;
         private IAccountService _accountService;
@@ -167,6 +168,12 @@ namespace JabaSurvivol.Gameplay
 
         public UnityEngine.Sprite ArmoryWeaponIconForTests(WeaponId weaponId) => _ui?.ArmoryWeaponIconForTests(weaponId);
 
+        public bool ClickArmoryWeaponActionForTests(WeaponId weaponId) =>
+            _ui != null && _ui.ClickArmoryWeaponActionForTests(weaponId);
+
+        public bool ClickArmoryUpgradeForTests(WeaponUpgradeStat stat) =>
+            _ui != null && _ui.ClickArmoryUpgradeForTests(stat);
+
         public UnityEngine.Sprite SelectActiveSkillIconForTests(SkillNode node) => _ui?.SelectActiveSkillIconForTests(node);
 
         public void ShowRoundEndForTests(RoundRewardOption[] options)
@@ -218,6 +225,34 @@ namespace JabaSurvivol.Gameplay
         public void UseDesignLayoutForTests() => _ui?.UseDesignLayoutForTests();
 
         public UnityEngine.UI.Button SoundButtonForTests => _ui?.SoundButtonForTests;
+
+        public bool AudioPanelVisibleForTests => _ui?.AudioPanelVisible ?? false;
+
+        public UnityEngine.UI.Button AudioButtonMainForTests => _ui?.AudioButtonMainForTests;
+
+        public UnityEngine.UI.Button AudioButtonPauseForTests => _ui?.AudioButtonPauseForTests;
+
+        public UnityEngine.UI.Button AudioMuteButtonForTests => _ui?.AudioMuteButtonForTests;
+
+        public UnityEngine.UI.Button AudioMasterMinusButtonForTests => _ui?.AudioMasterMinusButtonForTests;
+
+        public UnityEngine.UI.Button AudioMasterPlusButtonForTests => _ui?.AudioMasterPlusButtonForTests;
+
+        public UnityEngine.UI.Button AudioEffectsMinusButtonForTests => _ui?.AudioEffectsMinusButtonForTests;
+
+        public UnityEngine.UI.Button AudioEffectsPlusButtonForTests => _ui?.AudioEffectsPlusButtonForTests;
+
+        public UnityEngine.UI.Button AudioCloseButtonForTests => _ui?.AudioCloseButtonForTests;
+
+        public string AudioMasterLabelForTests => _ui?.AudioMasterLabelForTests ?? string.Empty;
+
+        public string AudioEffectsLabelForTests => _ui?.AudioEffectsLabelForTests ?? string.Empty;
+
+        public void SetApplicationPausedForTests(bool paused) => OnApplicationPause(paused);
+
+        public void SetApplicationFocusedForTests(bool focused) => OnApplicationFocus(focused);
+
+        public void ResetAudioHistoryForTests() => _audio?.ResetHistoryForTests();
 
         public float LastBulletDamageForTests { get; private set; }
 
@@ -374,6 +409,8 @@ namespace JabaSurvivol.Gameplay
                 PauseGame,
                 ResumeGame,
                 ToggleSound,
+                AdjustMasterVolume,
+                AdjustEffectsVolume,
                 () => ReloadWeapon(),
                 () => SwitchWeapon(),
                 () => ActivateActiveSkill(),
@@ -403,6 +440,8 @@ namespace JabaSurvivol.Gameplay
                 HandleLocaleSelected,
                 HideLeaderboard);
 
+            UiFactory.PlayUiCue = cue => _audio.Play(cue);
+            SyncAudioUi();
             Localization.LocaleChanged += HandleLocaleChanged;
 
             _accountService = accountService ?? CreateDefaultAccountService();
@@ -557,6 +596,13 @@ namespace JabaSurvivol.Gameplay
             _muzzleFlashes?.Update(deltaTime);
             _impacts?.Update(deltaTime);
             _run.TickWeapons(deltaTime);
+            var reloading = _run.IsReloading;
+            if (_wasReloading && !reloading)
+            {
+                _audio?.Play(GameAudioCue.ReloadComplete);
+            }
+
+            _wasReloading = reloading;
             _run.TickActiveSkill(deltaTime);
             _run.TickSynergies(deltaTime);
             UpdateSynergyStats();
@@ -661,7 +707,15 @@ namespace JabaSurvivol.Gameplay
                 }
                 else
                 {
-                    _run.StartReload();
+                    if (_run.StartReload())
+                    {
+                        _audio?.Play(GameAudioCue.ReloadStart);
+                    }
+                    else
+                    {
+                        _audio?.Play(GameAudioCue.Empty);
+                    }
+
                     _fireCooldown = 0.15f;
                 }
             }
@@ -675,6 +729,7 @@ namespace JabaSurvivol.Gameplay
             var damage = _stats.EffectiveWeaponDamage;
             var weaponId = _run != null ? _run.CurrentWeapon : _profile.EquippedWeapon;
             var visual = WeaponVisualCatalog.Get(weaponId);
+            _audio?.Play(CueForWeapon(weaponId));
             LastBulletDamageForTests = damage;
             _playerVisual?.SetRecoil(1f);
 
@@ -707,6 +762,24 @@ namespace JabaSurvivol.Gameplay
                 _bullets.Spawn(origin, direction, _weapon.ProjectileSpeed, lifetime, damage, visual.BulletStyle);
             }
         }
+
+        private static GameAudioCue CueForWeapon(WeaponId weaponId)
+        {
+            switch (weaponId)
+            {
+                case WeaponId.Smg:
+                    return GameAudioCue.SmgFire;
+                case WeaponId.Shotgun:
+                    return GameAudioCue.ShotgunFire;
+                case WeaponId.Rifle:
+                    return GameAudioCue.RifleFire;
+                case WeaponId.Lmg:
+                    return GameAudioCue.LmgFire;
+                default:
+                    return GameAudioCue.PistolFire;
+            }
+        }
+
         private float NextSpreadAngle(float spreadDegrees)
         {
             if (spreadDegrees <= 0f)
@@ -754,7 +827,14 @@ namespace JabaSurvivol.Gameplay
                 return false;
             }
 
-            return _run.StartReload();
+            if (!_run.StartReload())
+            {
+                _audio?.Play(GameAudioCue.Empty);
+                return false;
+            }
+
+            _audio?.Play(GameAudioCue.ReloadStart);
+            return true;
         }
 
         /// <summary>
@@ -771,6 +851,8 @@ namespace JabaSurvivol.Gameplay
             RefreshStats();
             RefreshWeaponVisual();
             _fireCooldown = 0f;
+            _wasReloading = false;
+            _audio?.Play(GameAudioCue.WeaponSwitch);
             return true;
         }
 
@@ -874,6 +956,7 @@ namespace JabaSurvivol.Gameplay
             _bossTelegraphRing.SetActive(false);
             _ui.ShowBoss(Localization.Get("boss.name"));
             _ui.UpdateBoss(definition.MaxHealth, definition.MaxHealth, false);
+            _audio?.Play(GameAudioCue.BossSpawn);
             return true;
         }
 
@@ -889,7 +972,13 @@ namespace JabaSurvivol.Gameplay
             var bossPosition = (Vector2)_bossObject.transform.position;
             var playerPosition = (Vector2)_playerObject.transform.position;
 
+            var wasEnraged = _bossEnraged;
             _bossEnraged = boss.IsEnraged;
+            if (_bossEnraged && !wasEnraged)
+            {
+                _audio?.Play(GameAudioCue.BossEnrage);
+            }
+
             _bossVisual?.SetEnraged(_bossEnraged);
 
             if (_bossTelegraphRemaining > 0f)
@@ -905,6 +994,7 @@ namespace JabaSurvivol.Gameplay
                 if (_bossTelegraphRemaining <= 0f)
                 {
                     _bossTelegraphRing.SetActive(false);
+                    _audio?.Play(GameAudioCue.BossSlam);
                     if (CombatMath.CirclesOverlap(
                             bossPosition.x,
                             bossPosition.y,
@@ -931,6 +1021,7 @@ namespace JabaSurvivol.Gameplay
                     _bossTelegraphRing.transform.localScale = Vector3.one * (definition.SlamRadius * 2f * 0.35f);
                     _bossTelegraphRenderer.color = new Color(1f, 0.25f, 0.2f, 0.35f);
                     _bossTelegraphRing.SetActive(true);
+                    _audio?.Play(GameAudioCue.BossTelegraph);
                 }
                 else
                 {
@@ -990,6 +1081,8 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
+            _audio?.Play(GameAudioCue.Impact);
+            _audio?.Play(GameAudioCue.BossHit);
             if (_run.ApplyBossDamage(damage, out var reward))
             {
                 OnBossKilled(reward);
@@ -1047,6 +1140,7 @@ namespace JabaSurvivol.Gameplay
             _bullets.Clear();
             _muzzleFlashes?.Clear();
             _impacts?.Clear();
+            _audio?.Play(GameAudioCue.BossDeath);
             _audio?.Play(GameAudioCue.Victory);
             _ui.HideBoss();
             _ui.ShowVictory(_run.Round, _run.Kills, _runSuppliesEarned, _runXpEarned);
@@ -1113,6 +1207,8 @@ namespace JabaSurvivol.Gameplay
             _lastBerserkerActive = false;
             _lastGhostActive = false;
             _state = GameSessionState.Playing;
+            _wasReloading = false;
+            _audio.SetSuspended(false);
 
             _playerObject.SetActive(true);
             _playerObject.transform.position = Vector3.zero;
@@ -1139,6 +1235,7 @@ namespace JabaSurvivol.Gameplay
             _turretShotsFired = 0;
 
             SpawnZombie();
+            _audio.Play(GameAudioCue.RoundStart);
             _ui.ShowHud();
             _ui.SetRoundModifier(_run.RoundModel.Definition.IsElite);
             _ui.UpdateHud(_run.Player, _run.Armor, _run.MaxArmor, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
@@ -1170,8 +1267,9 @@ namespace JabaSurvivol.Gameplay
             }
 
             _state = GameSessionState.Paused;
+            _audio.SetSuspended(true);
             _ui.ShowPaused(true);
-            _ui.SetSound(!_audio.IsMuted);
+            SyncAudioUi();
             _ui.SetSticks(default, default);
             _store.Save(_profile);
             _ = SyncCloudAsync();
@@ -1181,7 +1279,27 @@ namespace JabaSurvivol.Gameplay
         private void ToggleSound()
         {
             _audio.ToggleMute();
-            _ui?.SetSound(!_audio.IsMuted);
+            SyncAudioUi();
+        }
+
+        private void AdjustMasterVolume(float volume)
+        {
+            _audio.SetMasterVolume(volume);
+            SyncAudioUi();
+        }
+
+        private void AdjustEffectsVolume(float volume)
+        {
+            _audio.SetEffectsVolume(volume);
+            SyncAudioUi();
+        }
+
+        private void SyncAudioUi()
+        {
+            _ui?.SetAudio(
+                _audio.IsMuted,
+                _audio.MasterVolume,
+                _audio.EffectsVolume);
         }
 
         private void HandleLocaleSelected(string locale)
@@ -1203,7 +1321,7 @@ namespace JabaSurvivol.Gameplay
             }
 
             _ui.RefreshProgress(_profile);
-            _ui.SetSound(!_audio.IsMuted);
+            SyncAudioUi();
             _ui.SetTelemetry(
                 _telemetryEnabled,
                 _telemetryService != null && _telemetryService.OptedIn);
@@ -1261,6 +1379,7 @@ namespace JabaSurvivol.Gameplay
             }
 
             _state = GameSessionState.Playing;
+            _audio.SetSuspended(false);
             _ui.ShowPaused(false);
         }
 
@@ -1302,6 +1421,8 @@ namespace JabaSurvivol.Gameplay
                 _bossTelegraphRing.SetActive(false);
             }
 
+            _audio.SetSuspended(false);
+            _audio.StopAll();
             _ui.ShowMainMenu(_profile);
         }
 
@@ -1317,6 +1438,7 @@ namespace JabaSurvivol.Gameplay
 
             _armoryReturnState = _state;
             _ui.ShowArmory(_profile, ArmoryDisplayWeapon());
+            _audio?.Play(GameAudioCue.UiOpen);
             _ui.SetSticks(default, default);
         }
 
@@ -1348,6 +1470,7 @@ namespace JabaSurvivol.Gameplay
             }
 
             _ui.HideArmory();
+            _audio?.Play(GameAudioCue.UiClose);
             if (_armoryReturnState == GameSessionState.Paused && _state == GameSessionState.Paused)
             {
                 _ui.ShowHud();
@@ -1391,11 +1514,13 @@ namespace JabaSurvivol.Gameplay
                 canRespec,
                 _weapon,
                 ArmorService.GetEffectiveStats(_profile, _profile.EquippedArmor));
+            _audio?.Play(GameAudioCue.UiOpen);
         }
 
         public void CloseCharacterSheet()
         {
             _ui?.HideCharacterSheet();
+            _audio?.Play(GameAudioCue.UiClose);
         }
 
         private void HandleAllocateSkill(SkillNode node)
@@ -1533,11 +1658,13 @@ namespace JabaSurvivol.Gameplay
                 if (result == ArmoryPurchaseResult.Purchased)
                 {
                     TryEquipWeapon(weaponId);
+                    _audio?.Play(GameAudioCue.Purchase);
                     _ui.SetArmoryStatus(
                         Localization.Format("armory.purchased", Localization.WeaponName(weaponId)));
                 }
                 else if (result == ArmoryPurchaseResult.InsufficientSupplies)
                 {
+                    _audio?.Play(GameAudioCue.Error);
                     _ui.SetArmoryStatus(Localization.Get("armory.insufficient"));
                 }
                 else if (result == ArmoryPurchaseResult.AlreadyOwned && TryEquipWeapon(weaponId))
@@ -1555,6 +1682,7 @@ namespace JabaSurvivol.Gameplay
             var result = TryPurchaseWeaponUpgrade(stat);
             if (result == WeaponUpgradePurchaseResult.Purchased)
             {
+                _audio?.Play(GameAudioCue.Purchase);
                 _ui.SetArmoryStatus(
                     Localization.Format(
                         "armory.upgrade.purchased",
@@ -1563,10 +1691,12 @@ namespace JabaSurvivol.Gameplay
             }
             else if (result == WeaponUpgradePurchaseResult.InsufficientSupplies)
             {
+                _audio?.Play(GameAudioCue.Error);
                 _ui.SetArmoryStatus(Localization.Get("armory.insufficient"));
             }
             else if (result == WeaponUpgradePurchaseResult.MaxTier)
             {
+                _audio?.Play(GameAudioCue.Error);
                 _ui.SetArmoryStatus(Localization.Get("armory.upgrade.maxed"));
             }
 
@@ -1710,11 +1840,13 @@ namespace JabaSurvivol.Gameplay
                 if (result == ArmorPurchaseResult.Purchased)
                 {
                     TryEquipArmor(tier);
+                    _audio?.Play(GameAudioCue.Purchase);
                     _ui.SetArmoryStatus(
                         Localization.Format("armory.armor.purchased", Localization.ArmorName(tier)));
                 }
                 else if (result == ArmorPurchaseResult.InsufficientSupplies)
                 {
+                    _audio?.Play(GameAudioCue.Error);
                     _ui.SetArmoryStatus(Localization.Get("armory.insufficient"));
                 }
             }
@@ -1727,6 +1859,7 @@ namespace JabaSurvivol.Gameplay
             var result = TryPurchaseArmorUpgrade(_profile.EquippedArmor);
             if (result == ArmorUpgradePurchaseResult.Purchased)
             {
+                _audio?.Play(GameAudioCue.Purchase);
                 _ui.SetArmoryStatus(
                     Localization.Format(
                         "armory.armor.upgraded",
@@ -1734,10 +1867,12 @@ namespace JabaSurvivol.Gameplay
             }
             else if (result == ArmorUpgradePurchaseResult.InsufficientSupplies)
             {
+                _audio?.Play(GameAudioCue.Error);
                 _ui.SetArmoryStatus(Localization.Get("armory.insufficient"));
             }
             else if (result == ArmorUpgradePurchaseResult.MaxTier)
             {
+                _audio?.Play(GameAudioCue.Error);
                 _ui.SetArmoryStatus(Localization.Get("armory.armor.maxed"));
             }
 
@@ -1858,13 +1993,16 @@ namespace JabaSurvivol.Gameplay
                     _turretPosition = playerPosition;
                     _turretObject.transform.position = _turretPosition;
                     _turretObject.SetActive(true);
+                    _audio?.Play(GameAudioCue.TurretDeploy);
                     break;
 
                 case SkillNode.Dash:
+                    _audio?.Play(GameAudioCue.Dash);
                     ActivateDash(skill.Stats, playerPosition);
                     break;
 
                 case SkillNode.Shockwave:
+                    _audio?.Play(GameAudioCue.Shockwave);
                     ActivateShockwave(skill.Stats, playerPosition);
                     break;
             }
@@ -1981,6 +2119,7 @@ namespace JabaSurvivol.Gameplay
                             Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg,
                             alt: true);
                         _turretVisual?.SetRecoil(1f);
+                        _audio?.Play(GameAudioCue.TurretFire);
                         _turretShotsFired++;
                     }
                 }
@@ -2074,15 +2213,7 @@ namespace JabaSurvivol.Gameplay
         /// </summary>
         public void DamageZombieForTests(float amount)
         {
-            if (!_zombieActive || _zombie == null)
-            {
-                return;
-            }
-
-            if (_zombie.ApplyDamage(amount))
-            {
-                OnZombieKilled();
-            }
+            OnBulletHitZombie(amount);
         }
 
         private static IAccountService CreateDefaultAccountService()
@@ -2121,6 +2252,7 @@ namespace JabaSurvivol.Gameplay
         private void ShowLeaderboard()
         {
             _ui?.ShowLeaderboard();
+            _audio?.Play(GameAudioCue.UiOpen);
             if (!_leaderboardsEnabled)
             {
                 _ui?.SetLeaderboardStatus(Localization.Get("leaderboard.disabled"));
@@ -2133,6 +2265,7 @@ namespace JabaSurvivol.Gameplay
         private void HideLeaderboard()
         {
             _ui?.HideLeaderboard();
+            _audio?.Play(GameAudioCue.UiClose);
         }
 
         private async Task LoadLeaderboardAsync()
@@ -2501,12 +2634,14 @@ namespace JabaSurvivol.Gameplay
             }
 
             _ui.ShowAccount();
+            _audio?.Play(GameAudioCue.UiOpen);
             HandleAccountStateChanged(_accountService.State);
         }
 
         private void HideAccount()
         {
             _ui?.HideAccount();
+            _audio?.Play(GameAudioCue.UiClose);
         }
 
         private async void HandleAccountRegister(string username, string password)
@@ -2623,6 +2758,11 @@ namespace JabaSurvivol.Gameplay
         private void OnDestroy()
         {
             SaveNow();
+            UiFactory.PlayUiCue = null;
+            if (_audio != null)
+            {
+                _audio.StopAll();
+            }
             Localization.LocaleChanged -= HandleLocaleChanged;
 
             if (_accountService != null)
@@ -2685,7 +2825,26 @@ namespace JabaSurvivol.Gameplay
         {
             if (pause)
             {
+                _audio?.SetSuspended(true);
                 SaveNow();
+            }
+            else if (_state != GameSessionState.Paused)
+            {
+                _audio?.SetSuspended(false);
+            }
+        }
+
+        private void OnApplicationFocus(bool focus)
+        {
+            if (!focus)
+            {
+                _audio?.SetSuspended(true);
+                return;
+            }
+
+            if (_state != GameSessionState.Paused)
+            {
+                _audio?.SetSuspended(false);
             }
         }
 
@@ -2701,6 +2860,7 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
+            _audio?.Play(GameAudioCue.Impact);
             if (_zombie.ApplyDamage(damage))
             {
                 OnZombieKilled();
@@ -2765,6 +2925,7 @@ namespace JabaSurvivol.Gameplay
         {
             _roundRewardOptions = RoundRewardModel.GenerateOptions(_run.Round, _run.Seed);
             _roundClearPending = true;
+            _audio?.Play(GameAudioCue.RoundClear);
             _ui.ShowRoundEnd(
                 reward.Round,
                 _run.Kills,
@@ -2830,6 +2991,7 @@ namespace JabaSurvivol.Gameplay
             if (_run.AdvanceRound())
             {
                 SpawnZombie();
+                _audio?.Play(GameAudioCue.RoundStart);
             }
 
             _ui.UpdateHud(_run.Player, _run.Armor, _run.MaxArmor, _run.Round, _run.EnemiesRemaining, _run.Kills, _profile);
