@@ -27,7 +27,18 @@ namespace JabaSurvivol.Gameplay
         private readonly Button _languageEnglishButton;
         private readonly Button _languageSpanishButton;
         private readonly Button _languageCloseButton;
+        private readonly GameObject _audioPanel;
+        private readonly Text _audioMuteLabel;
+        private readonly Text _audioMasterLabel;
+        private readonly Button _audioMuteButton;
+        private readonly Button _audioMasterMinusButton;
+        private readonly Button _audioMasterPlusButton;
+        private readonly Button _audioCloseButton;
+        private readonly Button _audioButtonMain;
+        private readonly Button _audioButtonPause;
+        private readonly System.Action<float> _onMasterVolumeChanged;
         private readonly System.Action<string> _onLocaleSelected;
+        private float _masterVolume = GameAudio.DefaultMasterVolume;
         private readonly GameObject _gameOverPanel;
         private readonly GameObject _victoryPanel;
         private readonly GameObject _bossPanel;
@@ -115,6 +126,7 @@ namespace JabaSurvivol.Gameplay
         private readonly RectTransform _aimKnob;
         private readonly Image _moveBaseImage;
         private readonly Image _aimBaseImage;
+        private const float AudioVolumeStep = 0.1f;
         private static readonly Color HealthLow = new(0.9f, 0.2f, 0.22f);
         private static readonly Color HealthHigh = new(0.3f, 0.92f, 0.42f);
         private int _lastHealth = int.MinValue;
@@ -157,6 +169,7 @@ namespace JabaSurvivol.Gameplay
             System.Action onPause,
             System.Action onResume,
             System.Action onToggleSound,
+            System.Action<float> onMasterVolumeChanged,
             System.Action onReload,
             System.Action onSwitchWeapon,
             System.Action onActiveSkill,
@@ -187,6 +200,7 @@ namespace JabaSurvivol.Gameplay
             System.Action onLeaderboardClose)
         {
             _onLocaleSelected = onLocaleSelected;
+            _onMasterVolumeChanged = onMasterVolumeChanged;
             var canvasObject = UiFactory.CreateCanvas("JabaSurvivol UI", parent);
 
             var safeAreaObject = new GameObject("Safe Area", typeof(RectTransform));
@@ -203,11 +217,13 @@ namespace JabaSurvivol.Gameplay
                 onLeaderboard,
                 onTelemetryToggle,
                 ShowLanguagePanel,
+                ShowAudioPanel,
                 out _mainMenuAccountState,
                 out _telemetryButton,
                 out _telemetryLabel,
                 out _buildLabel,
-                out _languageButtonMain);
+                out _languageButtonMain,
+                out _audioButtonMain);
             _hud = BuildHud(onPause, onReload, onSwitchWeapon, onActiveSkill, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
             _roundModifierText = FindText(_hud, "Round Modifier");
             _weaponText = FindText(_hud, "Weapon");
@@ -228,17 +244,27 @@ namespace JabaSurvivol.Gameplay
                 onMenu,
                 onArmory,
                 onCharacterSheet,
-                onToggleSound,
+                ShowAudioPanel,
                 ShowLanguagePanel,
                 out _pauseSoundLabel,
                 out _pauseSoundButton,
-                out _languageButtonPause);
+                out _languageButtonPause,
+                out _audioButtonPause);
             _languagePanel = BuildLanguagePanel(
                 SelectLocale,
                 out _languageSystemButton,
                 out _languageEnglishButton,
                 out _languageSpanishButton,
                 out _languageCloseButton);
+            _audioPanel = BuildAudioPanel(
+                onToggleSound,
+                onMasterVolumeChanged,
+                out _audioMuteLabel,
+                out _audioMasterLabel,
+                out _audioMuteButton,
+                out _audioMasterMinusButton,
+                out _audioMasterPlusButton,
+                out _audioCloseButton);
             _gameOverPanel = BuildGameOverPanel(onRestart, onMenu, out _gameOverSummary);
             _victoryPanel = BuildVictoryPanel(onRestart, onMenu, onLeaderboard, out _victorySummary);
             _roundEndPanel = BuildRoundEndPanel(
@@ -348,6 +374,15 @@ namespace JabaSurvivol.Gameplay
             _mainMenu.SetActive(true);
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
+            if (_audioPanel != null)
+            {
+                _audioPanel.SetActive(false);
+            }
+
+            if (_languagePanel != null)
+            {
+                _languagePanel.SetActive(false);
+            }
             _gameOverPanel.SetActive(false);
             HideVictory();
             HideBoss();
@@ -368,6 +403,15 @@ namespace JabaSurvivol.Gameplay
             _mainMenu.SetActive(false);
             _hud.SetActive(true);
             _pausePanel.SetActive(false);
+            if (_audioPanel != null)
+            {
+                _audioPanel.SetActive(false);
+            }
+
+            if (_languagePanel != null)
+            {
+                _languagePanel.SetActive(false);
+            }
             _gameOverPanel.SetActive(false);
             HideVictory();
             HideBoss();
@@ -636,12 +680,31 @@ namespace JabaSurvivol.Gameplay
         public void ShowPaused(bool visible)
         {
             _pausePanel.SetActive(visible);
+            if (!visible)
+            {
+                if (_audioPanel != null)
+                {
+                    _audioPanel.SetActive(false);
+                }
+
+                if (_languagePanel != null)
+                {
+                    _languagePanel.SetActive(false);
+                }
+            }
         }
 
         public bool LanguagePanelVisible => _languagePanel != null && _languagePanel.activeSelf;
 
+        public bool AudioPanelVisible => _audioPanel != null && _audioPanel.activeSelf;
+
         public void ShowLanguagePanel()
         {
+            if (_audioPanel != null)
+            {
+                _audioPanel.SetActive(false);
+            }
+
             if (_languagePanel != null)
             {
                 _languagePanel.SetActive(true);
@@ -654,6 +717,32 @@ namespace JabaSurvivol.Gameplay
             {
                 _languagePanel.SetActive(false);
             }
+        }
+
+        public void ShowAudioPanel()
+        {
+            if (_languagePanel != null)
+            {
+                _languagePanel.SetActive(false);
+            }
+
+            if (_audioPanel != null)
+            {
+                _audioPanel.SetActive(true);
+            }
+
+            UiFactory.PlayUiCue?.Invoke(GameAudioCue.UiOpen);
+        }
+
+        public void HideAudioPanel()
+        {
+            if (_audioPanel == null || !_audioPanel.activeSelf)
+            {
+                return;
+            }
+
+            _audioPanel.SetActive(false);
+            UiFactory.PlayUiCue?.Invoke(GameAudioCue.UiClose);
         }
 
         public Button LanguageButtonForTests => _languageButtonMain;
@@ -689,19 +778,60 @@ namespace JabaSurvivol.Gameplay
         }
 
         /// <summary>
-        /// Updates the pause-menu sound toggle label.
+        /// Updates every sound label. Enabled means audio is audible.
         /// </summary>
         public void SetSound(bool enabled)
         {
-            if (_pauseSoundLabel == null)
+            var label = Localization.Get(enabled ? "pause.sound.on" : "pause.sound.off");
+            if (_pauseSoundLabel != null)
             {
-                return;
+                _pauseSoundLabel.text = label;
             }
 
-            _pauseSoundLabel.text = Localization.Get(enabled ? "pause.sound.on" : "pause.sound.off");
+            if (_audioButtonMain != null)
+            {
+                var mainLabel = _audioButtonMain.GetComponentInChildren<Text>();
+                if (mainLabel != null)
+                {
+                    mainLabel.text = label;
+                }
+            }
+
+            if (_audioMuteLabel != null)
+            {
+                _audioMuteLabel.text = label;
+            }
         }
 
-        public string SoundLabelForTests => _pauseSoundLabel?.text ?? string.Empty;
+        /// <summary>
+        /// Applies the full audio state and refreshes every label.
+        /// </summary>
+        public void SetAudio(bool muted, float masterVolume)
+        {
+            _masterVolume = Mathf.Clamp01(masterVolume);
+            SetSound(!muted);
+
+            if (_audioMasterLabel != null)
+            {
+                _audioMasterLabel.text = Mathf.RoundToInt(_masterVolume * 100f) + "%";
+            }
+        }
+
+        public string SoundLabelForTests => _audioMuteLabel?.text ?? string.Empty;
+
+        public string AudioMasterLabelForTests => _audioMasterLabel?.text ?? string.Empty;
+
+        public Button AudioButtonMainForTests => _audioButtonMain;
+
+        public Button AudioButtonPauseForTests => _audioButtonPause;
+
+        public Button AudioMuteButtonForTests => _audioMuteButton;
+
+        public Button AudioMasterMinusButtonForTests => _audioMasterMinusButton;
+
+        public Button AudioMasterPlusButtonForTests => _audioMasterPlusButton;
+
+        public Button AudioCloseButtonForTests => _audioCloseButton;
 
         public string MainMenuStartLabelForTests =>
             FindGameObject(_mainMenu, "Start")?.GetComponentInChildren<Text>()?.text ?? string.Empty;
@@ -744,6 +874,34 @@ namespace JabaSurvivol.Gameplay
             return index >= 0 && index < _rewardIcons.Length && _rewardIcons[index] != null
                 ? _rewardIcons[index].sprite
                 : null;
+        }
+
+        public bool ClickArmoryWeaponActionForTests(WeaponId weaponId)
+        {
+            for (var i = 0; i < _armoryRows.Length; i++)
+            {
+                if (_armoryRows[i].WeaponId == weaponId && _armoryRows[i].Button != null)
+                {
+                    _armoryRows[i].Button.onClick.Invoke();
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool ClickArmoryUpgradeForTests(WeaponUpgradeStat stat)
+        {
+            for (var i = 0; i < _armoryUpgradeRows.Length; i++)
+            {
+                if (_armoryUpgradeRows[i].Stat == stat && _armoryUpgradeRows[i].Button != null)
+                {
+                    _armoryUpgradeRows[i].Button.onClick.Invoke();
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public Sprite ArmoryWeaponIconForTests(WeaponId weaponId)
@@ -845,6 +1003,8 @@ namespace JabaSurvivol.Gameplay
         }
 
         public Button SoundButtonForTests => _pauseSoundButton;
+
+        public Button PauseAudioButtonForTests => _audioButtonPause;
 
         public void ShowGameOver(int round, int kills, int suppliesEarned)
         {
@@ -1760,11 +1920,13 @@ namespace JabaSurvivol.Gameplay
             System.Action onLeaderboard,
             System.Action onTelemetryToggle,
             System.Action onLanguage,
+            System.Action onAudio,
             out Text accountStateText,
             out Button telemetryButton,
             out Text telemetryLabel,
             out Text buildLabel,
-            out Button languageButton)
+            out Button languageButton,
+            out Button audioButton)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Main Menu", new Color(0.012f, 0.018f, 0.03f, 0.98f));
             var root = panel.gameObject;
@@ -1814,6 +1976,14 @@ namespace JabaSurvivol.Gameplay
                 22,
                 onLanguage);
             UiFactory.Place(languageButton.GetComponent<RectTransform>(), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(36f, -32f), new Vector2(240f, 56f));
+
+            audioButton = UiFactory.CreateButton(
+                root.transform,
+                "Audio",
+                Localization.Get("pause.sound.on"),
+                22,
+                onAudio);
+            UiFactory.Place(audioButton.GetComponent<RectTransform>(), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(288f, -32f), new Vector2(240f, 56f));
 
             var controls = UiFactory.CreateText(root.transform, "Controls", Localization.Get("menu.controls"), 24, TextAnchor.MiddleCenter, new Color(0.55f, 0.62f, 0.72f));
             UiFactory.Place(controls.rectTransform, new Vector2(0.5f, 0.065f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300f, 36f));
@@ -2191,11 +2361,12 @@ namespace JabaSurvivol.Gameplay
             System.Action onMenu,
             System.Action onArmory,
             System.Action onCharacterSheet,
-            System.Action onToggleSound,
+            System.Action onAudio,
             System.Action onLanguage,
             out Text soundLabel,
             out Button soundButton,
-            out Button languageButton)
+            out Button languageButton,
+            out Button audioButton)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Pause Panel", new Color(0.01f, 0.02f, 0.03f, 0.9f));
             var root = panel.gameObject;
@@ -2218,13 +2389,14 @@ namespace JabaSurvivol.Gameplay
 
             var sound = UiFactory.CreateButton(
                 root.transform,
-                "Sound Toggle",
+                "Audio Toggle",
                 Localization.Get("pause.sound.on"),
                 18,
-                onToggleSound);
+                onAudio);
             UiFactory.Place(sound.GetComponent<RectTransform>(), new Vector2(0.5f, 0.11f), new Vector2(0.5f, 0.5f), new Vector2(105f, 0f), new Vector2(180f, 64f));
             soundLabel = sound.GetComponentInChildren<Text>();
             soundButton = sound.GetComponent<Button>();
+            audioButton = soundButton;
 
             languageButton = UiFactory.CreateButton(
                 root.transform,
@@ -2289,6 +2461,68 @@ namespace JabaSurvivol.Gameplay
                 24,
                 HideLanguagePanel);
             UiFactory.Place(closeButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.16f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(240f, 68f));
+
+            return root;
+        }
+
+        private GameObject BuildAudioPanel(
+            System.Action onToggleMute,
+            System.Action<float> onMasterChanged,
+            out Text muteLabel,
+            out Text masterLabel,
+            out Button muteButton,
+            out Button masterMinus,
+            out Button masterPlus,
+            out Button closeButton)
+        {
+            var panel = UiFactory.CreatePanel(
+                _safeArea,
+                "Audio Panel",
+                new Color(0.008f, 0.012f, 0.022f, 1f));
+            var root = panel.gameObject;
+            root.SetActive(false);
+
+            muteButton = UiFactory.CreateButton(
+                root.transform,
+                "Mute",
+                Localization.Get("pause.sound.on"),
+                30,
+                onToggleMute);
+            UiFactory.Place(muteButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.64f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(560f, 88f));
+            muteLabel = muteButton.GetComponentInChildren<Text>();
+
+            masterLabel = UiFactory.CreateText(
+                root.transform,
+                "Master Volume",
+                "100%",
+                28,
+                TextAnchor.MiddleCenter,
+                new Color(0.55f, 0.95f, 0.75f));
+            UiFactory.Place(masterLabel.rectTransform, new Vector2(0.5f, 0.46f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(320f, 60f));
+
+            masterMinus = UiFactory.CreateButton(
+                root.transform,
+                "Master Volume Down",
+                "-",
+                30,
+                () => onMasterChanged(Mathf.Clamp01(_masterVolume - AudioVolumeStep)));
+            UiFactory.Place(masterMinus.GetComponent<RectTransform>(), new Vector2(0.5f, 0.46f), new Vector2(0.5f, 0.5f), new Vector2(-220f, 0f), new Vector2(84f, 68f));
+
+            masterPlus = UiFactory.CreateButton(
+                root.transform,
+                "Master Volume Up",
+                "+",
+                30,
+                () => onMasterChanged(Mathf.Clamp01(_masterVolume + AudioVolumeStep)));
+            UiFactory.Place(masterPlus.GetComponent<RectTransform>(), new Vector2(0.5f, 0.46f), new Vector2(0.5f, 0.5f), new Vector2(220f, 0f), new Vector2(84f, 68f));
+
+            closeButton = UiFactory.CreateButton(
+                root.transform,
+                "Close",
+                Localization.Get("settings.language.close"),
+                26,
+                HideAudioPanel);
+            UiFactory.Place(closeButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.16f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(260f, 68f));
 
             return root;
         }
@@ -3118,6 +3352,7 @@ namespace JabaSurvivol.Gameplay
             BindLocalizedButton(_mainMenu, "Leaderboard", "leaderboard.open");
             BindLocalizedButton(_mainMenu, "Account", "account.open");
             BindLocalizedButton(_mainMenu, "Language", "settings.language.title");
+            BindLocalizedButton(_mainMenu, "Audio", "pause.sound.on");
 
             BindLocalized(FindText(_pausePanel, "Title"), "pause.title");
             BindLocalizedButton(_pausePanel, "Resume", "pause.resume");
@@ -3125,6 +3360,7 @@ namespace JabaSurvivol.Gameplay
             BindLocalizedButton(_pausePanel, "Skills", "character.open");
             BindLocalizedButton(_pausePanel, "Menu", "pause.menu");
             BindLocalizedButton(_pausePanel, "Language", "settings.language.title");
+            BindLocalizedButton(_pausePanel, "Audio Toggle", "pause.sound.on");
 
             BindLocalized(FindText(_hud, "Boss Name"), "boss.name");
             BindLocalizedButton(_hud, "Reload Button", "hud.reload");
@@ -3186,6 +3422,8 @@ namespace JabaSurvivol.Gameplay
             BindLocalized(FindText(_languagePanel, "Title"), "settings.language.title");
             BindLocalizedButton(_languagePanel, "System Language", "settings.language.system");
             BindLocalizedButton(_languagePanel, "Close", "settings.language.close");
+            BindLocalizedButton(_audioPanel, "Mute", "pause.sound.on");
+            BindLocalizedButton(_audioPanel, "Close", "settings.language.close");
         }
 
         private static void BindLocalized(Text text, string key)

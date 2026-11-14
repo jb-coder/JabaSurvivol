@@ -4,6 +4,29 @@ All notable changes to this project are documented in this file.
 
 The format is based on Keep a Changelog and the project follows Semantic Versioning.
 
+## [0.7.1] - 2026-11-14
+
+### Added
+
+- Audio audit, cue matrix, settings contract, lifecycle contract, and release gate in `docs/standards/audio.md`.
+- A 12-source audio pool, a global voice limit, and per-cue cooldowns.
+- Master mute, master volume, and effects volume with persistence, clamping, and migration from `audio.muted`.
+- Audio controls on the main and pause menus with English and Spanish layouts.
+- Cues for weapon fire, empty magazines, reload start and completion, weapon switch, bullet impacts, player damage, kills, boss hits, turret deploy and fire, dash, shockwave, boss spawn, telegraph, slam, enrage and death, round start and clear, reward, level-up, victory, defeat, purchases, errors, and UI feedback.
+
+### Changed
+
+- Android and core package version bumped to `0.7.1` with version code `9`.
+- Audio suspends on pause, focus loss, and Android background, and resumes only when the session is playing.
+- Added the v0.7.1 milestone mapping and backfilled every v0.7.1 project item to the `Art` phase.
+
+### Fixed
+
+- Mute no longer controls only a single source and now applies to the whole audio service.
+- Rapid one-shots can no longer stack without a source and cooldown bound.
+- Returning to the main menu stops active run audio.
+- The build configuration now sets version `0.7.1` and version code `9`, so Android builds report the release version.
+
 ## [0.7.0] - 2026-11-14
 
 ### Added

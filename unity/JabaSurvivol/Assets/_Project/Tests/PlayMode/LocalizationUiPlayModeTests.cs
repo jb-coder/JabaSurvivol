@@ -80,6 +80,20 @@ namespace JabaSurvivol.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator Pseudo_locale_audio_panel_has_no_text_overflow()
+        {
+            Localization.UsePseudoLocaleForTests();
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            _bootstrap.Session.UseDesignLayoutForTests();
+            _bootstrap.Session.AudioButtonMainForTests.onClick.Invoke();
+            yield return null;
+
+            Assert.That(_bootstrap.Session.AudioPanelVisibleForTests, Is.True);
+            AssertNoOverflow(_bootstrap.Session, "audio panel");
+        }
+
+        [UnityTest]
         public IEnumerator Pseudo_locale_primary_screens_have_no_text_overflow()
         {
             Localization.UsePseudoLocaleForTests();

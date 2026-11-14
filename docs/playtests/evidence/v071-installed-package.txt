@@ -1,0 +1,4 @@
+
+    versionCode=9 minSdk=26 targetSdk=36
+    versionName=0.7.1
+
