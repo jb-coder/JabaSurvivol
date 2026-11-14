@@ -9,8 +9,8 @@
 
 | Artifact | Version | Version code | ABI | Min API | Target API | Size | SHA-256 |
 |---|---|---:|---|---:|---:|---:|---|
-| Production APK | 0.7.1 | 9 | arm64-v8a | 26 | 36 | 35,185,871 bytes | `6b6dc69efdc05f4cd225c418b0aadbf31dd48065e9098e000677d0252c3a0b7b` |
-| Emulator APK | 0.7.1 | 9 | arm64-v8a, x86_64 | 26 | 36 | 118,001,563 bytes | `d24332b53be8f408e0409b73d040ad7d3ea936a41415a39a0303be1e45639ccd` |
+| Production APK | 0.7.1 | 9 | arm64-v8a | 26 | 36 | 35,185,867 bytes | `b63ca363d8e2e5c58d2c708ed355980fd4e9fc9a4a58c470d3a2ed4a2134bee5` |
+| Emulator APK | 0.7.1 | 9 | arm64-v8a, x86_64 | 26 | 36 | 82,014,483 bytes | `4e4a0a63193fe7dfb8e9536776fb8da1d87786c07fa71fccad2f473cf4c7ff87` |
 
 The emulator APK was installed and launched. The production APK was badged
 and hashed; it was not installed on the x86_64 emulator because it is

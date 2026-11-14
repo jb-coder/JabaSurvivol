@@ -1,20 +1,20 @@
 
-11-14 20:50:39.178  5379  5397 D Unity   :     "memorysetup-temp-allocator-size-audio-worker=65536"
-11-14 20:50:40.131  5379  5397 I AAudio  : AAudioStreamBuilder_openStream() called ----------------------------------------
-11-14 20:50:40.131  5379  5397 I AudioStreamBuilder: rate   =  24000, channels  = 2, channelMask = 0x80000003, format   = 5, sharing = SH, dir = OUTPUT
-11-14 20:50:40.131  5379  5397 I AudioStreamBuilder: device =      0, sessionId = 0, perfMode = 12, callback: ON with frames = 512
-11-14 20:50:40.131  5379  5397 I AudioStreamBuilder: usage  =      0, contentType = 0, inputPreset = 0, allowedCapturePolicy = 0
-11-14 20:50:40.131  5379  5397 I AudioStreamBuilder: privacy sensitive = false, opPackageName = (null), attributionTag = (null)
-11-14 20:50:40.132  5379  5397 D AudioStreamBuilder: build() MMAP not used because sessionId specified.
-11-14 20:50:40.133  5379  5397 D AudioStreamTrack: open(), request notificationFrames = 0, frameCount = 8192
-11-14 20:50:40.155  5379  5397 D AudioStreamTrack: open() flags changed from 0x00000004 to 0x00000000
-11-14 20:50:40.155  5379  5397 D AudioStreamTrack: open() perfMode changed from 12 to 10
-11-14 20:50:40.155  5379  5397 D AAudioStream: setState(s#1) from 0 to 2
-11-14 20:50:40.158  5379  5397 I AAudio  : AAudioStreamBuilder_openStream() returns 0 = AAUDIO_OK for s#1 ----------------
-11-14 20:50:40.161  5379  5397 D AAudio  : AAudioStream_requestStart(s#1) called --------------
-11-14 20:50:40.161  5379  5397 D AAudioStream: setState(s#1) from 2 to 3
-11-14 20:50:40.168  5379  5391 D AudioStreamLegacy: onAudioDeviceUpdate(deviceId = 2)
-11-14 20:50:40.168  5379  5397 D AAudio  : AAudioStream_requestStart(s#1) returned 0 ---------
-11-14 20:50:40.174  5379  5445 D AAudioStream: setState(s#1) from 3 to 4
-11-14 20:50:41.266  5379  5397 V MediaRouter: Selecting route: RouteInfo{ name=Phone, description=null, status=null, category=RouteCategory{ name=System types=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO  groupable=false }, supportedTypes=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO , presentationDisplay=null }
+11-14 22:09:48.206  7081  7098 D Unity   :     "memorysetup-temp-allocator-size-audio-worker=65536"
+11-14 22:09:49.263  7081  7098 I AAudio  : AAudioStreamBuilder_openStream() called ----------------------------------------
+11-14 22:09:49.263  7081  7098 I AudioStreamBuilder: rate   =  24000, channels  = 2, channelMask = 0x80000003, format   = 5, sharing = SH, dir = OUTPUT
+11-14 22:09:49.263  7081  7098 I AudioStreamBuilder: device =      0, sessionId = 0, perfMode = 12, callback: ON with frames = 512
+11-14 22:09:49.263  7081  7098 I AudioStreamBuilder: usage  =      0, contentType = 0, inputPreset = 0, allowedCapturePolicy = 0
+11-14 22:09:49.263  7081  7098 I AudioStreamBuilder: privacy sensitive = false, opPackageName = (null), attributionTag = (null)
+11-14 22:09:49.265  7081  7098 D AudioStreamBuilder: build() MMAP not used because sessionId specified.
+11-14 22:09:49.266  7081  7098 D AudioStreamTrack: open(), request notificationFrames = 0, frameCount = 8192
+11-14 22:09:49.281  7081  7098 D AudioStreamTrack: open() flags changed from 0x00000004 to 0x00000000
+11-14 22:09:49.281  7081  7098 D AudioStreamTrack: open() perfMode changed from 12 to 10
+11-14 22:09:49.281  7081  7098 D AAudioStream: setState(s#1) from 0 to 2
+11-14 22:09:49.283  7081  7098 I AAudio  : AAudioStreamBuilder_openStream() returns 0 = AAUDIO_OK for s#1 ----------------
+11-14 22:09:49.284  7081  7098 D AAudio  : AAudioStream_requestStart(s#1) called --------------
+11-14 22:09:49.284  7081  7098 D AAudioStream: setState(s#1) from 2 to 3
+11-14 22:09:49.289  7081  7098 D AAudio  : AAudioStream_requestStart(s#1) returned 0 ---------
+11-14 22:09:49.290  7081  7093 D AudioStreamLegacy: onAudioDeviceUpdate(deviceId = 2)
+11-14 22:09:49.290  7081  7146 D AAudioStream: setState(s#1) from 3 to 4
+11-14 22:09:50.310  7081  7098 V MediaRouter: Selecting route: RouteInfo{ name=Phone, description=null, status=null, category=RouteCategory{ name=System types=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO  groupable=false }, supportedTypes=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO , presentationDisplay=null }
 
