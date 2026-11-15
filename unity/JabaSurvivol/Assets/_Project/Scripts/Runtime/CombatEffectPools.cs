@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace JabaSurvivol.Gameplay
 {
@@ -12,6 +13,7 @@ namespace JabaSurvivol.Gameplay
 
         private readonly GameObject[] _objects;
         private readonly SpriteRenderer[] _renderers;
+        private readonly Light2D[] _lights;
         private readonly float[] _remaining;
         private readonly Sprite _flash;
         private readonly Sprite _altFlash;
@@ -20,6 +22,7 @@ namespace JabaSurvivol.Gameplay
         {
             _objects = new GameObject[PoolSize];
             _renderers = new SpriteRenderer[PoolSize];
+            _lights = new Light2D[PoolSize];
             _remaining = new float[PoolSize];
             _flash = ArtCatalog.Get("Effects/muzzle_flash");
             _altFlash = ArtCatalog.Get("Effects/muzzle_flash_alt");
@@ -33,6 +36,13 @@ namespace JabaSurvivol.Gameplay
                 effect.SetActive(false);
                 _objects[i] = effect;
                 _renderers[i] = renderer;
+                var light = effect.AddComponent<Light2D>();
+                light.lightType = Light2D.LightType.Point;
+                light.color = new Color(1f, 0.75f, 0.3f, 1f);
+                light.intensity = 0.9f;
+                light.pointLightOuterRadius = 2.5f;
+                light.pointLightInnerRadius = 0.2f;
+                _lights[i] = light;
             }
         }
 
@@ -52,6 +62,9 @@ namespace JabaSurvivol.Gameplay
                 _objects[i].transform.localScale = new Vector3(0.6f, 0.6f, 1f);
                 _renderers[i].sprite = alt ? _altFlash : _flash;
                 _renderers[i].color = Color.white;
+                _lights[i].color = alt
+                    ? new Color(0.4f, 0.95f, 1f, 1f)
+                    : new Color(1f, 0.75f, 0.3f, 1f);
                 _remaining[i] = Lifetime;
                 _objects[i].SetActive(true);
                 ActiveCount++;

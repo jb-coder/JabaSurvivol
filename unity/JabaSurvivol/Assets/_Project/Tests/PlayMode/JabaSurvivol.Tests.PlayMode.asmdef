@@ -4,7 +4,10 @@
     "references": [
         "JabaSurvivol.Core",
         "JabaSurvivol.Gameplay",
-        "UnityEngine.TestRunner"
+        "UnityEngine.TestRunner",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Universal.2D.Runtime",
+        "Unity.RenderPipelines.Core.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

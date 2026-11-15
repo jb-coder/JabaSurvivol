@@ -65,6 +65,18 @@ namespace JabaSurvivol.Gameplay
 
         public SpriteRenderer[] Renderers { get; private set; } = System.Array.Empty<SpriteRenderer>();
 
+        public Vector3 HeadLocalPositionForTests =>
+            _head != null ? _head.localPosition : Vector3.zero;
+
+        public Vector3 WeaponMountLocalPositionForTests =>
+            _weaponMount != null ? _weaponMount.localPosition : Vector3.zero;
+
+        public Vector3 LeftLegLocalPositionForTests =>
+            _legLeft != null ? _legLeft.localPosition : Vector3.zero;
+
+        public Vector3 RightLegLocalPositionForTests =>
+            _legRight != null ? _legRight.localPosition : Vector3.zero;
+
         public static CharacterVisual CreatePlayer(Transform parent)
         {
             return Create(parent, "player", VisualKind.Player);
@@ -193,14 +205,14 @@ namespace JabaSurvivol.Gameplay
                 _walkPhase += deltaTime * (4f + (8f * _speed));
             }
 
-            var swing = Mathf.Sin(_walkPhase) * 26f * _speed;
+            var step = Mathf.Sin(_walkPhase) * 0.07f * _speed;
+            var sway = Mathf.Sin(_walkPhase) * 10f * _speed;
             if (_legLeft != null)
             {
-                _legLeft.localRotation = Quaternion.Euler(0f, 0f, swing);
-                _legRight.localRotation = Quaternion.Euler(0f, 0f, -swing);
-                var lift = Mathf.Abs(Mathf.Sin(_walkPhase)) * 0.025f * _speed;
-                _legLeft.localPosition = _legLeftBase + new Vector3(0f, lift, 0f);
-                _legRight.localPosition = _legRightBase + new Vector3(0f, -lift * 0.5f, 0f);
+                _legLeft.localRotation = Quaternion.Euler(0f, 0f, sway);
+                _legRight.localRotation = Quaternion.Euler(0f, 0f, -sway);
+                _legLeft.localPosition = _legLeftBase + new Vector3(step, 0f, 0f);
+                _legRight.localPosition = _legRightBase + new Vector3(-step, 0f, 0f);
             }
 
             if (_body != null)
@@ -328,16 +340,16 @@ namespace JabaSurvivol.Gameplay
                 "Leg Left",
                 $"Characters/{key}_leg",
                 _bodyBaseOrder - 1,
-                new Vector3(-0.15f, -0.1f, 0f),
+                new Vector3(-0.08f, 0.13f, 0f),
                 _partScale).transform;
             _legRight = CreateSprite(
                 _legs,
                 "Leg Right",
                 $"Characters/{key}_leg",
                 _bodyBaseOrder - 1,
-                new Vector3(0.15f, -0.1f, 0f),
+                new Vector3(-0.08f, -0.13f, 0f),
                 _partScale).transform;
-            _legLeft.localScale = new Vector3(-_partScale, _partScale, 1f);
+            _legLeft.localScale = new Vector3(_partScale, _partScale, 1f);
             _legRight.localScale = new Vector3(_partScale, _partScale, 1f);
             _legLeftBase = _legLeft.localPosition;
             _legRightBase = _legRight.localPosition;
@@ -357,21 +369,21 @@ namespace JabaSurvivol.Gameplay
                 "Head",
                 $"Characters/{key}_head",
                 _bodyBaseOrder + 1,
-                Vector3.zero,
+                new Vector3(0.14f, 0f, 0f),
                 _partScale).transform;
             _armLeft = CreateSprite(
                 _body,
                 "Arm Left",
                 $"Characters/{key}_arm",
                 _bodyBaseOrder + 1,
-                new Vector3(-0.02f, 0.19f, 0f),
+                new Vector3(0.10f, 0.16f, 0f),
                 _partScale).transform;
             _armRight = CreateSprite(
                 _body,
                 "Arm Right",
                 $"Characters/{key}_arm",
                 _bodyBaseOrder + 1,
-                new Vector3(-0.02f, -0.19f, 0f),
+                new Vector3(0.10f, -0.16f, 0f),
                 _partScale).transform;
             _armLeft.localScale = new Vector3(_partScale, -_partScale, 1f);
             _armRight.localScale = new Vector3(_partScale, _partScale, 1f);
@@ -389,6 +401,7 @@ namespace JabaSurvivol.Gameplay
                     SortingOrders.BossCore,
                     Vector3.zero,
                     _partScale).transform;
+                _core.localScale = Vector3.one * 0.42f;
                 _coreBaseScale = _core.localScale;
                 _coreRenderer = _core.GetComponent<SpriteRenderer>();
                 _coreColor = new Color(1f, 0.84f, 0.32f, 1f);
@@ -401,7 +414,7 @@ namespace JabaSurvivol.Gameplay
                     "Weapon",
                     "Weapons/pistol",
                     SortingOrders.PlayerWeapon,
-                    new Vector3(0.17f, 0.02f, 0f),
+                    new Vector3(0.22f, 0f, 0f),
                     1f);
                 _weaponRenderer = weapon;
                 _weaponMount = weapon.transform;

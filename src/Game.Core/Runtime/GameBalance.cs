@@ -24,8 +24,14 @@ namespace JabaSurvivol.Core
         public const float ZombieContactInterval = 0.8f;
         public const float ZombieRespawnDelay = 1.2f;
 
-        public const float ArenaHalfWidth = 8.8f;
-        public const float ArenaHalfHeight = 4.7f;
+        public const float ArenaHalfWidth = 18f;
+        public const float ArenaHalfHeight = 10f;
+        public const float ArenaCameraHalfHeight = 5.6f;
+        public const float SpawnRingMinDistance = 11.5f;
+        public const float SpawnRingMaxDistance = 14f;
+        public const float SpawnRingPadding = 1.5f;
+        public const float SpawnRingClearance = 10.5f;
+        public const float ArenaCameraSmoothTime = 0.12f;
 
         public const int SuppliesPerKill = 10;
         public const int XpPerKill = 10;
