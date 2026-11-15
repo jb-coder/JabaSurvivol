@@ -155,13 +155,24 @@ pivot from alpha bounds.
 
 - Arena target: 36 x 20 world units (ArenaHalfWidth = 18,
   ArenaHalfHeight = 10).
-- The camera follows the player with smoothing and clamps to the arena.
+- Camera height: orthographic size 5.6, so the visible height is 11.2
+  world units. Visible half width is 5.6 * aspect.
+- Camera target: SmoothDamp toward the player with `0.12 s` smoothing.
+- Camera clamp: x = clamp(player.x, -18 + halfWidth, 18 - halfWidth) and
+  y = clamp(player.y, -10 + halfHeight, 10 - halfHeight). If the view is
+  wider or taller than the arena, center that axis.
 - The camera never shows outside the perimeter walls on phone or tablet aspect
   ratios.
-- Enemies spawn on a ring around the player outside the camera view and inside
-  the arena. The ring distance is tuned per aspect ratio.
-- Arena layers: base floor, floor decals, props behind actors, actors, props in
-  front, perimeter, and light pools.
+- Spawn ring: `ring = clamp(max(halfWidth, halfHeight) + 1.5, 11.5, 14.0)`.
+  The 16:9 and 16:10 cases use 11.5. A 20:9 case uses about 13.9.
+- Spawn point: pick a random angle, place it at the ring distance, clamp it to
+  the arena inset, and retry if it is closer than 10.5 units to the player.
+- Arena layers: base floor, floor grid, floor decals, light pools, props behind
+  actors, actors, props in front, perimeter, and telegraphs.
+- Prop categories: vehicles, street furniture, barricades, containers, debris,
+  cables, and neon signs.
+- Light pools: 256 x 256, alpha 30-60, placed under neon signs and above
+  floor decals. No collider and no gameplay effect.
 - Props and decals never create colliders.
 - The lighting fallback must keep stable frame pacing on low-end Android.
 
@@ -171,9 +182,12 @@ Use numeric sorting orders from a single constants file.
 
 | Layer | Order |
 |---|---:|
-| Floor | -30 |
-| Floor grid | -25 |
-| Walls and props | -20 |
+| Floor | -40 |
+| Floor grid | -35 |
+| Floor decals | -32 |
+| Light pools | -31 |
+| Props behind actors | -20 |
+| Perimeter walls and fences | -18 |
 | Telegraphs | 10 |
 | Death effects | 12 |
 | Enemy shadows | 13 |
@@ -188,6 +202,7 @@ Use numeric sorting orders from a single constants file.
 | Player weapon | 21 |
 | Turret | 22 |
 | Turret barrel | 23 |
+| Props in front of actors | 24 |
 | Projectiles | 30 |
 | Muzzle and impact effects | 31 |
 
@@ -246,9 +261,12 @@ Every asset and every integration slice must pass:
 - English and Spanish screenshots when the asset appears in UI.
 - Android build, install, launch, and filtered logcat.
 - Camera follow, clamp, spawn-ring, and arena-layer tests.
-- Draw calls, steady-state GC allocations, texture memory, and APK size within
-  budget.
-- No gameplay, balance, hitbox, or persistent-progression changes.
+- Combat draw calls at or below 40; steady-state GC allocation `0 B/frame`;
+  frame time at or below 16.6 ms target and 33.3 ms floor; raw texture
+  memory at or below 24 MB; APK art growth at or below 10 MB.
+- Core gameplay rules, hitboxes, and persistent progression unchanged. Arena
+  bounds and the spawn ring are the only approved balance-affecting changes and
+  must pass the balance simulation and guard tests.
 
 ## Provenance
 

@@ -25,10 +25,14 @@ persistent progression, save data, weapons, skills, enemies, or rounds.
 3. Zombie arms reach forward. The player weapon extends forward of the torso.
 4. The arena extends beyond the camera view. The initial target is
    `ArenaHalfWidth = 18` and `ArenaHalfHeight = 10` (`36 x 20` units).
-5. The camera follows the player with smoothing and clamps so the view never
-   shows outside the arena.
-6. Enemies spawn on a ring around the player that is outside the camera view
-   and inside the arena. The exact ring distance is tuned per aspect ratio.
+5. The camera follows the player with `0.12 s` smoothing and clamps so the view
+   never shows outside the arena. The visible height is 11.2 world units and
+   the half width is 5.6 * aspect. The clamp uses the arena half extents minus
+   the camera half extents on each axis.
+6. Enemies spawn on a ring around the player. The ring is
+   clamp(max(halfWidth, halfHeight) + 1.5, 11.5, 14.0) world units, clamped to
+   the arena inset. A clamped point closer than 10.5 units retries another
+   angle.
 7. The arena is composed of layers: base floor, floor decals, props behind
    actors, actors, props in front, perimeter, and light pools.
 8. Bloom, vignette, and 2D lights are performance-gated. The fallback must keep
@@ -44,7 +48,12 @@ persistent progression, save data, weapons, skills, enemies, or rounds.
 - Camera follow and clamp need phone and tablet aspect-ratio tests.
 - Lighting is not allowed to break the Android frame, memory, draw-call, or APK
   budgets. A reduced fallback ships if the full setup fails.
-- Persistent progression and save schemas remain unchanged.
+- Core gameplay rules, hitboxes, and persistent progression remain unchanged.
+  Arena bounds and the spawn ring are the only approved balance-affecting
+  changes and must pass the balance simulation and guard tests.
+- Budget targets: at most `40` combat draw calls, `0 B/frame` steady-state GC
+  allocation, 16.6 ms target frame time and 33.3 ms floor, 24 MB raw
+  texture memory, and 10 MB APK art growth.
 
 ## Alternatives considered
 
