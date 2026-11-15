@@ -44,6 +44,13 @@ namespace JabaSurvivol.Editor
                 {
                     ArtImportSettings.AssetRoot + "/UI"
                 });
+
+            Build(
+                "Environment",
+                new[]
+                {
+                    ArtImportSettings.AssetRoot + "/Environment"
+                });
         }
 
         private static void Build(string name, IReadOnlyList<string> folders)
