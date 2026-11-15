@@ -1,1 +1,1 @@
-2bbdaf4725c399e572a61576f99fb77f8fe41034eaa1179d0ee08ee6635f601a  JabaSurvivol-0.8.0.apk
+b5fc76efeff9cf7414900b7a09ed2d9ea969c1b6ca246c6cd60a2e72572cd8ef  JabaSurvivol-0.8.0.apk

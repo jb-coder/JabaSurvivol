@@ -9,10 +9,10 @@
 
 | Artifact | Version | Version code | ABI | Min API | Target API | Size | SHA-256 |
 |---|---|---:|---|---:|---:|---:|---|
-| Production APK | 0.8.0 | 10 | arm64-v8a | 26 | 36 | 35,776,013 bytes | `2bbdaf4725c399e572a61576f99fb77f8fe41034eaa1179d0ee08ee6635f601a` |
-| Emulator APK | 0.8.0 | 10 | arm64-v8a, x86_64 | 26 | 36 | 82,595,060 bytes | `5b1efb0acec99ed05e97a197f9ab696611cd2d22b8f6138bae29a9249c7c94e6` |
+| Production APK | 0.8.0 | 10 | arm64-v8a | 26 | 36 | 35,776,001 bytes | `b5fc76efeff9cf7414900b7a09ed2d9ea969c1b6ca246c6cd60a2e72572cd8ef` |
+| Install emulator APK | Success |
 
-The emulator APK was installed and launched. The production APK was badged and
+Build provenance: both APKs were built from release commit `20f595c`; the evidence-only follow-up commit does not change runtime code. The emulator APK was installed and launched.
 hashed; it was not installed on the x86_64 emulator because it is ARM64-only.
 
 ## Automated verification
@@ -38,7 +38,7 @@ Device: `jaba_survivol_api35`, Android API 35 emulator.
 
 | Step | Result |
 |---|---|
-| Install emulator APK | `Success` |
+| Install emulator APK | Success |
 | Launch `com.jabasurvivol.game` | Activity started |
 | Main menu | Rendered in English and Spanish |
 | Gameplay | Top-down player, Walker, extended arena, props, and HUD rendered |
@@ -51,10 +51,10 @@ Device: `jaba_survivol_api35`, Android API 35 emulator.
 
 | Metric | Main menu | Gameplay |
 |---|---:|---:|
-| Draw calls | 18 | 32 |
+| Draw calls | 13 | 15 |
 | Steady-state GC allocation | 0 B/frame | 0 B/frame |
-| Mono memory | 12.86 MB | 13.10 MB |
-| Emulator total PSS (observed) | about 292 MB | about 292 MB |
+| Mono memory | 12.87 MB | 13.28 MB |
+| Emulator total PSS (observed) | about 293 MB | about 293 MB |
 
 The draw-call target is 40 and the observed gameplay value is 32. The emulator
 PSS includes Unity, Android, and graphics-driver overhead and is recorded as an
@@ -66,7 +66,7 @@ observation, not as a device budget claim.
 - Raw RGBA without the ASTC-compressed environment set: 15.64 MiB.
 - Environment raw RGBA: 10.81 MiB; shipped as ASTC 6x6 in the Environment atlas.
 - Estimated shipped texture memory: about 16.3 MiB, below the 24 MB target.
-- APK growth over v0.7.1: 591,482 bytes (about 0.56 MiB), below the 10 MB target.
+- APK growth over v0.7.1: 591,470 bytes (about 0.56 MiB), below the 10 MB target.
 
 ## Screenshot matrix
 

@@ -1,23 +1,71 @@
 
-11-15 14:18:42.023 18630 18654 D Unity   :     "memorysetup-temp-allocator-size-audio-worker=65536"
-11-15 14:18:43.390 18630 18654 I AAudio  : AAudioStreamBuilder_openStream() called ----------------------------------------
-11-15 14:18:43.390 18630 18654 I AudioStreamBuilder: rate   =  24000, channels  = 2, channelMask = 0x80000003, format   = 5, sharing = SH, dir = OUTPUT
-11-15 14:18:43.390 18630 18654 I AudioStreamBuilder: device =      0, sessionId = 0, perfMode = 12, callback: ON with frames = 512
-11-15 14:18:43.390 18630 18654 I AudioStreamBuilder: usage  =      0, contentType = 0, inputPreset = 0, allowedCapturePolicy = 0
-11-15 14:18:43.390 18630 18654 I AudioStreamBuilder: privacy sensitive = false, opPackageName = (null), attributionTag = (null)
-11-15 14:18:43.391 18630 18654 D AudioStreamBuilder: build() MMAP not used because sessionId specified.
-11-15 14:18:43.395 18630 18654 D AudioStreamTrack: open(), request notificationFrames = 0, frameCount = 8192
-11-15 14:18:43.423 18630 18654 D AudioStreamTrack: open() flags changed from 0x00000004 to 0x00000000
-11-15 14:18:43.423 18630 18654 D AudioStreamTrack: open() perfMode changed from 12 to 10
-11-15 14:18:43.423 18630 18654 D AAudioStream: setState(s#1) from 0 to 2
-11-15 14:18:43.427 18630 18654 I AAudio  : AAudioStreamBuilder_openStream() returns 0 = AAUDIO_OK for s#1 ----------------
-11-15 14:18:43.430 18630 18654 D AAudio  : AAudioStream_requestStart(s#1) called --------------
-11-15 14:18:43.430 18630 18654 D AAudioStream: setState(s#1) from 2 to 3
-11-15 14:18:43.436 18630 18646 D AudioStreamLegacy: onAudioDeviceUpdate(deviceId = 2)
-11-15 14:18:43.438 18630 18654 D AAudio  : AAudioStream_requestStart(s#1) returned 0 ---------
-11-15 14:18:43.444 18630 18707 D AAudioStream: setState(s#1) from 3 to 4
-11-15 14:18:48.401 18630 18654 V MediaRouter: Selecting route: RouteInfo{ name=Phone, description=null, status=null, category=RouteCategory{ name=System types=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO  groupable=false }, supportedTypes=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO , presentationDisplay=null }
-11-15 14:18:57.847 18630 18654 I Unity   : PERF drawCalls=0 gcAllocated=0 monoUsed=9986048 totalAllocated=87071558 frame=1
-11-15 14:18:57.847 18630 18654 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
-11-15 14:18:59.508 18630 18639 I basurvivol.game: Compiler allocated 5174KB to compile void android.view.ViewRootImpl.performTraversals()
+11-15 16:09:35.787 20949 20969 D Unity   :     "memorysetup-temp-allocator-size-audio-worker=65536"
+11-15 16:09:37.457 20949 20969 I AAudio  : AAudioStreamBuilder_openStream() called ----------------------------------------
+11-15 16:09:37.457 20949 20969 I AudioStreamBuilder: rate   =  24000, channels  = 2, channelMask = 0x80000003, format   = 5, sharing = SH, dir = OUTPUT
+11-15 16:09:37.457 20949 20969 I AudioStreamBuilder: device =      0, sessionId = 0, perfMode = 12, callback: ON with frames = 512
+11-15 16:09:37.457 20949 20969 I AudioStreamBuilder: usage  =      0, contentType = 0, inputPreset = 0, allowedCapturePolicy = 0
+11-15 16:09:37.458 20949 20969 I AudioStreamBuilder: privacy sensitive = false, opPackageName = (null), attributionTag = (null)
+11-15 16:09:37.458 20949 20969 D AudioStreamBuilder: build() MMAP not used because sessionId specified.
+11-15 16:09:37.460 20949 20969 D AudioStreamTrack: open(), request notificationFrames = 0, frameCount = 8192
+11-15 16:09:37.493 20949 20969 D AudioStreamTrack: open() flags changed from 0x00000004 to 0x00000000
+11-15 16:09:37.493 20949 20969 D AudioStreamTrack: open() perfMode changed from 12 to 10
+11-15 16:09:37.493 20949 20969 D AAudioStream: setState(s#1) from 0 to 2
+11-15 16:09:37.498 20949 20969 I AAudio  : AAudioStreamBuilder_openStream() returns 0 = AAUDIO_OK for s#1 ----------------
+11-15 16:09:37.502 20949 20969 D AAudio  : AAudioStream_requestStart(s#1) called --------------
+11-15 16:09:37.502 20949 20969 D AAudioStream: setState(s#1) from 2 to 3
+11-15 16:09:37.516 20949 20969 D AAudio  : AAudioStream_requestStart(s#1) returned 0 ---------
+11-15 16:09:37.516 20949 20960 D AudioStreamLegacy: onAudioDeviceUpdate(deviceId = 2)
+11-15 16:09:37.517 20949 21016 D AAudioStream: setState(s#1) from 3 to 4
+11-15 16:09:39.963 20949 20969 V MediaRouter: Selecting route: RouteInfo{ name=Phone, description=null, status=null, category=RouteCategory{ name=System types=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO  groupable=false }, supportedTypes=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO , presentationDisplay=null }
+11-15 16:09:42.710 20949 20954 I basurvivol.game: Compiler allocated 5174KB to compile void android.view.ViewRootImpl.performTraversals()
+11-15 16:09:44.609 20949 20969 I Unity   : PERF drawCalls=0 gcAllocated=0 monoUsed=10137600 totalAllocated=87070014 frame=1
+11-15 16:09:44.609 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:09:49.523 20949 20969 I Unity   : PERF drawCalls=13 gcAllocated=0 monoUsed=12902400 totalAllocated=93812032 frame=27
+11-15 16:09:49.523 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:09:54.611 20949 20969 I Unity   : PERF drawCalls=25 gcAllocated=0 monoUsed=13107200 totalAllocated=96070903 frame=45
+11-15 16:09:54.611 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:09:59.842 20949 20969 I Unity   : PERF drawCalls=27 gcAllocated=0 monoUsed=13107200 totalAllocated=96239906 frame=72
+11-15 16:09:59.842 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:10:04.927 20949 20969 I Unity   : PERF drawCalls=27 gcAllocated=84 monoUsed=13115392 totalAllocated=96240265 frame=102
+11-15 16:10:04.927 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:10:09.977 20949 20969 I Unity   : PERF drawCalls=15 gcAllocated=0 monoUsed=13148160 totalAllocated=96030651 frame=135
+11-15 16:10:09.977 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:10:15.058 20949 20969 I Unity   : PERF drawCalls=15 gcAllocated=0 monoUsed=13156352 totalAllocated=96045594 frame=169
+11-15 16:10:15.058 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:10:20.074 20949 20969 I Unity   : PERF drawCalls=15 gcAllocated=0 monoUsed=13160448 totalAllocated=96044306 frame=203
+11-15 16:10:20.074 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:10:25.165 20949 20969 I Unity   : PERF drawCalls=15 gcAllocated=0 monoUsed=13160448 totalAllocated=96044306 frame=236
+11-15 16:10:25.165 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:10:30.222 20949 20969 I Unity   : PERF drawCalls=15 gcAllocated=0 monoUsed=13160448 totalAllocated=96006828 frame=268
+11-15 16:10:30.222 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:10:35.234 20949 20969 I Unity   : PERF drawCalls=15 gcAllocated=0 monoUsed=13160448 totalAllocated=96044306 frame=296
+11-15 16:10:35.234 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:10:40.347 20949 20969 I Unity   : PERF drawCalls=15 gcAllocated=0 monoUsed=13168640 totalAllocated=96026946 frame=320
+11-15 16:10:40.347 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:10:45.488 20949 20969 I Unity   : PERF drawCalls=15 gcAllocated=0 monoUsed=13168640 totalAllocated=96026946 frame=353
+11-15 16:10:45.488 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:10:50.525 20949 20969 I Unity   : PERF drawCalls=15 gcAllocated=0 monoUsed=13168640 totalAllocated=96009602 frame=383
+11-15 16:10:50.525 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:10:55.528 20949 20969 I Unity   : PERF drawCalls=15 gcAllocated=0 monoUsed=13168640 totalAllocated=96009602 frame=411
+11-15 16:10:55.528 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:11:00.539 20949 20969 I Unity   : PERF drawCalls=15 gcAllocated=0 monoUsed=13172736 totalAllocated=96009602 frame=441
+11-15 16:11:00.539 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:11:05.689 20949 20969 I Unity   : PERF drawCalls=23 gcAllocated=0 monoUsed=13213696 totalAllocated=96153250 frame=467
+11-15 16:11:05.689 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:11:10.958 20949 20969 I Unity   : PERF drawCalls=27 gcAllocated=0 monoUsed=13213696 totalAllocated=96199649 frame=492
+11-15 16:11:10.958 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:11:15.971 20949 20969 I Unity   : PERF drawCalls=27 gcAllocated=0 monoUsed=13221888 totalAllocated=96124927 frame=515
+11-15 16:11:15.971 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:11:21.058 20949 20969 I Unity   : PERF drawCalls=15 gcAllocated=0 monoUsed=13262848 totalAllocated=96026562 frame=546
+11-15 16:11:21.058 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:11:26.138 20949 20969 I Unity   : PERF drawCalls=15 gcAllocated=0 monoUsed=13271040 totalAllocated=96113234 frame=576
+11-15 16:11:26.138 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:11:31.237 20949 20969 I Unity   : PERF drawCalls=15 gcAllocated=0 monoUsed=13271040 totalAllocated=96111890 frame=607
+11-15 16:11:31.237 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:11:36.205 20949 20969 I Unity   : PERF drawCalls=15 gcAllocated=0 monoUsed=13275136 totalAllocated=96094530 frame=638
+11-15 16:11:36.205 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:11:41.267 20949 20969 I Unity   : PERF drawCalls=15 gcAllocated=0 monoUsed=13275136 totalAllocated=96094530 frame=664
+11-15 16:11:41.267 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:11:46.356 20949 20969 I Unity   : PERF drawCalls=15 gcAllocated=0 monoUsed=13275136 totalAllocated=96094530 frame=688
+11-15 16:11:46.356 20949 20969 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
 
