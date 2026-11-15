@@ -71,6 +71,25 @@ namespace JabaSurvivol.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator Player_rig_uses_a_top_down_forward_layout()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.StartRun();
+            yield return null;
+
+            var visual = session.PlayerVisual;
+            Assert.That(visual.HeadLocalPositionForTests.x, Is.GreaterThan(0.1f));
+            Assert.That(visual.WeaponMountLocalPositionForTests.x, Is.GreaterThan(0.2f));
+
+            var before = visual.LeftLegLocalPositionForTests;
+            visual.SetMotion(Vector2.right, 1f);
+            visual.Tick(0.12f);
+            var after = visual.LeftLegLocalPositionForTests;
+            Assert.That(after, Is.Not.EqualTo(before));
+        }
+        [UnityTest]
         public IEnumerator Zombie_visual_is_pooled_and_toggles_elite_aura()
         {
             _bootstrap = CreateBootstrap();

@@ -130,6 +130,16 @@ namespace JabaSurvivol.Gameplay
 
         public bool EnemySpawningEnabledForTests { get; set; } = true;
 
+        public Vector2 SpawnPositionForTests(float radius) => PickSpawnPosition(radius);
+
+        public void SetPlayerPositionForTests(Vector2 position)
+        {
+            if (_playerObject != null)
+            {
+                _playerObject.transform.position = new Vector3(position.x, position.y, 0f);
+            }
+        }
+
         public void SetZombiePositionForTests(Vector2 position)
         {
             if (_zombieActor != null)
@@ -353,6 +363,8 @@ namespace JabaSurvivol.Gameplay
         public string SavePath => _store?.FilePath;
 
         public int ProfileSaveCountForTests => _store?.SaveCount ?? 0;
+
+        public Transform PlayerTransform => _playerObject != null ? _playerObject.transform : null;
 
         public Vector2 PlayerPosition => _playerObject != null
             ? (Vector2)_playerObject.transform.position
@@ -3070,20 +3082,66 @@ namespace JabaSurvivol.Gameplay
             return true;
         }
 
-        private static Vector2 PickSpawnPosition(float radius)
+        private Vector2 PickSpawnPosition(float radius)
         {
-            var edge = UnityEngine.Random.Range(0, 4);
             var inset = Mathf.Max(0.65f, radius + 0.2f);
-            var x = UnityEngine.Random.Range(-GameBalance.ArenaHalfWidth + inset, GameBalance.ArenaHalfWidth - inset);
-            var y = UnityEngine.Random.Range(-GameBalance.ArenaHalfHeight + inset, GameBalance.ArenaHalfHeight - inset);
+            var player = _playerObject != null
+                ? (Vector2)_playerObject.transform.position
+                : Vector2.zero;
+            var camera = Camera.main;
+            var aspect = camera != null ? Mathf.Max(0.1f, camera.aspect) : 16f / 9f;
+            var halfWidth = GameBalance.ArenaCameraHalfHeight * aspect;
+            var ring = Mathf.Clamp(
+                Mathf.Max(halfWidth, GameBalance.ArenaCameraHalfHeight) + GameBalance.SpawnRingPadding,
+                GameBalance.SpawnRingMinDistance,
+                GameBalance.SpawnRingMaxDistance);
+            var minDistanceSquared = GameBalance.SpawnRingClearance * GameBalance.SpawnRingClearance;
+            var best = player;
+            var bestDistanceSquared = -1f;
 
-            return edge switch
+            for (var attempt = 0; attempt < 32; attempt++)
             {
-                0 => new Vector2(-GameBalance.ArenaHalfWidth + inset, y),
-                1 => new Vector2(GameBalance.ArenaHalfWidth - inset, y),
-                2 => new Vector2(x, GameBalance.ArenaHalfHeight - inset),
-                _ => new Vector2(x, -GameBalance.ArenaHalfHeight + inset)
+                var angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
+                var candidate = player + (new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * ring);
+                candidate.x = Mathf.Clamp(
+                    candidate.x,
+                    -GameBalance.ArenaHalfWidth + inset,
+                    GameBalance.ArenaHalfWidth - inset);
+                candidate.y = Mathf.Clamp(
+                    candidate.y,
+                    -GameBalance.ArenaHalfHeight + inset,
+                    GameBalance.ArenaHalfHeight - inset);
+                var distanceSquared = (candidate - player).sqrMagnitude;
+                if (distanceSquared >= minDistanceSquared)
+                {
+                    return candidate;
+                }
+
+                if (distanceSquared > bestDistanceSquared)
+                {
+                    bestDistanceSquared = distanceSquared;
+                    best = candidate;
+                }
+            }
+
+            var corners = new[]
+            {
+                new Vector2(-GameBalance.ArenaHalfWidth + inset, -GameBalance.ArenaHalfHeight + inset),
+                new Vector2(GameBalance.ArenaHalfWidth - inset, -GameBalance.ArenaHalfHeight + inset),
+                new Vector2(-GameBalance.ArenaHalfWidth + inset, GameBalance.ArenaHalfHeight - inset),
+                new Vector2(GameBalance.ArenaHalfWidth - inset, GameBalance.ArenaHalfHeight - inset)
             };
+            for (var i = 0; i < corners.Length; i++)
+            {
+                var distanceSquared = (corners[i] - player).sqrMagnitude;
+                if (distanceSquared > bestDistanceSquared)
+                {
+                    bestDistanceSquared = distanceSquared;
+                    best = corners[i];
+                }
+            }
+
+            return best;
         }
 
         private void CreateActors()
@@ -3094,6 +3152,11 @@ namespace JabaSurvivol.Gameplay
             _playerVisual = CharacterVisual.CreatePlayer(_playerObject.transform);
             _playerVisual.SetWeapon(ArtCatalog.Get("Weapons/pistol"));
             _aimPivot = _playerVisual.AimPivot;
+            VisualPolish.AddPointLight(
+                _playerObject,
+                new Color(0.4f, 0.95f, 1f, 1f),
+                0.45f,
+                3f);
 
             _zombieActors = new ZombieActorPool(_worldRoot);
             _deathEffects = new DeathEffectPool(_worldRoot);
@@ -3101,6 +3164,11 @@ namespace JabaSurvivol.Gameplay
             _bossObject = new GameObject("Boss");
             _bossObject.transform.SetParent(_worldRoot, false);
             _bossVisual = CharacterVisual.CreateBoss(_bossObject.transform);
+            VisualPolish.AddPointLight(
+                _bossObject,
+                new Color(1f, 0.3f, 0.8f, 1f),
+                0.8f,
+                4.5f);
 
             var bossRing = new GameObject("Boss Ring");
             bossRing.transform.SetParent(_bossObject.transform, false);
@@ -3123,6 +3191,11 @@ namespace JabaSurvivol.Gameplay
             _turretObject.transform.SetParent(_worldRoot, false);
             _turretObject.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
             _turretVisual = CharacterVisual.CreateTurret(_turretObject.transform);
+            VisualPolish.AddPointLight(
+                _turretObject,
+                new Color(0.4f, 1f, 0.6f, 1f),
+                0.5f,
+                3.5f);
             _turretObject.SetActive(false);
 
             _impacts = new ImpactEffectPool(_worldRoot);
@@ -3131,3 +3204,4 @@ namespace JabaSurvivol.Gameplay
         }
     }
 }
+

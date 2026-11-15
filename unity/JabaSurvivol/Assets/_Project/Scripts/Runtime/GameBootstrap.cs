@@ -38,6 +38,17 @@ namespace JabaSurvivol.Gameplay
 
         public int ArenaPropCountForTests { get; private set; }
 
+        public int ArenaDecalCountForTests { get; private set; }
+
+        public int ArenaLightPoolCountForTests { get; private set; }
+
+        public Camera CameraForTests => _camera;
+
+        public AspectCameraFitter CameraFitterForTests =>
+            _camera != null ? _camera.GetComponent<AspectCameraFitter>() : null;
+
+        public VisualPolish VisualPolishForTests { get; private set; }
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -48,6 +59,7 @@ namespace JabaSurvivol.Gameplay
 
             Instance = this;
             Application.targetFrameRate = 60;
+            VisualPolishForTests = gameObject.AddComponent<VisualPolish>();
             ApiConfig.Initialize();
 #if DEVELOPMENT_BUILD
             SeedDevelopmentSession();
@@ -58,6 +70,7 @@ namespace JabaSurvivol.Gameplay
             runtimeRoot.SetParent(transform, false);
 
             _camera = CreateCamera(runtimeRoot);
+            VisualPolishForTests.ConfigureCamera(_camera);
             _worldRoot = new GameObject("World").transform;
             _worldRoot.SetParent(runtimeRoot, false);
             BuildArena(_worldRoot);
@@ -71,6 +84,7 @@ namespace JabaSurvivol.Gameplay
                 input,
                 _worldRoot,
                 AccountServiceFactoryOverride?.Invoke());
+            _camera.GetComponent<AspectCameraFitter>()?.SetTarget(Session.PlayerTransform);
 #if DEVELOPMENT_BUILD
             gameObject.AddComponent<PerformanceProbe>();
             ApplyDebugScenario();
@@ -271,7 +285,7 @@ namespace JabaSurvivol.Gameplay
             var floor = new GameObject("Floor");
             floor.transform.SetParent(parent, false);
             FloorRendererForTests = floor.AddComponent<SpriteRenderer>();
-            FloorRendererForTests.sprite = ArtCatalog.Get("Environment/floor_tile");
+            FloorRendererForTests.sprite = ArtCatalog.Get("Environment/floor_asphalt_a");
             FloorRendererForTests.drawMode = SpriteDrawMode.Tiled;
             FloorRendererForTests.tileMode = SpriteTileMode.Continuous;
             FloorRendererForTests.size = new Vector2(
@@ -279,56 +293,112 @@ namespace JabaSurvivol.Gameplay
                 GameBalance.ArenaHalfHeight * 2f);
             FloorRendererForTests.sortingOrder = SortingOrders.Floor;
 
-            AddWall(
-                parent,
-                "Arena Wall Top",
-                new Vector3(0f, GameBalance.ArenaHalfHeight, 0f),
-                new Vector2((GameBalance.ArenaHalfWidth * 2f) + 0.4f, 0.25f),
-                "Environment/wall_horizontal");
-            AddWall(
-                parent,
-                "Arena Wall Bottom",
-                new Vector3(0f, -GameBalance.ArenaHalfHeight, 0f),
-                new Vector2((GameBalance.ArenaHalfWidth * 2f) + 0.4f, 0.25f),
-                "Environment/wall_horizontal");
-            AddWall(
-                parent,
-                "Arena Wall Left",
-                new Vector3(-GameBalance.ArenaHalfWidth, 0f, 0f),
-                new Vector2(0.25f, (GameBalance.ArenaHalfHeight * 2f) + 0.4f),
-                "Environment/wall_vertical");
-            AddWall(
-                parent,
-                "Arena Wall Right",
-                new Vector3(GameBalance.ArenaHalfWidth, 0f, 0f),
-                new Vector2(0.25f, (GameBalance.ArenaHalfHeight * 2f) + 0.4f),
-                "Environment/wall_vertical");
-            ArenaWallCountForTests = 4;
+            var floorOverlay = new GameObject("Floor Overlay");
+            floorOverlay.transform.SetParent(parent, false);
+            var overlayRenderer = floorOverlay.AddComponent<SpriteRenderer>();
+            overlayRenderer.sprite = ArtCatalog.Get("Environment/floor_concrete");
+            overlayRenderer.drawMode = SpriteDrawMode.Tiled;
+            overlayRenderer.tileMode = SpriteTileMode.Continuous;
+            overlayRenderer.size = new Vector2(
+                GameBalance.ArenaHalfWidth * 2f,
+                GameBalance.ArenaHalfHeight * 2f);
+            overlayRenderer.color = new Color(1f, 1f, 1f, 0.12f);
+            overlayRenderer.sortingOrder = SortingOrders.FloorGrid;
 
-            var props = new[]
+            var decals = new[]
             {
-                ("Prop Barrel Left", "Environment/prop_barrel", new Vector2(-6.4f, -3.2f), 0.78f),
-                ("Prop Crate Right", "Environment/prop_crate", new Vector2(6.2f, 3.1f), 0.74f),
-                ("Prop Debris Left", "Environment/prop_debris", new Vector2(-6.0f, 2.9f), 0.7f),
-                ("Prop Barrel Right", "Environment/prop_barrel", new Vector2(6.4f, -3.0f), 0.7f),
-                ("Prop Crate Top", "Environment/prop_crate", new Vector2(2.4f, 3.6f), 0.62f),
-                ("Prop Debris Bottom", "Environment/prop_debris", new Vector2(-2.6f, -3.7f), 0.6f)
+                ("Decal Road Line Left", "Environment/decal_road_line", new Vector2(-8f, 0f), 1.2f, 0f),
+                ("Decal Road Line Right", "Environment/decal_road_line", new Vector2(6f, 0f), 1.2f, 0f),
+                ("Decal Road Arrow", "Environment/decal_road_arrow", new Vector2(-14f, 6f), 1f, 20f),
+                ("Decal Road Arrow South", "Environment/decal_road_arrow", new Vector2(12f, -6f), 1f, 200f),
+                ("Decal Crack", "Environment/decal_crack", new Vector2(-2f, -4f), 1.1f, 15f),
+                ("Decal Oil", "Environment/decal_oil", new Vector2(4f, 5f), 1.4f, 0f),
+                ("Decal Puddle", "Environment/decal_puddle", new Vector2(-5f, 7f), 1.3f, 0f),
+                ("Decal Manhole", "Environment/decal_manhole", new Vector2(10f, 2f), 0.9f, 0f),
+                ("Decal Blood", "Environment/decal_blood", new Vector2(-12f, -7f), 0.8f, 0f),
+                ("Decal Graffiti", "Environment/decal_graffiti", new Vector2(15f, 8f), 1.1f, 0f),
+                ("Decal Paper", "Environment/decal_paper", new Vector2(-16f, -2f), 0.7f, 40f),
+                ("Decal Tire Marks", "Environment/decal_tire_marks", new Vector2(0f, 9f), 1.1f, -20f)
             };
-
-            foreach (var (name, sprite, position, scale) in props)
+            foreach (var (name, sprite, position, scale, rotation) in decals)
             {
-                AddProp(parent, name, sprite, position, scale);
+                AddDecal(parent, name, sprite, position, scale, rotation);
             }
 
-            ArenaPropCountForTests = props.Length;
+            var lights = new[]
+            {
+                ("Light Cyan", "Environment/light_cyan", new Vector2(-14f, 6f), 2.2f),
+                ("Light Magenta", "Environment/light_magenta", new Vector2(14f, 5f), 2.4f),
+                ("Light Amber", "Environment/light_amber", new Vector2(-15f, -6f), 1.8f),
+                ("Light Green", "Environment/light_green", new Vector2(12f, -7f), 1.9f)
+            };
+            foreach (var (name, sprite, position, scale) in lights)
+            {
+                AddLightPool(parent, name, sprite, position, scale);
+            }
+
+            var propsBehind = new[]
+            {
+                ("Prop Car", "Environment/prop_car", new Vector2(-12f, -5f), 1f, 10f),
+                ("Prop Dumpster", "Environment/prop_dumpster", new Vector2(13f, 6f), 1f, 0f),
+                ("Prop Streetlight", "Environment/prop_streetlight", new Vector2(16f, 0f), 0.9f, 0f),
+                ("Prop Neon Sign", "Environment/prop_neon_sign", new Vector2(-17f, 0f), 0.9f, 0f),
+                ("Prop Barrel North", "Environment/prop_barrel", new Vector2(-9f, 8f), 0.8f, 0f),
+                ("Prop Crate North", "Environment/prop_crate", new Vector2(9f, 8f), 0.8f, 0f),
+                ("Prop Debris West", "Environment/prop_debris", new Vector2(-16f, -3f), 0.9f, 25f),
+                ("Prop Cables", "Environment/prop_cables", new Vector2(2f, 9f), 1.2f, 0f)
+            };
+            foreach (var (name, sprite, position, scale, rotation) in propsBehind)
+            {
+                AddProp(parent, name, sprite, position, scale, rotation, SortingOrders.PropsBehind);
+            }
+
+            var propsFront = new[]
+            {
+                ("Prop Barricade", "Environment/prop_barricade", new Vector2(-6f, 3f), 1f, 0f),
+                ("Prop Cone A", "Environment/prop_cone", new Vector2(5f, 2f), 1f, 0f),
+                ("Prop Cone B", "Environment/prop_cone", new Vector2(6f, 3f), 0.8f, 0f),
+                ("Prop Sandbags", "Environment/prop_sandbags", new Vector2(-8f, -2f), 1.1f, 0f),
+                ("Prop Barrel South", "Environment/prop_barrel", new Vector2(11f, -3f), 0.8f, 0f),
+                ("Prop Crate South", "Environment/prop_crate", new Vector2(-3f, -8f), 0.8f, 0f)
+            };
+            foreach (var (name, sprite, position, scale, rotation) in propsFront)
+            {
+                AddProp(parent, name, sprite, position, scale, rotation, SortingOrders.PropsFront);
+            }
+
+            var perimeter = new[]
+            {
+                ("Perimeter Fence North", "Environment/wall_fence_h", new Vector3(0f, GameBalance.ArenaHalfHeight, 0f), new Vector2((GameBalance.ArenaHalfWidth * 2f) + 0.6f, 0.6f)),
+                ("Perimeter Fence South", "Environment/wall_fence_h", new Vector3(0f, -GameBalance.ArenaHalfHeight, 0f), new Vector2((GameBalance.ArenaHalfWidth * 2f) + 0.6f, 0.6f)),
+                ("Perimeter Fence West", "Environment/wall_fence_v", new Vector3(-GameBalance.ArenaHalfWidth, 0f, 0f), new Vector2(0.6f, (GameBalance.ArenaHalfHeight * 2f) + 0.6f)),
+                ("Perimeter Fence East", "Environment/wall_fence_v", new Vector3(GameBalance.ArenaHalfWidth, 0f, 0f), new Vector2(0.6f, (GameBalance.ArenaHalfHeight * 2f) + 0.6f)),
+                ("Perimeter Barrier North", "Environment/wall_concrete_h", new Vector3(-9f, GameBalance.ArenaHalfHeight - 0.4f, 0f), new Vector2(14f, 0.5f)),
+                ("Perimeter Barrier South", "Environment/wall_concrete_h", new Vector3(9f, -GameBalance.ArenaHalfHeight + 0.4f, 0f), new Vector2(14f, 0.5f)),
+                ("Perimeter Barrier West", "Environment/wall_concrete_v", new Vector3(-GameBalance.ArenaHalfWidth + 0.4f, -5f, 0f), new Vector2(0.5f, 8f)),
+                ("Perimeter Barrier East", "Environment/wall_concrete_v", new Vector3(GameBalance.ArenaHalfWidth - 0.4f, 5f, 0f), new Vector2(0.5f, 8f))
+            };
+            foreach (var (name, sprite, position, size) in perimeter)
+            {
+                AddTiled(parent, name, sprite, position, size, SortingOrders.Perimeter);
+            }
+            ArenaWallCountForTests = perimeter.Length;
+
+            AddProp(parent, "Storefront North", "Environment/wall_storefront", new Vector2(-10f, 9.2f), 1.2f, 0f, SortingOrders.Perimeter - 1);
+            AddProp(parent, "Storefront South", "Environment/wall_storefront", new Vector2(10f, -9.2f), 1.2f, 180f, SortingOrders.Perimeter - 1);
+
+            ArenaDecalCountForTests = decals.Length;
+            ArenaLightPoolCountForTests = lights.Length;
+            ArenaPropCountForTests = propsBehind.Length + propsFront.Length + 2;
         }
 
-        private static void AddWall(
+        private static void AddTiled(
             Transform parent,
             string name,
+            string spritePath,
             Vector3 position,
             Vector2 size,
-            string spritePath)
+            int sortingOrder)
         {
             var wall = new GameObject(name);
             wall.transform.SetParent(parent, false);
@@ -338,7 +408,41 @@ namespace JabaSurvivol.Gameplay
             renderer.drawMode = SpriteDrawMode.Tiled;
             renderer.tileMode = SpriteTileMode.Continuous;
             renderer.size = size;
-            renderer.sortingOrder = SortingOrders.WallsAndProps;
+            renderer.sortingOrder = sortingOrder;
+        }
+
+        private static void AddDecal(
+            Transform parent,
+            string name,
+            string spritePath,
+            Vector2 position,
+            float scale,
+            float rotation)
+        {
+            var decal = new GameObject(name);
+            decal.transform.SetParent(parent, false);
+            decal.transform.localPosition = position;
+            decal.transform.localScale = Vector3.one * scale;
+            decal.transform.localRotation = Quaternion.Euler(0f, 0f, rotation);
+            var renderer = decal.AddComponent<SpriteRenderer>();
+            renderer.sprite = ArtCatalog.Get(spritePath);
+            renderer.sortingOrder = SortingOrders.FloorDecal;
+        }
+
+        private static void AddLightPool(
+            Transform parent,
+            string name,
+            string spritePath,
+            Vector2 position,
+            float scale)
+        {
+            var light = new GameObject(name);
+            light.transform.SetParent(parent, false);
+            light.transform.localPosition = position;
+            light.transform.localScale = Vector3.one * scale;
+            var renderer = light.AddComponent<SpriteRenderer>();
+            renderer.sprite = ArtCatalog.Get(spritePath);
+            renderer.sortingOrder = SortingOrders.LightPool;
         }
 
         private static void AddProp(
@@ -346,15 +450,27 @@ namespace JabaSurvivol.Gameplay
             string name,
             string spritePath,
             Vector2 position,
-            float scale)
+            float scale,
+            float rotation,
+            int sortingOrder)
         {
             var prop = new GameObject(name);
             prop.transform.SetParent(parent, false);
             prop.transform.localPosition = position;
             prop.transform.localScale = Vector3.one * scale;
+            prop.transform.localRotation = Quaternion.Euler(0f, 0f, rotation);
             var renderer = prop.AddComponent<SpriteRenderer>();
             renderer.sprite = ArtCatalog.Get(spritePath);
-            renderer.sortingOrder = SortingOrders.WallsAndProps + 1;
+            renderer.sortingOrder = sortingOrder;
+
+            if (name == "Prop Neon Sign")
+            {
+                VisualPolish.AddPointLight(prop, new Color(1f, 0.2f, 0.9f, 1f), 0.7f, 4f);
+            }
+            else if (name == "Prop Streetlight")
+            {
+                VisualPolish.AddPointLight(prop, new Color(0.4f, 0.9f, 1f, 1f), 0.8f, 5f);
+            }
         }
     }
 }

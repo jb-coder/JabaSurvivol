@@ -44,9 +44,20 @@ namespace JabaSurvivol.Editor
                 {
                     ArtImportSettings.AssetRoot + "/UI"
                 });
+
+            Build(
+                "Environment",
+                new[]
+                {
+                    ArtImportSettings.AssetRoot + "/Environment"
+                },
+                compress: true);
         }
 
-        private static void Build(string name, IReadOnlyList<string> folders)
+        private static void Build(
+            string name,
+            IReadOnlyList<string> folders,
+            bool compress = false)
         {
             var path = $"{AtlasRoot}/{name}.spriteatlas";
             AssetDatabase.DeleteAsset(path);
@@ -71,6 +82,25 @@ namespace JabaSurvivol.Editor
 
             SpriteAtlasExtensions.Add(atlas, packables.ToArray());
             SpriteAtlasExtensions.SetIncludeInBuild(atlas, true);
+            atlas.SetTextureSettings(new SpriteAtlasTextureSettings
+            {
+                filterMode = FilterMode.Bilinear,
+                generateMipMaps = false,
+                sRGB = true,
+                readable = false,
+                anisoLevel = 0
+            });
+            atlas.SetPlatformSettings(new TextureImporterPlatformSettings
+            {
+                name = "Android",
+                overridden = true,
+                maxTextureSize = ArtImportSettings.MaxTextureSize,
+                format = compress ? TextureImporterFormat.ASTC_6x6 : TextureImporterFormat.RGBA32,
+                compressionQuality = 100,
+                textureCompression = compress
+                    ? TextureImporterCompression.CompressedHQ
+                    : TextureImporterCompression.Uncompressed
+            });
             AssetDatabase.CreateAsset(atlas, path);
         }
     }

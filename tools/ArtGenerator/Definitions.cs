@@ -2,7 +2,7 @@ using SkiaSharp;
 
 namespace JabaSurvivol.ArtGenerator;
 
-internal static class Definitions
+internal static partial class Definitions
 {
     private const int CharacterSize = 256;
     private const int BossSize = 512;
@@ -25,6 +25,7 @@ internal static class Definitions
         AddEffects(definitions);
         AddIcons(definitions);
         AddEnvironment(definitions);
+        AddV080Environment(definitions);
         AddAppIcon(definitions);
 
         return definitions;
@@ -122,7 +123,7 @@ internal static class Definitions
             $"Characters/{key}_shadow.png", size, size, 0.5f, 0.5f, category,
             canvas => DrawCharacterPart(canvas, size, palette, shape, CharacterPart.Shadow)));
         definitions.Add(new SpriteDefinition(
-            $"Characters/{key}_leg.png", size, size, 0.5f, 0.9f, category,
+            $"Characters/{key}_leg.png", size, size, 0.85f, 0.5f, category,
             canvas => DrawCharacterPart(canvas, size, palette, shape, CharacterPart.Leg)));
         definitions.Add(new SpriteDefinition(
             $"Characters/{key}_torso.png", size, size, 0.5f, 0.5f, category,
@@ -131,7 +132,7 @@ internal static class Definitions
             $"Characters/{key}_head.png", size, size, 0.5f, 0.5f, category,
             canvas => DrawCharacterPart(canvas, size, palette, shape, CharacterPart.Head)));
         definitions.Add(new SpriteDefinition(
-            $"Characters/{key}_arm.png", size, size, 0.5f, 0.5f, category,
+            $"Characters/{key}_arm.png", size, size, 0.2f, 0.5f, category,
             canvas => DrawCharacterPart(canvas, size, palette, shape, CharacterPart.Arm)));
 
         if (shape.Horns)
@@ -159,19 +160,19 @@ internal static class Definitions
                 return;
 
             case CharacterPart.Leg:
-                DrawLeg(canvas, center, scale, palette, shape);
+                DrawTopDownLeg(canvas, center, scale, palette, shape);
                 return;
 
             case CharacterPart.Torso:
-                DrawTorso(canvas, center, scale, palette, shape);
+                DrawTopDownTorso(canvas, center, scale, palette, shape);
                 return;
 
             case CharacterPart.Head:
-                DrawHead(canvas, center, scale, palette, shape);
+                DrawTopDownHead(canvas, center, scale, palette, shape);
                 return;
 
             case CharacterPart.Arm:
-                DrawArm(canvas, center, scale, palette, shape);
+                DrawTopDownArm(canvas, center, scale, palette, shape);
                 return;
         }
     }
