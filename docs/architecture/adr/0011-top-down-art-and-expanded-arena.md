@@ -33,8 +33,9 @@ persistent progression, save data, weapons, skills, enemies, or rounds.
    clamp(max(halfWidth, halfHeight) + 1.5, 11.5, 14.0) world units, clamped to
    the arena inset. A clamped point closer than 10.5 units retries another
    angle.
-7. The arena is composed of layers: base floor, floor decals, props behind
-   actors, actors, props in front, perimeter, and light pools.
+7. The arena is composed of layers, in numeric order: base floor, floor grid,
+   floor decals, light pools, props behind actors, perimeter, telegraphs,
+   actors, and props in front.
 8. Bloom, vignette, and 2D lights are performance-gated. The fallback must keep
    stable frame pacing on low-end Android devices.
 9. `tools/ArtGenerator` remains the source of truth for every first-party asset.

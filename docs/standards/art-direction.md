@@ -167,8 +167,8 @@ pivot from alpha bounds.
   The 16:9 and 16:10 cases use 11.5. A 20:9 case uses about 13.9.
 - Spawn point: pick a random angle, place it at the ring distance, clamp it to
   the arena inset, and retry if it is closer than 10.5 units to the player.
-- Arena layers: base floor, floor grid, floor decals, light pools, props behind
-  actors, actors, props in front, perimeter, and telegraphs.
+- Arena layers, in numeric order: base floor, floor grid, floor decals,
+  light pools, props behind actors, perimeter, telegraphs, actors, and props in front.
 - Prop categories: vehicles, street furniture, barricades, containers, debris,
   cables, and neon signs.
 - Light pools: 256 x 256, alpha 30-60, placed under neon signs and above
