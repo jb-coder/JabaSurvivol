@@ -16,6 +16,7 @@ v0.5.1
 v0.6.0
 v0.7.0
 v0.7.1
+v0.8.0
 ```
 
 ## Release checklist
@@ -61,5 +62,3 @@ For every release that changes audio behavior:
 - [ ] Main menu and pause menu expose the audio controls in every supported locale.
 - [ ] Android filtered logcat has no audio errors.
 - [ ] Final authored audio remains deferred to v1.0.0 unless the release notes say otherwise.
-
-

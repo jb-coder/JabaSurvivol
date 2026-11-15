@@ -39,6 +39,9 @@ persistent progression, save data, weapons, skills, enemies, or rounds.
 8. Bloom, vignette, and 2D lights are performance-gated. The fallback must keep
    stable frame pacing on low-end Android devices.
 9. `tools/ArtGenerator` remains the source of truth for every first-party asset.
+10. v0.8.0 ships the reduced lighting fallback: camera post-processing and the
+    global light are disabled after the Android washout. Follow-up #203 tracks
+    the corrected Bloom/Vignette implementation.
 
 ## Consequences
 

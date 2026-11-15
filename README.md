@@ -4,7 +4,7 @@
 
 <br />
 
-[![Latest release](https://img.shields.io/badge/release-v0.7.1-22d3ee?style=for-the-badge&labelColor=07111f)](https://github.com/jb-coder/JabaSurvivol/releases/tag/v0.7.1)
+[![Latest release](https://img.shields.io/badge/release-v0.8.0-22d3ee?style=for-the-badge&labelColor=07111f)](https://github.com/jb-coder/JabaSurvivol/releases/tag/v0.8.0)
 [![Status](https://img.shields.io/badge/status-local%20beta-f59e0b?style=for-the-badge&labelColor=07111f)](#status)
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20Windows-22c55e?style=for-the-badge&labelColor=07111f)](#built-for-phones-and-tablets)
 [![Unity](https://img.shields.io/badge/Unity-6.3%20LTS-111827?style=for-the-badge&labelColor=07111f&logo=unity&logoColor=white)](https://unity.com/)
@@ -45,9 +45,9 @@ Fight through ten escalating rounds, build a survivor across runs, and keep ever
 
 ## Status
 
-> **v0.7.1 audio review and fixes release.** The core loop, persistent progression, five-weapon arsenal, boss encounter, accounts, cloud saves, leaderboard, opt-in telemetry, and BFF are implemented. English and Spanish are available with a device-language default and a runtime selector. Generated neon art covers actors, weapons, projectiles, effects, the arena, UI icons, and the app icon. The audio layer now has a pooled service, persisted mute and volume, lifecycle suspension, and combat, skill, boss, round, and UI cues. Online features require a reachable backend configured at build time.
+> **v0.8.0 top-down art and arena upgrade release.** The core loop, persistent progression, five-weapon arsenal, boss encounter, accounts, cloud saves, leaderboard, opt-in telemetry, and BFF are implemented. English and Spanish are available with a device-language default and a runtime selector. Actors are now authored top-down, and the arena uses a layered neon environment that extends beyond the camera view. The audio layer has a pooled service, persisted mute and volume, lifecycle suspension, and combat, skill, boss, round, and UI cues. Online features require a reachable backend configured at build time.
 
-Read the [v0.7.1 release notes](docs/releases/2026-11-14-v0.7.1.md) for the full feature list, verification evidence, and known issues.
+Read the [v0.8.0 release notes](docs/releases/2026-11-15-v0.8.0.md) for the full feature list, verification evidence, and known issues.
 
 ## The pitch
 
@@ -256,17 +256,17 @@ The backend is a modular monolith. Services are extracted only when a concrete n
 
 ## Quality gates
 
-The v0.7.1 release was verified with:
+The v0.8.0 release was verified with:
 
 | Gate | Result |
 |---|---|
 | Release build | 0 warnings, 0 errors |
 | .NET tests | 267 passed: 173 core, 86 integration, 1 architecture, 1 smoke, 6 art generator |
 | Unity EditMode | 120 passed |
-| Unity PlayMode | 133 passed |
+| Unity PlayMode | 144 passed |
 | Formatting | `dotnet format --verify-no-changes` passed |
-| Android APK | v0.7.1, version code 9, `arm64-v8a`, minimum API 26, target API 36 |
-| Device coverage | Android emulator phone and tablet layouts in English and Spanish; audio evidence in `docs/playtests/2026-11-14-v071-audio-verification.md` |
+| Android APK | v0.8.0, version code 10, `arm64-v8a`, minimum API 26, target API 36 |
+| Device coverage | Android emulator phone and tablet layouts in English and Spanish; art and arena evidence in `docs/playtests/2026-11-15-v080-art-arena-verification.md` |
 
 ```powershell
 dotnet restore JabaSurvivol.slnx
@@ -307,7 +307,7 @@ dotnet run --project src/AppHost
 
 ### Open the game
 
-Unity setup instructions, scene details, and Android build steps live in [`docs/setup/unity.md`](docs/setup/unity.md). The release APK is attached to the [v0.7.1 release](https://github.com/jb-coder/JabaSurvivol/releases/tag/v0.7.1).
+Unity setup instructions, scene details, and Android build steps live in [`docs/setup/unity.md`](docs/setup/unity.md). The release APK is attached to the [v0.8.0 release](https://github.com/jb-coder/JabaSurvivol/releases/tag/v0.8.0).
 
 ## Roadmap
 
@@ -318,6 +318,7 @@ Unity setup instructions, scene details, and Android build steps live in [`docs/
 | **v0.6.0 Localization** | Shipped | English and Spanish, device-language default, runtime selector, key coverage, and layout checks |
 | **v0.7.0 Art and Visual Polish** | Shipped | Generated neon art pipeline, modular characters, weapons, projectiles, combat FX, environment, UI icons, and app icon |
 | **v0.7.1 Audio Review and Fixes** | Shipped | Audio defect audit, pooled routing, mute and volume controls, lifecycle suspension, core combat and UI cues, and Android evidence |
+| **v0.8.0 Top-Down Art and Arena Upgrade** | Shipped | Top-down actors, layered neon arena, extended arena with camera follow, and Android visual evidence |
 | **v1.0.0 Release and Donations** | Planned | Release readiness and an optional donation link with no in-game rewards |
 
 ## Principles
@@ -338,7 +339,7 @@ Unity setup instructions, scene details, and Android build steps live in [`docs/
 | [`docs/game-design/economy.md`](docs/game-design/economy.md) | Supplies, XP, weapons, armor, rewards, and pacing |
 | [`docs/game-design/skills.md`](docs/game-design/skills.md) | Levels, skill tree, active skills, synergies, and caps |
 | [`docs/architecture/README.md`](docs/architecture/README.md) | System shape and architecture decision records |
-| [`docs/releases/2026-11-14-v0.7.1.md`](docs/releases/2026-11-14-v0.7.1.md) | Current release notes and evidence |
+| [`docs/releases/2026-11-15-v0.8.0.md`](docs/releases/2026-11-15-v0.8.0.md) | Current release notes and evidence |
 | [`docs/standards/audio.md`](docs/standards/audio.md) | Audio cue matrix, settings, lifecycle, and release gate |
 | [`docs/playtests/README.md`](docs/playtests/README.md) | Playtest plans, evidence, and beta feedback templates |
 | [`docs/standards/localization.md`](docs/standards/localization.md) | Translation workflow, review gate, and per-locale release checks |
