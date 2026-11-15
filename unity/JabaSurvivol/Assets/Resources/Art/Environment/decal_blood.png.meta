@@ -1,13 +1,7 @@
 fileFormatVersion: 2
 guid: 416cacec0a2182f438e88418583ff685
 TextureImporter:
-  internalIDToNameTable:
-  - first:
-      213: -316010402664861630
-    second: decal_blood_0
-  - first:
-      213: -2002673134933074984
-    second: decal_blood_1
+  internalIDToNameTable: []
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -127,51 +121,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites:
-    - serializedVersion: 2
-      name: decal_blood_0
-      rect:
-        serializedVersion: 2
-        x: 79
-        y: 89
-        width: 90
-        height: 60
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 24035db863e4d9bf0800000000000000
-      internalID: -316010402664861630
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: decal_blood_1
-      rect:
-        serializedVersion: 2
-        x: 91
-        y: 81
-        width: 22
-        height: 18
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8db9817f4631534e0800000000000000
-      internalID: -2002673134933074984
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
+    sprites: []
     outline: []
     customData: 
     physicsShape: []

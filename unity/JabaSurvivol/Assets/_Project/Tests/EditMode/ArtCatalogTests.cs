@@ -115,6 +115,10 @@ namespace JabaSurvivol.Tests.EditMode
             Assert.That(SpriteAtlasExtensions.GetPackables(weapons).Length, Is.GreaterThan(0));
             Assert.That(SpriteAtlasExtensions.GetPackables(ui).Length, Is.GreaterThan(0));
             Assert.That(SpriteAtlasExtensions.GetPackables(environment).Length, Is.GreaterThan(0));
+
+            var androidSettings = environment.GetPlatformSettings("Android");
+            Assert.That(androidSettings.overridden, Is.True);
+            Assert.That(androidSettings.format, Is.EqualTo(TextureImporterFormat.ASTC_6x6));
         }
     }
 }

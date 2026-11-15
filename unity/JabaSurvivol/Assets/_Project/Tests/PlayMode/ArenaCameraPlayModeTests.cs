@@ -115,6 +115,25 @@ namespace JabaSurvivol.Tests.PlayMode
             Assert.That(Mathf.Abs(zombie.y), Is.LessThanOrEqualTo(GameBalance.ArenaHalfHeight));
         }
 
+        [UnityTest]
+        public IEnumerator Spawn_ring_stays_safe_at_arena_corners()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.StartRun();
+            yield return null;
+
+            session.SetPlayerPositionForTests(new Vector2(17.55f, 9.55f));
+            for (var i = 0; i < 64; i++)
+            {
+                var spawn = session.SpawnPositionForTests(0.5f);
+                var distance = Vector2.Distance(session.PlayerPosition, spawn);
+                Assert.That(distance, Is.GreaterThanOrEqualTo(GameBalance.SpawnRingClearance));
+                Assert.That(Mathf.Abs(spawn.x), Is.LessThanOrEqualTo(GameBalance.ArenaHalfWidth));
+                Assert.That(Mathf.Abs(spawn.y), Is.LessThanOrEqualTo(GameBalance.ArenaHalfHeight));
+            }
+        }
         private static GameBootstrap CreateBootstrap()
         {
             var gameObject = new GameObject("Test Bootstrap");
@@ -132,3 +151,4 @@ namespace JabaSurvivol.Tests.PlayMode
         }
     }
 }
+

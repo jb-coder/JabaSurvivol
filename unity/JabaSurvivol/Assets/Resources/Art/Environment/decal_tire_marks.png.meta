@@ -1,13 +1,7 @@
 fileFormatVersion: 2
 guid: 524707f00eb98044795622197d1b427f
 TextureImporter:
-  internalIDToNameTable:
-  - first:
-      213: 1426079613559378006
-    second: decal_tire_marks_0
-  - first:
-      213: 979632711358888810
-    second: decal_tire_marks_1
+  internalIDToNameTable: []
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -127,51 +121,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites:
-    - serializedVersion: 2
-      name: decal_tire_marks_0
-      rect:
-        serializedVersion: 2
-        x: 41
-        y: 60
-        width: 161
-        height: 124
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 65012a35ad37ac310800000000000000
-      internalID: 1426079613559378006
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: decal_tire_marks_1
-      rect:
-        serializedVersion: 2
-        x: 61
-        y: 40
-        width: 161
-        height: 124
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a6b36eab2ca589d00800000000000000
-      internalID: 979632711358888810
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
+    sprites: []
     outline: []
     customData: 
     physicsShape: []

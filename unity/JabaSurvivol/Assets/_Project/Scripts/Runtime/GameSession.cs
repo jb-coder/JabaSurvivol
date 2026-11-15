@@ -130,6 +130,8 @@ namespace JabaSurvivol.Gameplay
 
         public bool EnemySpawningEnabledForTests { get; set; } = true;
 
+        public Vector2 SpawnPositionForTests(float radius) => PickSpawnPosition(radius);
+
         public void SetPlayerPositionForTests(Vector2 position)
         {
             if (_playerObject != null)
@@ -3094,9 +3096,10 @@ namespace JabaSurvivol.Gameplay
                 GameBalance.SpawnRingMinDistance,
                 GameBalance.SpawnRingMaxDistance);
             var minDistanceSquared = GameBalance.SpawnRingClearance * GameBalance.SpawnRingClearance;
-            var fallback = player;
+            var best = player;
+            var bestDistanceSquared = -1f;
 
-            for (var attempt = 0; attempt < 8; attempt++)
+            for (var attempt = 0; attempt < 32; attempt++)
             {
                 var angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
                 var candidate = player + (new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * ring);
@@ -3108,14 +3111,37 @@ namespace JabaSurvivol.Gameplay
                     candidate.y,
                     -GameBalance.ArenaHalfHeight + inset,
                     GameBalance.ArenaHalfHeight - inset);
-                fallback = candidate;
-                if ((candidate - player).sqrMagnitude >= minDistanceSquared)
+                var distanceSquared = (candidate - player).sqrMagnitude;
+                if (distanceSquared >= minDistanceSquared)
                 {
                     return candidate;
                 }
+
+                if (distanceSquared > bestDistanceSquared)
+                {
+                    bestDistanceSquared = distanceSquared;
+                    best = candidate;
+                }
             }
 
-            return fallback;
+            var corners = new[]
+            {
+                new Vector2(-GameBalance.ArenaHalfWidth + inset, -GameBalance.ArenaHalfHeight + inset),
+                new Vector2(GameBalance.ArenaHalfWidth - inset, -GameBalance.ArenaHalfHeight + inset),
+                new Vector2(-GameBalance.ArenaHalfWidth + inset, GameBalance.ArenaHalfHeight - inset),
+                new Vector2(GameBalance.ArenaHalfWidth - inset, GameBalance.ArenaHalfHeight - inset)
+            };
+            for (var i = 0; i < corners.Length; i++)
+            {
+                var distanceSquared = (corners[i] - player).sqrMagnitude;
+                if (distanceSquared > bestDistanceSquared)
+                {
+                    bestDistanceSquared = distanceSquared;
+                    best = corners[i];
+                }
+            }
+
+            return best;
         }
 
         private void CreateActors()
@@ -3178,3 +3204,4 @@ namespace JabaSurvivol.Gameplay
         }
     }
 }
+
