@@ -16,6 +16,9 @@
 - `adr/0010-generated-art-pipeline.md`: deterministic in-repo sprite generation,
   committed manifest and PNGs, manifest-driven Unity import, and a cached
   runtime catalog.
+- `adr/0011-top-down-art-and-expanded-arena.md`: top-down actor rigs, layered
+  arena art, a 36x20 arena, camera follow and clamp, a spawn ring, and
+  performance-gated lighting.
 - `c4/`: reserved for C4 diagrams and context maps.
 
 Current target:
