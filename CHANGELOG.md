@@ -4,6 +4,31 @@ All notable changes to this project are documented in this file.
 
 The format is based on Keep a Changelog and the project follows Semantic Versioning.
 
+## [0.8.0] - 2026-11-15
+
+### Added
+
+- Top-down actor art for the player, Walker, Runner, Brute, Warden, and turret, with forward arms, forward weapons, and stepping legs.
+- Thirty layered environment sprites: seamless floor variants, decals, props, storefronts, fences, concrete barriers, and light pools.
+- Dedicated Environment sprite atlas with Android ASTC 6x6 compression.
+- Layered arena composition with deterministic decoration placement and non-colliding props.
+- Camera follow with smoothing and arena clamping on phone and tablet aspect ratios.
+- Spawn ring outside the camera view with a farthest-corner safety fallback.
+- Arena, camera, top-down rig, atlas, layout, and visual-polish fallback coverage.
+
+### Changed
+
+- Android and core package version bumped to `0.8.0` with version code `10`.
+- The arena now uses ArenaHalfWidth = 18 and ArenaHalfHeight = 10.
+- Arena and spawn constants are the only balance-affecting changes; the balance simulation reports no outliers.
+- The visual-polish service ships with camera post-processing and the global light disabled after the Android washout.
+
+### Fixed
+
+- Spawn points can no longer fall on top of the player at arena corners.
+- Environment atlas compression and single-sprite metadata are enforced.
+- Stale sprite-sheet metadata is cleared from generated environment imports.
+
 ## [0.7.1] - 2026-11-14
 
 ### Added
@@ -220,3 +245,5 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 - HUD text and fill updates now avoid per-frame string formatting.
 - Profile saves preserve the previous file as a backup and recover from a corrupt main file.
 - Project configuration no longer recreates the committed scene on every build.
+
+

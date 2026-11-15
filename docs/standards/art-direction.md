@@ -219,6 +219,9 @@ Never change sorting to fix a one-off layering bug; add a named order instead.
 - At most eight lights may be active at once.
 - Low-end devices use a reduced or disabled lighting profile.
 - No custom shader graph is required for the first pass.
+- v0.8.0 fallback: URP camera post-processing and the global light are disabled
+  because they wash out the 2D scene on the Android emulator. Follow-up #203
+  tracks the corrected Bloom/Vignette implementation.
 
 ## Texture and compression
 
