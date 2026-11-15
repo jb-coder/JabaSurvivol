@@ -88,6 +88,13 @@ namespace JabaSurvivol.Editor
             settings.mipmapEnabled = false;
             settings.alphaIsTransparency = true;
             importer.SetTextureSettings(settings);
+            if (importer.spriteImportMode == SpriteImportMode.Single &&
+                importer.spritesheet != null &&
+                importer.spritesheet.Length > 0)
+            {
+                importer.spritesheet = Array.Empty<SpriteMetaData>();
+            }
+
             importer.maxTextureSize = MaxTextureSize;
 
             var android = importer.GetPlatformTextureSettings("Android");
@@ -123,3 +130,4 @@ namespace JabaSurvivol.Editor
         }
     }
 }
+

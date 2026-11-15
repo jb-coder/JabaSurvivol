@@ -55,7 +55,8 @@ archetype.
 - Projectiles: `128 x 64` or `64 x 64`, pivot center.
 - Effects: `256 x 256`, pivot center.
 - Icons: `128 x 128`, pivot center.
-- Environment tiles: `256 x 256`; walls use `256 x 64` or `64 x 256`.
+- Environment floor tiles: `512 x 512`. Decals and props: `256 x 256`. Walls:
+  `256 x 64` or `64 x 256`. Light pools: `256 x 256`.
 - PPU in Unity must match the manifest. Do not mix art authored at different
   PPUs without an explicit exception.
 
@@ -85,6 +86,27 @@ archetype.
 The player must remain the brightest cyan silhouette on screen. Elites use the
 gold aura and ring, not a body tint. The Warden uses a larger scale and a core
 that shifts from magenta to red when enraged.
+
+## Top-down actor rig
+
+Actors are seen from above. The rig keeps the same part contract for the player,
+Walker, Runner, Brute, and Warden so pooling and animation remain shared.
+
+| Part | Top-down read |
+|---|---|
+| Shadow | Soft ellipse under the actor. |
+| Leg | Long limb behind the torso, top pivot at the hip. |
+| Torso | Shoulders, chest, and back armor seen from above. |
+| Head | Top of the head, hood, helmet, or horns, slightly forward of center. |
+| Arm | Forward-reaching limb with a hand, shoulder pivot near the torso. |
+| Weapon | Top-down barrel and grip, forward of the torso. |
+| Core | Warden only; glowing top-down core between the shoulders. |
+
+- The player faces aim with the weapon forward.
+- Zombie arms reach toward the target and sway during the walk.
+- The head must not cover the weapon or the forward arm silhouette.
+- The player remains the brightest cyan read on screen.
+- Every actor must pass a 64 px grayscale silhouette test from above.
 
 ## Naming
 
@@ -129,15 +151,43 @@ Manifest pivots are normalized `(0, 0)` bottom-left to `(1, 1)` top-right.
 Unity import must read the pivot from the manifest. Do not let Unity guess a
 pivot from alpha bounds.
 
+## Arena and camera
+
+- Arena target: 36 x 20 world units (ArenaHalfWidth = 18,
+  ArenaHalfHeight = 10).
+- Camera height: orthographic size 5.6, so the visible height is 11.2
+  world units. Visible half width is 5.6 * aspect.
+- Camera target: SmoothDamp toward the player with `0.12 s` smoothing.
+- Camera clamp: x = clamp(player.x, -18 + halfWidth, 18 - halfWidth) and
+  y = clamp(player.y, -10 + halfHeight, 10 - halfHeight). If the view is
+  wider or taller than the arena, center that axis.
+- The camera never shows outside the perimeter walls on phone or tablet aspect
+  ratios.
+- Spawn ring: `ring = clamp(max(halfWidth, halfHeight) + 1.5, 11.5, 14.0)`.
+  The 16:9 and 16:10 cases use 11.5. A 20:9 case uses about 13.9.
+- Spawn point: pick a random angle, place it at the ring distance, clamp it to
+  the arena inset, and retry if it is closer than 10.5 units to the player.
+- Arena layers, in numeric order: base floor, floor grid, floor decals,
+  light pools, props behind actors, perimeter, telegraphs, actors, and props in front.
+- Prop categories: vehicles, street furniture, barricades, containers, debris,
+  cables, and neon signs.
+- Light pools: 256 x 256, alpha 30-60, placed under neon signs and above
+  floor decals. No collider and no gameplay effect.
+- Props and decals never create colliders.
+- The lighting fallback must keep stable frame pacing on low-end Android.
+
 ## Sorting
 
 Use numeric sorting orders from a single constants file.
 
 | Layer | Order |
 |---|---:|
-| Floor | -30 |
-| Floor grid | -25 |
-| Walls and props | -20 |
+| Floor | -40 |
+| Floor grid | -35 |
+| Floor decals | -32 |
+| Light pools | -31 |
+| Props behind actors | -20 |
+| Perimeter walls and fences | -18 |
 | Telegraphs | 10 |
 | Death effects | 12 |
 | Enemy shadows | 13 |
@@ -152,11 +202,26 @@ Use numeric sorting orders from a single constants file.
 | Player weapon | 21 |
 | Turret | 22 |
 | Turret barrel | 23 |
+| Props in front of actors | 24 |
 | Projectiles | 30 |
 | Muzzle and impact effects | 31 |
 
 Character parts inside one rig may use the same order and rely on hierarchy.
 Never change sorting to fix a one-off layering bug; add a named order instead.
+
+## Lighting and post-processing
+
+- Global ambient light stays dark enough for neon accents to read.
+- Bloom is low-intensity and thresholded so only emissive highlights bloom.
+- Vignette is subtle and never hides HUD or touch controls.
+- 2D lights are limited to the player visor, muzzle flash, turret, Warden core,
+  and selected neon props.
+- At most eight lights may be active at once.
+- Low-end devices use a reduced or disabled lighting profile.
+- No custom shader graph is required for the first pass.
+- v0.8.0 fallback: URP camera post-processing and the global light are disabled
+  because they wash out the 2D scene on the Android emulator. Follow-up #203
+  tracks the corrected Bloom/Vignette implementation.
 
 ## Texture and compression
 
@@ -169,7 +234,7 @@ Never change sorting to fix a one-off layering bug; add a named order instead.
 - Read/Write: off.
 - Android character and weapon atlases: uncompressed or ASTC 6x6 if the result
   passes the neon-line test. Environment atlases may use ASTC 6x6.
-- One atlas per category: `Characters`, `WeaponsFx`, `UI`.
+- One atlas per category: `Characters`, `WeaponsFx`, `UI`, `Environment`.
 - Keep total shipped art texture memory below `24 MB` on Android.
 - Keep the shipped APK art increase below `10 MB`.
 
@@ -198,9 +263,13 @@ Every asset and every integration slice must pass:
 - Contact sheet reviewed at 1x and phone size.
 - English and Spanish screenshots when the asset appears in UI.
 - Android build, install, launch, and filtered logcat.
-- Draw calls, steady-state GC allocations, texture memory, and APK size within
-  budget.
-- No gameplay, balance, hitbox, or persistent-progression changes.
+- Camera follow, clamp, spawn-ring, and arena-layer tests.
+- Combat draw calls at or below 40; steady-state GC allocation `0 B/frame`;
+  frame time at or below 16.6 ms target and 33.3 ms floor; raw texture
+  memory at or below 24 MB; APK art growth at or below 10 MB.
+- Core gameplay rules, hitboxes, and persistent progression unchanged. Arena
+  bounds and the spawn ring are the only approved balance-affecting changes and
+  must pass the balance simulation and guard tests.
 
 ## Provenance
 

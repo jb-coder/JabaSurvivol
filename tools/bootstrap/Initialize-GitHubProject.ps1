@@ -227,6 +227,7 @@ $milestones = @(
     @{ Title = "v0.6.0 Localization"; Due = "2027-02-01T23:59:59Z"; Description = "English and Spanish, device-language default, runtime selector, key coverage, and layout checks." },
     @{ Title = "v0.7.0 Art and Visual Polish"; Due = "2027-04-12T23:59:59Z"; Description = "First-party generated neon art pipeline, modular characters, weapons, projectiles, combat FX, environment, UI icons, and app icon." },
     @{ Title = "v0.7.1 Audio Review and Fixes"; Due = "2026-11-27T23:59:59Z"; Description = "Audit audio behavior, fix mute, volume, pause, and background defects, add missing core combat and UI cues, and verify Android audio with tests and evidence. Final authored audio remains in v1.0.0." },
+    @{ Title = "v0.8.0 Top-Down Art and Arena Upgrade"; Due = "2026-12-18T23:59:59Z"; Description = "Top-down actor sprites, layered neon arena background, extended arena with camera follow, 2D lighting and post-processing, and Android visual and performance evidence." },
     @{ Title = "v1.0.0 Release and Donations"; Due = "2027-05-03T23:59:59Z"; Description = "Free release readiness, optional PayPal donation link with no rewards or entitlements, and final release. No premium currency, cosmetic store, payments sandbox, or in-game purchases." }
 )
 

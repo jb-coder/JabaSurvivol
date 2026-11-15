@@ -6,8 +6,12 @@ namespace JabaSurvivol.Gameplay
     /// </summary>
     public static class SortingOrders
     {
-        public const int Floor = -30;
-        public const int FloorGrid = -25;
+        public const int Floor = -40;
+        public const int FloorGrid = -35;
+        public const int FloorDecal = -32;
+        public const int LightPool = -31;
+        public const int PropsBehind = -20;
+        public const int Perimeter = -18;
         public const int WallsAndProps = -20;
         public const int Telegraph = 10;
         public const int DeathEffect = 12;
@@ -24,6 +28,7 @@ namespace JabaSurvivol.Gameplay
         public const int Turret = 22;
         public const int TurretBarrel = 23;
         public const int Projectile = 30;
+        public const int PropsFront = 24;
         public const int MuzzleAndImpact = 31;
     }
 }

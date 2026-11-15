@@ -1,0 +1,29 @@
+
+11-15 16:12:43.308 21120 21144 I AudioStreamBuilder: device =      0, sessionId = 0, perfMode = 12, callback: ON with frames = 512
+11-15 16:12:43.336 21120 21144 D AudioStreamTrack: open() perfMode changed from 12 to 10
+11-15 16:12:45.940 21120 21125 I basurvivol.game: Compiler allocated 5174KB to compile void android.view.ViewRootImpl.performTraversals()
+11-15 16:12:49.492 21120 21144 I Unity   : PERF drawCalls=0 gcAllocated=0 monoUsed=10014720 totalAllocated=87017670 frame=1
+11-15 16:12:49.492 21120 21144 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:12:54.755 21120 21144 I Unity   : PERF drawCalls=13 gcAllocated=0 monoUsed=12861440 totalAllocated=93788456 frame=22
+11-15 16:12:54.755 21120 21144 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:12:59.991 21120 21144 I Unity   : PERF drawCalls=13 gcAllocated=0 monoUsed=12861440 totalAllocated=93788400 frame=42
+11-15 16:12:59.991 21120 21144 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:13:04.965 21120 21144 I Unity   : PERF drawCalls=13 gcAllocated=0 monoUsed=12861440 totalAllocated=93773121 frame=68
+11-15 16:13:04.965 21120 21144 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:13:10.154 21120 21144 I Unity   : PERF drawCalls=13 gcAllocated=0 monoUsed=12861440 totalAllocated=93788120 frame=99
+11-15 16:13:10.154 21120 21144 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:13:15.269 21120 21144 I Unity   : PERF drawCalls=13 gcAllocated=0 monoUsed=12861440 totalAllocated=93788120 frame=131
+11-15 16:13:15.269 21120 21144 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:13:20.415 21120 21144 I Unity   : PERF drawCalls=13 gcAllocated=0 monoUsed=12861440 totalAllocated=93750510 frame=163
+11-15 16:13:20.415 21120 21144 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:13:25.443 21120 21144 I Unity   : PERF drawCalls=13 gcAllocated=0 monoUsed=12865536 totalAllocated=93770760 frame=193
+11-15 16:13:25.443 21120 21144 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:13:30.538 21120 21144 I Unity   : PERF drawCalls=13 gcAllocated=0 monoUsed=12869632 totalAllocated=93733150 frame=221
+11-15 16:13:30.538 21120 21144 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:13:35.642 21120 21144 I Unity   : PERF drawCalls=13 gcAllocated=0 monoUsed=12869632 totalAllocated=93753416 frame=252
+11-15 16:13:35.642 21120 21144 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:13:40.637 21120 21144 I Unity   : PERF drawCalls=13 gcAllocated=0 monoUsed=12869632 totalAllocated=93753416 frame=279
+11-15 16:13:40.637 21120 21144 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+11-15 16:13:45.765 21120 21144 I Unity   : PERF drawCalls=13 gcAllocated=0 monoUsed=12869632 totalAllocated=93753416 frame=309
+11-15 16:13:45.765 21120 21144 I Unity   : JabaSurvivol.Gameplay.PerformanceProbe:Update()
+
