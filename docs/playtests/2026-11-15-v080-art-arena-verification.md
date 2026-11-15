@@ -10,10 +10,9 @@
 | Artifact | Version | Version code | ABI | Min API | Target API | Size | SHA-256 |
 |---|---|---:|---|---:|---:|---:|---|
 | Production APK | 0.8.0 | 10 | arm64-v8a | 26 | 36 | 35,776,001 bytes | `b5fc76efeff9cf7414900b7a09ed2d9ea969c1b6ca246c6cd60a2e72572cd8ef` |
-| Install emulator APK | Success |
+| Emulator APK | 0.8.0 | 10 | arm64-v8a, x86_64 | 26 | 36 | 82,792,108 bytes | `440cf6fb03ba5140af509e2a4031ee631bc1b771959d77ba82630405e9f19699` |
 
-Build provenance: both APKs were built from release commit `20f595c`; the evidence-only follow-up commit does not change runtime code. The emulator APK was installed and launched.
-hashed; it was not installed on the x86_64 emulator because it is ARM64-only.
+Build provenance: both APKs were built from release commit `20f595c`; the evidence-only follow-up commit does not change runtime code. The emulator APK was installed and launched. The production APK was badged and hashed; it was not installed on the x86_64 emulator because it is ARM64-only.
 
 ## Automated verification
 
@@ -56,7 +55,7 @@ Device: `jaba_survivol_api35`, Android API 35 emulator.
 | Mono memory | 12.87 MB | 13.28 MB |
 | Emulator total PSS (observed) | about 293 MB | about 293 MB |
 
-The draw-call target is 40 and the observed gameplay value is 32. The emulator
+The draw-call target is 40 and the observed gameplay value is 15. The emulator
 PSS includes Unity, Android, and graphics-driver overhead and is recorded as an
 observation, not as a device budget claim.
 
