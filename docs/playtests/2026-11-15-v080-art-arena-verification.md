@@ -42,7 +42,7 @@ Device: `jaba_survivol_api35`, Android API 35 emulator.
 | Launch `com.jabasurvivol.game` | Activity started |
 | Main menu | Rendered in English and Spanish |
 | Gameplay | Top-down player, Walker, extended arena, props, and HUD rendered |
-| Pause | Pause menu rendered |
+| Pause | Phone pause menu rendered in English and Spanish |
 | Phone layout | 2340 x 1080 |
 | Tablet layout | 2560 x 1600 |
 | Filtered app logcat | No `FATAL EXCEPTION` or `AndroidRuntime` crash |
@@ -77,6 +77,7 @@ observation, not as a device budget claim.
 - `v080-phone-gameplay-en.png`
 - `v080-phone-gameplay-es.png`
 - `v080-phone-pause-en.png`
+- `v080-phone-pause-es.png`
 
 ### Tablet
 
