@@ -30,20 +30,15 @@ namespace JabaSurvivol.Gameplay
         private readonly GameObject _audioPanel;
         private readonly Text _audioMuteLabel;
         private readonly Text _audioMasterLabel;
-        private readonly Text _audioEffectsLabel;
         private readonly Button _audioMuteButton;
         private readonly Button _audioMasterMinusButton;
         private readonly Button _audioMasterPlusButton;
-        private readonly Button _audioEffectsMinusButton;
-        private readonly Button _audioEffectsPlusButton;
         private readonly Button _audioCloseButton;
         private readonly Button _audioButtonMain;
         private readonly Button _audioButtonPause;
         private readonly System.Action<float> _onMasterVolumeChanged;
-        private readonly System.Action<float> _onEffectsVolumeChanged;
         private readonly System.Action<string> _onLocaleSelected;
         private float _masterVolume = GameAudio.DefaultMasterVolume;
-        private float _effectsVolume = GameAudio.DefaultEffectsVolume;
         private readonly GameObject _gameOverPanel;
         private readonly GameObject _victoryPanel;
         private readonly GameObject _bossPanel;
@@ -175,7 +170,6 @@ namespace JabaSurvivol.Gameplay
             System.Action onResume,
             System.Action onToggleSound,
             System.Action<float> onMasterVolumeChanged,
-            System.Action<float> onEffectsVolumeChanged,
             System.Action onReload,
             System.Action onSwitchWeapon,
             System.Action onActiveSkill,
@@ -207,7 +201,6 @@ namespace JabaSurvivol.Gameplay
         {
             _onLocaleSelected = onLocaleSelected;
             _onMasterVolumeChanged = onMasterVolumeChanged;
-            _onEffectsVolumeChanged = onEffectsVolumeChanged;
             var canvasObject = UiFactory.CreateCanvas("JabaSurvivol UI", parent);
 
             var safeAreaObject = new GameObject("Safe Area", typeof(RectTransform));
@@ -266,15 +259,11 @@ namespace JabaSurvivol.Gameplay
             _audioPanel = BuildAudioPanel(
                 onToggleSound,
                 onMasterVolumeChanged,
-                onEffectsVolumeChanged,
                 out _audioMuteLabel,
                 out _audioMasterLabel,
-                out _audioEffectsLabel,
                 out _audioMuteButton,
                 out _audioMasterMinusButton,
                 out _audioMasterPlusButton,
-                out _audioEffectsMinusButton,
-                out _audioEffectsPlusButton,
                 out _audioCloseButton);
             _gameOverPanel = BuildGameOverPanel(onRestart, onMenu, out _gameOverSummary);
             _victoryPanel = BuildVictoryPanel(onRestart, onMenu, onLeaderboard, out _victorySummary);
@@ -817,28 +806,20 @@ namespace JabaSurvivol.Gameplay
         /// <summary>
         /// Applies the full audio state and refreshes every label.
         /// </summary>
-        public void SetAudio(bool muted, float masterVolume, float effectsVolume)
+        public void SetAudio(bool muted, float masterVolume)
         {
             _masterVolume = Mathf.Clamp01(masterVolume);
-            _effectsVolume = Mathf.Clamp01(effectsVolume);
             SetSound(!muted);
 
             if (_audioMasterLabel != null)
             {
-                _audioMasterLabel.text = "VOL " + Mathf.RoundToInt(_masterVolume * 100f) + "%";
-            }
-
-            if (_audioEffectsLabel != null)
-            {
-                _audioEffectsLabel.text = "FX " + Mathf.RoundToInt(_effectsVolume * 100f) + "%";
+                _audioMasterLabel.text = Mathf.RoundToInt(_masterVolume * 100f) + "%";
             }
         }
 
         public string SoundLabelForTests => _audioMuteLabel?.text ?? string.Empty;
 
         public string AudioMasterLabelForTests => _audioMasterLabel?.text ?? string.Empty;
-
-        public string AudioEffectsLabelForTests => _audioEffectsLabel?.text ?? string.Empty;
 
         public Button AudioButtonMainForTests => _audioButtonMain;
 
@@ -849,10 +830,6 @@ namespace JabaSurvivol.Gameplay
         public Button AudioMasterMinusButtonForTests => _audioMasterMinusButton;
 
         public Button AudioMasterPlusButtonForTests => _audioMasterPlusButton;
-
-        public Button AudioEffectsMinusButtonForTests => _audioEffectsMinusButton;
-
-        public Button AudioEffectsPlusButtonForTests => _audioEffectsPlusButton;
 
         public Button AudioCloseButtonForTests => _audioCloseButton;
 
@@ -2491,15 +2468,11 @@ namespace JabaSurvivol.Gameplay
         private GameObject BuildAudioPanel(
             System.Action onToggleMute,
             System.Action<float> onMasterChanged,
-            System.Action<float> onEffectsChanged,
             out Text muteLabel,
             out Text masterLabel,
-            out Text effectsLabel,
             out Button muteButton,
             out Button masterMinus,
             out Button masterPlus,
-            out Button effectsMinus,
-            out Button effectsPlus,
             out Button closeButton)
         {
             var panel = UiFactory.CreatePanel(
@@ -2518,11 +2491,10 @@ namespace JabaSurvivol.Gameplay
             UiFactory.Place(muteButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.64f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(560f, 88f));
             muteLabel = muteButton.GetComponentInChildren<Text>();
 
-            // VOL and FX are language-neutral technical abbreviations.
             masterLabel = UiFactory.CreateText(
                 root.transform,
                 "Master Volume",
-                "VOL 100%",
+                "100%",
                 28,
                 TextAnchor.MiddleCenter,
                 new Color(0.55f, 0.95f, 0.75f));
@@ -2543,31 +2515,6 @@ namespace JabaSurvivol.Gameplay
                 30,
                 () => onMasterChanged(Mathf.Clamp01(_masterVolume + AudioVolumeStep)));
             UiFactory.Place(masterPlus.GetComponent<RectTransform>(), new Vector2(0.5f, 0.46f), new Vector2(0.5f, 0.5f), new Vector2(220f, 0f), new Vector2(84f, 68f));
-
-            effectsLabel = UiFactory.CreateText(
-                root.transform,
-                "Effects Volume",
-                "FX 80%",
-                28,
-                TextAnchor.MiddleCenter,
-                new Color(0.55f, 0.85f, 1f));
-            UiFactory.Place(effectsLabel.rectTransform, new Vector2(0.5f, 0.32f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(320f, 60f));
-
-            effectsMinus = UiFactory.CreateButton(
-                root.transform,
-                "Effects Volume Down",
-                "-",
-                30,
-                () => onEffectsChanged(Mathf.Clamp01(_effectsVolume - AudioVolumeStep)));
-            UiFactory.Place(effectsMinus.GetComponent<RectTransform>(), new Vector2(0.5f, 0.32f), new Vector2(0.5f, 0.5f), new Vector2(-220f, 0f), new Vector2(84f, 68f));
-
-            effectsPlus = UiFactory.CreateButton(
-                root.transform,
-                "Effects Volume Up",
-                "+",
-                30,
-                () => onEffectsChanged(Mathf.Clamp01(_effectsVolume + AudioVolumeStep)));
-            UiFactory.Place(effectsPlus.GetComponent<RectTransform>(), new Vector2(0.5f, 0.32f), new Vector2(0.5f, 0.5f), new Vector2(220f, 0f), new Vector2(84f, 68f));
 
             closeButton = UiFactory.CreateButton(
                 root.transform,

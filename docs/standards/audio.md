@@ -28,8 +28,8 @@ sound effects remain in v1.0.0.
   PlayerPrefs and applied to every source.
 - Pause, focus loss, and Android background suspend audio and stop active
   one-shots. Resume restores audio only when the session is playing.
-- The main menu and pause menu open an audio panel with mute, VOL, and FX
-  controls. VOL and FX are language-neutral technical abbreviations.
+- The main menu and pause menu open an audio panel with mute and master
+  volume. The effects volume remains internal in v0.7.1.
 - The panel reuses the existing pause.sound.on, pause.sound.off, and
   settings.language.close keys, so no Spanish locale table change is needed.
 
@@ -109,7 +109,7 @@ Rules:
 - `audio.muted` from v0.5.1 remains the source of truth for mute, so existing
   preferences keep working.
 - Audio controls are available on the main menu and the pause menu.
-- The controls use existing localization keys and language-neutral symbols so they render in English and Spanish without new translations.
+- The controls use existing localization keys and numeric percentages so they render in English and Spanish without new translations.
 
 ## Audio control labels
 
@@ -120,7 +120,7 @@ The audio panel reuses existing keys:
 | Main menu and pause menu entry | `pause.sound.on` / `pause.sound.off` |
 | Mute button | `pause.sound.on` / `pause.sound.off` |
 | Close button | `settings.language.close` |
-| Volume rows | `VOL` and `FX` language-neutral abbreviations with percentages |
+| Master volume | Numeric percentage next to the minus and plus buttons |
 
 ## Lifecycle contract
 

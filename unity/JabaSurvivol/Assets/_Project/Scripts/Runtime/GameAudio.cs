@@ -70,6 +70,7 @@ namespace JabaSurvivol.Gameplay
         private readonly float[] _lastPlayTimes = new float[CueCount];
         private readonly GameAudioCue[] _recentCues = new GameAudioCue[8];
         private int _recentCueCount;
+        private bool _initialized;
         private bool _muted;
         private bool _suspended;
 
@@ -133,6 +134,25 @@ namespace JabaSurvivol.Gameplay
 
         private void Awake()
         {
+            Initialize();
+        }
+
+        /// <summary>
+        /// Initializes the service for EditMode tests that do not run Awake.
+        /// </summary>
+        public void InitializeForTests()
+        {
+            Initialize();
+        }
+
+        private void Initialize()
+        {
+            if (_initialized)
+            {
+                return;
+            }
+
+            _initialized = true;
             for (var i = 0; i < CueCount; i++)
             {
                 _lastPlayTimes[i] = -1000f;
@@ -316,6 +336,14 @@ namespace JabaSurvivol.Gameplay
             var index = (int)cue;
             return index >= 0 && index < _clips.Length && _clips[index] != null
                 ? _clips[index].samples
+                : 0;
+        }
+
+        public int ClipSampleRateForTests(GameAudioCue cue)
+        {
+            var index = (int)cue;
+            return index >= 0 && index < _clips.Length && _clips[index] != null
+                ? _clips[index].frequency
                 : 0;
         }
 
