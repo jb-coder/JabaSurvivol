@@ -55,7 +55,8 @@ archetype.
 - Projectiles: `128 x 64` or `64 x 64`, pivot center.
 - Effects: `256 x 256`, pivot center.
 - Icons: `128 x 128`, pivot center.
-- Environment tiles: `256 x 256`; walls use `256 x 64` or `64 x 256`.
+- Environment floor tiles: `512 x 512`. Decals and props: `256 x 256`. Walls:
+  `256 x 64` or `64 x 256`. Light pools: `256 x 256`.
 - PPU in Unity must match the manifest. Do not mix art authored at different
   PPUs without an explicit exception.
 
@@ -85,6 +86,27 @@ archetype.
 The player must remain the brightest cyan silhouette on screen. Elites use the
 gold aura and ring, not a body tint. The Warden uses a larger scale and a core
 that shifts from magenta to red when enraged.
+
+## Top-down actor rig
+
+Actors are seen from above. The rig keeps the same part contract for the player,
+Walker, Runner, Brute, and Warden so pooling and animation remain shared.
+
+| Part | Top-down read |
+|---|---|
+| Shadow | Soft ellipse under the actor. |
+| Leg | Long limb behind the torso, top pivot at the hip. |
+| Torso | Shoulders, chest, and back armor seen from above. |
+| Head | Top of the head, hood, helmet, or horns, slightly forward of center. |
+| Arm | Forward-reaching limb with a hand, shoulder pivot near the torso. |
+| Weapon | Top-down barrel and grip, forward of the torso. |
+| Core | Warden only; glowing top-down core between the shoulders. |
+
+- The player faces aim with the weapon forward.
+- Zombie arms reach toward the target and sway during the walk.
+- The head must not cover the weapon or the forward arm silhouette.
+- The player remains the brightest cyan read on screen.
+- Every actor must pass a 64 px grayscale silhouette test from above.
 
 ## Naming
 
@@ -129,6 +151,20 @@ Manifest pivots are normalized `(0, 0)` bottom-left to `(1, 1)` top-right.
 Unity import must read the pivot from the manifest. Do not let Unity guess a
 pivot from alpha bounds.
 
+## Arena and camera
+
+- Arena target: 36 x 20 world units (ArenaHalfWidth = 18,
+  ArenaHalfHeight = 10).
+- The camera follows the player with smoothing and clamps to the arena.
+- The camera never shows outside the perimeter walls on phone or tablet aspect
+  ratios.
+- Enemies spawn on a ring around the player outside the camera view and inside
+  the arena. The ring distance is tuned per aspect ratio.
+- Arena layers: base floor, floor decals, props behind actors, actors, props in
+  front, perimeter, and light pools.
+- Props and decals never create colliders.
+- The lighting fallback must keep stable frame pacing on low-end Android.
+
 ## Sorting
 
 Use numeric sorting orders from a single constants file.
@@ -158,6 +194,17 @@ Use numeric sorting orders from a single constants file.
 Character parts inside one rig may use the same order and rely on hierarchy.
 Never change sorting to fix a one-off layering bug; add a named order instead.
 
+## Lighting and post-processing
+
+- Global ambient light stays dark enough for neon accents to read.
+- Bloom is low-intensity and thresholded so only emissive highlights bloom.
+- Vignette is subtle and never hides HUD or touch controls.
+- 2D lights are limited to the player visor, muzzle flash, turret, Warden core,
+  and selected neon props.
+- At most eight lights may be active at once.
+- Low-end devices use a reduced or disabled lighting profile.
+- No custom shader graph is required for the first pass.
+
 ## Texture and compression
 
 - Max texture size: `512` for characters and environment; `256` for icons.
@@ -169,7 +216,7 @@ Never change sorting to fix a one-off layering bug; add a named order instead.
 - Read/Write: off.
 - Android character and weapon atlases: uncompressed or ASTC 6x6 if the result
   passes the neon-line test. Environment atlases may use ASTC 6x6.
-- One atlas per category: `Characters`, `WeaponsFx`, `UI`.
+- One atlas per category: `Characters`, `WeaponsFx`, `UI`, `Environment`.
 - Keep total shipped art texture memory below `24 MB` on Android.
 - Keep the shipped APK art increase below `10 MB`.
 
@@ -198,6 +245,7 @@ Every asset and every integration slice must pass:
 - Contact sheet reviewed at 1x and phone size.
 - English and Spanish screenshots when the asset appears in UI.
 - Android build, install, launch, and filtered logcat.
+- Camera follow, clamp, spawn-ring, and arena-layer tests.
 - Draw calls, steady-state GC allocations, texture memory, and APK size within
   budget.
 - No gameplay, balance, hitbox, or persistent-progression changes.
