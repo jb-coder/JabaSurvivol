@@ -18,11 +18,11 @@
       "resourcePath": "Art/Characters/boss_warden_arm",
       "width": 512,
       "height": 512,
-      "pivotX": 0.5,
+      "pivotX": 0.2,
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "c772668f3c642dc64330cc696d50b22bb6f6ac369240e46d63c98fe5924829e8"
+      "sha256": "b9c8a544fc3457f9c0912d7c6f9721b00380f1349556dc32070a50eb817d6085"
     },
     {
       "path": "Characters/boss_warden_core.png",
@@ -44,18 +44,18 @@
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "75337e4df8d9de691e2ac57075d1c7699cf82d0ac6aaf575d030d7852cf2073c"
+      "sha256": "148969d6159e13475fa141c4987527f2e77ea35bad99d5fc14326cd87243f194"
     },
     {
       "path": "Characters/boss_warden_leg.png",
       "resourcePath": "Art/Characters/boss_warden_leg",
       "width": 512,
       "height": 512,
-      "pivotX": 0.5,
-      "pivotY": 0.9,
+      "pivotX": 0.85,
+      "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "b4434eaa2c3a5ae81fc9cd4986b00af8d0e1cabf05a254b2e43e9f6ed15a82f5"
+      "sha256": "506c762ee4b9cfe2a1b8409f4e4233e5a51f9cfa7fe4f7ae750c6061e5fd4c1d"
     },
     {
       "path": "Characters/boss_warden_shadow.png",
@@ -77,18 +77,18 @@
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "6e77d501de7633b8023b4187534241424d08d2f8dc53b0cd3ecc4249f84b5bab"
+      "sha256": "a4f9835381a33166ea4bc97ea4ca207a2c4c95fb5f217c552451e66c9cf32833"
     },
     {
       "path": "Characters/player_arm.png",
       "resourcePath": "Art/Characters/player_arm",
       "width": 256,
       "height": 256,
-      "pivotX": 0.5,
+      "pivotX": 0.2,
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "9663af32636cb950a9ab3d5ef6222aed498db0b1a93a240cf25a320eebd645bb"
+      "sha256": "9bdd97099952a673521897480a97119b881eb54eb2223be19aff69c36913bd9d"
     },
     {
       "path": "Characters/player_head.png",
@@ -99,18 +99,18 @@
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "09841d5f9192b4b7b120fa0bea8e6a0db173a17179576cd47315e08e64eace7b"
+      "sha256": "fef9bd8246ee226fd4f92235f51d884265425210762218575443f9b480536619"
     },
     {
       "path": "Characters/player_leg.png",
       "resourcePath": "Art/Characters/player_leg",
       "width": 256,
       "height": 256,
-      "pivotX": 0.5,
-      "pivotY": 0.9,
+      "pivotX": 0.85,
+      "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "927f0a86f6819a58efb9504b25b3142b8c05075bdc1b260cbf9881b4e447e89c"
+      "sha256": "98f82ea1a9c780acaac1a4397676de7c88a8e985a34503190327cf4dcad0d13d"
     },
     {
       "path": "Characters/player_shadow.png",
@@ -132,7 +132,7 @@
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "7fe7ee478001b64ccdca7f45924a84782a72c8bb8183f45cc0cbd69e4639d2be"
+      "sha256": "52c3578b309a3681b83f9c2b0fe818d0c74789c8844b15c03b3a60f1a1abf802"
     },
     {
       "path": "Characters/turret_barrel.png",
@@ -172,11 +172,11 @@
       "resourcePath": "Art/Characters/zombie_brute_arm",
       "width": 256,
       "height": 256,
-      "pivotX": 0.5,
+      "pivotX": 0.2,
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "23c3eb51a1086e1d8f13a9eca3675c400e31449a7fe1da9445053b3cbdc1d141"
+      "sha256": "90117cc83d6506cacba8c3a0814d43e68f845d8c78eccb4e225df2ba8b10ae63"
     },
     {
       "path": "Characters/zombie_brute_head.png",
@@ -187,18 +187,18 @@
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "c2d2984a57d336175a05627de40d6e25c5f17b22f4992196988484dea1ddebc5"
+      "sha256": "b44d3bc76f296d46f57e528ccb485eebaf883f72aa1d2e839efd6ca2e94000b7"
     },
     {
       "path": "Characters/zombie_brute_leg.png",
       "resourcePath": "Art/Characters/zombie_brute_leg",
       "width": 256,
       "height": 256,
-      "pivotX": 0.5,
-      "pivotY": 0.9,
+      "pivotX": 0.85,
+      "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "98ba2b1a27ba23e182fbb54fbe69a78070ee3d634d6fab770b20e7b5e082a013"
+      "sha256": "e321f6371b5c1dfcded938481d070d50713e360741c1a8b21df2720d517eceb8"
     },
     {
       "path": "Characters/zombie_brute_shadow.png",
@@ -220,18 +220,18 @@
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "f2c892aa53be978c917e2bc86e04a00235589f5be129c01a409d4ec198c45e29"
+      "sha256": "bd7c62742e596a466b02606a2ca9b942f481aa9a2bd676d0d917bff2119b7fb3"
     },
     {
       "path": "Characters/zombie_runner_arm.png",
       "resourcePath": "Art/Characters/zombie_runner_arm",
       "width": 256,
       "height": 256,
-      "pivotX": 0.5,
+      "pivotX": 0.2,
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "398e51f66f3756a4c76d16b436c3a2f1c5cc06706104c1fee34ab383ca86baac"
+      "sha256": "4ecff3e01644b5d9eff3d451f6658df264662f4df26adab53fff289a26967851"
     },
     {
       "path": "Characters/zombie_runner_head.png",
@@ -242,18 +242,18 @@
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "8f28f850230fa25435d7475268782dc7d400cbca37fc2c9b893e168d23717ff9"
+      "sha256": "2f53a923daad1168d7db9f91a1fd8b1b3cd32648997a006e3c9d370d635f3ff3"
     },
     {
       "path": "Characters/zombie_runner_leg.png",
       "resourcePath": "Art/Characters/zombie_runner_leg",
       "width": 256,
       "height": 256,
-      "pivotX": 0.5,
-      "pivotY": 0.9,
+      "pivotX": 0.85,
+      "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "7e8983e72cc82f20f896724ab78a41738de162ad46180fc748b71f0c3e48fc89"
+      "sha256": "b0bb2475eadf30f980b61b381f722e1265ffd78e5b955ac9553688dcf468e8cf"
     },
     {
       "path": "Characters/zombie_runner_shadow.png",
@@ -275,18 +275,18 @@
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "d4e76cd8101c0983c53f88562782880f0a37a9a3524e2e3b5adf36bc7d7ba423"
+      "sha256": "ecf98b489635ec6e8e64fe30a6cd6c0a00488603f71ffff10bdd3c9ed2d9eddb"
     },
     {
       "path": "Characters/zombie_walker_arm.png",
       "resourcePath": "Art/Characters/zombie_walker_arm",
       "width": 256,
       "height": 256,
-      "pivotX": 0.5,
+      "pivotX": 0.2,
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "4f08dfe4a3d7c4e80da0575a815cda65381c4e63a41410c95ebe62463e1ce25f"
+      "sha256": "4c0791fc8fc28dd94c250b206c9c555ee143f45e10d2a45909a6bee834287d36"
     },
     {
       "path": "Characters/zombie_walker_head.png",
@@ -297,18 +297,18 @@
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "f6ffb01954c5fd07edc38d2af7c66e409968d18ce8c4172ae3d5ef0af4b8d61e"
+      "sha256": "dbcb348bc7163c8c704a6a9b0a2b2d71ed28e38650024b6485099e4c33f3b1b1"
     },
     {
       "path": "Characters/zombie_walker_leg.png",
       "resourcePath": "Art/Characters/zombie_walker_leg",
       "width": 256,
       "height": 256,
-      "pivotX": 0.5,
-      "pivotY": 0.9,
+      "pivotX": 0.85,
+      "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "b0ca153007f8b3233caf724c251dcdfe9ae29a3a649c22f105eef7da836c075a"
+      "sha256": "7e85f3c6644a53bc6cc304a1ee30fe1ef299f31edb9ec546cf09ce03b75789bc"
     },
     {
       "path": "Characters/zombie_walker_shadow.png",
@@ -330,7 +330,7 @@
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "3a8e89b48f8ed5e2598614f21f5df88c9e8442b6c557304414a27b81a68b72ed"
+      "sha256": "b6a8963668c9044607129e10d9281fdd0f330e6eced7dae32797bfc1db5c6fd1"
     },
     {
       "path": "Effects/death_burst.png",
@@ -399,6 +399,149 @@
       "sha256": "4d4d5bcc51e978009a6ec9a20b02007712be611a7e193a02552793f82ebb1776"
     },
     {
+      "path": "Environment/decal_blood.png",
+      "resourcePath": "Art/Environment/decal_blood",
+      "width": 256,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "8deb3a310584608d9a2d6486ff969bb68469e25804d64b23347a84b4f05ac536"
+    },
+    {
+      "path": "Environment/decal_crack.png",
+      "resourcePath": "Art/Environment/decal_crack",
+      "width": 256,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "c92847ba11167ebd257aca3953ff5c80fd5c3da3621b6761423fea0c13358396"
+    },
+    {
+      "path": "Environment/decal_graffiti.png",
+      "resourcePath": "Art/Environment/decal_graffiti",
+      "width": 256,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "f31acab1fe3bbb455381bba79529e36fa4e0e7314852755d48ff13eece57b405"
+    },
+    {
+      "path": "Environment/decal_manhole.png",
+      "resourcePath": "Art/Environment/decal_manhole",
+      "width": 256,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "971cca1d3865badd7bde06581d73f41d4ad8ad9c8f4f725d43130005ad36117f"
+    },
+    {
+      "path": "Environment/decal_oil.png",
+      "resourcePath": "Art/Environment/decal_oil",
+      "width": 256,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "e17a07d5fd19b2c7627f7340725dbe7de56aaf68bd71b8b8a7baba21a84d2b21"
+    },
+    {
+      "path": "Environment/decal_paper.png",
+      "resourcePath": "Art/Environment/decal_paper",
+      "width": 256,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "0b24677c9cf0b884197e0d07bd5cb4bfd7aa5f6eeddf77420dafe08226dfc775"
+    },
+    {
+      "path": "Environment/decal_puddle.png",
+      "resourcePath": "Art/Environment/decal_puddle",
+      "width": 256,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "2e9dede3cb377220c4789c4feb7b41c19faded9080fd5dc9f6ecf6f9d5d8b53e"
+    },
+    {
+      "path": "Environment/decal_road_arrow.png",
+      "resourcePath": "Art/Environment/decal_road_arrow",
+      "width": 256,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "3fd9d1d6432538c51aa79feab6f2a8bf299e1a5ce28d9eb9afec77f58aba2b0c"
+    },
+    {
+      "path": "Environment/decal_road_line.png",
+      "resourcePath": "Art/Environment/decal_road_line",
+      "width": 256,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "b9b997e5ed9f9f0133b10d1b62fc8fa537c5cccd74d835f2f2fb3ba100962f0a"
+    },
+    {
+      "path": "Environment/decal_tire_marks.png",
+      "resourcePath": "Art/Environment/decal_tire_marks",
+      "width": 256,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "c0b52c3e92f871be092a9872585e96bb899f1a4c7244a7c322b1d9ae9458f2e8"
+    },
+    {
+      "path": "Environment/floor_asphalt_a.png",
+      "resourcePath": "Art/Environment/floor_asphalt_a",
+      "width": 512,
+      "height": 512,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "4239011bdcb57443a78bd193d43febb06b09cdbc7ebc0a962df2f3096f7cd733"
+    },
+    {
+      "path": "Environment/floor_asphalt_b.png",
+      "resourcePath": "Art/Environment/floor_asphalt_b",
+      "width": 512,
+      "height": 512,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "0d64dc4468f71b885736b7f9d69766723e108952914316dea260796f43460faa"
+    },
+    {
+      "path": "Environment/floor_concrete.png",
+      "resourcePath": "Art/Environment/floor_concrete",
+      "width": 512,
+      "height": 512,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "605b2e4c2b7b82d03115d95ecdc791d1220b50ed06a433953f258beae6644e5b"
+    },
+    {
       "path": "Environment/floor_tile.png",
       "resourcePath": "Art/Environment/floor_tile",
       "width": 256,
@@ -410,6 +553,50 @@
       "sha256": "99dd3f17f0d90c031cd042f160a3060ed8fcb079ff816144842bb19042f57728"
     },
     {
+      "path": "Environment/light_amber.png",
+      "resourcePath": "Art/Environment/light_amber",
+      "width": 256,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "cf3b0c2fac942baab2444702faefe9a06cf24a360289cb9393f16f22318937a5"
+    },
+    {
+      "path": "Environment/light_cyan.png",
+      "resourcePath": "Art/Environment/light_cyan",
+      "width": 256,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "47973540df67f250d80aa46fcb47e8055a3830826c2442730cf7052a49718703"
+    },
+    {
+      "path": "Environment/light_green.png",
+      "resourcePath": "Art/Environment/light_green",
+      "width": 256,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "5989a860efd9461035efa2445ce48f3893e3b05c631e1c685f6b0f8d49d7a690"
+    },
+    {
+      "path": "Environment/light_magenta.png",
+      "resourcePath": "Art/Environment/light_magenta",
+      "width": 256,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "f2978d9f4d498105985f9a04d5c36c91e2f7c5386e83b784259023184a906953"
+    },
+    {
       "path": "Environment/prop_barrel.png",
       "resourcePath": "Art/Environment/prop_barrel",
       "width": 256,
@@ -419,6 +606,50 @@
       "category": "environment",
       "paletteVersion": "2026-11-13.1",
       "sha256": "a235de36ce35c2b451fea28099e62dc5835c4c4acb528707ed435480b92fdfe5"
+    },
+    {
+      "path": "Environment/prop_barricade.png",
+      "resourcePath": "Art/Environment/prop_barricade",
+      "width": 256,
+      "height": 128,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "dc4f866d0d3876b6bf098fda3f0d78c0d098600ed4632fa1f44837961ca43ad9"
+    },
+    {
+      "path": "Environment/prop_cables.png",
+      "resourcePath": "Art/Environment/prop_cables",
+      "width": 256,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "a37271a8c0beedbe861d949d8b06f8f69dfd432f3f18b6dcdbbef5cbdfce4bad"
+    },
+    {
+      "path": "Environment/prop_car.png",
+      "resourcePath": "Art/Environment/prop_car",
+      "width": 512,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "c573a7b76ee04215050dff897ab26882b7d021cb172900b1f2afb0a28583178e"
+    },
+    {
+      "path": "Environment/prop_cone.png",
+      "resourcePath": "Art/Environment/prop_cone",
+      "width": 128,
+      "height": 128,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "b664179e6092ae19f6c4940c010a415555dd9e9351f7ff54e08b121db79c15ec"
     },
     {
       "path": "Environment/prop_crate.png",
@@ -443,6 +674,94 @@
       "sha256": "9cdb5d48e4b62c2016bacae7559dd65169a9d8d7ee089e763c9eb0b820f49c26"
     },
     {
+      "path": "Environment/prop_dumpster.png",
+      "resourcePath": "Art/Environment/prop_dumpster",
+      "width": 256,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "b2589264df2efa9aa7c915dffe56f71b603c2ce7f94e6b1b9fd576fb1dd9ce47"
+    },
+    {
+      "path": "Environment/prop_neon_sign.png",
+      "resourcePath": "Art/Environment/prop_neon_sign",
+      "width": 256,
+      "height": 512,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "6eae81a8378901ee346b8ccff899066963685fbe994217d1c8ca8778f94ae081"
+    },
+    {
+      "path": "Environment/prop_sandbags.png",
+      "resourcePath": "Art/Environment/prop_sandbags",
+      "width": 256,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "16ee42c8fe929594e3f3d154d348f1dfca9253b95fc9c79f006da65c607ac425"
+    },
+    {
+      "path": "Environment/prop_streetlight.png",
+      "resourcePath": "Art/Environment/prop_streetlight",
+      "width": 256,
+      "height": 512,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "9a622d4ede814a41bc0db0e6948db3715ec01a98f153f972cce6088b786cddc2"
+    },
+    {
+      "path": "Environment/wall_concrete_h.png",
+      "resourcePath": "Art/Environment/wall_concrete_h",
+      "width": 256,
+      "height": 64,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "48886bf71dcb4641dc5102607437a0eb94591946cd4af58a8dd7666e2c4e2223"
+    },
+    {
+      "path": "Environment/wall_concrete_v.png",
+      "resourcePath": "Art/Environment/wall_concrete_v",
+      "width": 64,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "0544a25e4a3c0d1d41cbca4397b64ed45c9f7aa2e768be2c08db65c74af52970"
+    },
+    {
+      "path": "Environment/wall_fence_h.png",
+      "resourcePath": "Art/Environment/wall_fence_h",
+      "width": 256,
+      "height": 64,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "b4618d1cc227e8ef9f170c46d239305f603884d75548dea6ae948c792b39c3ed"
+    },
+    {
+      "path": "Environment/wall_fence_v.png",
+      "resourcePath": "Art/Environment/wall_fence_v",
+      "width": 64,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "3d4240c34cffed30f9701733749d47846b21485ab0880e969d94201b0ec21bfb"
+    },
+    {
       "path": "Environment/wall_horizontal.png",
       "resourcePath": "Art/Environment/wall_horizontal",
       "width": 256,
@@ -452,6 +771,17 @@
       "category": "environment",
       "paletteVersion": "2026-11-13.1",
       "sha256": "266adbffc7b8cabd4da014f75d758c7326f576b176b959c905297b84b7ec231c"
+    },
+    {
+      "path": "Environment/wall_storefront.png",
+      "resourcePath": "Art/Environment/wall_storefront",
+      "width": 512,
+      "height": 256,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "category": "environment",
+      "paletteVersion": "2026-11-13.1",
+      "sha256": "beb6bffc366beae1b64f4060489a30ebb0b65de02bee23b728bd7c6a3d0a022f"
     },
     {
       "path": "Environment/wall_vertical.png",

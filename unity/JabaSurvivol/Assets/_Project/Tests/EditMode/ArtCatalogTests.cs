@@ -105,13 +105,16 @@ namespace JabaSurvivol.Tests.EditMode
             var characters = AssetDatabase.LoadAssetAtPath<SpriteAtlas>("Assets/_Project/Art/Atlas/Characters.spriteatlas");
             var weapons = AssetDatabase.LoadAssetAtPath<SpriteAtlas>("Assets/_Project/Art/Atlas/WeaponsFx.spriteatlas");
             var ui = AssetDatabase.LoadAssetAtPath<SpriteAtlas>("Assets/_Project/Art/Atlas/UI.spriteatlas");
+            var environment = AssetDatabase.LoadAssetAtPath<SpriteAtlas>("Assets/_Project/Art/Atlas/Environment.spriteatlas");
 
             Assert.That(characters, Is.Not.Null);
             Assert.That(weapons, Is.Not.Null);
             Assert.That(ui, Is.Not.Null);
+            Assert.That(environment, Is.Not.Null);
             Assert.That(SpriteAtlasExtensions.GetPackables(characters).Length, Is.GreaterThan(0));
             Assert.That(SpriteAtlasExtensions.GetPackables(weapons).Length, Is.GreaterThan(0));
             Assert.That(SpriteAtlasExtensions.GetPackables(ui).Length, Is.GreaterThan(0));
+            Assert.That(SpriteAtlasExtensions.GetPackables(environment).Length, Is.GreaterThan(0));
         }
     }
 }

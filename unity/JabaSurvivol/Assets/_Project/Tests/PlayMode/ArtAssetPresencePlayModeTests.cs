@@ -36,7 +36,11 @@ namespace JabaSurvivol.Tests.PlayMode
             "UI/reward_supplies",
             "UI/skill_turret",
             "Environment/floor_tile",
+            "Environment/floor_asphalt_a",
             "Environment/wall_horizontal",
+            "Environment/prop_car",
+            "Environment/prop_dumpster",
+            "Environment/light_cyan",
             "App/icon"
         };
 
@@ -58,7 +62,7 @@ namespace JabaSurvivol.Tests.PlayMode
             var sprites = Resources.LoadAll<Sprite>("Art");
 
             Assert.That(sprites, Is.Not.Null);
-            Assert.That(sprites.Length, Is.GreaterThanOrEqualTo(60));
+            Assert.That(sprites.Length, Is.GreaterThanOrEqualTo(90));
         }
     }
 }
