@@ -54,16 +54,18 @@ namespace JabaSurvivol.Tests.PlayMode
             var floor = _bootstrap.FloorRendererForTests;
             Assert.That(floor, Is.Not.Null);
             Assert.That(floor.sprite, Is.Not.Null);
-            Assert.That(floor.sprite.name, Is.EqualTo("floor_tile"));
+            Assert.That(floor.sprite.name, Is.EqualTo("floor_asphalt_a"));
             Assert.That(floor.drawMode, Is.EqualTo(SpriteDrawMode.Tiled));
             Assert.That(floor.size.x, Is.GreaterThan(1f));
             Assert.That(floor.size.y, Is.GreaterThan(1f));
-            Assert.That(_bootstrap.ArenaWallCountForTests, Is.EqualTo(4));
-            Assert.That(_bootstrap.ArenaPropCountForTests, Is.GreaterThanOrEqualTo(4));
+            Assert.That(_bootstrap.ArenaWallCountForTests, Is.GreaterThanOrEqualTo(4));
+            Assert.That(_bootstrap.ArenaPropCountForTests, Is.GreaterThanOrEqualTo(12));
+            Assert.That(_bootstrap.ArenaDecalCountForTests, Is.GreaterThanOrEqualTo(10));
+            Assert.That(_bootstrap.ArenaLightPoolCountForTests, Is.GreaterThanOrEqualTo(4));
 
             var world = GameObject.Find("World");
             Assert.That(world, Is.Not.Null);
-            var prop = world.transform.Find("Prop Barrel Left");
+            var prop = world.transform.Find("Prop Car");
             Assert.That(prop, Is.Not.Null);
             Assert.That(prop.GetComponent<Collider2D>(), Is.Null);
         }
