@@ -37,6 +37,10 @@ The project is configured by `JabaSurvivol.Editor.ProjectSetup.Configure`:
 - WebGL IL2CPP.
 - Input System only.
 - Main scene at `Assets/_Project/Scenes/Main.unity`.
+- URP compatibility mode with `URP_COMPATIBILITY_MODE` for the color-safe
+  `JabaNeonPostFeature`. See ADR-0012.
+- `Assets/_Project/Shaders/NeonPost.mat` installed on `Renderer2D.asset` as a
+  full-screen pass before post-processing.
 
 Run the configuration from the Unity menu or in batch mode:
 

@@ -219,9 +219,11 @@ Never change sorting to fix a one-off layering bug; add a named order instead.
 - At most eight lights may be active at once.
 - Low-end devices use a reduced or disabled lighting profile.
 - No custom shader graph is required for the first pass.
-- v0.8.0 fallback: URP camera post-processing and the global light are disabled
-  because they wash out the 2D scene on the Android emulator. Follow-up #203
-  tracks the corrected Bloom/Vignette implementation.
+- v0.8.1 uses the first-party `JabaSurvivol/NeonPost` full-screen feature for
+  bloom and vignette. URP camera post-processing stays disabled because its
+  color-grading path corrupts the scene on Android GLES. See ADR-0012.
+- Devices with two or fewer cores or less than 1536 MB of system memory use the
+  unprocessed neon path.
 
 ## Texture and compression
 
