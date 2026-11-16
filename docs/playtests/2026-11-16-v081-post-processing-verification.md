@@ -23,7 +23,7 @@ installed on the x86_64 emulator. The emulator APK was installed and launched.
 | `dotnet test JabaSurvivol.slnx -c Release` | 267 passed: 173 core, 86 integration, 1 architecture, 1 smoke, 6 art generator |
 | `dotnet format JabaSurvivol.slnx --verify-no-changes` | passed |
 | Unity EditMode | 121 passed, 0 failed |
-| Unity PlayMode | 145 passed, 0 failed |
+| Unity PlayMode | 146 passed, 0 failed |
 
 Unity coverage includes the color-safe shader, material, and renderer feature
 presence, the low-end fallback selection, the camera post-processing state, the
@@ -62,10 +62,13 @@ The draw-call target is 40 and the observed gameplay value is 34. The added
 full-screen pass stays inside the draw-call and GC budgets.
 
 The emulator is software-rendered and is not a device frame-time budget claim.
-The same probe recorded about 250 ms/frame (4 FPS) on the v0.8.0 fallback under
-SwiftShader. The v0.8.1 emulator sample is 160 to 174 ms/frame (about 6 FPS) and
-is recorded as an observation, not as a physical-device result. Physical phone
-and tablet profiling remains in #99.
+The v0.8.1 steady-state emulator sample is 160 to 174 ms/frame (about 6 FPS)
+over the five-second probe windows. The startup sample (`4348.80` ms) is
+excluded from the steady-state range. It does not satisfy the 16.6 ms device target and is
+recorded as an observation only. Earlier emulator profiling in
+`docs/setup/android-profiling.md` also recorded frame pacing outside the device
+floor and must not be used as a device result. Physical phone and tablet
+profiling remains in #99.
 
 ## APK budget
 

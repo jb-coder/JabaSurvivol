@@ -20,6 +20,9 @@ namespace JabaSurvivol.Gameplay
         {
             _drawCalls = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Draw Calls Count");
             _gcAllocated = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Allocated In Frame");
+            _lastLogTime = Time.unscaledTime;
+            _lastFrame = Time.frameCount;
+            _nextLogTime = Time.unscaledTime + 5f;
         }
 
         private void OnDisable()

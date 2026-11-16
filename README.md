@@ -263,7 +263,7 @@ The v0.8.1 release was verified with:
 | Release build | 0 warnings, 0 errors |
 | .NET tests | 267 passed: 173 core, 86 integration, 1 architecture, 1 smoke, 6 art generator |
 | Unity EditMode | 121 passed |
-| Unity PlayMode | 145 passed |
+| Unity PlayMode | 146 passed |
 | Formatting | `dotnet format --verify-no-changes` passed |
 | Android APK | v0.8.1, version code 11, `arm64-v8a`, minimum API 26, target API 36 |
 | Device coverage | Android emulator phone and tablet layouts in English and Spanish; art and arena evidence in `docs/playtests/2026-11-16-v081-post-processing-verification.md` |

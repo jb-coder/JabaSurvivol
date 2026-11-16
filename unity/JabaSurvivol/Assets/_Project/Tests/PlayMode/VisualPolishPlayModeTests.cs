@@ -13,12 +13,14 @@ namespace JabaSurvivol.Tests.PlayMode
     {
         private string _directory;
         private GameBootstrap _bootstrap;
+        private int _previousQualityLevel;
 
         [SetUp]
         public void SetUp()
         {
             _directory = Path.Combine(Path.GetTempPath(), "jabasurvivol-polish", System.Guid.NewGuid().ToString("N"));
             GameBootstrap.SavePathOverride = Path.Combine(_directory, ProfileStore.FileName);
+            _previousQualityLevel = QualitySettings.GetQualityLevel();
         }
 
         [TearDown]
@@ -36,6 +38,8 @@ namespace JabaSurvivol.Tests.PlayMode
             {
                 Directory.Delete(_directory, true);
             }
+
+            QualitySettings.SetQualityLevel(_previousQualityLevel, true);
         }
 
         [UnityTest]
@@ -76,6 +80,22 @@ namespace JabaSurvivol.Tests.PlayMode
                 .Count(light => light.isActiveAndEnabled);
 
             Assert.That(active, Is.LessThanOrEqualTo(VisualPolish.MaxActiveLights));
+        }
+
+        [UnityTest]
+        public IEnumerator Low_quality_level_disables_post_processing()
+        {
+            QualitySettings.SetQualityLevel(1, true);
+            _bootstrap = CreateBootstrap();
+            yield return null;
+
+            var polish = _bootstrap.VisualPolishForTests;
+            polish.Configure(true);
+
+            Assert.That(polish.Enabled, Is.True);
+            Assert.That(polish.BloomActive, Is.False);
+            Assert.That(polish.VignetteActive, Is.False);
+            Assert.That(VisualPolish.PostProcessingActive, Is.False);
         }
 
         [UnityTest]
