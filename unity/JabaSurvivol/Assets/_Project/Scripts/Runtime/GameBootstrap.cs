@@ -71,6 +71,7 @@ namespace JabaSurvivol.Gameplay
 
             _camera = CreateCamera(runtimeRoot);
             VisualPolishForTests.ConfigureCamera(_camera);
+            VisualPolishForTests.Configure(true);
             _worldRoot = new GameObject("World").transform;
             _worldRoot.SetParent(runtimeRoot, false);
             BuildArena(_worldRoot);

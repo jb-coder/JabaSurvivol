@@ -5,16 +5,29 @@ using UnityEngine.Rendering.Universal;
 namespace JabaSurvivol.Gameplay
 {
     /// <summary>
-    /// Owns the runtime post-processing volume and the small 2D light budget.
-    /// The setup is intentionally cheap and can be disabled as one unit.
+    /// Owns the color-safe bloom and vignette settings plus the small 2D light
+    /// budget. The custom full-screen renderer feature is used instead of URP
+    /// camera post-processing because the integrated color-grading path is not
+    /// reliable on Android GLES.
     /// </summary>
     public sealed class VisualPolish : MonoBehaviour
     {
         public const int MaxActiveLights = 8;
+        public const float DefaultBloomIntensity = 0.22f;
+        public const float DefaultBloomThreshold = 0.6f;
+        public const float DefaultBloomRadius = 3f;
+        public const float DefaultVignetteIntensity = 0.22f;
+        public const float DefaultVignetteSmoothness = 0.6f;
 
-        private VolumeProfile _profile;
-        private GameObject _volumeObject;
+        private static readonly int BloomIntensityId = Shader.PropertyToID("_BloomIntensity");
+        private static readonly int BloomThresholdId = Shader.PropertyToID("_BloomThreshold");
+        private static readonly int BloomRadiusId = Shader.PropertyToID("_BloomRadius");
+        private static readonly int VignetteIntensityId = Shader.PropertyToID("_VignetteIntensity");
+        private static readonly int VignetteSmoothnessId = Shader.PropertyToID("_VignetteSmoothness");
+
         private GameObject _globalLightObject;
+
+        public static bool PostProcessingActive { get; private set; }
 
         public bool Enabled { get; private set; }
 
@@ -40,13 +53,17 @@ namespace JabaSurvivol.Gameplay
 
         public void Configure(bool enabled)
         {
+            var active = enabled &&
+                ShouldEnablePostProcessing(
+                    SystemInfo.processorCount,
+                    SystemInfo.systemMemorySize,
+                    true);
+
             Enabled = enabled;
-            BloomActive = enabled && _profile != null;
-            VignetteActive = enabled && _profile != null;
-            if (_volumeObject != null)
-            {
-                _volumeObject.SetActive(enabled);
-            }
+            PostProcessingActive = active;
+            BloomActive = active;
+            VignetteActive = active;
+            ApplyShaderSettings(active);
 
             if (_globalLightObject != null)
             {
@@ -54,38 +71,37 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
+        /// <summary>
+        /// Chooses whether the color-safe post-processing feature should run.
+        /// Very small or low-memory devices keep the unprocessed neon path.
+        /// </summary>
+        public static bool ShouldEnablePostProcessing(
+            int processorCount,
+            int systemMemorySizeMegabytes,
+            bool highQuality)
+        {
+            return highQuality &&
+                processorCount > 2 &&
+                systemMemorySizeMegabytes >= 1536;
+        }
+
         private void Awake()
         {
-            CreateVolume();
             CreateGlobalLight();
             Configure(false);
         }
 
-        private void CreateVolume()
+        private static void ApplyShaderSettings(bool active)
         {
-            _profile = ScriptableObject.CreateInstance<VolumeProfile>();
-            _profile.name = "JabaSurvivol Runtime Volume";
-
-            var bloom = _profile.Add<Bloom>(true);
-            bloom.intensity.Override(0.45f);
-            bloom.threshold.Override(0.9f);
-            bloom.scatter.Override(0.6f);
-            bloom.highQualityFiltering.Override(false);
-            BloomActive = false;
-
-            var vignette = _profile.Add<Vignette>(true);
-            vignette.intensity.Override(0.18f);
-            vignette.smoothness.Override(0.35f);
-            vignette.color.Override(new Color(0f, 0f, 0f, 1f));
-            VignetteActive = false;
-
-            _volumeObject = new GameObject("Runtime Post Process Volume");
-            _volumeObject.transform.SetParent(transform, false);
-            var volume = _volumeObject.AddComponent<Volume>();
-            volume.isGlobal = true;
-            volume.priority = 100f;
-            volume.weight = 1f;
-            volume.profile = _profile;
+            Shader.SetGlobalFloat(
+                BloomIntensityId,
+                active ? DefaultBloomIntensity : 0f);
+            Shader.SetGlobalFloat(BloomThresholdId, DefaultBloomThreshold);
+            Shader.SetGlobalFloat(BloomRadiusId, DefaultBloomRadius);
+            Shader.SetGlobalFloat(
+                VignetteIntensityId,
+                active ? DefaultVignetteIntensity : 0f);
+            Shader.SetGlobalFloat(VignetteSmoothnessId, DefaultVignetteSmoothness);
         }
 
         private void CreateGlobalLight()
@@ -119,14 +135,6 @@ namespace JabaSurvivol.Gameplay
             light.pointLightInnerRadius = innerRadius;
             light.blendStyleIndex = 0;
             return light;
-        }
-        private void OnDestroy()
-        {
-            if (_profile != null)
-            {
-                Destroy(_profile);
-                _profile = null;
-            }
         }
     }
 }
