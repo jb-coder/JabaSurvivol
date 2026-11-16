@@ -13,12 +13,14 @@ namespace JabaSurvivol.Tests.PlayMode
     {
         private string _directory;
         private GameBootstrap _bootstrap;
+        private int _previousQualityLevel;
 
         [SetUp]
         public void SetUp()
         {
             _directory = Path.Combine(Path.GetTempPath(), "jabasurvivol-polish", System.Guid.NewGuid().ToString("N"));
             GameBootstrap.SavePathOverride = Path.Combine(_directory, ProfileStore.FileName);
+            _previousQualityLevel = QualitySettings.GetQualityLevel();
         }
 
         [TearDown]
@@ -36,21 +38,35 @@ namespace JabaSurvivol.Tests.PlayMode
             {
                 Directory.Delete(_directory, true);
             }
+
+            QualitySettings.SetQualityLevel(_previousQualityLevel, true);
         }
 
         [UnityTest]
-        public IEnumerator Runtime_visual_polish_is_disabled_as_fallback()
+        public IEnumerator Runtime_visual_polish_uses_the_color_safe_feature()
         {
             _bootstrap = CreateBootstrap();
             yield return null;
 
             var polish = _bootstrap.VisualPolishForTests;
             Assert.That(polish, Is.Not.Null);
-            Assert.That(polish.Enabled, Is.False);
-            Assert.That(polish.BloomActive, Is.False);
-            Assert.That(polish.VignetteActive, Is.False);
+            Assert.That(polish.Enabled, Is.True);
+            Assert.That(polish.BloomActive, Is.EqualTo(VisualPolish.PostProcessingActive));
+            Assert.That(polish.VignetteActive, Is.EqualTo(VisualPolish.PostProcessingActive));
             Assert.That(polish.GlobalLight, Is.Not.Null);
             Assert.That(polish.GlobalLight.lightType, Is.EqualTo(Light2D.LightType.Global));
+
+            var cameraData = _bootstrap.CameraForTests.GetUniversalAdditionalCameraData();
+            Assert.That(cameraData.renderPostProcessing, Is.False);
+        }
+
+        [Test]
+        public void Low_end_devices_disable_post_processing()
+        {
+            Assert.That(VisualPolish.ShouldEnablePostProcessing(4, 1024, true), Is.False);
+            Assert.That(VisualPolish.ShouldEnablePostProcessing(2, 4096, true), Is.False);
+            Assert.That(VisualPolish.ShouldEnablePostProcessing(8, 4096, false), Is.False);
+            Assert.That(VisualPolish.ShouldEnablePostProcessing(8, 4096, true), Is.True);
         }
 
         [UnityTest]
@@ -67,6 +83,22 @@ namespace JabaSurvivol.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator Low_quality_level_disables_post_processing()
+        {
+            QualitySettings.SetQualityLevel(1, true);
+            _bootstrap = CreateBootstrap();
+            yield return null;
+
+            var polish = _bootstrap.VisualPolishForTests;
+            polish.Configure(true);
+
+            Assert.That(polish.Enabled, Is.True);
+            Assert.That(polish.BloomActive, Is.False);
+            Assert.That(polish.VignetteActive, Is.False);
+            Assert.That(VisualPolish.PostProcessingActive, Is.False);
+        }
+
+        [UnityTest]
         public IEnumerator Visual_polish_can_be_disabled_as_one_unit()
         {
             _bootstrap = CreateBootstrap();
@@ -75,9 +107,14 @@ namespace JabaSurvivol.Tests.PlayMode
             var polish = _bootstrap.VisualPolishForTests;
             polish.Configure(false);
             Assert.That(polish.Enabled, Is.False);
+            Assert.That(polish.BloomActive, Is.False);
+            Assert.That(polish.VignetteActive, Is.False);
+            Assert.That(VisualPolish.PostProcessingActive, Is.False);
 
             polish.Configure(true);
             Assert.That(polish.Enabled, Is.True);
+            Assert.That(polish.BloomActive, Is.EqualTo(VisualPolish.PostProcessingActive));
+            Assert.That(polish.VignetteActive, Is.EqualTo(VisualPolish.PostProcessingActive));
         }
 
         private static GameBootstrap CreateBootstrap()

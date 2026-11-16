@@ -5,6 +5,7 @@
     "JabaSurvivol.Core",
     "JabaSurvivol.Gameplay",
     "Unity.RenderPipelines.Universal.Runtime",
+    "Unity.RenderPipelines.Universal.2D.Runtime",
     "Unity.RenderPipelines.Core.Runtime",
     "Unity.2D.Sprite.Editor"
   ],

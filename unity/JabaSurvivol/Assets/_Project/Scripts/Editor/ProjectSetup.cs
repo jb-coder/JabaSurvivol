@@ -24,6 +24,7 @@ namespace JabaSurvivol.Editor
             ConfigurePlayer();
             ConfigureIcons();
             ConfigureRendering();
+            NeonPostInstaller.EnsureInstalled();
             ConfigureScene();
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -71,8 +72,8 @@ namespace JabaSurvivol.Editor
         {
             PlayerSettings.companyName = "JabaSurvivol";
             PlayerSettings.productName = "JabaSurvivol";
-            PlayerSettings.bundleVersion = "0.8.0";
-            PlayerSettings.Android.bundleVersionCode = 10;
+            PlayerSettings.bundleVersion = "0.8.1";
+            PlayerSettings.Android.bundleVersionCode = 11;
             PlayerSettings.colorSpace = ColorSpace.Linear;
 
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.jabasurvivol.game");
@@ -86,11 +87,30 @@ namespace JabaSurvivol.Editor
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone, ScriptingImplementation.IL2CPP);
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.WebGL, ScriptingImplementation.IL2CPP);
 
+            EnableUrpCompatibilityMode(NamedBuildTarget.Android);
+            EnableUrpCompatibilityMode(NamedBuildTarget.Standalone);
+            EnableUrpCompatibilityMode(NamedBuildTarget.WebGL);
+
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
             PlayerSettings.allowedAutorotateToLandscapeLeft = true;
             PlayerSettings.allowedAutorotateToLandscapeRight = true;
             PlayerSettings.allowedAutorotateToPortrait = false;
             PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
+        }
+
+        private static void EnableUrpCompatibilityMode(NamedBuildTarget target)
+        {
+            const string define = "URP_COMPATIBILITY_MODE";
+            PlayerSettings.GetScriptingDefineSymbols(target, out var defines);
+            if (System.Array.IndexOf(defines, define) >= 0)
+            {
+                return;
+            }
+
+            var updated = new string[defines.Length + 1];
+            System.Array.Copy(defines, updated, defines.Length);
+            updated[defines.Length] = define;
+            PlayerSettings.SetScriptingDefineSymbols(target, updated);
         }
 
         private static void ConfigureRendering()
@@ -102,6 +122,8 @@ namespace JabaSurvivol.Editor
                     $"Universal Render Pipeline asset not found at {UniversalRenderPipelinePath}.");
             }
 
+            pipeline.supportsHDR = false;
+            pipeline.colorGradingMode = ColorGradingMode.LowDynamicRange;
             GraphicsSettings.defaultRenderPipeline = pipeline;
             QualitySettings.renderPipeline = pipeline;
         }

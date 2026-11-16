@@ -17,6 +17,7 @@ v0.6.0
 v0.7.0
 v0.7.1
 v0.8.0
+v0.8.1
 ```
 
 ## Release checklist

@@ -1,0 +1,7 @@
+source: adb logcat -d -v threadtime
+filter: crash markers and PERF
+
+11-16 16:44:26.506  5754  5803 I Unity   : PERF drawCalls=0 gcAllocated=0 monoUsed=10002432 totalAllocated=86814070 frameMs=4348.80 frame=1
+11-16 16:44:31.570  5754  5803 I Unity   : PERF drawCalls=20 gcAllocated=0 monoUsed=12840960 totalAllocated=93140854 frameMs=341.75 frame=16
+11-16 16:44:36.579  5754  5803 I Unity   : PERF drawCalls=34 gcAllocated=0 monoUsed=13053952 totalAllocated=93606376 frameMs=161.83 frame=47
+11-16 16:44:41.636  5754  5803 I Unity   : PERF drawCalls=34 gcAllocated=0 monoUsed=13058048 totalAllocated=93658352 frameMs=173.56 frame=76
