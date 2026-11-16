@@ -57,7 +57,7 @@ namespace JabaSurvivol.Gameplay
                 ShouldEnablePostProcessing(
                     SystemInfo.processorCount,
                     SystemInfo.systemMemorySize,
-                    true);
+                    QualitySettings.GetQualityLevel() >= 2);
 
             Enabled = enabled;
             PostProcessingActive = active;

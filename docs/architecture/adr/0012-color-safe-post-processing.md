@@ -42,6 +42,10 @@ texture in Render Graph mode.
    an explicit, temporary platform workaround.
 5. Install the feature, material, and shader from
    `ProjectSetup.Configure` so clean builds and local runs stay in sync.
+   Unity 6.3 and URP 17.3 reserialize `Renderer2D.asset` when the feature is
+   installed: legacy shader references move to the URP global settings, and the
+   layer mask and probe-volume fields are added. No renderer behavior is
+   removed.
 6. Keep post-processing behind a quality check: devices with two or fewer
    cores or less than 1536 MB of system memory use the unprocessed neon path.
 7. Keep the HUD on the native overlay path so text and touch controls are not
@@ -54,8 +58,10 @@ texture in Render Graph mode.
 - Bloom and vignette are visible without changing the arena, actor, or HUD
   contrast.
 - The custom pass adds one full-screen color copy and one full-screen draw.
-  The emulator draw-call and frame budgets are measured in the release
-  evidence.
+  Draw calls and steady-state GC are measured in the release evidence. The
+  emulator frame time is recorded as a SwiftShader observation, not as a
+  physical-device budget claim; physical phone and tablet profiling remains in
+  #99.
 - Compatibility mode is deprecated upstream. It is isolated to this one pass
   and can be removed without changing gameplay code or save data.
 - The shader is first-party and is covered by the existing asset provenance

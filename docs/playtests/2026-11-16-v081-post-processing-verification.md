@@ -9,8 +9,8 @@
 
 | Artifact | Version | Version code | ABI | Min API | Target API | Size | SHA-256 |
 |---|---|---:|---|---:|---:|---:|---|
-| Production APK | 0.8.1 | 11 | arm64-v8a | 26 | 36 | 35,957,555 bytes | `8D124C84CEC5A8EFAB1D319D623973560AE6F2A2652F41097F793676E2E98993` |
-| Emulator APK | 0.8.1 | 11 | arm64-v8a, x86_64 | 26 | 36 | 83,214,949 bytes | `7DF25B9EDF77E5D36038FED9D9294916E2D531608437EBE16E231C80194E07BA` |
+| Production APK | 0.8.1 | 11 | arm64-v8a | 26 | 36 | 35,959,243 bytes | `5C849DBCD36A616738AB3A96F38E5BD851BDACCB38C604A5EDA0ACA8EC2009AE` |
+| Emulator APK | 0.8.1 | 11 | arm64-v8a, x86_64 | 26 | 36 | 104,616,007 bytes | `238E428A18D8BEFABA5999D0BCB32211901D3AEDBFB8DD8854F31DAF9DCA9D4F` |
 
 The production APK is ARM64-only and was badged and hashed. It was not
 installed on the x86_64 emulator. The emulator APK was installed and launched.
@@ -53,11 +53,25 @@ the v0.8.0 beige washout with a readable dark neon scene.
 
 | Metric | Gameplay |
 |---|---:|
-| Draw calls | 15 to 30 |
+| Draw calls | 20 to 34 |
 | Steady-state GC allocation | 0 B/frame |
-| Mono memory | about 13.3 MB |
+| Mono memory | about 13.1 MB |
+| Emulator average frame time | 160 to 174 ms (SwiftShader) |
 
-The draw-call target is 40. The added full-screen pass stays inside the budget.
+The draw-call target is 40 and the observed gameplay value is 34. The added
+full-screen pass stays inside the draw-call and GC budgets.
+
+The emulator is software-rendered and is not a device frame-time budget claim.
+The same probe recorded about 250 ms/frame (4 FPS) on the v0.8.0 fallback under
+SwiftShader. The v0.8.1 emulator sample is 160 to 174 ms/frame (about 6 FPS) and
+is recorded as an observation, not as a physical-device result. Physical phone
+and tablet profiling remains in #99.
+
+## APK budget
+
+- v0.8.0 production APK: `35,776,001` bytes.
+- v0.8.1 production APK: `35,959,243` bytes.
+- Growth: `183,242` bytes (about `0.17 MiB`), below the `10 MB` target.
 
 ## Screenshot matrix
 
@@ -74,6 +88,9 @@ The draw-call target is 40. The added full-screen pass stays inside the budget.
 
 - `v081-tablet-menu-es.png`
 - `v081-tablet-gameplay-es.png`
+
+Phone evidence covers English and Spanish. Tablet evidence covers the Spanish
+locale; tablet English screenshots were not captured for this patch release.
 
 ## Evidence files
 
