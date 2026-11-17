@@ -329,6 +329,12 @@ namespace JabaSurvivol.Gameplay
 
         public UnityEngine.UI.Button FireButtonForTests => _ui?.FireButtonForTests;
 
+        public Vector2 FireButtonScreenCenterForTests =>
+            _ui != null ? _ui.FireButtonScreenCenterForTests : Vector2.zero;
+
+        public bool IsFireButtonTouchForTests(Vector2 screenPoint) =>
+            _ui != null && _ui.IsTouchOverFireButton(screenPoint);
+
         public Vector2 MoveStickAnchorForTests =>
             _ui != null ? _ui.MoveStickAnchorForTests : Vector2.zero;
 
@@ -570,6 +576,11 @@ namespace JabaSurvivol.Gameplay
                 HandleLocaleSelected,
                 ResetSettings,
                 HideLeaderboard);
+
+            if (_input is TwinStickInput touchInput)
+            {
+                touchInput.SetTouchFilter(_ui.IsTouchOverFireButton);
+            }
 
             UiFactory.PlayUiCue = cue => _audio.Play(cue);
             SyncAudioUi();
@@ -1349,7 +1360,8 @@ namespace JabaSurvivol.Gameplay
         }
 
         private void OnBulletHitBoss(float damage)
-        {            if (!_run.BossActive)
+        {
+            if (!_run.BossActive)
             {
                 return;
             }

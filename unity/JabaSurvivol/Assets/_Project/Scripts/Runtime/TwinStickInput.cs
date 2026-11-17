@@ -23,10 +23,21 @@ namespace JabaSurvivol.Gameplay
         private Vector2 _moveCurrent;
         private Vector2 _aimOrigin;
         private Vector2 _aimCurrent;
+        private System.Func<Vector2, bool> _ignoreTouch;
 
         public void Initialize(Camera camera)
         {
             _camera = camera;
+        }
+
+        /// <summary>
+        /// Optional filter for screen points that belong to UI controls. Touches
+        /// that start on a filtered control do not seed the movement or aim
+        /// sticks.
+        /// </summary>
+        public void SetTouchFilter(System.Func<Vector2, bool> ignoreTouch)
+        {
+            _ignoreTouch = ignoreTouch;
         }
 
         private void OnEnable()
@@ -155,6 +166,11 @@ namespace JabaSurvivol.Gameplay
 
                 if (touch.phase == TouchPhase.Began)
                 {
+                    if (_ignoreTouch != null && _ignoreTouch(touch.screenPosition))
+                    {
+                        continue;
+                    }
+
                     var moveOnLeft = !GameSettings.LeftHanded;
                     var beganLeft = touch.screenPosition.x < Screen.width * 0.5f;
                     if (_moveFinger < 0 && beganLeft == moveOnLeft)

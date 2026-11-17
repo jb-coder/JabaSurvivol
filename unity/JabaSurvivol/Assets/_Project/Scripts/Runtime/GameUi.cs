@@ -154,6 +154,7 @@ namespace JabaSurvivol.Gameplay
         private readonly Button _pauseButton;
         private readonly Button _fireButton;
         private readonly Text _controlsHint;
+        private readonly Text _mainMenuControls;
         private bool _moveStickOnRight;
         private bool _aimStickOnRight;
         private float _joystickScale = 1f;
@@ -268,6 +269,7 @@ namespace JabaSurvivol.Gameplay
             _pauseButton = FindGameObject(_hud, "Pause")?.GetComponent<Button>();
             _fireButton = FindGameObject(_hud, "Fire Button")?.GetComponent<Button>();
             _controlsHint = FindText(_hud, "Controls Hint");
+            _mainMenuControls = FindText(_mainMenu, "Controls");
             _roundModifierText = FindText(_hud, "Round Modifier");
             _weaponText = FindText(_hud, "Weapon");
             _weaponIcon = FindImage(_hud, "Weapon Icon");
@@ -535,10 +537,15 @@ namespace JabaSurvivol.Gameplay
 
             PlaceActionButtons(leftHanded);
 
+            var controlsKey = leftHanded ? "menu.controls.leftHanded" : "menu.controls";
             if (_controlsHint != null)
             {
-                _controlsHint.text = Localization.Get(
-                    leftHanded ? "menu.controls.leftHanded" : "menu.controls");
+                _controlsHint.text = Localization.Get(controlsKey);
+            }
+
+            if (_mainMenuControls != null)
+            {
+                _mainMenuControls.text = Localization.Get(controlsKey);
             }
 
             if (_fireButton != null)
@@ -556,6 +563,10 @@ namespace JabaSurvivol.Gameplay
 
         private void PlaceActionButtons(bool leftHanded)
         {
+            var baseSize = StickBaseSize * _joystickScale;
+            var edgePadding = (baseSize * 0.5f) + StickEdgeMargin;
+            var skillOffset = baseSize + 80f;
+
             if (_reloadButton != null)
             {
                 UiFactory.Place(
@@ -583,7 +594,7 @@ namespace JabaSurvivol.Gameplay
                     _activeSkillButton.GetComponent<RectTransform>(),
                     anchor,
                     anchor,
-                    new Vector2(leftHanded ? 170f : -170f, 330f),
+                    new Vector2(leftHanded ? 170f : -170f, skillOffset),
                     new Vector2(130f, 130f));
             }
 
@@ -600,8 +611,6 @@ namespace JabaSurvivol.Gameplay
 
             if (_fireButton != null)
             {
-                var baseSize = StickBaseSize * _joystickScale;
-                var edgePadding = (baseSize * 0.5f) + StickEdgeMargin;
                 var fireOffset = edgePadding + (baseSize * 0.5f) + (FireButtonSize * 0.5f) + StickEdgeMargin;
                 UiFactory.Place(
                     _fireButton.GetComponent<RectTransform>(),
@@ -981,6 +990,34 @@ namespace JabaSurvivol.Gameplay
         public Button FireButtonForTests => _fireButton;
 
         public bool FireButtonVisibleForTests => _fireButton != null && _fireButton.gameObject.activeSelf;
+
+        public bool IsTouchOverFireButton(Vector2 screenPoint)
+        {
+            if (_fireButton == null || !_fireButton.gameObject.activeInHierarchy)
+            {
+                return false;
+            }
+
+            return RectTransformUtility.RectangleContainsScreenPoint(
+                _fireButton.GetComponent<RectTransform>(),
+                screenPoint,
+                null);
+        }
+
+        public Vector2 FireButtonScreenCenterForTests
+        {
+            get
+            {
+                if (_fireButton == null)
+                {
+                    return Vector2.zero;
+                }
+
+                return RectTransformUtility.WorldToScreenPoint(
+                    null,
+                    _fireButton.GetComponent<RectTransform>().position);
+            }
+        }
 
         public Button ReloadButtonForTests => _reloadButton;
 
@@ -3956,7 +3993,10 @@ namespace JabaSurvivol.Gameplay
         {
             BindLocalized(FindText(_mainMenu, "Title"), "app.title");
             BindLocalized(FindText(_mainMenu, "Subtitle"), "menu.subtitle");
-            BindLocalized(FindText(_mainMenu, "Controls"), "menu.controls");
+            BindLocalized(
+                FindText(_mainMenu, "Controls"),
+                () => Localization.Get(
+                    GameSettings.LeftHanded ? "menu.controls.leftHanded" : "menu.controls"));
             BindLocalized(_buildLabel, () => Localization.Format("menu.build", BuildInfo.Version, BuildInfo.Commit));
             BindLocalizedButton(_mainMenu, "Start", "menu.start");
             BindLocalizedButton(_mainMenu, "Armory", "menu.armory");

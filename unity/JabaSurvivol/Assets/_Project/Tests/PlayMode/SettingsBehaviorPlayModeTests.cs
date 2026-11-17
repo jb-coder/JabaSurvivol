@@ -139,6 +139,33 @@ namespace JabaSurvivol.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator Maximum_joystick_size_keeps_the_active_skill_button_clear()
+        {
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.EnemySpawningEnabledForTests = false;
+            session.StartRun();
+            yield return null;
+
+            GameSettings.SetJoystickSize(1.4f);
+            session.ApplyControlLayoutForTests();
+            yield return null;
+
+            Assert.That(
+                session.ActiveSkillButtonPositionForTests.y,
+                Is.GreaterThanOrEqualTo(session.AimStickSizeForTests + 20f));
+
+            GameSettings.SetLeftHanded(true);
+            session.ApplyControlLayoutForTests();
+            yield return null;
+
+            Assert.That(
+                session.ActiveSkillButtonPositionForTests.y,
+                Is.GreaterThanOrEqualTo(session.MoveStickSizeForTests + 20f));
+        }
+
+        [UnityTest]
         public IEnumerator Aim_assist_off_low_and_high_blend_and_fall_back_to_raw_aim()
         {
             _bootstrap = CreateBootstrap();
@@ -201,6 +228,10 @@ namespace JabaSurvivol.Tests.PlayMode
             yield return null;
 
             Assert.That(session.FireButtonVisibleForTests, Is.True);
+            Assert.That(
+                session.IsFireButtonTouchForTests(session.FireButtonScreenCenterForTests),
+                Is.True);
+            Assert.That(session.IsFireButtonTouchForTests(Vector2.zero), Is.False);
             Assert.That(session.ActiveBullets, Is.EqualTo(0));
 
             session.SetFireButtonPressedForTests(true);

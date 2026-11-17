@@ -39,16 +39,16 @@ This slice applies the settings that #211 persisted and displayed:
 - `dotnet build JabaSurvivol.slnx -c Release`: 0 warnings, 0 errors.
 - `dotnet test JabaSurvivol.slnx -c Release --no-build`: 267 passed, 0 failed.
 - Unity EditMode: 129 passed, 0 failed.
-- Unity PlayMode: 160 passed, 0 failed.
+- Unity PlayMode: 161 passed, 0 failed.
 - One earlier PlayMode run had a single TearDown file-lock failure in
   `Round_reward_persists_across_bootstrap_recreation`; the isolated rerun and
   the next full run passed. No related code was changed.
-- Android production APK: `JabaSurvivol-212-216.apk`, 35,980,103 bytes,
+- Android production APK: `JabaSurvivol-212-216.apk`, 35,984,251 bytes,
   SHA-256
-  `D490F0CA1DEDD20AE84A0AD1D42C7889AF64D7E39BC71E6CFE904E7EABAADB5B`.
-- Android emulator APK: `JabaSurvivol-212-216-emulator.apk`, 104,634,260
+  `5B72BBFA0930E310DFC745EDA7B70E8995F4BE95F0D3D7B57407D14E3528C842`.
+- Android emulator APK: `JabaSurvivol-212-216-emulator.apk`, 83,057,954
   bytes, SHA-256
-  `33492043C480BD16C6B52669F11DA843D2524F940EA53FF6782DF7DAAE49AD34`.
+  `4204BFD26C66C75B57184953B724A45290125A7FA11B47A69E5CED1B5FACAEC1`.
 - Both APKs declare `android.permission.VIBRATE` and
   `android.permission.INTERNET`.
 - Both APKs expose
