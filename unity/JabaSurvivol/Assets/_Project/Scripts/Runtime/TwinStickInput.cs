@@ -58,7 +58,9 @@ namespace JabaSurvivol.Gameplay
 
         private void ReadTouchSticks(ref InputFrame frame)
         {
-            var radius = Mathf.Max(32f, Mathf.Min(Screen.width, Screen.height) * TouchRadiusFactor);
+            var radius = Mathf.Max(
+                32f,
+                Mathf.Min(Screen.width, Screen.height) * TouchRadiusFactor * GameSettings.JoystickSize);
 
             if (_moveFinger >= 0)
             {
@@ -76,7 +78,10 @@ namespace JabaSurvivol.Gameplay
                 if (CombatMath.TryNormalizeStick(delta.x, delta.y, GameBalance.AimStickDeadZone, out var nx, out var ny))
                 {
                     frame.Aim = new Vector2(nx, ny);
-                    frame.FireHeld = true;
+                    if (GameSettings.AutoFire)
+                    {
+                        frame.FireHeld = true;
+                    }
                 }
             }
         }
@@ -150,7 +155,9 @@ namespace JabaSurvivol.Gameplay
 
                 if (touch.phase == TouchPhase.Began)
                 {
-                    if (_moveFinger < 0 && touch.screenPosition.x < Screen.width * 0.5f)
+                    var moveOnLeft = !GameSettings.LeftHanded;
+                    var beganLeft = touch.screenPosition.x < Screen.width * 0.5f;
+                    if (_moveFinger < 0 && beganLeft == moveOnLeft)
                     {
                         _moveFinger = finger;
                         _moveOrigin = touch.screenPosition;

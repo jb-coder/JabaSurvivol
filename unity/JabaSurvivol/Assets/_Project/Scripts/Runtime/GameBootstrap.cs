@@ -60,6 +60,7 @@ namespace JabaSurvivol.Gameplay
             Instance = this;
             Application.targetFrameRate = 60;
             VisualPolishForTests = gameObject.AddComponent<VisualPolish>();
+            GameSettings.Changed += HandleSettingsChanged;
             ApiConfig.Initialize();
 #if DEVELOPMENT_BUILD
             SeedDevelopmentSession();
@@ -71,7 +72,7 @@ namespace JabaSurvivol.Gameplay
 
             _camera = CreateCamera(runtimeRoot);
             VisualPolishForTests.ConfigureCamera(_camera);
-            VisualPolishForTests.Configure(true);
+            VisualPolishForTests.Configure(!GameSettings.ReducedMotion);
             _worldRoot = new GameObject("World").transform;
             _worldRoot.SetParent(runtimeRoot, false);
             BuildArena(_worldRoot);
@@ -114,8 +115,17 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
+            GameSettings.Changed -= HandleSettingsChanged;
             Session?.SaveNow();
             Instance = null;
+        }
+
+        private void HandleSettingsChanged()
+        {
+            if (VisualPolishForTests != null)
+            {
+                VisualPolishForTests.Configure(!GameSettings.ReducedMotion);
+            }
         }
 
 #if DEVELOPMENT_BUILD

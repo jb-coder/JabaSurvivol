@@ -19,6 +19,12 @@ namespace JabaSurvivol.Gameplay
     /// </summary>
     public static class GameSettings
     {
+        /// <summary>
+        /// Raised after any device-local setting changes or resets. Listeners
+        /// apply the new value immediately without waiting for a scene reload.
+        /// </summary>
+        public static event System.Action Changed;
+
         public const string LeftHandedKey = "settings.leftHanded";
         public const string JoystickSizeKey = "settings.joystickSize";
         public const string JoystickOpacityKey = "settings.joystickOpacity";
@@ -156,6 +162,7 @@ namespace JabaSurvivol.Gameplay
             _leftHanded = value;
             PlayerPrefs.SetInt(LeftHandedKey, value ? 1 : 0);
             PlayerPrefs.Save();
+            NotifyChanged();
         }
 
         public static void SetJoystickSize(float value)
@@ -164,6 +171,7 @@ namespace JabaSurvivol.Gameplay
             _joystickSize = ClampJoystickSize(value);
             PlayerPrefs.SetFloat(JoystickSizeKey, _joystickSize);
             PlayerPrefs.Save();
+            NotifyChanged();
         }
 
         public static void SetJoystickOpacity(float value)
@@ -172,6 +180,7 @@ namespace JabaSurvivol.Gameplay
             _joystickOpacity = ClampJoystickOpacity(value);
             PlayerPrefs.SetFloat(JoystickOpacityKey, _joystickOpacity);
             PlayerPrefs.Save();
+            NotifyChanged();
         }
 
         public static void SetAimAssist(AimAssistLevel value)
@@ -180,6 +189,7 @@ namespace JabaSurvivol.Gameplay
             _aimAssist = IsValidAimAssist(value) ? value : DefaultAimAssist;
             PlayerPrefs.SetInt(AimAssistKey, (int)_aimAssist);
             PlayerPrefs.Save();
+            NotifyChanged();
         }
 
         /// <summary>
@@ -204,6 +214,7 @@ namespace JabaSurvivol.Gameplay
             _autoFire = value;
             PlayerPrefs.SetInt(AutoFireKey, value ? 1 : 0);
             PlayerPrefs.Save();
+            NotifyChanged();
         }
 
         public static void SetReducedMotion(bool value)
@@ -212,6 +223,7 @@ namespace JabaSurvivol.Gameplay
             _reducedMotion = value;
             PlayerPrefs.SetInt(ReducedMotionKey, value ? 1 : 0);
             PlayerPrefs.Save();
+            NotifyChanged();
         }
 
         public static void SetHaptics(bool value)
@@ -220,6 +232,7 @@ namespace JabaSurvivol.Gameplay
             _haptics = value;
             PlayerPrefs.SetInt(HapticsKey, value ? 1 : 0);
             PlayerPrefs.Save();
+            NotifyChanged();
         }
 
         public static void SetColorblindSafeTelegraphs(bool value)
@@ -228,6 +241,7 @@ namespace JabaSurvivol.Gameplay
             _colorblindSafeTelegraphs = value;
             PlayerPrefs.SetInt(ColorblindSafeTelegraphsKey, value ? 1 : 0);
             PlayerPrefs.Save();
+            NotifyChanged();
         }
 
         /// <summary>
@@ -263,6 +277,7 @@ namespace JabaSurvivol.Gameplay
             _haptics = DefaultHaptics;
             _colorblindSafeTelegraphs = DefaultColorblindSafeTelegraphs;
             PersistValues();
+            NotifyChanged();
         }
 
         public static float ClampJoystickSize(float value)
@@ -298,6 +313,11 @@ namespace JabaSurvivol.Gameplay
         public static void ReloadForTests()
         {
             Load();
+        }
+
+        private static void NotifyChanged()
+        {
+            Changed?.Invoke();
         }
 
         private static void EnsureLoaded()

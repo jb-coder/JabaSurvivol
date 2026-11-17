@@ -43,6 +43,8 @@ namespace JabaSurvivol.Gameplay
         private CharacterVisual _bossVisual;
         private GameObject _bossTelegraphRing;
         private SpriteRenderer _bossTelegraphRenderer;
+        private GameObject _bossTelegraphOutline;
+        private SpriteRenderer _bossTelegraphOutlineRenderer;
         private float _bossTelegraphRemaining;
         private float _bossAttackCooldown;
         private bool _bossEnraged;
@@ -59,6 +61,7 @@ namespace JabaSurvivol.Gameplay
         private float _respawnCooldown;
         private bool _zombieActive;
         private bool _roundClearPending;
+        private bool _fireButtonHeld;
         private RoundRewardOption[] _roundRewardOptions;
         private int _runSuppliesEarned;
         private int _runXpEarned;
@@ -320,6 +323,68 @@ namespace JabaSurvivol.Gameplay
 
         public Vector2 LastShotDirectionForTests { get; private set; }
 
+        public Vector2 AimDirectionForTests => _aimDirection;
+
+        public bool FireButtonVisibleForTests => _ui != null && _ui.FireButtonVisibleForTests;
+
+        public UnityEngine.UI.Button FireButtonForTests => _ui?.FireButtonForTests;
+
+        public Vector2 MoveStickAnchorForTests =>
+            _ui != null ? _ui.MoveStickAnchorForTests : Vector2.zero;
+
+        public Vector2 AimStickAnchorForTests =>
+            _ui != null ? _ui.AimStickAnchorForTests : Vector2.zero;
+
+        public Vector2 MoveStickPositionForTests =>
+            _ui != null ? _ui.MoveStickPositionForTests : Vector2.zero;
+
+        public Vector2 AimStickPositionForTests =>
+            _ui != null ? _ui.AimStickPositionForTests : Vector2.zero;
+
+        public float MoveStickSizeForTests => _ui?.MoveStickSizeForTests ?? 0f;
+
+        public float AimStickSizeForTests => _ui?.AimStickSizeForTests ?? 0f;
+
+        public float MoveKnobSizeForTests => _ui?.MoveKnobSizeForTests ?? 0f;
+
+        public float AimKnobSizeForTests => _ui?.AimKnobSizeForTests ?? 0f;
+
+        public Color MoveBaseColorForTests =>
+            _ui != null ? _ui.MoveBaseColorForTests : Color.clear;
+
+        public Color AimBaseColorForTests =>
+            _ui != null ? _ui.AimBaseColorForTests : Color.clear;
+
+        public Color MoveKnobColorForTests =>
+            _ui != null ? _ui.MoveKnobColorForTests : Color.clear;
+
+        public Color AimKnobColorForTests =>
+            _ui != null ? _ui.AimKnobColorForTests : Color.clear;
+
+        public Vector2 ReloadButtonPositionForTests =>
+            _ui != null ? _ui.ReloadButtonPositionForTests : Vector2.zero;
+
+        public Vector2 SwitchWeaponButtonPositionForTests =>
+            _ui != null ? _ui.SwitchWeaponButtonPositionForTests : Vector2.zero;
+
+        public Vector2 PauseButtonPositionForTests =>
+            _ui != null ? _ui.PauseButtonPositionForTests : Vector2.zero;
+
+        public Vector2 ActiveSkillButtonPositionForTests =>
+            _ui != null ? _ui.ActiveSkillButtonPositionForTests : Vector2.zero;
+
+        public Vector2 FireButtonPositionForTests =>
+            _ui != null ? _ui.FireButtonPositionForTests : Vector2.zero;
+
+        public string ControlsHintForTests => _ui?.ControlsHintForTests ?? string.Empty;
+
+        public void ApplyControlLayoutForTests() => _ui?.ApplyControlLayout();
+
+        public void SetFireButtonPressedForTests(bool pressed) => _ui?.SetFireButtonPressedForTests(pressed);
+
+        public bool BossTelegraphOutlineVisible =>
+            _bossTelegraphOutline != null && _bossTelegraphOutline.activeSelf;
+
         public CharacterVisual PlayerVisual => _playerVisual;
 
         public CharacterVisual ZombieVisual => _zombieActor != null ? _zombieActor.Visual : null;
@@ -478,6 +543,7 @@ namespace JabaSurvivol.Gameplay
                 () => ReloadWeapon(),
                 () => SwitchWeapon(),
                 () => ActivateActiveSkill(),
+                SetFireButtonHeld,
                 HandleSelectActiveSkill,
                 index => SelectRoundReward(index),
                 ShowArmory,
@@ -757,14 +823,15 @@ namespace JabaSurvivol.Gameplay
 
             if (frame.Aim.sqrMagnitude > 0.0001f)
             {
-                _aimDirection = frame.Aim.normalized;
+                _aimDirection = ApplyAimAssist(frame.Aim.normalized);
             }
 
             _playerVisual?.SetMotion(frame.Move, frame.Move.magnitude);
             _playerVisual?.SetAim(_aimDirection);
 
             _fireCooldown = Mathf.Max(0f, _fireCooldown - deltaTime);
-            if (frame.FireHeld && _fireCooldown <= 0f)
+            var fireHeld = frame.FireHeld || _fireButtonHeld;
+            if (fireHeld && _fireCooldown <= 0f)
             {
                 if (_run.TryFireCurrentWeapon())
                 {
@@ -786,6 +853,108 @@ namespace JabaSurvivol.Gameplay
             }
 
             _playerVisual?.Tick(deltaTime);
+        }
+
+        /// <summary>
+        /// Blends the raw aim direction toward the nearest living enemy inside
+        /// the configured cone. Falls back to the raw direction when no enemy
+        /// qualifies or aim assist is off.
+        /// </summary>
+        private Vector2 ApplyAimAssist(Vector2 rawAim)
+        {
+            var (coneDegrees, blend, range) = AimAssistSettings(GameSettings.AimAssist);
+            if (blend <= 0f || range <= 0f)
+            {
+                return rawAim;
+            }
+
+            var playerPosition = (Vector2)_playerObject.transform.position;
+            var hasTarget = false;
+            var nearestDistance = float.MaxValue;
+            var targetDirection = rawAim;
+
+            if (_zombieActive && _zombieActor != null)
+            {
+                ConsiderAimAssistTarget(
+                    (Vector2)_zombieActor.GameObject.transform.position,
+                    playerPosition,
+                    rawAim,
+                    coneDegrees,
+                    range,
+                    ref hasTarget,
+                    ref nearestDistance,
+                    ref targetDirection);
+            }
+
+            var boss = _run?.Boss;
+            if (_run != null && _run.BossActive && boss != null && boss.Health > 0f && _bossObject != null)
+            {
+                ConsiderAimAssistTarget(
+                    (Vector2)_bossObject.transform.position,
+                    playerPosition,
+                    rawAim,
+                    coneDegrees,
+                    range,
+                    ref hasTarget,
+                    ref nearestDistance,
+                    ref targetDirection);
+            }
+
+            if (!hasTarget)
+            {
+                return rawAim;
+            }
+
+            var blended = Vector2.Lerp(rawAim, targetDirection, blend);
+            return blended.sqrMagnitude > 0.0001f ? blended.normalized : rawAim;
+        }
+
+        private static void ConsiderAimAssistTarget(
+            Vector2 targetPosition,
+            Vector2 playerPosition,
+            Vector2 rawAim,
+            float coneDegrees,
+            float range,
+            ref bool hasTarget,
+            ref float nearestDistance,
+            ref Vector2 targetDirection)
+        {
+            var delta = targetPosition - playerPosition;
+            var distance = delta.magnitude;
+            if (distance <= 0.0001f || distance > range)
+            {
+                return;
+            }
+
+            var direction = delta / distance;
+            if (Vector2.Angle(rawAim, direction) > coneDegrees)
+            {
+                return;
+            }
+
+            if (distance >= nearestDistance)
+            {
+                return;
+            }
+
+            nearestDistance = distance;
+            targetDirection = direction;
+            hasTarget = true;
+        }
+
+        private static (float ConeDegrees, float Blend, float Range) AimAssistSettings(AimAssistLevel level)
+        {
+            return level switch
+            {
+                AimAssistLevel.Low => (6f, 0.35f, 10f),
+                AimAssistLevel.High => (12f, 0.65f, 12f),
+                _ => (0f, 0f, 0f)
+            };
+        }
+
+        private void SetFireButtonHeld(bool held)
+        {
+            _fireButtonHeld = held;
         }
 
         private void Fire()
@@ -1019,6 +1188,11 @@ namespace JabaSurvivol.Gameplay
             _bossAttackCooldown = definition.SlamIntervalSeconds;
             _bossEnraged = false;
             _bossTelegraphRing.SetActive(false);
+            if (_bossTelegraphOutline != null)
+            {
+                _bossTelegraphOutline.SetActive(false);
+            }
+
             _ui.ShowBoss(Localization.Get("boss.name"));
             _ui.UpdateBoss(definition.MaxHealth, definition.MaxHealth, false);
             _audio?.Play(GameAudioCue.BossSpawn);
@@ -1055,11 +1229,18 @@ namespace JabaSurvivol.Gameplay
                 _bossTelegraphRing.transform.localScale = Vector3.one * ringScale;
                 var ringColor = new Color(1f, 0.25f, 0.2f, 0.35f + (0.55f * progress));
                 _bossTelegraphRenderer.color = ringColor;
+                UpdateTelegraphOutline(bossPosition, ringScale, progress);
 
                 if (_bossTelegraphRemaining <= 0f)
                 {
                     _bossTelegraphRing.SetActive(false);
+                    if (_bossTelegraphOutline != null)
+                    {
+                        _bossTelegraphOutline.SetActive(false);
+                    }
+
                     _audio?.Play(GameAudioCue.BossSlam);
+                    HapticFeedback.BossSlam();
                     if (CombatMath.CirclesOverlap(
                             bossPosition.x,
                             bossPosition.y,
@@ -1086,6 +1267,10 @@ namespace JabaSurvivol.Gameplay
                     _bossTelegraphRing.transform.localScale = Vector3.one * (definition.SlamRadius * 2f * 0.35f);
                     _bossTelegraphRenderer.color = new Color(1f, 0.25f, 0.2f, 0.35f);
                     _bossTelegraphRing.SetActive(true);
+                    UpdateTelegraphOutline(
+                        bossPosition,
+                        definition.SlamRadius * 2f * 0.35f,
+                        0f);
                     _audio?.Play(GameAudioCue.BossTelegraph);
                 }
                 else
@@ -1139,9 +1324,32 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
-        private void OnBulletHitBoss(float damage)
+        /// <summary>
+        /// Adds a high-contrast outer ring as a non-color cue when the
+        /// colorblind-safe telegraph setting is enabled. Timing, radius, and
+        /// damage are unchanged.
+        /// </summary>
+        private void UpdateTelegraphOutline(Vector2 bossPosition, float ringScale, float progress)
         {
-            if (!_run.BossActive)
+            if (_bossTelegraphOutline == null || _bossTelegraphOutlineRenderer == null)
+            {
+                return;
+            }
+
+            if (!GameSettings.ColorblindSafeTelegraphs)
+            {
+                _bossTelegraphOutline.SetActive(false);
+                return;
+            }
+
+            _bossTelegraphOutline.transform.position = bossPosition;
+            _bossTelegraphOutline.transform.localScale = Vector3.one * (ringScale * 1.12f);
+            _bossTelegraphOutlineRenderer.color = new Color(1f, 1f, 1f, 0.75f + (0.25f * progress));
+            _bossTelegraphOutline.SetActive(true);
+        }
+
+        private void OnBulletHitBoss(float damage)
+        {            if (!_run.BossActive)
             {
                 return;
             }
@@ -1175,6 +1383,11 @@ namespace JabaSurvivol.Gameplay
             if (_bossTelegraphRing != null)
             {
                 _bossTelegraphRing.SetActive(false);
+            }
+
+            if (_bossTelegraphOutline != null)
+            {
+                _bossTelegraphOutline.SetActive(false);
             }
 
             _bossTelegraphRemaining = 0f;
@@ -1269,6 +1482,7 @@ namespace JabaSurvivol.Gameplay
             _roundRewardOptions = null;
             _spreadSequence = 0;
             _levelUpRemaining = 0f;
+            _fireButtonHeld = false;
             _lastBerserkerActive = false;
             _lastGhostActive = false;
             _state = GameSessionState.Playing;
@@ -1292,6 +1506,11 @@ namespace JabaSurvivol.Gameplay
             _bossObject.SetActive(false);
             _bossVisual?.ResetVisual();
             _bossTelegraphRing.SetActive(false);
+            if (_bossTelegraphOutline != null)
+            {
+                _bossTelegraphOutline.SetActive(false);
+            }
+
             _bossTelegraphRemaining = 0f;
             _bossAttackCooldown = 0f;
             _bossEnraged = false;
@@ -1332,6 +1551,7 @@ namespace JabaSurvivol.Gameplay
             }
 
             _state = GameSessionState.Paused;
+            _fireButtonHeld = false;
             _audio.SetSuspended(true);
             _ui.ShowPaused(true);
             SyncAudioUi();
@@ -1398,6 +1618,7 @@ namespace JabaSurvivol.Gameplay
                 _telemetryService != null && _telemetryService.OptedIn);
             _ui.SetRoundModifier(_run != null && _run.RoundModel.Definition.IsElite);
             _ui.InvalidateHudCache();
+            _ui.ApplyControlLayout();
 
             if (_run != null)
             {
@@ -1490,6 +1711,11 @@ namespace JabaSurvivol.Gameplay
             if (_bossTelegraphRing != null)
             {
                 _bossTelegraphRing.SetActive(false);
+            }
+
+            if (_bossTelegraphOutline != null)
+            {
+                _bossTelegraphOutline.SetActive(false);
             }
 
             _audio.SetSuspended(false);
@@ -2029,6 +2255,7 @@ namespace JabaSurvivol.Gameplay
             }
 
             _audio?.Play(GameAudioCue.Hit);
+            HapticFeedback.PlayerDamage();
 
             if (_run.DamagePlayer(amount))
             {
@@ -2997,6 +3224,7 @@ namespace JabaSurvivol.Gameplay
             _roundRewardOptions = RoundRewardModel.GenerateOptions(_run.Round, _run.Seed);
             _roundClearPending = true;
             _audio?.Play(GameAudioCue.RoundClear);
+            HapticFeedback.RoundClear();
             _ui.ShowRoundEnd(
                 reward.Round,
                 _run.Kills,
@@ -3112,6 +3340,11 @@ namespace JabaSurvivol.Gameplay
             if (_bossTelegraphRing != null)
             {
                 _bossTelegraphRing.SetActive(false);
+            }
+
+            if (_bossTelegraphOutline != null)
+            {
+                _bossTelegraphOutline.SetActive(false);
             }
 
             _ui.HideBoss();
@@ -3259,6 +3492,14 @@ namespace JabaSurvivol.Gameplay
             _bossTelegraphRenderer.color = new Color(1f, 0.25f, 0.2f, 0.4f);
             _bossTelegraphRenderer.sortingOrder = 12;
             _bossTelegraphRing.SetActive(false);
+
+            _bossTelegraphOutline = new GameObject("Boss Telegraph Outline");
+            _bossTelegraphOutline.transform.SetParent(_worldRoot, false);
+            _bossTelegraphOutlineRenderer = _bossTelegraphOutline.AddComponent<SpriteRenderer>();
+            _bossTelegraphOutlineRenderer.sprite = SpriteFactory.Ring;
+            _bossTelegraphOutlineRenderer.color = new Color(1f, 1f, 1f, 0.9f);
+            _bossTelegraphOutlineRenderer.sortingOrder = 13;
+            _bossTelegraphOutline.SetActive(false);
 
             _turretObject = new GameObject("Turret");
             _turretObject.transform.SetParent(_worldRoot, false);

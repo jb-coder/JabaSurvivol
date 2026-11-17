@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace JabaSurvivol.Gameplay
@@ -55,6 +56,7 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _settingsColorblindLabel;
         private readonly System.Action<string> _onLocaleSelected;
         private readonly System.Action _onResetSettings;
+        private readonly System.Action<bool> _onFireHeld;
         private bool _muted;
         private float _masterVolume = GameAudio.DefaultMasterVolume;
         private float _effectsVolume = GameAudio.DefaultEffectsVolume;
@@ -145,6 +147,21 @@ namespace JabaSurvivol.Gameplay
         private readonly RectTransform _aimKnob;
         private readonly Image _moveBaseImage;
         private readonly Image _aimBaseImage;
+        private readonly Image _moveKnobImage;
+        private readonly Image _aimKnobImage;
+        private readonly Button _reloadButton;
+        private readonly Button _switchWeaponButton;
+        private readonly Button _pauseButton;
+        private readonly Button _fireButton;
+        private readonly Text _controlsHint;
+        private bool _moveStickOnRight;
+        private bool _aimStickOnRight;
+        private float _joystickScale = 1f;
+        private float _joystickOpacity = 1f;
+        private const float StickBaseSize = 260f;
+        private const float StickKnobSize = 96f;
+        private const float StickEdgeMargin = 20f;
+        private const float FireButtonSize = 130f;
         private const float AudioVolumeStep = 0.1f;
         private static readonly Color HealthLow = new(0.9f, 0.2f, 0.22f);
         private static readonly Color HealthHigh = new(0.3f, 0.92f, 0.42f);
@@ -193,6 +210,7 @@ namespace JabaSurvivol.Gameplay
             System.Action onReload,
             System.Action onSwitchWeapon,
             System.Action onActiveSkill,
+            System.Action<bool> onFireHeld,
             System.Action<SkillNode> onSelectActiveSkill,
             System.Action<int> onRewardSelected,
             System.Action onArmory,
@@ -222,6 +240,7 @@ namespace JabaSurvivol.Gameplay
         {
             _onLocaleSelected = onLocaleSelected;
             _onResetSettings = onResetSettings;
+            _onFireHeld = onFireHeld;
             var canvasObject = UiFactory.CreateCanvas("JabaSurvivol UI", parent);
 
             var safeAreaObject = new GameObject("Safe Area", typeof(RectTransform));
@@ -243,7 +262,12 @@ namespace JabaSurvivol.Gameplay
                 out _telemetryLabel,
                 out _buildLabel,
                 out _settingsButtonMain);
-            _hud = BuildHud(onPause, onReload, onSwitchWeapon, onActiveSkill, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
+            _hud = BuildHud(onPause, onReload, onSwitchWeapon, onActiveSkill, onFireHeld, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage, out _moveKnobImage, out _aimKnobImage);
+            _reloadButton = FindGameObject(_hud, "Reload Button")?.GetComponent<Button>();
+            _switchWeaponButton = FindGameObject(_hud, "Switch Weapon")?.GetComponent<Button>();
+            _pauseButton = FindGameObject(_hud, "Pause")?.GetComponent<Button>();
+            _fireButton = FindGameObject(_hud, "Fire Button")?.GetComponent<Button>();
+            _controlsHint = FindText(_hud, "Controls Hint");
             _roundModifierText = FindText(_hud, "Round Modifier");
             _weaponText = FindText(_hud, "Weapon");
             _weaponIcon = FindImage(_hud, "Weapon Icon");
@@ -409,6 +433,7 @@ namespace JabaSurvivol.Gameplay
         {
             _mainMenu.SetActive(true);
             _hud.SetActive(false);
+            _onFireHeld?.Invoke(false);
             _pausePanel.SetActive(false);
             CloseSettingsPanelSilently();
             _gameOverPanel.SetActive(false);
@@ -442,6 +467,149 @@ namespace JabaSurvivol.Gameplay
             InvalidateHudCache();
             HideLevelUp();
             HideRoundEnd();
+            ApplyControlLayout();
+        }
+
+        /// <summary>
+        /// Applies the device-local touch layout: stick side, stick size,
+        /// opacity, action-button mirroring, the manual fire control, and the
+        /// controls hint text.
+        /// </summary>
+        public void ApplyControlLayout()
+        {
+            var leftHanded = GameSettings.LeftHanded;
+            _joystickScale = GameSettings.JoystickSize;
+            _joystickOpacity = GameSettings.JoystickOpacity;
+            _moveStickOnRight = leftHanded;
+            _aimStickOnRight = !leftHanded;
+
+            var baseSize = StickBaseSize * _joystickScale;
+            var knobSize = StickKnobSize * _joystickScale;
+            var edgePadding = (baseSize * 0.5f) + StickEdgeMargin;
+
+            if (_moveBase != null)
+            {
+                _moveBase.sizeDelta = new Vector2(baseSize, baseSize);
+                _moveBase.anchorMin = _moveBase.anchorMax = new Vector2(_moveStickOnRight ? 1f : 0f, 0f);
+                _moveBase.anchoredPosition = new Vector2(_moveStickOnRight ? -edgePadding : edgePadding, edgePadding);
+            }
+
+            if (_aimBase != null)
+            {
+                _aimBase.sizeDelta = new Vector2(baseSize, baseSize);
+                _aimBase.anchorMin = _aimBase.anchorMax = new Vector2(_aimStickOnRight ? 1f : 0f, 0f);
+                _aimBase.anchoredPosition = new Vector2(_aimStickOnRight ? -edgePadding : edgePadding, edgePadding);
+            }
+
+            if (_moveKnob != null)
+            {
+                _moveKnob.sizeDelta = new Vector2(knobSize, knobSize);
+                _moveKnob.anchoredPosition = Vector2.zero;
+            }
+
+            if (_aimKnob != null)
+            {
+                _aimKnob.sizeDelta = new Vector2(knobSize, knobSize);
+                _aimKnob.anchoredPosition = Vector2.zero;
+            }
+
+            if (_moveBaseImage != null)
+            {
+                _moveBaseImage.color = new Color(0.7f, 0.82f, 0.9f, 0.15f * _joystickOpacity);
+            }
+
+            if (_aimBaseImage != null)
+            {
+                _aimBaseImage.color = new Color(0.7f, 0.82f, 0.9f, 0.15f * _joystickOpacity);
+            }
+
+            if (_moveKnobImage != null)
+            {
+                _moveKnobImage.color = new Color(0.72f, 0.95f, 1f, 0.42f * _joystickOpacity);
+            }
+
+            if (_aimKnobImage != null)
+            {
+                _aimKnobImage.color = new Color(0.72f, 0.95f, 1f, 0.42f * _joystickOpacity);
+            }
+
+            PlaceActionButtons(leftHanded);
+
+            if (_controlsHint != null)
+            {
+                _controlsHint.text = Localization.Get(
+                    leftHanded ? "menu.controls.leftHanded" : "menu.controls");
+            }
+
+            if (_fireButton != null)
+            {
+                _fireButton.gameObject.SetActive(!GameSettings.AutoFire);
+            }
+
+            if (GameSettings.AutoFire)
+            {
+                _onFireHeld?.Invoke(false);
+            }
+
+            _sticksInitialized = false;
+        }
+
+        private void PlaceActionButtons(bool leftHanded)
+        {
+            if (_reloadButton != null)
+            {
+                UiFactory.Place(
+                    _reloadButton.GetComponent<RectTransform>(),
+                    new Vector2(0.5f, 0f),
+                    new Vector2(0.5f, 0f),
+                    new Vector2(leftHanded ? 110f : -110f, 84f),
+                    new Vector2(190f, 66f));
+            }
+
+            if (_switchWeaponButton != null)
+            {
+                UiFactory.Place(
+                    _switchWeaponButton.GetComponent<RectTransform>(),
+                    new Vector2(0.5f, 0f),
+                    new Vector2(0.5f, 0f),
+                    new Vector2(leftHanded ? -100f : 100f, 84f),
+                    new Vector2(190f, 66f));
+            }
+
+            if (_activeSkillButton != null)
+            {
+                var anchor = new Vector2(leftHanded ? 0f : 1f, 0f);
+                UiFactory.Place(
+                    _activeSkillButton.GetComponent<RectTransform>(),
+                    anchor,
+                    anchor,
+                    new Vector2(leftHanded ? 170f : -170f, 330f),
+                    new Vector2(130f, 130f));
+            }
+
+            if (_pauseButton != null)
+            {
+                var anchor = new Vector2(leftHanded ? 0f : 1f, 1f);
+                UiFactory.Place(
+                    _pauseButton.GetComponent<RectTransform>(),
+                    anchor,
+                    anchor,
+                    new Vector2(leftHanded ? 30f : -30f, -30f),
+                    new Vector2(84f, 84f));
+            }
+
+            if (_fireButton != null)
+            {
+                var baseSize = StickBaseSize * _joystickScale;
+                var edgePadding = (baseSize * 0.5f) + StickEdgeMargin;
+                var fireOffset = edgePadding + (baseSize * 0.5f) + (FireButtonSize * 0.5f) + StickEdgeMargin;
+                UiFactory.Place(
+                    _fireButton.GetComponent<RectTransform>(),
+                    new Vector2(_aimStickOnRight ? 1f : 0f, 0f),
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(_aimStickOnRight ? -fireOffset : fireOffset, edgePadding),
+                    new Vector2(FireButtonSize, FireButtonSize));
+            }
         }
 
         public void InvalidateHudCache()
@@ -807,7 +975,78 @@ namespace JabaSurvivol.Gameplay
 
         public string SettingsHapticsLabelForTests => _settingsHapticsLabel?.text ?? string.Empty;
 
-        public string SettingsColorblindLabelForTests => _settingsColorblindLabel?.text ?? string.Empty;
+        public string SettingsColorblindLabelForTests =>
+            _settingsColorblindLabel?.text ?? string.Empty;
+
+        public Button FireButtonForTests => _fireButton;
+
+        public bool FireButtonVisibleForTests => _fireButton != null && _fireButton.gameObject.activeSelf;
+
+        public Button ReloadButtonForTests => _reloadButton;
+
+        public Button SwitchWeaponButtonForTests => _switchWeaponButton;
+
+        public Button PauseButtonForTests => _pauseButton;
+
+        public Vector2 MoveStickAnchorForTests => _moveBase != null ? _moveBase.anchorMin : Vector2.zero;
+
+        public Vector2 AimStickAnchorForTests => _aimBase != null ? _aimBase.anchorMin : Vector2.zero;
+
+        public Vector2 MoveStickPositionForTests =>
+            _moveBase != null ? _moveBase.anchoredPosition : Vector2.zero;
+
+        public Vector2 AimStickPositionForTests =>
+            _aimBase != null ? _aimBase.anchoredPosition : Vector2.zero;
+
+        public float MoveStickSizeForTests => _moveBase != null ? _moveBase.sizeDelta.x : 0f;
+
+        public float AimStickSizeForTests => _aimBase != null ? _aimBase.sizeDelta.x : 0f;
+
+        public float MoveKnobSizeForTests => _moveKnob != null ? _moveKnob.sizeDelta.x : 0f;
+
+        public float AimKnobSizeForTests => _aimKnob != null ? _aimKnob.sizeDelta.x : 0f;
+
+        public Color MoveBaseColorForTests =>
+            _moveBaseImage != null ? _moveBaseImage.color : Color.clear;
+
+        public Color AimBaseColorForTests =>
+            _aimBaseImage != null ? _aimBaseImage.color : Color.clear;
+
+        public Color MoveKnobColorForTests =>
+            _moveKnobImage != null ? _moveKnobImage.color : Color.clear;
+
+        public Color AimKnobColorForTests =>
+            _aimKnobImage != null ? _aimKnobImage.color : Color.clear;
+
+        public Vector2 ReloadButtonPositionForTests =>
+            _reloadButton != null ? _reloadButton.GetComponent<RectTransform>().anchoredPosition : Vector2.zero;
+
+        public Vector2 SwitchWeaponButtonPositionForTests =>
+            _switchWeaponButton != null
+                ? _switchWeaponButton.GetComponent<RectTransform>().anchoredPosition
+                : Vector2.zero;
+
+        public Vector2 PauseButtonPositionForTests =>
+            _pauseButton != null ? _pauseButton.GetComponent<RectTransform>().anchoredPosition : Vector2.zero;
+
+        public Vector2 ActiveSkillButtonPositionForTests =>
+            _activeSkillButton != null
+                ? _activeSkillButton.GetComponent<RectTransform>().anchoredPosition
+                : Vector2.zero;
+
+        public Vector2 FireButtonPositionForTests =>
+            _fireButton != null ? _fireButton.GetComponent<RectTransform>().anchoredPosition : Vector2.zero;
+
+        public string ControlsHintForTests => _controlsHint?.text ?? string.Empty;
+
+        /// <summary>
+        /// Test hook that presses or releases the manual fire control without
+        /// synthesizing a touch.
+        /// </summary>
+        public void SetFireButtonPressedForTests(bool pressed)
+        {
+            _onFireHeld?.Invoke(pressed);
+        }
 
         public void RefreshProgress(Profile profile)
         {
@@ -832,30 +1071,35 @@ namespace JabaSurvivol.Gameplay
         {
             GameSettings.SetLeftHanded(!GameSettings.LeftHanded);
             RefreshSettingsValues();
+            ApplyControlLayout();
         }
 
         private void AdjustJoystickSize(float delta)
         {
             GameSettings.SetJoystickSize(GameSettings.JoystickSize + delta);
             RefreshSettingsValues();
+            ApplyControlLayout();
         }
 
         private void AdjustJoystickOpacity(float delta)
         {
             GameSettings.SetJoystickOpacity(GameSettings.JoystickOpacity + delta);
             RefreshSettingsValues();
+            ApplyControlLayout();
         }
 
         private void CycleAimAssist()
         {
             GameSettings.CycleAimAssist();
             RefreshSettingsValues();
+            ApplyControlLayout();
         }
 
         private void ToggleAutoFire()
         {
             GameSettings.SetAutoFire(!GameSettings.AutoFire);
             RefreshSettingsValues();
+            ApplyControlLayout();
         }
 
         private void ToggleReducedMotion()
@@ -880,6 +1124,7 @@ namespace JabaSurvivol.Gameplay
         {
             _onResetSettings?.Invoke();
             RefreshSettingsValues();
+            ApplyControlLayout();
         }
 
         /// <summary>
@@ -2024,8 +2269,8 @@ namespace JabaSurvivol.Gameplay
             _sticksInitialized = true;
             _lastMoveStick = move;
             _lastAimStick = aim;
-            UpdateStick(_moveBase, _moveKnob, _moveBaseImage, move, false);
-            UpdateStick(_aimBase, _aimKnob, _aimBaseImage, aim, true);
+            UpdateStick(_moveBase, _moveKnob, _moveBaseImage, move, _moveStickOnRight);
+            UpdateStick(_aimBase, _aimKnob, _aimBaseImage, aim, _aimStickOnRight);
         }
 
         private void UpdateStick(
@@ -2035,8 +2280,8 @@ namespace JabaSurvivol.Gameplay
             StickState state,
             bool right)
         {
-            const float baseSize = 260f;
-            const float edgePadding = 150f;
+            var baseSize = StickBaseSize * _joystickScale;
+            var edgePadding = (baseSize * 0.5f) + StickEdgeMargin;
 
             if (state.Active)
             {
@@ -2054,7 +2299,7 @@ namespace JabaSurvivol.Gameplay
                 var delta = state.Current - state.Origin;
                 var direction = delta.sqrMagnitude > 0.0001f ? delta.normalized : Vector2.zero;
                 knob.anchoredPosition = direction * (baseSize * 0.32f);
-                baseImage.color = new Color(0.45f, 0.9f, 1f, 0.34f);
+                baseImage.color = new Color(0.45f, 0.9f, 1f, 0.34f * _joystickOpacity);
             }
             else
             {
@@ -2062,7 +2307,7 @@ namespace JabaSurvivol.Gameplay
                 baseRect.anchorMax = new Vector2(right ? 1f : 0f, 0f);
                 baseRect.anchoredPosition = new Vector2(right ? -edgePadding : edgePadding, edgePadding);
                 knob.anchoredPosition = Vector2.zero;
-                baseImage.color = new Color(0.7f, 0.82f, 0.9f, 0.15f);
+                baseImage.color = new Color(0.7f, 0.82f, 0.9f, 0.15f * _joystickOpacity);
             }
         }
 
@@ -2325,6 +2570,7 @@ namespace JabaSurvivol.Gameplay
             System.Action onReload,
             System.Action onSwitchWeapon,
             System.Action onActiveSkill,
+            System.Action<bool> onFireHeld,
             out Text healthText,
             out Text armorText,
             out Image healthFill,
@@ -2338,7 +2584,9 @@ namespace JabaSurvivol.Gameplay
             out RectTransform aimBase,
             out RectTransform aimKnob,
             out Image moveBaseImage,
-            out Image aimBaseImage)
+            out Image aimBaseImage,
+            out Image moveKnobImage,
+            out Image aimKnobImage)
         {
             var root = new GameObject("HUD", typeof(RectTransform));
             root.transform.SetParent(_safeArea, false);
@@ -2468,8 +2716,22 @@ namespace JabaSurvivol.Gameplay
             var hint = UiFactory.CreateText(root.transform, "Controls Hint", Localization.Get("menu.controls"), 20, TextAnchor.MiddleCenter, new Color(0.48f, 0.56f, 0.66f));
             UiFactory.Place(hint.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 24f), new Vector2(1400f, 40f));
 
-            moveBaseImage = BuildStick(root.transform, "Move Stick", out moveBase, out moveKnob);
-            aimBaseImage = BuildStick(root.transform, "Aim Stick", out aimBase, out aimKnob);
+            var fire = UiFactory.CreateButton(root.transform, "Fire Button", Localization.Get("hud.fire"), 26, null);
+            fire.onClick.RemoveAllListeners();
+            var fireTrigger = fire.gameObject.AddComponent<EventTrigger>();
+            AddPointerTrigger(fireTrigger, EventTriggerType.PointerDown, () => onFireHeld?.Invoke(true));
+            AddPointerTrigger(fireTrigger, EventTriggerType.PointerUp, () => onFireHeld?.Invoke(false));
+            AddPointerTrigger(fireTrigger, EventTriggerType.PointerExit, () => onFireHeld?.Invoke(false));
+            UiFactory.Place(
+                fire.GetComponent<RectTransform>(),
+                new Vector2(1f, 0f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(-380f, 150f),
+                new Vector2(FireButtonSize, FireButtonSize));
+            fire.gameObject.SetActive(false);
+
+            moveBaseImage = BuildStick(root.transform, "Move Stick", out moveBase, out moveKnob, out moveKnobImage);
+            aimBaseImage = BuildStick(root.transform, "Aim Stick", out aimBase, out aimKnob, out aimKnobImage);
             moveBaseImage.color = new Color(0.7f, 0.82f, 0.9f, 0.15f);
             aimBaseImage.color = new Color(0.7f, 0.82f, 0.9f, 0.15f);
             moveBase.anchorMin = moveBase.anchorMax = new Vector2(0f, 0f);
@@ -2480,21 +2742,36 @@ namespace JabaSurvivol.Gameplay
             return root;
         }
 
-        private static Image BuildStick(Transform parent, string name, out RectTransform baseRect, out RectTransform knobRect)
+        private static void AddPointerTrigger(
+            EventTrigger trigger,
+            EventTriggerType type,
+            System.Action callback)
+        {
+            var entry = new EventTrigger.Entry { eventID = type };
+            entry.callback.AddListener(_ => callback());
+            trigger.triggers.Add(entry);
+        }
+
+        private static Image BuildStick(
+            Transform parent,
+            string name,
+            out RectTransform baseRect,
+            out RectTransform knobRect,
+            out Image knobImage)
         {
             var baseImage = UiFactory.CreateImage(parent, name, SpriteFactory.Ring, new Color(0.7f, 0.82f, 0.9f, 0.15f));
             baseRect = baseImage.rectTransform;
             baseRect.anchorMin = new Vector2(0.5f, 0.5f);
             baseRect.anchorMax = new Vector2(0.5f, 0.5f);
             baseRect.pivot = new Vector2(0.5f, 0.5f);
-            baseRect.sizeDelta = new Vector2(260f, 260f);
+            baseRect.sizeDelta = new Vector2(StickBaseSize, StickBaseSize);
 
-            var knobImage = UiFactory.CreateImage(baseImage.transform, "Knob", SpriteFactory.Circle, new Color(0.72f, 0.95f, 1f, 0.42f));
+            knobImage = UiFactory.CreateImage(baseImage.transform, "Knob", SpriteFactory.Circle, new Color(0.72f, 0.95f, 1f, 0.42f));
             knobRect = knobImage.rectTransform;
             knobRect.anchorMin = new Vector2(0.5f, 0.5f);
             knobRect.anchorMax = new Vector2(0.5f, 0.5f);
             knobRect.pivot = new Vector2(0.5f, 0.5f);
-            knobRect.sizeDelta = new Vector2(96f, 96f);
+            knobRect.sizeDelta = new Vector2(StickKnobSize, StickKnobSize);
             knobRect.anchoredPosition = Vector2.zero;
 
             return baseImage;
@@ -3698,7 +3975,11 @@ namespace JabaSurvivol.Gameplay
             BindLocalized(FindText(_hud, "Boss Name"), "boss.name");
             BindLocalizedButton(_hud, "Reload Button", "hud.reload");
             BindLocalizedButton(_hud, "Switch Weapon", "hud.switch");
-            BindLocalized(FindText(_hud, "Controls Hint"), "menu.controls");
+            BindLocalizedButton(_hud, "Fire Button", "hud.fire");
+            BindLocalized(
+                FindText(_hud, "Controls Hint"),
+                () => Localization.Get(
+                    GameSettings.LeftHanded ? "menu.controls.leftHanded" : "menu.controls"));
 
             BindLocalized(FindText(_gameOverPanel, "Title"), "gameover.title");
             BindLocalizedButton(_gameOverPanel, "Restart", "gameover.restart");
