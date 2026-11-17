@@ -1,0 +1,3 @@
+No FATAL EXCEPTION or AndroidRuntime crash lines for com.jabasurvivol.game were observed in the filtered logcat capture.
+System-level emulator warnings (audio HAL, Google Play services, and Android language services) are unrelated to the app and were excluded.
+Captured: 2026-11-17.

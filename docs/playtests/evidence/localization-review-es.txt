@@ -1,19 +1,68 @@
 # Spanish (es) Localization Review
 
-- Status: Approved
+## Current review (v0.9.0 settings panel)
+
+- Status: Pending
 - Review owner: repository owner (`jb-coder`)
-- Named human reviewer: repository owner (`jb-coder`)
-- Review date: 2026-11-13
-- Reviewed commit or APK: runtime/build commit `3dd604f`; release APK `JabaSurvivol-0.6.0.apk` SHA-256 `77ED5ADF7143C86798AADF9FC62176A22DDF10E5A610A42E204151AF412F31BA`
+- Named human reviewer: pending
+- Review date: pending
+- Reviewed commit or APK: pending
 - Locale file: `unity/JabaSurvivol/Assets/Resources/Localization/es.json`
 - Source table: `unity/JabaSurvivol/Assets/Resources/Localization/en.json`
-- Key coverage: 196/196
-- Placeholder coverage: 196/196, no mismatches
-- Glossary version: `docs/localization/glossary.md` reviewed with the locale
-- Translation method: Human-reviewed; drafting method not separately recorded
-- Screens reviewed: Full 0.6.0 phone/tablet matrix for main menu, HUD, pause, armory, and game over in English and Spanish
-- Unresolved items: Character-sheet layout remains outside the #141 pseudo-locale and screenshot matrix; accepted gap for this release.
-- Approval: Approved by repository owner (`jb-coder`) on 2026-11-13
+- Key coverage: 222/222
+- Placeholder coverage: 222/222, no mismatches
+- Glossary version: `docs/localization/glossary.md`
+- Translation method: pending
+- Screens reviewed: pending; settings panel on phone and tablet in English and Spanish
+- Unresolved items: pending review of the v0.9.0 settings keys and screenshots
+- Approval: Pending
+
+## v0.9.0 scope
+
+New keys:
+
+- `settings.open`
+- `settings.title`
+- `settings.close`
+- `settings.reset`
+- `settings.audio.title`
+- `settings.audio.mute`
+- `settings.audio.master`
+- `settings.audio.effects`
+- `settings.language.current`
+- `settings.controls.title`
+- `settings.controls.leftHanded`
+- `settings.controls.joystickSize`
+- `settings.controls.joystickOpacity`
+- `settings.controls.aimAssist`
+- `settings.controls.autoFire`
+- `settings.accessibility.title`
+- `settings.accessibility.reducedMotion`
+- `settings.accessibility.haptics`
+- `settings.accessibility.colorblind`
+- `settings.value.on`
+- `settings.value.off`
+- `settings.value.percent`
+- `settings.value.size`
+- `settings.aim.off`
+- `settings.aim.low`
+- `settings.aim.high`
+
+Changed screens:
+
+- Main menu Settings entry.
+- Settings panel audio, language, controls, and accessibility sections on
+  phone and tablet.
+
+Evidence:
+
+- `docs/playtests/2026-11-17-v090-settings-verification.md`
+- `docs/playtests/evidence/v090-settings-phone-main.png`
+- `docs/playtests/evidence/v090-settings-phone-en.png`
+- `docs/playtests/evidence/v090-settings-phone-es.png`
+- `docs/playtests/evidence/v090-settings-tablet-main-es.png`
+- `docs/playtests/evidence/v090-settings-tablet-en.png`
+- `docs/playtests/evidence/v090-settings-tablet-es.png`
 
 ## Required review scope
 
@@ -22,8 +71,7 @@
 - Grammar, gender, accents, and punctuation.
 - Placeholder and newline preservation.
 - Missing, stale, or untranslated values.
-- Phone and tablet screenshots for the main menu, HUD, pause, armory, and
-  result screens.
+- Phone and tablet screenshots for the changed screens.
 - Truncation, overlap, and accented-glyph rendering.
 
 Record findings by key and glossary reference. Target-language term changes
@@ -31,6 +79,23 @@ belong in `docs/localization/glossary.md`; keep this record in English.
 
 ## Release gate
 
-Spanish is approved for the v0.6.0 release. Any later source or glossary change
-requires re-review and a new signed record. The agent reviewer and
-`reviewer-approval` check are not linguistic review.
+A signed record is required before the Spanish locale can ship with these
+settings strings. The agent reviewer and `reviewer-approval` check are not
+linguistic review.
+
+## Previous approval (v0.6.0)
+
+- Status: Approved
+- Review owner: repository owner (`jb-coder`)
+- Named human reviewer: repository owner (`jb-coder`)
+- Review date: 2026-11-13
+- Reviewed commit or APK: runtime/build commit `3dd604f`; release APK
+  `JabaSurvivol-0.6.0.apk` SHA-256
+  `77ED5ADF7143C86798AADF9FC62176A22DDF10E5A610A42E204151AF412F31BA`
+- Key coverage: 196/196
+- Placeholder coverage: 196/196, no mismatches
+- Screens reviewed: Full 0.6.0 phone/tablet matrix for main menu, HUD, pause,
+  armory, and game over in English and Spanish
+- Unresolved items: Character-sheet layout remains outside the #141
+  pseudo-locale and screenshot matrix; accepted gap for that release.
+- Approval: Approved by repository owner (`jb-coder`) on 2026-11-13
