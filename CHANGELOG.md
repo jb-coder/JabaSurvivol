@@ -36,7 +36,7 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 ### Known issues
 
 - Android evidence is emulator-only. Physical phone and tablet profiling remains in #99.
-- The Spanish settings, HUD, confirmation, and help strings require the pending human review record.
+- The Spanish settings, HUD, confirmation, and help strings are approved in `docs/playtests/evidence/localization-review-es.txt`.
 - Unity hosted CI remains disabled until #27 is provisioned.
 - Final authored audio and store listing art remain in v1.0.0.
 
