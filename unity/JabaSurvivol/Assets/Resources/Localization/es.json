@@ -27,6 +27,10 @@
       "value": "PALANCA IZQ. MOVER    PALANCA DCHA. APUNTAR Y DISPARAR"
     },
     {
+      "key": "menu.controls.leftHanded",
+      "value": "PALANCA DCHA. MOVER    PALANCA IZQ. APUNTAR Y DISPARAR"
+    },
+    {
       "key": "menu.build",
       "value": "v{0} · {1}"
     },
@@ -259,6 +263,10 @@
       "value": "CAMBIAR"
     },
     {
+      "key": "hud.fire",
+      "value": "DISPARAR"
+    },
+    {
       "key": "hud.ammo",
       "value": "MUNICIÓN {0}/{1}   RESERVA {2}"
     },
@@ -321,6 +329,34 @@
     {
       "key": "pause.sound.off",
       "value": "SONIDO: DESACTIVADO"
+    },
+    {
+      "key": "confirm.respec.title",
+      "value": "¿REASIGNAR HABILIDADES?"
+    },
+    {
+      "key": "confirm.respec.body",
+      "value": "¿DEVOLVER {0} PUNTOS DE HABILIDAD ASIGNADOS? SE RESTABLECEN TODOS LOS RANGOS."
+    },
+    {
+      "key": "confirm.respec.confirm",
+      "value": "REASIGNAR"
+    },
+    {
+      "key": "confirm.leave.title",
+      "value": "¿ABANDONAR ESTA PARTIDA?"
+    },
+    {
+      "key": "confirm.leave.body",
+      "value": "LA PARTIDA ACTUAL TERMINA. SE CONSERVA TODO EL PROGRESO PERSISTENTE."
+    },
+    {
+      "key": "confirm.leave.confirm",
+      "value": "ABANDONAR PARTIDA"
+    },
+    {
+      "key": "confirm.cancel",
+      "value": "CANCELAR"
     },
     {
       "key": "armory.title",
@@ -785,6 +821,126 @@
     {
       "key": "account.error.validation",
       "value": "REVISA TU USUARIO Y CONTRASEÑA"
+    },
+    {
+      "key": "settings.open",
+      "value": "AJUSTES"
+    },
+    {
+      "key": "settings.title",
+      "value": "AJUSTES"
+    },
+    {
+      "key": "settings.close",
+      "value": "CERRAR"
+    },
+    {
+      "key": "settings.reset",
+      "value": "RESTABLECER VALORES"
+    },
+    {
+      "key": "settings.audio.title",
+      "value": "AUDIO"
+    },
+    {
+      "key": "settings.audio.mute",
+      "value": "SONIDO"
+    },
+    {
+      "key": "settings.audio.master",
+      "value": "VOLUMEN GENERAL"
+    },
+    {
+      "key": "settings.audio.effects",
+      "value": "VOLUMEN DE EFECTOS"
+    },
+    {
+      "key": "settings.language.current",
+      "value": "IDIOMA ACTUAL"
+    },
+    {
+      "key": "settings.controls.title",
+      "value": "CONTROLES"
+    },
+    {
+      "key": "settings.controls.leftHanded",
+      "value": "DISEÑO PARA ZURDOS"
+    },
+    {
+      "key": "settings.controls.joystickSize",
+      "value": "TAMAÑO DEL JOYSTICK"
+    },
+    {
+      "key": "settings.controls.joystickOpacity",
+      "value": "OPACIDAD DEL JOYSTICK"
+    },
+    {
+      "key": "settings.controls.aimAssist",
+      "value": "AYUDA DE PUNTERÍA"
+    },
+    {
+      "key": "settings.controls.autoFire",
+      "value": "DISPARO AUTOMÁTICO"
+    },
+    {
+      "key": "settings.accessibility.title",
+      "value": "ACCESIBILIDAD"
+    },
+    {
+      "key": "settings.accessibility.reducedMotion",
+      "value": "MOVIMIENTO REDUCIDO"
+    },
+    {
+      "key": "settings.accessibility.haptics",
+      "value": "VIBRACIÓN"
+    },
+    {
+      "key": "settings.accessibility.colorblind",
+      "value": "AVISOS PARA DALTONISMO"
+    },
+    {
+      "key": "settings.value.on",
+      "value": "SÍ"
+    },
+    {
+      "key": "settings.value.off",
+      "value": "NO"
+    },
+    {
+      "key": "settings.value.percent",
+      "value": "{0}%"
+    },
+    {
+      "key": "settings.value.size",
+      "value": "{0}x"
+    },
+    {
+      "key": "settings.aim.off",
+      "value": "DESACTIVADA"
+    },
+    {
+      "key": "settings.aim.low",
+      "value": "BAJA"
+    },
+    {
+      "key": "settings.aim.high",
+      "value": "ALTA"
+    },
+    {
+      "key": "help.title",
+      "value": "CÓMO JUGAR"
+    },
+    {
+      "key": "help.body",
+      "value": "PALANCA DE MOVER: MOVER\nPALANCA DE APUNTAR: APUNTAR Y DISPARAR\nDISPARO MANUAL: MANTÉN PULSADO\nRECARGAR/CAMBIAR: TOCA LOS BOTONES\nHABILIDAD ACTIVA: TOCA EL BOTÓN\nRECOMPENSAS: ELIGE 1 DE 3\nARMERÍA: GASTA SUMINISTROS\nEN MEJORAS PERMANENTES\n\nLA MUERTE CONSERVA SUMINISTROS,\nXP, NIVELES, PUNTOS DE HABILIDAD,\nHABILIDADES, ARMAS,\nMEJORAS Y ARMADURA."
+    },
+    {
+      "key": "help.open",
+      "value": "CÓMO JUGAR"
+    },
+    {
+      "key": "help.close",
+      "value": "ENTENDIDO"
     }
   ]
 }

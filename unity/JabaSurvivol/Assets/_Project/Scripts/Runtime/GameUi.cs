@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace JabaSurvivol.Gameplay
@@ -18,27 +19,63 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _buildLabel;
         private readonly GameObject _hud;
         private readonly GameObject _pausePanel;
-        private readonly Text _pauseSoundLabel;
-        private readonly Button _pauseSoundButton;
-        private readonly GameObject _languagePanel;
-        private readonly Button _languageButtonMain;
-        private readonly Button _languageButtonPause;
-        private readonly Button _languageSystemButton;
-        private readonly Button _languageEnglishButton;
-        private readonly Button _languageSpanishButton;
-        private readonly Button _languageCloseButton;
-        private readonly GameObject _audioPanel;
-        private readonly Text _audioMuteLabel;
-        private readonly Text _audioMasterLabel;
-        private readonly Button _audioMuteButton;
-        private readonly Button _audioMasterMinusButton;
-        private readonly Button _audioMasterPlusButton;
-        private readonly Button _audioCloseButton;
-        private readonly Button _audioButtonMain;
-        private readonly Button _audioButtonPause;
-        private readonly System.Action<float> _onMasterVolumeChanged;
+        private readonly Button _pauseMenuButton;
+        private readonly GameObject _confirmationPanel;
+        private readonly Text _confirmationTitle;
+        private readonly Text _confirmationBody;
+        private readonly Button _confirmationConfirmButton;
+        private readonly Text _confirmationConfirmLabel;
+        private readonly Button _confirmationCancelButton;
+        private readonly Text _confirmationCancelLabel;
+        private readonly GameObject _helpPanel;
+        private readonly Text _helpTitle;
+        private readonly Text _helpBody;
+        private readonly Button _helpCloseButton;
+        private readonly Button _helpButtonMain;
+        private readonly Button _helpButtonSettings;
+        private System.Action _confirmationConfirmAction;
+        private System.Action _confirmationCancelAction;
+        private readonly GameObject _settingsPanel;
+        private readonly Button _settingsButtonMain;
+        private readonly Button _settingsButtonPause;
+        private readonly Button _settingsCloseButton;
+        private readonly Button _settingsResetButton;
+        private readonly Button _settingsMuteButton;
+        private readonly Text _settingsMuteLabel;
+        private readonly Button _settingsMasterMinusButton;
+        private readonly Button _settingsMasterPlusButton;
+        private readonly Text _settingsMasterLabel;
+        private readonly Button _settingsEffectsMinusButton;
+        private readonly Button _settingsEffectsPlusButton;
+        private readonly Text _settingsEffectsLabel;
+        private readonly Button _settingsLanguageSystemButton;
+        private readonly Button _settingsLanguageEnglishButton;
+        private readonly Button _settingsLanguageSpanishButton;
+        private readonly Text _settingsLanguageCurrentLabel;
+        private readonly Button _settingsLeftHandedButton;
+        private readonly Text _settingsLeftHandedLabel;
+        private readonly Button _settingsJoystickSizeMinusButton;
+        private readonly Button _settingsJoystickSizePlusButton;
+        private readonly Text _settingsJoystickSizeLabel;
+        private readonly Button _settingsJoystickOpacityMinusButton;
+        private readonly Button _settingsJoystickOpacityPlusButton;
+        private readonly Text _settingsJoystickOpacityLabel;
+        private readonly Button _settingsAimAssistButton;
+        private readonly Text _settingsAimAssistLabel;
+        private readonly Button _settingsAutoFireButton;
+        private readonly Text _settingsAutoFireLabel;
+        private readonly Button _settingsReducedMotionButton;
+        private readonly Text _settingsReducedMotionLabel;
+        private readonly Button _settingsHapticsButton;
+        private readonly Text _settingsHapticsLabel;
+        private readonly Button _settingsColorblindButton;
+        private readonly Text _settingsColorblindLabel;
         private readonly System.Action<string> _onLocaleSelected;
+        private readonly System.Action _onResetSettings;
+        private readonly System.Action<bool> _onFireHeld;
+        private bool _muted;
         private float _masterVolume = GameAudio.DefaultMasterVolume;
+        private float _effectsVolume = GameAudio.DefaultEffectsVolume;
         private readonly GameObject _gameOverPanel;
         private readonly GameObject _victoryPanel;
         private readonly GameObject _bossPanel;
@@ -126,6 +163,22 @@ namespace JabaSurvivol.Gameplay
         private readonly RectTransform _aimKnob;
         private readonly Image _moveBaseImage;
         private readonly Image _aimBaseImage;
+        private readonly Image _moveKnobImage;
+        private readonly Image _aimKnobImage;
+        private readonly Button _reloadButton;
+        private readonly Button _switchWeaponButton;
+        private readonly Button _pauseButton;
+        private readonly Button _fireButton;
+        private readonly Text _controlsHint;
+        private readonly Text _mainMenuControls;
+        private bool _moveStickOnRight;
+        private bool _aimStickOnRight;
+        private float _joystickScale = 1f;
+        private float _joystickOpacity = 1f;
+        private const float StickBaseSize = 260f;
+        private const float StickKnobSize = 96f;
+        private const float StickEdgeMargin = 20f;
+        private const float FireButtonSize = 130f;
         private const float AudioVolumeStep = 0.1f;
         private static readonly Color HealthLow = new(0.9f, 0.2f, 0.22f);
         private static readonly Color HealthHigh = new(0.3f, 0.92f, 0.42f);
@@ -166,13 +219,16 @@ namespace JabaSurvivol.Gameplay
             System.Action onStart,
             System.Action onRestart,
             System.Action onMenu,
+            System.Action onPauseMenu,
             System.Action onPause,
             System.Action onResume,
             System.Action onToggleSound,
             System.Action<float> onMasterVolumeChanged,
+            System.Action<float> onEffectsVolumeChanged,
             System.Action onReload,
             System.Action onSwitchWeapon,
             System.Action onActiveSkill,
+            System.Action<bool> onFireHeld,
             System.Action<SkillNode> onSelectActiveSkill,
             System.Action<int> onRewardSelected,
             System.Action onArmory,
@@ -197,10 +253,12 @@ namespace JabaSurvivol.Gameplay
             System.Action onLeaderboard,
             System.Action onTelemetryToggle,
             System.Action<string> onLocaleSelected,
+            System.Action onResetSettings,
             System.Action onLeaderboardClose)
         {
             _onLocaleSelected = onLocaleSelected;
-            _onMasterVolumeChanged = onMasterVolumeChanged;
+            _onResetSettings = onResetSettings;
+            _onFireHeld = onFireHeld;
             var canvasObject = UiFactory.CreateCanvas("JabaSurvivol UI", parent);
 
             var safeAreaObject = new GameObject("Safe Area", typeof(RectTransform));
@@ -216,15 +274,21 @@ namespace JabaSurvivol.Gameplay
                 onAccount,
                 onLeaderboard,
                 onTelemetryToggle,
-                ShowLanguagePanel,
-                ShowAudioPanel,
+                ShowSettingsPanel,
+                ShowHelp,
                 out _mainMenuAccountState,
                 out _telemetryButton,
                 out _telemetryLabel,
                 out _buildLabel,
-                out _languageButtonMain,
-                out _audioButtonMain);
-            _hud = BuildHud(onPause, onReload, onSwitchWeapon, onActiveSkill, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage);
+                out _settingsButtonMain,
+                out _helpButtonMain);
+            _hud = BuildHud(onPause, onReload, onSwitchWeapon, onActiveSkill, onFireHeld, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage, out _moveKnobImage, out _aimKnobImage);
+            _reloadButton = FindGameObject(_hud, "Reload Button")?.GetComponent<Button>();
+            _switchWeaponButton = FindGameObject(_hud, "Switch Weapon")?.GetComponent<Button>();
+            _pauseButton = FindGameObject(_hud, "Pause")?.GetComponent<Button>();
+            _fireButton = FindGameObject(_hud, "Fire Button")?.GetComponent<Button>();
+            _controlsHint = FindText(_hud, "Controls Hint");
+            _mainMenuControls = FindText(_mainMenu, "Controls");
             _roundModifierText = FindText(_hud, "Round Modifier");
             _weaponText = FindText(_hud, "Weapon");
             _weaponIcon = FindImage(_hud, "Weapon Icon");
@@ -241,30 +305,49 @@ namespace JabaSurvivol.Gameplay
             _bossHealthFill = FindImage(_hud, "Boss Health Fill");
             _pausePanel = BuildPausePanel(
                 onResume,
-                onMenu,
+                onPauseMenu,
                 onArmory,
                 onCharacterSheet,
-                ShowAudioPanel,
-                ShowLanguagePanel,
-                out _pauseSoundLabel,
-                out _pauseSoundButton,
-                out _languageButtonPause,
-                out _audioButtonPause);
-            _languagePanel = BuildLanguagePanel(
-                SelectLocale,
-                out _languageSystemButton,
-                out _languageEnglishButton,
-                out _languageSpanishButton,
-                out _languageCloseButton);
-            _audioPanel = BuildAudioPanel(
+                ShowSettingsPanel,
+                out _settingsButtonPause,
+                out _pauseMenuButton);
+            _settingsPanel = BuildSettingsPanel(
                 onToggleSound,
                 onMasterVolumeChanged,
-                out _audioMuteLabel,
-                out _audioMasterLabel,
-                out _audioMuteButton,
-                out _audioMasterMinusButton,
-                out _audioMasterPlusButton,
-                out _audioCloseButton);
+                onEffectsVolumeChanged,
+                out _settingsMuteButton,
+                out _settingsMuteLabel,
+                out _settingsMasterMinusButton,
+                out _settingsMasterPlusButton,
+                out _settingsMasterLabel,
+                out _settingsEffectsMinusButton,
+                out _settingsEffectsPlusButton,
+                out _settingsEffectsLabel,
+                out _settingsLanguageSystemButton,
+                out _settingsLanguageEnglishButton,
+                out _settingsLanguageSpanishButton,
+                out _settingsLanguageCurrentLabel,
+                out _settingsLeftHandedButton,
+                out _settingsLeftHandedLabel,
+                out _settingsJoystickSizeMinusButton,
+                out _settingsJoystickSizePlusButton,
+                out _settingsJoystickSizeLabel,
+                out _settingsJoystickOpacityMinusButton,
+                out _settingsJoystickOpacityPlusButton,
+                out _settingsJoystickOpacityLabel,
+                out _settingsAimAssistButton,
+                out _settingsAimAssistLabel,
+                out _settingsAutoFireButton,
+                out _settingsAutoFireLabel,
+                out _settingsReducedMotionButton,
+                out _settingsReducedMotionLabel,
+                out _settingsHapticsButton,
+                out _settingsHapticsLabel,
+                out _settingsColorblindButton,
+                out _settingsColorblindLabel,
+                out _settingsResetButton,
+                out _settingsCloseButton,
+                out _helpButtonSettings);
             _gameOverPanel = BuildGameOverPanel(onRestart, onMenu, out _gameOverSummary);
             _victoryPanel = BuildVictoryPanel(onRestart, onMenu, onLeaderboard, out _victorySummary);
             _roundEndPanel = BuildRoundEndPanel(
@@ -335,6 +418,17 @@ namespace JabaSurvivol.Gameplay
                 out _leaderboardStatusText,
                 out _leaderboardText,
                 out _leaderboardViewport);
+            _confirmationPanel = BuildConfirmationPanel(
+                out _confirmationTitle,
+                out _confirmationBody,
+                out _confirmationConfirmButton,
+                out _confirmationConfirmLabel,
+                out _confirmationCancelButton,
+                out _confirmationCancelLabel);
+            _helpPanel = BuildHelpPanel(
+                out _helpTitle,
+                out _helpBody,
+                out _helpCloseButton);
 
             _selectActiveButtons = new Button[3];
             _selectActiveLabels = new Text[3];
@@ -371,18 +465,13 @@ namespace JabaSurvivol.Gameplay
 
         public void ShowMainMenu(Profile profile)
         {
+            HideHelpSilently();
             _mainMenu.SetActive(true);
             _hud.SetActive(false);
+            _onFireHeld?.Invoke(false);
             _pausePanel.SetActive(false);
-            if (_audioPanel != null)
-            {
-                _audioPanel.SetActive(false);
-            }
-
-            if (_languagePanel != null)
-            {
-                _languagePanel.SetActive(false);
-            }
+            CloseSettingsPanelSilently();
+            HideConfirmation();
             _gameOverPanel.SetActive(false);
             HideVictory();
             HideBoss();
@@ -400,18 +489,12 @@ namespace JabaSurvivol.Gameplay
 
         public void ShowHud()
         {
+            HideHelpSilently();
             _mainMenu.SetActive(false);
             _hud.SetActive(true);
             _pausePanel.SetActive(false);
-            if (_audioPanel != null)
-            {
-                _audioPanel.SetActive(false);
-            }
-
-            if (_languagePanel != null)
-            {
-                _languagePanel.SetActive(false);
-            }
+            CloseSettingsPanelSilently();
+            HideConfirmation();
             _gameOverPanel.SetActive(false);
             HideVictory();
             HideBoss();
@@ -422,6 +505,156 @@ namespace JabaSurvivol.Gameplay
             InvalidateHudCache();
             HideLevelUp();
             HideRoundEnd();
+            ApplyControlLayout();
+        }
+
+        /// <summary>
+        /// Applies the device-local touch layout: stick side, stick size,
+        /// opacity, action-button mirroring, the manual fire control, and the
+        /// controls hint text.
+        /// </summary>
+        public void ApplyControlLayout()
+        {
+            var leftHanded = GameSettings.LeftHanded;
+            _joystickScale = GameSettings.JoystickSize;
+            _joystickOpacity = GameSettings.JoystickOpacity;
+            _moveStickOnRight = leftHanded;
+            _aimStickOnRight = !leftHanded;
+
+            var baseSize = StickBaseSize * _joystickScale;
+            var knobSize = StickKnobSize * _joystickScale;
+            var edgePadding = (baseSize * 0.5f) + StickEdgeMargin;
+
+            if (_moveBase != null)
+            {
+                _moveBase.sizeDelta = new Vector2(baseSize, baseSize);
+                _moveBase.anchorMin = _moveBase.anchorMax = new Vector2(_moveStickOnRight ? 1f : 0f, 0f);
+                _moveBase.anchoredPosition = new Vector2(_moveStickOnRight ? -edgePadding : edgePadding, edgePadding);
+            }
+
+            if (_aimBase != null)
+            {
+                _aimBase.sizeDelta = new Vector2(baseSize, baseSize);
+                _aimBase.anchorMin = _aimBase.anchorMax = new Vector2(_aimStickOnRight ? 1f : 0f, 0f);
+                _aimBase.anchoredPosition = new Vector2(_aimStickOnRight ? -edgePadding : edgePadding, edgePadding);
+            }
+
+            if (_moveKnob != null)
+            {
+                _moveKnob.sizeDelta = new Vector2(knobSize, knobSize);
+                _moveKnob.anchoredPosition = Vector2.zero;
+            }
+
+            if (_aimKnob != null)
+            {
+                _aimKnob.sizeDelta = new Vector2(knobSize, knobSize);
+                _aimKnob.anchoredPosition = Vector2.zero;
+            }
+
+            if (_moveBaseImage != null)
+            {
+                _moveBaseImage.color = new Color(0.7f, 0.82f, 0.9f, 0.15f * _joystickOpacity);
+            }
+
+            if (_aimBaseImage != null)
+            {
+                _aimBaseImage.color = new Color(0.7f, 0.82f, 0.9f, 0.15f * _joystickOpacity);
+            }
+
+            if (_moveKnobImage != null)
+            {
+                _moveKnobImage.color = new Color(0.72f, 0.95f, 1f, 0.42f * _joystickOpacity);
+            }
+
+            if (_aimKnobImage != null)
+            {
+                _aimKnobImage.color = new Color(0.72f, 0.95f, 1f, 0.42f * _joystickOpacity);
+            }
+
+            PlaceActionButtons(leftHanded);
+
+            var controlsKey = leftHanded ? "menu.controls.leftHanded" : "menu.controls";
+            if (_controlsHint != null)
+            {
+                _controlsHint.text = Localization.Get(controlsKey);
+            }
+
+            if (_mainMenuControls != null)
+            {
+                _mainMenuControls.text = Localization.Get(controlsKey);
+            }
+
+            if (_fireButton != null)
+            {
+                _fireButton.gameObject.SetActive(!GameSettings.AutoFire);
+            }
+
+            if (GameSettings.AutoFire)
+            {
+                _onFireHeld?.Invoke(false);
+            }
+
+            _sticksInitialized = false;
+        }
+
+        private void PlaceActionButtons(bool leftHanded)
+        {
+            var baseSize = StickBaseSize * _joystickScale;
+            var edgePadding = (baseSize * 0.5f) + StickEdgeMargin;
+            var skillOffset = baseSize + 80f;
+
+            if (_reloadButton != null)
+            {
+                UiFactory.Place(
+                    _reloadButton.GetComponent<RectTransform>(),
+                    new Vector2(0.5f, 0f),
+                    new Vector2(0.5f, 0f),
+                    new Vector2(leftHanded ? 110f : -110f, 84f),
+                    new Vector2(190f, 66f));
+            }
+
+            if (_switchWeaponButton != null)
+            {
+                UiFactory.Place(
+                    _switchWeaponButton.GetComponent<RectTransform>(),
+                    new Vector2(0.5f, 0f),
+                    new Vector2(0.5f, 0f),
+                    new Vector2(leftHanded ? -100f : 100f, 84f),
+                    new Vector2(190f, 66f));
+            }
+
+            if (_activeSkillButton != null)
+            {
+                var anchor = new Vector2(leftHanded ? 0f : 1f, 0f);
+                UiFactory.Place(
+                    _activeSkillButton.GetComponent<RectTransform>(),
+                    anchor,
+                    anchor,
+                    new Vector2(leftHanded ? 170f : -170f, skillOffset),
+                    new Vector2(130f, 130f));
+            }
+
+            if (_pauseButton != null)
+            {
+                var anchor = new Vector2(leftHanded ? 0f : 1f, 1f);
+                UiFactory.Place(
+                    _pauseButton.GetComponent<RectTransform>(),
+                    anchor,
+                    anchor,
+                    new Vector2(leftHanded ? 30f : -30f, -30f),
+                    new Vector2(84f, 84f));
+            }
+
+            if (_fireButton != null)
+            {
+                var fireOffset = edgePadding + (baseSize * 0.5f) + (FireButtonSize * 0.5f) + StickEdgeMargin;
+                UiFactory.Place(
+                    _fireButton.GetComponent<RectTransform>(),
+                    new Vector2(_aimStickOnRight ? 1f : 0f, 0f),
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(_aimStickOnRight ? -fireOffset : fireOffset, edgePadding),
+                    new Vector2(FireButtonSize, FireButtonSize));
+            }
         }
 
         public void InvalidateHudCache()
@@ -679,83 +912,373 @@ namespace JabaSurvivol.Gameplay
 
         public void ShowPaused(bool visible)
         {
+            if (visible)
+            {
+                HideHelpSilently();
+            }
+
             _pausePanel.SetActive(visible);
             if (!visible)
             {
-                if (_audioPanel != null)
-                {
-                    _audioPanel.SetActive(false);
-                }
-
-                if (_languagePanel != null)
-                {
-                    _languagePanel.SetActive(false);
-                }
+                CloseSettingsPanelSilently();
+                HideConfirmation();
             }
         }
 
-        public bool LanguagePanelVisible => _languagePanel != null && _languagePanel.activeSelf;
+        public bool SettingsPanelVisible => _settingsPanel != null && _settingsPanel.activeSelf;
 
-        public bool AudioPanelVisible => _audioPanel != null && _audioPanel.activeSelf;
+        public bool ConfirmationVisible =>
+            _confirmationPanel != null && _confirmationPanel.activeSelf;
 
-        public void ShowLanguagePanel()
+        /// <summary>
+        /// Shows the reusable full-screen confirmation modal. The cancel
+        /// button receives the default focus so accidental confirms are less
+        /// likely on touch devices.
+        /// </summary>
+        public void ShowConfirmation(
+            string title,
+            string body,
+            string confirmLabel,
+            System.Action onConfirm,
+            System.Action onCancel = null)
         {
-            if (_audioPanel != null)
+            if (_confirmationPanel == null)
             {
-                _audioPanel.SetActive(false);
+                onConfirm?.Invoke();
+                return;
             }
 
-            if (_languagePanel != null)
-            {
-                _languagePanel.SetActive(true);
-            }
-        }
+            _confirmationTitle.text = title ?? string.Empty;
+            _confirmationBody.text = body ?? string.Empty;
+            _confirmationConfirmLabel.text = confirmLabel ?? string.Empty;
+            _confirmationCancelLabel.text = Localization.Get("confirm.cancel");
+            _confirmationConfirmAction = onConfirm;
+            _confirmationCancelAction = onCancel;
+            _confirmationPanel.SetActive(true);
 
-        public void HideLanguagePanel()
-        {
-            if (_languagePanel != null)
+            if (EventSystem.current != null)
             {
-                _languagePanel.SetActive(false);
-            }
-        }
-
-        public void ShowAudioPanel()
-        {
-            if (_languagePanel != null)
-            {
-                _languagePanel.SetActive(false);
-            }
-
-            if (_audioPanel != null)
-            {
-                _audioPanel.SetActive(true);
+                EventSystem.current.SetSelectedGameObject(_confirmationCancelButton.gameObject);
             }
 
             UiFactory.PlayUiCue?.Invoke(GameAudioCue.UiOpen);
         }
 
-        public void HideAudioPanel()
+        public void HideConfirmation()
         {
-            if (_audioPanel == null || !_audioPanel.activeSelf)
+            if (_confirmationPanel == null || !_confirmationPanel.activeSelf)
             {
                 return;
             }
 
-            _audioPanel.SetActive(false);
+            _confirmationPanel.SetActive(false);
+            _confirmationConfirmAction = null;
+            _confirmationCancelAction = null;
+            if (EventSystem.current != null)
+            {
+                EventSystem.current.SetSelectedGameObject(null);
+            }
+        }
+
+        private void ConfirmConfirmation()
+        {
+            var action = _confirmationConfirmAction;
+            HideConfirmation();
+            action?.Invoke();
+        }
+
+        private void CancelConfirmation()
+        {
+            var action = _confirmationCancelAction;
+            HideConfirmation();
+            UiFactory.PlayUiCue?.Invoke(GameAudioCue.UiClose);
+            action?.Invoke();
+        }
+
+        /// <summary>
+        /// Shows the modal first-run help panel above the current menu. Closing
+        /// it reveals whichever panel was underneath: main menu, pause menu, or
+        /// settings.
+        /// </summary>
+        public void ShowHelp()
+        {
+            if (_helpPanel == null)
+            {
+                return;
+            }
+
+            _helpPanel.transform.SetAsLastSibling();
+            _helpPanel.SetActive(true);
+            if (EventSystem.current != null)
+            {
+                EventSystem.current.SetSelectedGameObject(_helpCloseButton.gameObject);
+            }
+
+            UiFactory.PlayUiCue?.Invoke(GameAudioCue.UiOpen);
+        }
+
+        /// <summary>
+        /// Dismisses the help panel and records the device-local seen flag.
+        /// </summary>
+        public void HideHelp()
+        {
+            if (_helpPanel == null || !_helpPanel.activeSelf)
+            {
+                return;
+            }
+
+            _helpPanel.SetActive(false);
+            GameSettings.MarkHelpSeen();
+            if (EventSystem.current != null)
+            {
+                EventSystem.current.SetSelectedGameObject(null);
+            }
+
             UiFactory.PlayUiCue?.Invoke(GameAudioCue.UiClose);
         }
 
-        public Button LanguageButtonForTests => _languageButtonMain;
+        private void HideHelpSilently()
+        {
+            if (_helpPanel != null)
+            {
+                _helpPanel.SetActive(false);
+            }
+        }
 
-        public Button PauseLanguageButtonForTests => _languageButtonPause;
+        public bool HelpVisible => _helpPanel != null && _helpPanel.activeSelf;
 
-        public Button LanguageSystemButtonForTests => _languageSystemButton;
+        public void ShowSettingsPanel()
+        {
+            HideHelpSilently();
+            RefreshSettingsValues();
+            if (_settingsPanel != null)
+            {
+                _settingsPanel.SetActive(true);
+            }
 
-        public Button LanguageEnglishButtonForTests => _languageEnglishButton;
+            UiFactory.PlayUiCue?.Invoke(GameAudioCue.UiOpen);
+        }
 
-        public Button LanguageSpanishButtonForTests => _languageSpanishButton;
+        public void HideSettingsPanel()
+        {
+            if (_settingsPanel == null || !_settingsPanel.activeSelf)
+            {
+                return;
+            }
 
-        public Button LanguageCloseButtonForTests => _languageCloseButton;
+            _settingsPanel.SetActive(false);
+            UiFactory.PlayUiCue?.Invoke(GameAudioCue.UiClose);
+        }
+
+        private void CloseSettingsPanelSilently()
+        {
+            if (_settingsPanel != null)
+            {
+                _settingsPanel.SetActive(false);
+            }
+        }
+
+        public Button SettingsButtonMainForTests => _settingsButtonMain;
+
+        public Button SettingsButtonPauseForTests => _settingsButtonPause;
+
+        public Button HelpButtonMainForTests => _helpButtonMain;
+
+        public Button HelpButtonSettingsForTests => _helpButtonSettings;
+
+        public Button HelpCloseButtonForTests => _helpCloseButton;
+
+        public string HelpTitleForTests => _helpTitle?.text ?? string.Empty;
+
+        public string HelpBodyForTests => _helpBody?.text ?? string.Empty;
+
+        public Button SettingsCloseButtonForTests => _settingsCloseButton;
+
+        public Button SettingsResetButtonForTests => _settingsResetButton;
+
+        public Button SettingsMuteButtonForTests => _settingsMuteButton;
+
+        public Button SettingsMasterMinusButtonForTests => _settingsMasterMinusButton;
+
+        public Button SettingsMasterPlusButtonForTests => _settingsMasterPlusButton;
+
+        public Button SettingsEffectsMinusButtonForTests => _settingsEffectsMinusButton;
+
+        public Button SettingsEffectsPlusButtonForTests => _settingsEffectsPlusButton;
+
+        public Button SettingsLanguageSystemButtonForTests => _settingsLanguageSystemButton;
+
+        public Button SettingsLanguageEnglishButtonForTests => _settingsLanguageEnglishButton;
+
+        public Button SettingsLanguageSpanishButtonForTests => _settingsLanguageSpanishButton;
+
+        public Button SettingsLeftHandedButtonForTests => _settingsLeftHandedButton;
+
+        public Button SettingsJoystickSizeMinusButtonForTests => _settingsJoystickSizeMinusButton;
+
+        public Button SettingsJoystickSizePlusButtonForTests => _settingsJoystickSizePlusButton;
+
+        public Button SettingsJoystickOpacityMinusButtonForTests => _settingsJoystickOpacityMinusButton;
+
+        public Button SettingsJoystickOpacityPlusButtonForTests => _settingsJoystickOpacityPlusButton;
+
+        public Button SettingsAimAssistButtonForTests => _settingsAimAssistButton;
+
+        public Button SettingsAutoFireButtonForTests => _settingsAutoFireButton;
+
+        public Button SettingsReducedMotionButtonForTests => _settingsReducedMotionButton;
+
+        public Button SettingsHapticsButtonForTests => _settingsHapticsButton;
+
+        public Button SettingsColorblindButtonForTests => _settingsColorblindButton;
+
+        public string SettingsMuteLabelForTests => _settingsMuteLabel?.text ?? string.Empty;
+
+        public string SettingsMasterLabelForTests => _settingsMasterLabel?.text ?? string.Empty;
+
+        public string SettingsEffectsLabelForTests => _settingsEffectsLabel?.text ?? string.Empty;
+
+        public string SettingsLanguageCurrentLabelForTests =>
+            _settingsLanguageCurrentLabel?.text ?? string.Empty;
+
+        public string SettingsLeftHandedLabelForTests => _settingsLeftHandedLabel?.text ?? string.Empty;
+
+        public string SettingsJoystickSizeLabelForTests => _settingsJoystickSizeLabel?.text ?? string.Empty;
+
+        public string SettingsJoystickOpacityLabelForTests =>
+            _settingsJoystickOpacityLabel?.text ?? string.Empty;
+
+        public string SettingsAimAssistLabelForTests => _settingsAimAssistLabel?.text ?? string.Empty;
+
+        public string SettingsAutoFireLabelForTests => _settingsAutoFireLabel?.text ?? string.Empty;
+
+        public string SettingsReducedMotionLabelForTests =>
+            _settingsReducedMotionLabel?.text ?? string.Empty;
+
+        public string SettingsHapticsLabelForTests => _settingsHapticsLabel?.text ?? string.Empty;
+
+        public string SettingsColorblindLabelForTests =>
+            _settingsColorblindLabel?.text ?? string.Empty;
+
+        public bool ConfirmationVisibleForTests => ConfirmationVisible;
+
+        public string ConfirmationTitleForTests => _confirmationTitle?.text ?? string.Empty;
+
+        public string ConfirmationBodyForTests => _confirmationBody?.text ?? string.Empty;
+
+        public string ConfirmationConfirmLabelForTests =>
+            _confirmationConfirmLabel?.text ?? string.Empty;
+
+        public string ConfirmationCancelLabelForTests =>
+            _confirmationCancelLabel?.text ?? string.Empty;
+
+        public Button ConfirmationConfirmButtonForTests => _confirmationConfirmButton;
+
+        public Button ConfirmationCancelButtonForTests => _confirmationCancelButton;
+
+        public Button CharacterRespecButtonForTests => _characterRespecButton;
+
+        public Button PauseMenuButtonForTests => _pauseMenuButton;
+
+        public bool PausePanelVisibleForTests => _pausePanel != null && _pausePanel.activeSelf;
+
+        public Button FireButtonForTests => _fireButton;
+
+        public bool FireButtonVisibleForTests => _fireButton != null && _fireButton.gameObject.activeSelf;
+
+        public bool IsTouchOverFireButton(Vector2 screenPoint)
+        {
+            if (_fireButton == null || !_fireButton.gameObject.activeInHierarchy)
+            {
+                return false;
+            }
+
+            return RectTransformUtility.RectangleContainsScreenPoint(
+                _fireButton.GetComponent<RectTransform>(),
+                screenPoint,
+                null);
+        }
+
+        public Vector2 FireButtonScreenCenterForTests
+        {
+            get
+            {
+                if (_fireButton == null)
+                {
+                    return Vector2.zero;
+                }
+
+                return RectTransformUtility.WorldToScreenPoint(
+                    null,
+                    _fireButton.GetComponent<RectTransform>().position);
+            }
+        }
+
+        public Button ReloadButtonForTests => _reloadButton;
+
+        public Button SwitchWeaponButtonForTests => _switchWeaponButton;
+
+        public Button PauseButtonForTests => _pauseButton;
+
+        public Vector2 MoveStickAnchorForTests => _moveBase != null ? _moveBase.anchorMin : Vector2.zero;
+
+        public Vector2 AimStickAnchorForTests => _aimBase != null ? _aimBase.anchorMin : Vector2.zero;
+
+        public Vector2 MoveStickPositionForTests =>
+            _moveBase != null ? _moveBase.anchoredPosition : Vector2.zero;
+
+        public Vector2 AimStickPositionForTests =>
+            _aimBase != null ? _aimBase.anchoredPosition : Vector2.zero;
+
+        public float MoveStickSizeForTests => _moveBase != null ? _moveBase.sizeDelta.x : 0f;
+
+        public float AimStickSizeForTests => _aimBase != null ? _aimBase.sizeDelta.x : 0f;
+
+        public float MoveKnobSizeForTests => _moveKnob != null ? _moveKnob.sizeDelta.x : 0f;
+
+        public float AimKnobSizeForTests => _aimKnob != null ? _aimKnob.sizeDelta.x : 0f;
+
+        public Color MoveBaseColorForTests =>
+            _moveBaseImage != null ? _moveBaseImage.color : Color.clear;
+
+        public Color AimBaseColorForTests =>
+            _aimBaseImage != null ? _aimBaseImage.color : Color.clear;
+
+        public Color MoveKnobColorForTests =>
+            _moveKnobImage != null ? _moveKnobImage.color : Color.clear;
+
+        public Color AimKnobColorForTests =>
+            _aimKnobImage != null ? _aimKnobImage.color : Color.clear;
+
+        public Vector2 ReloadButtonPositionForTests =>
+            _reloadButton != null ? _reloadButton.GetComponent<RectTransform>().anchoredPosition : Vector2.zero;
+
+        public Vector2 SwitchWeaponButtonPositionForTests =>
+            _switchWeaponButton != null
+                ? _switchWeaponButton.GetComponent<RectTransform>().anchoredPosition
+                : Vector2.zero;
+
+        public Vector2 PauseButtonPositionForTests =>
+            _pauseButton != null ? _pauseButton.GetComponent<RectTransform>().anchoredPosition : Vector2.zero;
+
+        public Vector2 ActiveSkillButtonPositionForTests =>
+            _activeSkillButton != null
+                ? _activeSkillButton.GetComponent<RectTransform>().anchoredPosition
+                : Vector2.zero;
+
+        public Vector2 FireButtonPositionForTests =>
+            _fireButton != null ? _fireButton.GetComponent<RectTransform>().anchoredPosition : Vector2.zero;
+
+        public string ControlsHintForTests => _controlsHint?.text ?? string.Empty;
+
+        /// <summary>
+        /// Test hook that presses or releases the manual fire control without
+        /// synthesizing a touch.
+        /// </summary>
+        public void SetFireButtonPressedForTests(bool pressed)
+        {
+            _onFireHeld?.Invoke(pressed);
+        }
 
         public void RefreshProgress(Profile profile)
         {
@@ -773,65 +1296,171 @@ namespace JabaSurvivol.Gameplay
 
         private void SelectLocale(string locale)
         {
-            HideLanguagePanel();
             _onLocaleSelected?.Invoke(locale);
         }
 
-        /// <summary>
-        /// Updates every sound label. Enabled means audio is audible.
-        /// </summary>
-        public void SetSound(bool enabled)
+        private void ToggleLeftHanded()
         {
-            var label = Localization.Get(enabled ? "pause.sound.on" : "pause.sound.off");
-            if (_pauseSoundLabel != null)
-            {
-                _pauseSoundLabel.text = label;
-            }
+            GameSettings.SetLeftHanded(!GameSettings.LeftHanded);
+            RefreshSettingsValues();
+            ApplyControlLayout();
+        }
 
-            if (_audioButtonMain != null)
-            {
-                var mainLabel = _audioButtonMain.GetComponentInChildren<Text>();
-                if (mainLabel != null)
-                {
-                    mainLabel.text = label;
-                }
-            }
+        private void AdjustJoystickSize(float delta)
+        {
+            GameSettings.SetJoystickSize(GameSettings.JoystickSize + delta);
+            RefreshSettingsValues();
+            ApplyControlLayout();
+        }
 
-            if (_audioMuteLabel != null)
-            {
-                _audioMuteLabel.text = label;
-            }
+        private void AdjustJoystickOpacity(float delta)
+        {
+            GameSettings.SetJoystickOpacity(GameSettings.JoystickOpacity + delta);
+            RefreshSettingsValues();
+            ApplyControlLayout();
+        }
+
+        private void CycleAimAssist()
+        {
+            GameSettings.CycleAimAssist();
+            RefreshSettingsValues();
+            ApplyControlLayout();
+        }
+
+        private void ToggleAutoFire()
+        {
+            GameSettings.SetAutoFire(!GameSettings.AutoFire);
+            RefreshSettingsValues();
+            ApplyControlLayout();
+        }
+
+        private void ToggleReducedMotion()
+        {
+            GameSettings.SetReducedMotion(!GameSettings.ReducedMotion);
+            RefreshSettingsValues();
+        }
+
+        private void ToggleHaptics()
+        {
+            GameSettings.SetHaptics(!GameSettings.Haptics);
+            RefreshSettingsValues();
+        }
+
+        private void ToggleColorblindSafeTelegraphs()
+        {
+            GameSettings.SetColorblindSafeTelegraphs(!GameSettings.ColorblindSafeTelegraphs);
+            RefreshSettingsValues();
+        }
+
+        private void ResetSettings()
+        {
+            _onResetSettings?.Invoke();
+            RefreshSettingsValues();
+            ApplyControlLayout();
         }
 
         /// <summary>
-        /// Applies the full audio state and refreshes every label.
+        /// Applies the full audio state and refreshes every settings label.
         /// </summary>
-        public void SetAudio(bool muted, float masterVolume)
+        public void SetAudio(bool muted, float masterVolume, float effectsVolume)
         {
+            _muted = muted;
             _masterVolume = Mathf.Clamp01(masterVolume);
-            SetSound(!muted);
+            _effectsVolume = Mathf.Clamp01(effectsVolume);
+            RefreshSettingsValues();
+        }
 
-            if (_audioMasterLabel != null)
+        /// <summary>
+        /// Refreshes every dynamic settings value for the active locale.
+        /// </summary>
+        public void RefreshSettingsValues()
+        {
+            var onLabel = Localization.Get("settings.value.on");
+            var offLabel = Localization.Get("settings.value.off");
+
+            if (_settingsMuteLabel != null)
             {
-                _audioMasterLabel.text = Mathf.RoundToInt(_masterVolume * 100f) + "%";
+                _settingsMuteLabel.text = _muted ? offLabel : onLabel;
+            }
+
+            if (_settingsMasterLabel != null)
+            {
+                _settingsMasterLabel.text = Localization.Format(
+                    "settings.value.percent",
+                    Mathf.RoundToInt(_masterVolume * 100f));
+            }
+
+            if (_settingsEffectsLabel != null)
+            {
+                _settingsEffectsLabel.text = Localization.Format(
+                    "settings.value.percent",
+                    Mathf.RoundToInt(_effectsVolume * 100f));
+            }
+
+            if (_settingsLanguageCurrentLabel != null)
+            {
+                var locale = Localization.CurrentLocale == Localization.PseudoLocale
+                    ? Localization.DefaultLocale
+                    : Localization.CurrentLocale;
+                _settingsLanguageCurrentLabel.text = Localization.GetDisplayName(locale);
+            }
+
+            if (_settingsLeftHandedLabel != null)
+            {
+                _settingsLeftHandedLabel.text = GameSettings.LeftHanded ? onLabel : offLabel;
+            }
+
+            if (_settingsJoystickSizeLabel != null)
+            {
+                _settingsJoystickSizeLabel.text = Localization.Format(
+                    "settings.value.size",
+                    GameSettings.JoystickSize.ToString("0.0", Localization.DisplayCulture));
+            }
+
+            if (_settingsJoystickOpacityLabel != null)
+            {
+                _settingsJoystickOpacityLabel.text = Localization.Format(
+                    "settings.value.percent",
+                    Mathf.RoundToInt(GameSettings.JoystickOpacity * 100f));
+            }
+
+            if (_settingsAimAssistLabel != null)
+            {
+                _settingsAimAssistLabel.text = Localization.Get(AimAssistKey(GameSettings.AimAssist));
+            }
+
+            if (_settingsAutoFireLabel != null)
+            {
+                _settingsAutoFireLabel.text = GameSettings.AutoFire ? onLabel : offLabel;
+            }
+
+            if (_settingsReducedMotionLabel != null)
+            {
+                _settingsReducedMotionLabel.text = GameSettings.ReducedMotion ? onLabel : offLabel;
+            }
+
+            if (_settingsHapticsLabel != null)
+            {
+                _settingsHapticsLabel.text = GameSettings.Haptics ? onLabel : offLabel;
+            }
+
+            if (_settingsColorblindLabel != null)
+            {
+                _settingsColorblindLabel.text = GameSettings.ColorblindSafeTelegraphs
+                    ? onLabel
+                    : offLabel;
             }
         }
 
-        public string SoundLabelForTests => _audioMuteLabel?.text ?? string.Empty;
-
-        public string AudioMasterLabelForTests => _audioMasterLabel?.text ?? string.Empty;
-
-        public Button AudioButtonMainForTests => _audioButtonMain;
-
-        public Button AudioButtonPauseForTests => _audioButtonPause;
-
-        public Button AudioMuteButtonForTests => _audioMuteButton;
-
-        public Button AudioMasterMinusButtonForTests => _audioMasterMinusButton;
-
-        public Button AudioMasterPlusButtonForTests => _audioMasterPlusButton;
-
-        public Button AudioCloseButtonForTests => _audioCloseButton;
+        private static string AimAssistKey(AimAssistLevel level)
+        {
+            return level switch
+            {
+                AimAssistLevel.Low => "settings.aim.low",
+                AimAssistLevel.High => "settings.aim.high",
+                _ => "settings.aim.off"
+            };
+        }
 
         public string MainMenuStartLabelForTests =>
             FindGameObject(_mainMenu, "Start")?.GetComponentInChildren<Text>()?.text ?? string.Empty;
@@ -952,6 +1581,14 @@ namespace JabaSurvivol.Gameplay
         /// </summary>
         public void UseDesignLayoutForTests()
         {
+            UseDesignLayoutForTests(new Vector2(1920f, 1080f));
+        }
+
+        /// <summary>
+        /// Test hook that lays the UI out against a specific design resolution.
+        /// </summary>
+        public void UseDesignLayoutForTests(Vector2 designSize)
+        {
             var canvas = _safeArea.GetComponentInParent<Canvas>();
             if (canvas == null)
             {
@@ -971,7 +1608,7 @@ namespace JabaSurvivol.Gameplay
 
             canvas.renderMode = RenderMode.WorldSpace;
             var canvasRect = canvas.GetComponent<RectTransform>();
-            canvasRect.sizeDelta = new Vector2(1920f, 1080f);
+            canvasRect.sizeDelta = designSize;
             _safeArea.anchorMin = Vector2.zero;
             _safeArea.anchorMax = Vector2.one;
             _safeArea.offsetMin = Vector2.zero;
@@ -1002,15 +1639,14 @@ namespace JabaSurvivol.Gameplay
             return topmost ?? _safeArea;
         }
 
-        public Button SoundButtonForTests => _pauseSoundButton;
-
-        public Button PauseAudioButtonForTests => _audioButtonPause;
-
         public void ShowGameOver(int round, int kills, int suppliesEarned)
         {
+            HideHelpSilently();
             _mainMenu.SetActive(false);
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
+            CloseSettingsPanelSilently();
+            HideConfirmation();
             _gameOverPanel.SetActive(true);
             HideVictory();
             HideBoss();
@@ -1022,9 +1658,12 @@ namespace JabaSurvivol.Gameplay
 
         public void ShowVictory(int round, int kills, int suppliesEarned, int xpEarned)
         {
+            HideHelpSilently();
             _mainMenu.SetActive(false);
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
+            CloseSettingsPanelSilently();
+            HideConfirmation();
             _gameOverPanel.SetActive(false);
             HideBoss();
             HideRoundEnd();
@@ -1101,9 +1740,12 @@ namespace JabaSurvivol.Gameplay
 
         public void ShowArmory(Profile profile, WeaponId displayWeapon)
         {
+            HideHelpSilently();
             _mainMenu.SetActive(false);
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
+            CloseSettingsPanelSilently();
+            HideConfirmation();
             _gameOverPanel.SetActive(false);
             HideVictory();
             HideRoundEnd();
@@ -1134,6 +1776,8 @@ namespace JabaSurvivol.Gameplay
 
         public void ShowCharacterSheet(Profile profile, bool canAllocate, bool canRespec, WeaponStats weapon, ArmorStats armor)
         {
+            HideHelpSilently();
+            CloseSettingsPanelSilently();
             _characterSheetTablet = IsTabletLayout();
             _characterSheet.SetActive(true);
             ApplyCharacterSheetLayout();
@@ -1145,6 +1789,9 @@ namespace JabaSurvivol.Gameplay
 
         public void ShowAccount()
         {
+            HideHelpSilently();
+            CloseSettingsPanelSilently();
+            HideConfirmation();
             _accountPanel.SetActive(true);
             _accountStatusText.text = string.Empty;
         }
@@ -1193,6 +1840,9 @@ namespace JabaSurvivol.Gameplay
 
         public void ShowLeaderboard()
         {
+            HideHelpSilently();
+            CloseSettingsPanelSilently();
+            HideConfirmation();
             _leaderboardPanel.SetActive(true);
         }
 
@@ -1330,6 +1980,8 @@ namespace JabaSurvivol.Gameplay
             {
                 _characterSheet.SetActive(false);
             }
+
+            HideConfirmation();
         }
 
         public void RefreshCharacterSheet(Profile profile, bool canAllocate, bool canRespec, WeaponStats weapon, ArmorStats armor)
@@ -1870,8 +2522,8 @@ namespace JabaSurvivol.Gameplay
             _sticksInitialized = true;
             _lastMoveStick = move;
             _lastAimStick = aim;
-            UpdateStick(_moveBase, _moveKnob, _moveBaseImage, move, false);
-            UpdateStick(_aimBase, _aimKnob, _aimBaseImage, aim, true);
+            UpdateStick(_moveBase, _moveKnob, _moveBaseImage, move, _moveStickOnRight);
+            UpdateStick(_aimBase, _aimKnob, _aimBaseImage, aim, _aimStickOnRight);
         }
 
         private void UpdateStick(
@@ -1881,8 +2533,8 @@ namespace JabaSurvivol.Gameplay
             StickState state,
             bool right)
         {
-            const float baseSize = 260f;
-            const float edgePadding = 150f;
+            var baseSize = StickBaseSize * _joystickScale;
+            var edgePadding = (baseSize * 0.5f) + StickEdgeMargin;
 
             if (state.Active)
             {
@@ -1900,7 +2552,7 @@ namespace JabaSurvivol.Gameplay
                 var delta = state.Current - state.Origin;
                 var direction = delta.sqrMagnitude > 0.0001f ? delta.normalized : Vector2.zero;
                 knob.anchoredPosition = direction * (baseSize * 0.32f);
-                baseImage.color = new Color(0.45f, 0.9f, 1f, 0.34f);
+                baseImage.color = new Color(0.45f, 0.9f, 1f, 0.34f * _joystickOpacity);
             }
             else
             {
@@ -1908,7 +2560,7 @@ namespace JabaSurvivol.Gameplay
                 baseRect.anchorMax = new Vector2(right ? 1f : 0f, 0f);
                 baseRect.anchoredPosition = new Vector2(right ? -edgePadding : edgePadding, edgePadding);
                 knob.anchoredPosition = Vector2.zero;
-                baseImage.color = new Color(0.7f, 0.82f, 0.9f, 0.15f);
+                baseImage.color = new Color(0.7f, 0.82f, 0.9f, 0.15f * _joystickOpacity);
             }
         }
 
@@ -1919,14 +2571,14 @@ namespace JabaSurvivol.Gameplay
             System.Action onAccount,
             System.Action onLeaderboard,
             System.Action onTelemetryToggle,
-            System.Action onLanguage,
-            System.Action onAudio,
+            System.Action onSettings,
+            System.Action onHelp,
             out Text accountStateText,
             out Button telemetryButton,
             out Text telemetryLabel,
             out Text buildLabel,
-            out Button languageButton,
-            out Button audioButton)
+            out Button settingsButton,
+            out Button helpButton)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Main Menu", new Color(0.012f, 0.018f, 0.03f, 0.98f));
             var root = panel.gameObject;
@@ -1953,11 +2605,14 @@ namespace JabaSurvivol.Gameplay
             var character = UiFactory.CreateButton(root.transform, "Skills", Localization.Get("character.open"), 32, onCharacterSheet);
             UiFactory.Place(character.GetComponent<RectTransform>(), new Vector2(0.5f, 0.22f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 76f));
 
-            var leaderboard = UiFactory.CreateButton(root.transform, "Leaderboard", Localization.Get("leaderboard.open"), 28, onLeaderboard);
-            UiFactory.Place(leaderboard.GetComponent<RectTransform>(), new Vector2(0.5f, 0.13f), new Vector2(0.5f, 0.5f), new Vector2(-190f, 0f), new Vector2(340f, 76f));
+            var leaderboard = UiFactory.CreateButton(root.transform, "Leaderboard", Localization.Get("leaderboard.open"), 26, onLeaderboard);
+            UiFactory.Place(leaderboard.GetComponent<RectTransform>(), new Vector2(0.5f, 0.13f), new Vector2(0.5f, 0.5f), new Vector2(-330f, 0f), new Vector2(300f, 76f));
 
-            var account = UiFactory.CreateButton(root.transform, "Account", Localization.Get("account.open"), 28, onAccount);
-            UiFactory.Place(account.GetComponent<RectTransform>(), new Vector2(0.5f, 0.13f), new Vector2(0.5f, 0.5f), new Vector2(190f, 0f), new Vector2(340f, 76f));
+            helpButton = UiFactory.CreateButton(root.transform, "How To Play", Localization.Get("help.open"), 24, onHelp);
+            UiFactory.Place(helpButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.13f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300f, 76f));
+
+            var account = UiFactory.CreateButton(root.transform, "Account", Localization.Get("account.open"), 26, onAccount);
+            UiFactory.Place(account.GetComponent<RectTransform>(), new Vector2(0.5f, 0.13f), new Vector2(0.5f, 0.5f), new Vector2(330f, 0f), new Vector2(300f, 76f));
 
             telemetryButton = UiFactory.CreateButton(
                 root.transform,
@@ -1969,21 +2624,13 @@ namespace JabaSurvivol.Gameplay
             telemetryLabel = telemetryButton.GetComponentInChildren<Text>();
             telemetryButton.gameObject.SetActive(false);
 
-            languageButton = UiFactory.CreateButton(
+            settingsButton = UiFactory.CreateButton(
                 root.transform,
-                "Language",
-                Localization.Get("settings.language.title"),
+                "Settings",
+                Localization.Get("settings.open"),
                 22,
-                onLanguage);
-            UiFactory.Place(languageButton.GetComponent<RectTransform>(), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(36f, -32f), new Vector2(240f, 56f));
-
-            audioButton = UiFactory.CreateButton(
-                root.transform,
-                "Audio",
-                Localization.Get("pause.sound.on"),
-                22,
-                onAudio);
-            UiFactory.Place(audioButton.GetComponent<RectTransform>(), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(288f, -32f), new Vector2(240f, 56f));
+                onSettings);
+            UiFactory.Place(settingsButton.GetComponent<RectTransform>(), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(36f, -32f), new Vector2(240f, 56f));
 
             var controls = UiFactory.CreateText(root.transform, "Controls", Localization.Get("menu.controls"), 24, TextAnchor.MiddleCenter, new Color(0.55f, 0.62f, 0.72f));
             UiFactory.Place(controls.rectTransform, new Vector2(0.5f, 0.065f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300f, 36f));
@@ -2054,6 +2701,139 @@ namespace JabaSurvivol.Gameplay
 
             return root;
         }
+
+        private GameObject BuildConfirmationPanel(
+            out Text title,
+            out Text body,
+            out Button confirmButton,
+            out Text confirmLabel,
+            out Button cancelButton,
+            out Text cancelLabel)
+        {
+            var panel = UiFactory.CreatePanel(
+                _safeArea,
+                "Confirmation Panel",
+                new Color(0.006f, 0.01f, 0.018f, 1f));
+            var root = panel.gameObject;
+            root.SetActive(false);
+
+            title = UiFactory.CreateText(
+                root.transform,
+                "Title",
+                string.Empty,
+                52,
+                TextAnchor.MiddleCenter,
+                new Color(1f, 0.78f, 0.35f));
+            title.fontStyle = FontStyle.Bold;
+            UiFactory.Place(
+                title.rectTransform,
+                new Vector2(0.5f, 0.74f),
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                new Vector2(1100f, 90f));
+
+            body = UiFactory.CreateText(
+                root.transform,
+                "Body",
+                string.Empty,
+                22,
+                TextAnchor.MiddleCenter,
+                new Color(0.84f, 0.88f, 0.95f));
+            UiFactory.Place(
+                body.rectTransform,
+                new Vector2(0.5f, 0.54f),
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                new Vector2(1200f, 180f));
+
+            cancelButton = UiFactory.CreateButton(
+                root.transform,
+                "Cancel",
+                Localization.Get("confirm.cancel"),
+                28,
+                CancelConfirmation);
+            UiFactory.Place(
+                cancelButton.GetComponent<RectTransform>(),
+                new Vector2(0.5f, 0.28f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(-220f, 0f),
+                new Vector2(380f, 84f));
+            cancelLabel = cancelButton.GetComponentInChildren<Text>();
+
+            confirmButton = UiFactory.CreateButton(
+                root.transform,
+                "Confirm",
+                string.Empty,
+                28,
+                ConfirmConfirmation);
+            UiFactory.Place(
+                confirmButton.GetComponent<RectTransform>(),
+                new Vector2(0.5f, 0.28f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(220f, 0f),
+                new Vector2(380f, 84f));
+            confirmLabel = confirmButton.GetComponentInChildren<Text>();
+
+            return root;
+        }
+
+        private GameObject BuildHelpPanel(
+            out Text title,
+            out Text body,
+            out Button closeButton)
+        {
+            var panel = UiFactory.CreatePanel(
+                _safeArea,
+                "Help Panel",
+                new Color(0.006f, 0.01f, 0.018f, 1f));
+            var root = panel.gameObject;
+            root.SetActive(false);
+
+            title = UiFactory.CreateText(
+                root.transform,
+                "Title",
+                Localization.Get("help.title"),
+                56,
+                TextAnchor.MiddleCenter,
+                new Color(0.4f, 0.95f, 1f));
+            title.fontStyle = FontStyle.Bold;
+            UiFactory.Place(
+                title.rectTransform,
+                new Vector2(0.5f, 0.9f),
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                new Vector2(1200f, 72f));
+
+            body = UiFactory.CreateText(
+                root.transform,
+                "Body",
+                Localization.Get("help.body"),
+                20,
+                TextAnchor.MiddleCenter,
+                new Color(0.84f, 0.89f, 0.96f));
+            UiFactory.Place(
+                body.rectTransform,
+                new Vector2(0.5f, 0.51f),
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                new Vector2(1260f, 470f));
+
+            closeButton = UiFactory.CreateButton(
+                root.transform,
+                "Close",
+                Localization.Get("help.close"),
+                28,
+                HideHelp);
+            UiFactory.Place(
+                closeButton.GetComponent<RectTransform>(),
+                new Vector2(0.5f, 0f),
+                new Vector2(0.5f, 0f),
+                new Vector2(0f, 36f),
+                new Vector2(360f, 76f));
+
+            return root;
+        }
+
         private GameObject BuildAccountPanel(
             System.Action<string, string> onRegister,
             System.Action<string, string> onLogin,
@@ -2181,6 +2961,7 @@ namespace JabaSurvivol.Gameplay
             System.Action onReload,
             System.Action onSwitchWeapon,
             System.Action onActiveSkill,
+            System.Action<bool> onFireHeld,
             out Text healthText,
             out Text armorText,
             out Image healthFill,
@@ -2194,7 +2975,9 @@ namespace JabaSurvivol.Gameplay
             out RectTransform aimBase,
             out RectTransform aimKnob,
             out Image moveBaseImage,
-            out Image aimBaseImage)
+            out Image aimBaseImage,
+            out Image moveKnobImage,
+            out Image aimKnobImage)
         {
             var root = new GameObject("HUD", typeof(RectTransform));
             root.transform.SetParent(_safeArea, false);
@@ -2324,8 +3107,22 @@ namespace JabaSurvivol.Gameplay
             var hint = UiFactory.CreateText(root.transform, "Controls Hint", Localization.Get("menu.controls"), 20, TextAnchor.MiddleCenter, new Color(0.48f, 0.56f, 0.66f));
             UiFactory.Place(hint.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 24f), new Vector2(1400f, 40f));
 
-            moveBaseImage = BuildStick(root.transform, "Move Stick", out moveBase, out moveKnob);
-            aimBaseImage = BuildStick(root.transform, "Aim Stick", out aimBase, out aimKnob);
+            var fire = UiFactory.CreateButton(root.transform, "Fire Button", Localization.Get("hud.fire"), 26, null);
+            fire.onClick.RemoveAllListeners();
+            var fireTrigger = fire.gameObject.AddComponent<EventTrigger>();
+            AddPointerTrigger(fireTrigger, EventTriggerType.PointerDown, () => onFireHeld?.Invoke(true));
+            AddPointerTrigger(fireTrigger, EventTriggerType.PointerUp, () => onFireHeld?.Invoke(false));
+            AddPointerTrigger(fireTrigger, EventTriggerType.PointerExit, () => onFireHeld?.Invoke(false));
+            UiFactory.Place(
+                fire.GetComponent<RectTransform>(),
+                new Vector2(1f, 0f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(-380f, 150f),
+                new Vector2(FireButtonSize, FireButtonSize));
+            fire.gameObject.SetActive(false);
+
+            moveBaseImage = BuildStick(root.transform, "Move Stick", out moveBase, out moveKnob, out moveKnobImage);
+            aimBaseImage = BuildStick(root.transform, "Aim Stick", out aimBase, out aimKnob, out aimKnobImage);
             moveBaseImage.color = new Color(0.7f, 0.82f, 0.9f, 0.15f);
             aimBaseImage.color = new Color(0.7f, 0.82f, 0.9f, 0.15f);
             moveBase.anchorMin = moveBase.anchorMax = new Vector2(0f, 0f);
@@ -2336,21 +3133,36 @@ namespace JabaSurvivol.Gameplay
             return root;
         }
 
-        private static Image BuildStick(Transform parent, string name, out RectTransform baseRect, out RectTransform knobRect)
+        private static void AddPointerTrigger(
+            EventTrigger trigger,
+            EventTriggerType type,
+            System.Action callback)
+        {
+            var entry = new EventTrigger.Entry { eventID = type };
+            entry.callback.AddListener(_ => callback());
+            trigger.triggers.Add(entry);
+        }
+
+        private static Image BuildStick(
+            Transform parent,
+            string name,
+            out RectTransform baseRect,
+            out RectTransform knobRect,
+            out Image knobImage)
         {
             var baseImage = UiFactory.CreateImage(parent, name, SpriteFactory.Ring, new Color(0.7f, 0.82f, 0.9f, 0.15f));
             baseRect = baseImage.rectTransform;
             baseRect.anchorMin = new Vector2(0.5f, 0.5f);
             baseRect.anchorMax = new Vector2(0.5f, 0.5f);
             baseRect.pivot = new Vector2(0.5f, 0.5f);
-            baseRect.sizeDelta = new Vector2(260f, 260f);
+            baseRect.sizeDelta = new Vector2(StickBaseSize, StickBaseSize);
 
-            var knobImage = UiFactory.CreateImage(baseImage.transform, "Knob", SpriteFactory.Circle, new Color(0.72f, 0.95f, 1f, 0.42f));
+            knobImage = UiFactory.CreateImage(baseImage.transform, "Knob", SpriteFactory.Circle, new Color(0.72f, 0.95f, 1f, 0.42f));
             knobRect = knobImage.rectTransform;
             knobRect.anchorMin = new Vector2(0.5f, 0.5f);
             knobRect.anchorMax = new Vector2(0.5f, 0.5f);
             knobRect.pivot = new Vector2(0.5f, 0.5f);
-            knobRect.sizeDelta = new Vector2(96f, 96f);
+            knobRect.sizeDelta = new Vector2(StickKnobSize, StickKnobSize);
             knobRect.anchoredPosition = Vector2.zero;
 
             return baseImage;
@@ -2361,12 +3173,9 @@ namespace JabaSurvivol.Gameplay
             System.Action onMenu,
             System.Action onArmory,
             System.Action onCharacterSheet,
-            System.Action onAudio,
-            System.Action onLanguage,
-            out Text soundLabel,
-            out Button soundButton,
-            out Button languageButton,
-            out Button audioButton)
+            System.Action onSettings,
+            out Button settingsButton,
+            out Button menuButton)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Pause Panel", new Color(0.01f, 0.02f, 0.03f, 0.9f));
             var root = panel.gameObject;
@@ -2386,145 +3195,350 @@ namespace JabaSurvivol.Gameplay
 
             var menu = UiFactory.CreateButton(root.transform, "Menu", Localization.Get("pause.menu"), 28, onMenu);
             UiFactory.Place(menu.GetComponent<RectTransform>(), new Vector2(0.5f, 0.22f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
+            menuButton = menu;
 
-            var sound = UiFactory.CreateButton(
+            settingsButton = UiFactory.CreateButton(
                 root.transform,
-                "Audio Toggle",
-                Localization.Get("pause.sound.on"),
-                18,
-                onAudio);
-            UiFactory.Place(sound.GetComponent<RectTransform>(), new Vector2(0.5f, 0.11f), new Vector2(0.5f, 0.5f), new Vector2(105f, 0f), new Vector2(180f, 64f));
-            soundLabel = sound.GetComponentInChildren<Text>();
-            soundButton = sound.GetComponent<Button>();
-            audioButton = soundButton;
-
-            languageButton = UiFactory.CreateButton(
-                root.transform,
-                "Language",
-                Localization.Get("settings.language.title"),
-                18,
-                onLanguage);
-            UiFactory.Place(languageButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.11f), new Vector2(0.5f, 0.5f), new Vector2(-105f, 0f), new Vector2(180f, 64f));
+                "Settings",
+                Localization.Get("settings.open"),
+                28,
+                onSettings);
+            UiFactory.Place(settingsButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.11f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
 
             return root;
         }
 
-        private GameObject BuildLanguagePanel(
-            System.Action<string> onSelect,
-            out Button systemButton,
-            out Button englishButton,
-            out Button spanishButton,
-            out Button closeButton)
+        private GameObject BuildSettingsPanel(
+            System.Action onToggleMute,
+            System.Action<float> onMasterChanged,
+            System.Action<float> onEffectsChanged,
+            out Button muteButton,
+            out Text muteLabel,
+            out Button masterMinus,
+            out Button masterPlus,
+            out Text masterLabel,
+            out Button effectsMinus,
+            out Button effectsPlus,
+            out Text effectsLabel,
+            out Button languageSystemButton,
+            out Button languageEnglishButton,
+            out Button languageSpanishButton,
+            out Text languageCurrentLabel,
+            out Button leftHandedButton,
+            out Text leftHandedLabel,
+            out Button joystickSizeMinus,
+            out Button joystickSizePlus,
+            out Text joystickSizeLabel,
+            out Button joystickOpacityMinus,
+            out Button joystickOpacityPlus,
+            out Text joystickOpacityLabel,
+            out Button aimAssistButton,
+            out Text aimAssistLabel,
+            out Button autoFireButton,
+            out Text autoFireLabel,
+            out Button reducedMotionButton,
+            out Text reducedMotionLabel,
+            out Button hapticsButton,
+            out Text hapticsLabel,
+            out Button colorblindButton,
+            out Text colorblindLabel,
+            out Button resetButton,
+            out Button closeButton,
+            out Button helpButton)
         {
-            var panel = UiFactory.CreatePanel(_safeArea, "Language Panel", new Color(0.008f, 0.012f, 0.022f, 1f));
+            var panel = UiFactory.CreatePanel(
+                _safeArea,
+                "Settings Panel",
+                new Color(0.006f, 0.01f, 0.018f, 1f));
             var root = panel.gameObject;
             root.SetActive(false);
 
             var title = UiFactory.CreateText(
                 root.transform,
                 "Title",
-                Localization.Get("settings.language.title"),
-                60,
+                Localization.Get("settings.title"),
+                46,
                 TextAnchor.MiddleCenter,
                 new Color(0.4f, 0.95f, 1f));
             title.fontStyle = FontStyle.Bold;
-            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 0.78f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900f, 80f));
+            UiFactory.Place(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -24f), new Vector2(900f, 64f));
 
-            systemButton = UiFactory.CreateButton(
-                root.transform,
+            var audioCard = CreateSettingsCard(root.transform, "Audio Section", new Vector2(-395f, 195f));
+            CreateSettingsCardTitle(audioCard, "Audio Section Title", "settings.audio.title");
+            CreateSettingsRowLabel(audioCard, "Sound Label", "settings.audio.mute", -78f);
+            muteButton = UiFactory.CreateButton(
+                audioCard,
+                "Sound Toggle",
+                Localization.Get("settings.value.on"),
+                22,
+                onToggleMute);
+            UiFactory.Place(muteButton.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24f, -78f), new Vector2(210f, 52f));
+            muteLabel = muteButton.GetComponentInChildren<Text>();
+
+            CreateSettingsRowLabel(audioCard, "Master Volume Label", "settings.audio.master", -134f);
+            masterMinus = CreateSettingsStepperButton(
+                audioCard,
+                "Master Volume Down",
+                "-",
+                -236f,
+                -134f,
+                () => onMasterChanged(Mathf.Clamp01(_masterVolume - AudioVolumeStep)));
+            masterLabel = CreateSettingsValueLabel(audioCard, "Master Volume Value", -134f);
+            masterPlus = CreateSettingsStepperButton(
+                audioCard,
+                "Master Volume Up",
+                "+",
+                -24f,
+                -134f,
+                () => onMasterChanged(Mathf.Clamp01(_masterVolume + AudioVolumeStep)));
+
+            CreateSettingsRowLabel(audioCard, "Effects Volume Label", "settings.audio.effects", -190f);
+            effectsMinus = CreateSettingsStepperButton(
+                audioCard,
+                "Effects Volume Down",
+                "-",
+                -236f,
+                -190f,
+                () => onEffectsChanged(Mathf.Clamp01(_effectsVolume - AudioVolumeStep)));
+            effectsLabel = CreateSettingsValueLabel(audioCard, "Effects Volume Value", -190f);
+            effectsPlus = CreateSettingsStepperButton(
+                audioCard,
+                "Effects Volume Up",
+                "+",
+                -24f,
+                -190f,
+                () => onEffectsChanged(Mathf.Clamp01(_effectsVolume + AudioVolumeStep)));
+
+            var languageCard = CreateSettingsCard(root.transform, "Language Section", new Vector2(395f, 195f));
+            CreateSettingsCardTitle(languageCard, "Language Section Title", "settings.language.title");
+            CreateSettingsRowLabel(languageCard, "Language Current Label", "settings.language.current", -78f);
+            languageCurrentLabel = UiFactory.CreateText(
+                languageCard,
+                "Language Current Value",
+                string.Empty,
+                24,
+                TextAnchor.MiddleRight,
+                new Color(0.55f, 0.95f, 0.75f));
+            UiFactory.Place(languageCurrentLabel.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24f, -78f), new Vector2(260f, 54f));
+
+            languageSystemButton = UiFactory.CreateButton(
+                languageCard,
                 "System Language",
                 Localization.Get("settings.language.system"),
-                28,
-                () => onSelect(Localization.SystemLocaleValue));
-            UiFactory.Place(systemButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.56f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(520f, 78f));
+                20,
+                () => SelectLocale(Localization.SystemLocaleValue));
+            UiFactory.Place(languageSystemButton.GetComponent<RectTransform>(), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(20f, -180f), new Vector2(230f, 62f));
 
-            englishButton = UiFactory.CreateButton(
-                root.transform,
+            languageEnglishButton = UiFactory.CreateButton(
+                languageCard,
                 "English",
                 Localization.GetDisplayName("en"),
-                28,
-                () => onSelect("en"));
-            UiFactory.Place(englishButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.43f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(520f, 78f));
+                22,
+                () => SelectLocale("en"));
+            UiFactory.Place(languageEnglishButton.GetComponent<RectTransform>(), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(265f, -180f), new Vector2(230f, 62f));
 
-            spanishButton = UiFactory.CreateButton(
-                root.transform,
+            languageSpanishButton = UiFactory.CreateButton(
+                languageCard,
                 "Spanish",
                 Localization.GetDisplayName("es"),
-                28,
-                () => onSelect("es"));
-            UiFactory.Place(spanishButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.30f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(520f, 78f));
+                22,
+                () => SelectLocale("es"));
+            UiFactory.Place(languageSpanishButton.GetComponent<RectTransform>(), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(510f, -180f), new Vector2(230f, 62f));
+
+            var controlsCard = CreateSettingsCard(root.transform, "Controls Section", new Vector2(-395f, -195f));
+            CreateSettingsCardTitle(controlsCard, "Controls Section Title", "settings.controls.title");
+
+            CreateSettingsRowLabel(controlsCard, "Left Handed Label", "settings.controls.leftHanded", -78f);
+            leftHandedButton = UiFactory.CreateButton(
+                controlsCard,
+                "Left Handed Toggle",
+                Localization.Get("settings.value.off"),
+                22,
+                ToggleLeftHanded);
+            UiFactory.Place(leftHandedButton.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24f, -78f), new Vector2(210f, 52f));
+            leftHandedLabel = leftHandedButton.GetComponentInChildren<Text>();
+
+            CreateSettingsRowLabel(controlsCard, "Joystick Size Label", "settings.controls.joystickSize", -134f);
+            joystickSizeMinus = CreateSettingsStepperButton(
+                controlsCard,
+                "Joystick Size Down",
+                "-",
+                -236f,
+                -134f,
+                () => AdjustJoystickSize(-GameSettings.JoystickSizeStep));
+            joystickSizeLabel = CreateSettingsValueLabel(controlsCard, "Joystick Size Value", -134f);
+            joystickSizePlus = CreateSettingsStepperButton(
+                controlsCard,
+                "Joystick Size Up",
+                "+",
+                -24f,
+                -134f,
+                () => AdjustJoystickSize(GameSettings.JoystickSizeStep));
+
+            CreateSettingsRowLabel(controlsCard, "Joystick Opacity Label", "settings.controls.joystickOpacity", -190f);
+            joystickOpacityMinus = CreateSettingsStepperButton(
+                controlsCard,
+                "Joystick Opacity Down",
+                "-",
+                -236f,
+                -190f,
+                () => AdjustJoystickOpacity(-GameSettings.JoystickOpacityStep));
+            joystickOpacityLabel = CreateSettingsValueLabel(controlsCard, "Joystick Opacity Value", -190f);
+            joystickOpacityPlus = CreateSettingsStepperButton(
+                controlsCard,
+                "Joystick Opacity Up",
+                "+",
+                -24f,
+                -190f,
+                () => AdjustJoystickOpacity(GameSettings.JoystickOpacityStep));
+
+            CreateSettingsRowLabel(controlsCard, "Aim Assist Label", "settings.controls.aimAssist", -246f);
+            aimAssistButton = UiFactory.CreateButton(
+                controlsCard,
+                "Aim Assist Toggle",
+                Localization.Get("settings.aim.off"),
+                22,
+                CycleAimAssist);
+            UiFactory.Place(aimAssistButton.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24f, -246f), new Vector2(210f, 52f));
+            aimAssistLabel = aimAssistButton.GetComponentInChildren<Text>();
+
+            CreateSettingsRowLabel(controlsCard, "Auto Fire Label", "settings.controls.autoFire", -302f);
+            autoFireButton = UiFactory.CreateButton(
+                controlsCard,
+                "Auto Fire Toggle",
+                Localization.Get("settings.value.on"),
+                22,
+                ToggleAutoFire);
+            UiFactory.Place(autoFireButton.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24f, -302f), new Vector2(210f, 52f));
+            autoFireLabel = autoFireButton.GetComponentInChildren<Text>();
+
+            var accessibilityCard = CreateSettingsCard(root.transform, "Accessibility Section", new Vector2(395f, -195f));
+            CreateSettingsCardTitle(accessibilityCard, "Accessibility Section Title", "settings.accessibility.title");
+
+            CreateSettingsRowLabel(accessibilityCard, "Reduced Motion Label", "settings.accessibility.reducedMotion", -90f);
+            reducedMotionButton = UiFactory.CreateButton(
+                accessibilityCard,
+                "Reduced Motion Toggle",
+                Localization.Get("settings.value.off"),
+                22,
+                ToggleReducedMotion);
+            UiFactory.Place(reducedMotionButton.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24f, -90f), new Vector2(210f, 52f));
+            reducedMotionLabel = reducedMotionButton.GetComponentInChildren<Text>();
+
+            CreateSettingsRowLabel(accessibilityCard, "Haptics Label", "settings.accessibility.haptics", -170f);
+            hapticsButton = UiFactory.CreateButton(
+                accessibilityCard,
+                "Haptics Toggle",
+                Localization.Get("settings.value.off"),
+                22,
+                ToggleHaptics);
+            UiFactory.Place(hapticsButton.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24f, -170f), new Vector2(210f, 52f));
+            hapticsLabel = hapticsButton.GetComponentInChildren<Text>();
+
+            CreateSettingsRowLabel(accessibilityCard, "Colorblind Label", "settings.accessibility.colorblind", -250f);
+            colorblindButton = UiFactory.CreateButton(
+                accessibilityCard,
+                "Colorblind Toggle",
+                Localization.Get("settings.value.off"),
+                22,
+                ToggleColorblindSafeTelegraphs);
+            UiFactory.Place(colorblindButton.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24f, -250f), new Vector2(210f, 52f));
+            colorblindLabel = colorblindButton.GetComponentInChildren<Text>();
+
+            resetButton = UiFactory.CreateButton(
+                root.transform,
+                "Reset",
+                Localization.Get("settings.reset"),
+                24,
+                ResetSettings);
+            UiFactory.Place(resetButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-380f, 26f), new Vector2(360f, 64f));
+
+            helpButton = UiFactory.CreateButton(
+                root.transform,
+                "How To Play",
+                Localization.Get("help.open"),
+                24,
+                ShowHelp);
+            UiFactory.Place(helpButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 26f), new Vector2(320f, 64f));
 
             closeButton = UiFactory.CreateButton(
                 root.transform,
                 "Close",
-                Localization.Get("settings.language.close"),
+                Localization.Get("settings.close"),
                 24,
-                HideLanguagePanel);
-            UiFactory.Place(closeButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.16f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(240f, 68f));
+                HideSettingsPanel);
+            UiFactory.Place(closeButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(380f, 26f), new Vector2(360f, 64f));
 
             return root;
         }
 
-        private GameObject BuildAudioPanel(
-            System.Action onToggleMute,
-            System.Action<float> onMasterChanged,
-            out Text muteLabel,
-            out Text masterLabel,
-            out Button muteButton,
-            out Button masterMinus,
-            out Button masterPlus,
-            out Button closeButton)
+        private static RectTransform CreateSettingsCard(Transform parent, string name, Vector2 position)
         {
-            var panel = UiFactory.CreatePanel(
-                _safeArea,
-                "Audio Panel",
-                new Color(0.008f, 0.012f, 0.022f, 1f));
-            var root = panel.gameObject;
-            root.SetActive(false);
+            var card = UiFactory.CreatePanel(parent, name, new Color(0.022f, 0.04f, 0.062f, 0.98f));
+            UiFactory.Place(
+                card,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                position,
+                new Vector2(760f, 360f));
+            return card;
+        }
 
-            muteButton = UiFactory.CreateButton(
-                root.transform,
-                "Mute",
-                Localization.Get("pause.sound.on"),
-                30,
-                onToggleMute);
-            UiFactory.Place(muteButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.64f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(560f, 88f));
-            muteLabel = muteButton.GetComponentInChildren<Text>();
+        private static Text CreateSettingsCardTitle(RectTransform card, string name, string key)
+        {
+            var title = UiFactory.CreateText(
+                card,
+                name,
+                Localization.Get(key),
+                24,
+                TextAnchor.MiddleLeft,
+                new Color(0.52f, 0.9f, 1f));
+            title.fontStyle = FontStyle.Bold;
+            UiFactory.Place(title.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24f, -16f), new Vector2(500f, 40f));
+            return title;
+        }
 
-            masterLabel = UiFactory.CreateText(
-                root.transform,
-                "Master Volume",
-                "100%",
-                28,
-                TextAnchor.MiddleCenter,
+        private static Text CreateSettingsRowLabel(
+            RectTransform card,
+            string name,
+            string key,
+            float y)
+        {
+            var label = UiFactory.CreateText(
+                card,
+                name,
+                Localization.Get(key),
+                20,
+                TextAnchor.MiddleLeft,
+                new Color(0.78f, 0.84f, 0.92f));
+            UiFactory.Place(label.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24f, y), new Vector2(440f, 54f));
+            return label;
+        }
+
+        private static Text CreateSettingsValueLabel(RectTransform card, string name, float y)
+        {
+            var label = UiFactory.CreateText(
+                card,
+                name,
+                string.Empty,
+                22,
+                TextAnchor.MiddleRight,
                 new Color(0.55f, 0.95f, 0.75f));
-            UiFactory.Place(masterLabel.rectTransform, new Vector2(0.5f, 0.46f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(320f, 60f));
+            UiFactory.Place(label.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-96f, y), new Vector2(110f, 54f));
+            return label;
+        }
 
-            masterMinus = UiFactory.CreateButton(
-                root.transform,
-                "Master Volume Down",
-                "-",
-                30,
-                () => onMasterChanged(Mathf.Clamp01(_masterVolume - AudioVolumeStep)));
-            UiFactory.Place(masterMinus.GetComponent<RectTransform>(), new Vector2(0.5f, 0.46f), new Vector2(0.5f, 0.5f), new Vector2(-220f, 0f), new Vector2(84f, 68f));
-
-            masterPlus = UiFactory.CreateButton(
-                root.transform,
-                "Master Volume Up",
-                "+",
-                30,
-                () => onMasterChanged(Mathf.Clamp01(_masterVolume + AudioVolumeStep)));
-            UiFactory.Place(masterPlus.GetComponent<RectTransform>(), new Vector2(0.5f, 0.46f), new Vector2(0.5f, 0.5f), new Vector2(220f, 0f), new Vector2(84f, 68f));
-
-            closeButton = UiFactory.CreateButton(
-                root.transform,
-                "Close",
-                Localization.Get("settings.language.close"),
-                26,
-                HideAudioPanel);
-            UiFactory.Place(closeButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.16f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(260f, 68f));
-
-            return root;
+        private static Button CreateSettingsStepperButton(
+            RectTransform card,
+            string name,
+            string label,
+            float x,
+            float y,
+            System.Action onClick)
+        {
+            var button = UiFactory.CreateButton(card, name, label, 28, onClick);
+            UiFactory.Place(button.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(x, y), new Vector2(56f, 52f));
+            return button;
         }
 
         private GameObject BuildGameOverPanel(System.Action onRestart, System.Action onMenu, out Text summary)
@@ -3344,28 +4358,34 @@ namespace JabaSurvivol.Gameplay
         {
             BindLocalized(FindText(_mainMenu, "Title"), "app.title");
             BindLocalized(FindText(_mainMenu, "Subtitle"), "menu.subtitle");
-            BindLocalized(FindText(_mainMenu, "Controls"), "menu.controls");
+            BindLocalized(
+                FindText(_mainMenu, "Controls"),
+                () => Localization.Get(
+                    GameSettings.LeftHanded ? "menu.controls.leftHanded" : "menu.controls"));
             BindLocalized(_buildLabel, () => Localization.Format("menu.build", BuildInfo.Version, BuildInfo.Commit));
             BindLocalizedButton(_mainMenu, "Start", "menu.start");
             BindLocalizedButton(_mainMenu, "Armory", "menu.armory");
             BindLocalizedButton(_mainMenu, "Skills", "character.open");
             BindLocalizedButton(_mainMenu, "Leaderboard", "leaderboard.open");
             BindLocalizedButton(_mainMenu, "Account", "account.open");
-            BindLocalizedButton(_mainMenu, "Language", "settings.language.title");
-            BindLocalizedButton(_mainMenu, "Audio", "pause.sound.on");
+            BindLocalizedButton(_mainMenu, "Settings", "settings.open");
+            BindLocalizedButton(_mainMenu, "How To Play", "help.open");
 
             BindLocalized(FindText(_pausePanel, "Title"), "pause.title");
             BindLocalizedButton(_pausePanel, "Resume", "pause.resume");
             BindLocalizedButton(_pausePanel, "Armory", "pause.armory");
             BindLocalizedButton(_pausePanel, "Skills", "character.open");
             BindLocalizedButton(_pausePanel, "Menu", "pause.menu");
-            BindLocalizedButton(_pausePanel, "Language", "settings.language.title");
-            BindLocalizedButton(_pausePanel, "Audio Toggle", "pause.sound.on");
+            BindLocalizedButton(_pausePanel, "Settings", "settings.open");
 
             BindLocalized(FindText(_hud, "Boss Name"), "boss.name");
             BindLocalizedButton(_hud, "Reload Button", "hud.reload");
             BindLocalizedButton(_hud, "Switch Weapon", "hud.switch");
-            BindLocalized(FindText(_hud, "Controls Hint"), "menu.controls");
+            BindLocalizedButton(_hud, "Fire Button", "hud.fire");
+            BindLocalized(
+                FindText(_hud, "Controls Hint"),
+                () => Localization.Get(
+                    GameSettings.LeftHanded ? "menu.controls.leftHanded" : "menu.controls"));
 
             BindLocalized(FindText(_gameOverPanel, "Title"), "gameover.title");
             BindLocalizedButton(_gameOverPanel, "Restart", "gameover.restart");
@@ -3416,14 +4436,36 @@ namespace JabaSurvivol.Gameplay
             BindLocalizedButton(_cloudConflictPanel, "Use Cloud", "cloud.useCloud");
             BindLocalizedButton(_cloudConflictPanel, "Keep Local", "cloud.keepLocal");
 
+            BindLocalizedButton(_confirmationPanel, "Cancel", "confirm.cancel");
+
             BindLocalized(FindText(_leaderboardPanel, "Title"), "leaderboard.title");
             BindLocalizedButton(_leaderboardPanel, "Close", "account.close");
 
-            BindLocalized(FindText(_languagePanel, "Title"), "settings.language.title");
-            BindLocalizedButton(_languagePanel, "System Language", "settings.language.system");
-            BindLocalizedButton(_languagePanel, "Close", "settings.language.close");
-            BindLocalizedButton(_audioPanel, "Mute", "pause.sound.on");
-            BindLocalizedButton(_audioPanel, "Close", "settings.language.close");
+            BindLocalized(FindText(_settingsPanel, "Title"), "settings.title");
+            BindLocalized(FindText(_settingsPanel, "Audio Section Title"), "settings.audio.title");
+            BindLocalized(FindText(_settingsPanel, "Language Section Title"), "settings.language.title");
+            BindLocalized(FindText(_settingsPanel, "Controls Section Title"), "settings.controls.title");
+            BindLocalized(FindText(_settingsPanel, "Accessibility Section Title"), "settings.accessibility.title");
+            BindLocalized(FindText(_settingsPanel, "Sound Label"), "settings.audio.mute");
+            BindLocalized(FindText(_settingsPanel, "Master Volume Label"), "settings.audio.master");
+            BindLocalized(FindText(_settingsPanel, "Effects Volume Label"), "settings.audio.effects");
+            BindLocalized(FindText(_settingsPanel, "Language Current Label"), "settings.language.current");
+            BindLocalized(FindText(_settingsPanel, "Left Handed Label"), "settings.controls.leftHanded");
+            BindLocalized(FindText(_settingsPanel, "Joystick Size Label"), "settings.controls.joystickSize");
+            BindLocalized(FindText(_settingsPanel, "Joystick Opacity Label"), "settings.controls.joystickOpacity");
+            BindLocalized(FindText(_settingsPanel, "Aim Assist Label"), "settings.controls.aimAssist");
+            BindLocalized(FindText(_settingsPanel, "Auto Fire Label"), "settings.controls.autoFire");
+            BindLocalized(FindText(_settingsPanel, "Reduced Motion Label"), "settings.accessibility.reducedMotion");
+            BindLocalized(FindText(_settingsPanel, "Haptics Label"), "settings.accessibility.haptics");
+            BindLocalized(FindText(_settingsPanel, "Colorblind Label"), "settings.accessibility.colorblind");
+            BindLocalizedButton(_settingsPanel, "System Language", "settings.language.system");
+            BindLocalizedButton(_settingsPanel, "Reset", "settings.reset");
+            BindLocalizedButton(_settingsPanel, "How To Play", "help.open");
+            BindLocalizedButton(_settingsPanel, "Close", "settings.close");
+
+            BindLocalized(FindText(_helpPanel, "Title"), "help.title");
+            BindLocalized(FindText(_helpPanel, "Body"), "help.body");
+            BindLocalizedButton(_helpPanel, "Close", "help.close");
         }
 
         private static void BindLocalized(Text text, string key)

@@ -43,6 +43,8 @@ namespace JabaSurvivol.Gameplay
         private CharacterVisual _bossVisual;
         private GameObject _bossTelegraphRing;
         private SpriteRenderer _bossTelegraphRenderer;
+        private GameObject _bossTelegraphOutline;
+        private SpriteRenderer _bossTelegraphOutlineRenderer;
         private float _bossTelegraphRemaining;
         private float _bossAttackCooldown;
         private bool _bossEnraged;
@@ -59,6 +61,7 @@ namespace JabaSurvivol.Gameplay
         private float _respawnCooldown;
         private bool _zombieActive;
         private bool _roundClearPending;
+        private bool _fireButtonHeld;
         private RoundRewardOption[] _roundRewardOptions;
         private int _runSuppliesEarned;
         private int _runXpEarned;
@@ -191,23 +194,142 @@ namespace JabaSurvivol.Gameplay
             _ui?.ShowRoundEnd(1, 0, 0, 0, options);
         }
 
-        public string SoundLabelForTests => _ui?.SoundLabelForTests ?? string.Empty;
+        public bool SettingsPanelVisibleForTests => _ui?.SettingsPanelVisible ?? false;
 
+        public UnityEngine.UI.Button SettingsButtonMainForTests => _ui?.SettingsButtonMainForTests;
 
+        public UnityEngine.UI.Button SettingsButtonPauseForTests => _ui?.SettingsButtonPauseForTests;
 
-        public bool LanguagePanelVisibleForTests => _ui?.LanguagePanelVisible ?? false;
+        public UnityEngine.UI.Button SettingsCloseButtonForTests => _ui?.SettingsCloseButtonForTests;
 
-        public UnityEngine.UI.Button LanguageButtonForTests => _ui?.LanguageButtonForTests;
+        public UnityEngine.UI.Button SettingsResetButtonForTests => _ui?.SettingsResetButtonForTests;
 
-        public UnityEngine.UI.Button PauseLanguageButtonForTests => _ui?.PauseLanguageButtonForTests;
+        public UnityEngine.UI.Button SettingsMuteButtonForTests => _ui?.SettingsMuteButtonForTests;
 
-        public UnityEngine.UI.Button LanguageSystemButtonForTests => _ui?.LanguageSystemButtonForTests;
+        public UnityEngine.UI.Button SettingsMasterMinusButtonForTests =>
+            _ui?.SettingsMasterMinusButtonForTests;
 
-        public UnityEngine.UI.Button LanguageEnglishButtonForTests => _ui?.LanguageEnglishButtonForTests;
+        public UnityEngine.UI.Button SettingsMasterPlusButtonForTests =>
+            _ui?.SettingsMasterPlusButtonForTests;
 
-        public UnityEngine.UI.Button LanguageSpanishButtonForTests => _ui?.LanguageSpanishButtonForTests;
+        public UnityEngine.UI.Button SettingsEffectsMinusButtonForTests =>
+            _ui?.SettingsEffectsMinusButtonForTests;
 
-        public UnityEngine.UI.Button LanguageCloseButtonForTests => _ui?.LanguageCloseButtonForTests;
+        public UnityEngine.UI.Button SettingsEffectsPlusButtonForTests =>
+            _ui?.SettingsEffectsPlusButtonForTests;
+
+        public UnityEngine.UI.Button SettingsLanguageSystemButtonForTests =>
+            _ui?.SettingsLanguageSystemButtonForTests;
+
+        public UnityEngine.UI.Button SettingsLanguageEnglishButtonForTests =>
+            _ui?.SettingsLanguageEnglishButtonForTests;
+
+        public UnityEngine.UI.Button SettingsLanguageSpanishButtonForTests =>
+            _ui?.SettingsLanguageSpanishButtonForTests;
+
+        public UnityEngine.UI.Button SettingsLeftHandedButtonForTests =>
+            _ui?.SettingsLeftHandedButtonForTests;
+
+        public UnityEngine.UI.Button SettingsJoystickSizeMinusButtonForTests =>
+            _ui?.SettingsJoystickSizeMinusButtonForTests;
+
+        public UnityEngine.UI.Button SettingsJoystickSizePlusButtonForTests =>
+            _ui?.SettingsJoystickSizePlusButtonForTests;
+
+        public UnityEngine.UI.Button SettingsJoystickOpacityMinusButtonForTests =>
+            _ui?.SettingsJoystickOpacityMinusButtonForTests;
+
+        public UnityEngine.UI.Button SettingsJoystickOpacityPlusButtonForTests =>
+            _ui?.SettingsJoystickOpacityPlusButtonForTests;
+
+        public UnityEngine.UI.Button SettingsAimAssistButtonForTests =>
+            _ui?.SettingsAimAssistButtonForTests;
+
+        public UnityEngine.UI.Button SettingsAutoFireButtonForTests =>
+            _ui?.SettingsAutoFireButtonForTests;
+
+        public UnityEngine.UI.Button SettingsReducedMotionButtonForTests =>
+            _ui?.SettingsReducedMotionButtonForTests;
+
+        public UnityEngine.UI.Button SettingsHapticsButtonForTests =>
+            _ui?.SettingsHapticsButtonForTests;
+
+        public UnityEngine.UI.Button SettingsColorblindButtonForTests =>
+            _ui?.SettingsColorblindButtonForTests;
+
+        public string SettingsMuteLabelForTests => _ui?.SettingsMuteLabelForTests ?? string.Empty;
+
+        public string SettingsMasterLabelForTests => _ui?.SettingsMasterLabelForTests ?? string.Empty;
+
+        public string SettingsEffectsLabelForTests => _ui?.SettingsEffectsLabelForTests ?? string.Empty;
+
+        public string SettingsLanguageCurrentLabelForTests =>
+            _ui?.SettingsLanguageCurrentLabelForTests ?? string.Empty;
+
+        public string SettingsLeftHandedLabelForTests =>
+            _ui?.SettingsLeftHandedLabelForTests ?? string.Empty;
+
+        public string SettingsJoystickSizeLabelForTests =>
+            _ui?.SettingsJoystickSizeLabelForTests ?? string.Empty;
+
+        public string SettingsJoystickOpacityLabelForTests =>
+            _ui?.SettingsJoystickOpacityLabelForTests ?? string.Empty;
+
+        public string SettingsAimAssistLabelForTests =>
+            _ui?.SettingsAimAssistLabelForTests ?? string.Empty;
+
+        public string SettingsAutoFireLabelForTests => _ui?.SettingsAutoFireLabelForTests ?? string.Empty;
+
+        public string SettingsReducedMotionLabelForTests =>
+            _ui?.SettingsReducedMotionLabelForTests ?? string.Empty;
+
+        public string SettingsHapticsLabelForTests => _ui?.SettingsHapticsLabelForTests ?? string.Empty;
+
+        public string SettingsColorblindLabelForTests =>
+            _ui?.SettingsColorblindLabelForTests ?? string.Empty;
+
+        public bool HelpVisibleForTests => _ui?.HelpVisible ?? false;
+
+        public UnityEngine.UI.Button HelpButtonMainForTests => _ui?.HelpButtonMainForTests;
+
+        public UnityEngine.UI.Button HelpButtonSettingsForTests => _ui?.HelpButtonSettingsForTests;
+
+        public UnityEngine.UI.Button HelpCloseButtonForTests => _ui?.HelpCloseButtonForTests;
+
+        public string HelpTitleForTests => _ui?.HelpTitleForTests ?? string.Empty;
+
+        public string HelpBodyForTests => _ui?.HelpBodyForTests ?? string.Empty;
+
+        public void ShowHelpForTests() => _ui?.ShowHelp();
+
+        public void DismissHelpForTests() => _ui?.HideHelp();
+
+        public bool ConfirmationVisibleForTests => _ui?.ConfirmationVisibleForTests ?? false;
+
+        public string ConfirmationTitleForTests =>
+            _ui?.ConfirmationTitleForTests ?? string.Empty;
+
+        public string ConfirmationBodyForTests => _ui?.ConfirmationBodyForTests ?? string.Empty;
+
+        public string ConfirmationConfirmLabelForTests =>
+            _ui?.ConfirmationConfirmLabelForTests ?? string.Empty;
+
+        public string ConfirmationCancelLabelForTests =>
+            _ui?.ConfirmationCancelLabelForTests ?? string.Empty;
+
+        public UnityEngine.UI.Button ConfirmationConfirmButtonForTests =>
+            _ui?.ConfirmationConfirmButtonForTests;
+
+        public UnityEngine.UI.Button ConfirmationCancelButtonForTests =>
+            _ui?.ConfirmationCancelButtonForTests;
+
+        public UnityEngine.UI.Button CharacterRespecButtonForTests =>
+            _ui?.CharacterRespecButtonForTests;
+
+        public UnityEngine.UI.Button PauseMenuButtonForTests =>
+            _ui?.PauseMenuButtonForTests;
+
+        public bool PausePanelVisibleForTests => _ui?.PausePanelVisibleForTests ?? false;
 
         public string MainMenuStartLabelForTests => _ui?.MainMenuStartLabelForTests ?? string.Empty;
 
@@ -234,23 +356,8 @@ namespace JabaSurvivol.Gameplay
 
         public void UseDesignLayoutForTests() => _ui?.UseDesignLayoutForTests();
 
-        public UnityEngine.UI.Button SoundButtonForTests => _ui?.SoundButtonForTests;
-
-        public bool AudioPanelVisibleForTests => _ui?.AudioPanelVisible ?? false;
-
-        public UnityEngine.UI.Button AudioButtonMainForTests => _ui?.AudioButtonMainForTests;
-
-        public UnityEngine.UI.Button AudioButtonPauseForTests => _ui?.AudioButtonPauseForTests;
-
-        public UnityEngine.UI.Button AudioMuteButtonForTests => _ui?.AudioMuteButtonForTests;
-
-        public UnityEngine.UI.Button AudioMasterMinusButtonForTests => _ui?.AudioMasterMinusButtonForTests;
-
-        public UnityEngine.UI.Button AudioMasterPlusButtonForTests => _ui?.AudioMasterPlusButtonForTests;
-
-        public UnityEngine.UI.Button AudioCloseButtonForTests => _ui?.AudioCloseButtonForTests;
-
-        public string AudioMasterLabelForTests => _ui?.AudioMasterLabelForTests ?? string.Empty;
+        public void UseDesignLayoutForTests(Vector2 designSize) =>
+            _ui?.UseDesignLayoutForTests(designSize);
 
         public void SetApplicationPausedForTests(bool paused) => OnApplicationPause(paused);
 
@@ -261,6 +368,74 @@ namespace JabaSurvivol.Gameplay
         public float LastBulletDamageForTests { get; private set; }
 
         public Vector2 LastShotDirectionForTests { get; private set; }
+
+        public Vector2 AimDirectionForTests => _aimDirection;
+
+        public bool FireButtonVisibleForTests => _ui != null && _ui.FireButtonVisibleForTests;
+
+        public UnityEngine.UI.Button FireButtonForTests => _ui?.FireButtonForTests;
+
+        public Vector2 FireButtonScreenCenterForTests =>
+            _ui != null ? _ui.FireButtonScreenCenterForTests : Vector2.zero;
+
+        public bool IsFireButtonTouchForTests(Vector2 screenPoint) =>
+            _ui != null && _ui.IsTouchOverFireButton(screenPoint);
+
+        public Vector2 MoveStickAnchorForTests =>
+            _ui != null ? _ui.MoveStickAnchorForTests : Vector2.zero;
+
+        public Vector2 AimStickAnchorForTests =>
+            _ui != null ? _ui.AimStickAnchorForTests : Vector2.zero;
+
+        public Vector2 MoveStickPositionForTests =>
+            _ui != null ? _ui.MoveStickPositionForTests : Vector2.zero;
+
+        public Vector2 AimStickPositionForTests =>
+            _ui != null ? _ui.AimStickPositionForTests : Vector2.zero;
+
+        public float MoveStickSizeForTests => _ui?.MoveStickSizeForTests ?? 0f;
+
+        public float AimStickSizeForTests => _ui?.AimStickSizeForTests ?? 0f;
+
+        public float MoveKnobSizeForTests => _ui?.MoveKnobSizeForTests ?? 0f;
+
+        public float AimKnobSizeForTests => _ui?.AimKnobSizeForTests ?? 0f;
+
+        public Color MoveBaseColorForTests =>
+            _ui != null ? _ui.MoveBaseColorForTests : Color.clear;
+
+        public Color AimBaseColorForTests =>
+            _ui != null ? _ui.AimBaseColorForTests : Color.clear;
+
+        public Color MoveKnobColorForTests =>
+            _ui != null ? _ui.MoveKnobColorForTests : Color.clear;
+
+        public Color AimKnobColorForTests =>
+            _ui != null ? _ui.AimKnobColorForTests : Color.clear;
+
+        public Vector2 ReloadButtonPositionForTests =>
+            _ui != null ? _ui.ReloadButtonPositionForTests : Vector2.zero;
+
+        public Vector2 SwitchWeaponButtonPositionForTests =>
+            _ui != null ? _ui.SwitchWeaponButtonPositionForTests : Vector2.zero;
+
+        public Vector2 PauseButtonPositionForTests =>
+            _ui != null ? _ui.PauseButtonPositionForTests : Vector2.zero;
+
+        public Vector2 ActiveSkillButtonPositionForTests =>
+            _ui != null ? _ui.ActiveSkillButtonPositionForTests : Vector2.zero;
+
+        public Vector2 FireButtonPositionForTests =>
+            _ui != null ? _ui.FireButtonPositionForTests : Vector2.zero;
+
+        public string ControlsHintForTests => _ui?.ControlsHintForTests ?? string.Empty;
+
+        public void ApplyControlLayoutForTests() => _ui?.ApplyControlLayout();
+
+        public void SetFireButtonPressedForTests(bool pressed) => _ui?.SetFireButtonPressedForTests(pressed);
+
+        public bool BossTelegraphOutlineVisible =>
+            _bossTelegraphOutline != null && _bossTelegraphOutline.activeSelf;
 
         public CharacterVisual PlayerVisual => _playerVisual;
 
@@ -412,13 +587,16 @@ namespace JabaSurvivol.Gameplay
                 StartRun,
                 RestartRun,
                 ReturnToMenu,
+                HandlePauseMenuRequest,
                 PauseGame,
                 ResumeGame,
                 ToggleSound,
                 AdjustMasterVolume,
+                AdjustEffectsVolume,
                 () => ReloadWeapon(),
                 () => SwitchWeapon(),
                 () => ActivateActiveSkill(),
+                SetFireButtonHeld,
                 HandleSelectActiveSkill,
                 index => SelectRoundReward(index),
                 ShowArmory,
@@ -443,7 +621,13 @@ namespace JabaSurvivol.Gameplay
                 ShowLeaderboard,
                 ToggleTelemetry,
                 HandleLocaleSelected,
+                ResetSettings,
                 HideLeaderboard);
+
+            if (_input is TwinStickInput touchInput)
+            {
+                touchInput.SetTouchFilter(_ui.IsTouchOverFireButton);
+            }
 
             UiFactory.PlayUiCue = cue => _audio.Play(cue);
             SyncAudioUi();
@@ -470,6 +654,11 @@ namespace JabaSurvivol.Gameplay
 
             _state = GameSessionState.MainMenu;
             _ui.ShowMainMenu(_profile);
+            if (!GameSettings.HelpSeen)
+            {
+                _ui.ShowHelp();
+            }
+
             _playerObject.SetActive(false);
             _zombieActors.ReturnAll();
         }
@@ -494,6 +683,18 @@ namespace JabaSurvivol.Gameplay
 
             var playerPosition = (Vector2)_playerObject.transform.position;
             var frame = _input.Read(playerPosition);
+
+            if (_ui.HelpVisible)
+            {
+                _ui.SetSticks(default, default);
+                return;
+            }
+
+            if (_ui.ConfirmationVisible)
+            {
+                _ui.SetSticks(default, default);
+                return;
+            }
 
             if (_ui.CharacterSheetVisible)
             {
@@ -697,14 +898,15 @@ namespace JabaSurvivol.Gameplay
 
             if (frame.Aim.sqrMagnitude > 0.0001f)
             {
-                _aimDirection = frame.Aim.normalized;
+                _aimDirection = ApplyAimAssist(frame.Aim.normalized);
             }
 
             _playerVisual?.SetMotion(frame.Move, frame.Move.magnitude);
             _playerVisual?.SetAim(_aimDirection);
 
             _fireCooldown = Mathf.Max(0f, _fireCooldown - deltaTime);
-            if (frame.FireHeld && _fireCooldown <= 0f)
+            var fireHeld = frame.FireHeld || _fireButtonHeld;
+            if (fireHeld && _fireCooldown <= 0f)
             {
                 if (_run.TryFireCurrentWeapon())
                 {
@@ -726,6 +928,108 @@ namespace JabaSurvivol.Gameplay
             }
 
             _playerVisual?.Tick(deltaTime);
+        }
+
+        /// <summary>
+        /// Blends the raw aim direction toward the nearest living enemy inside
+        /// the configured cone. Falls back to the raw direction when no enemy
+        /// qualifies or aim assist is off.
+        /// </summary>
+        private Vector2 ApplyAimAssist(Vector2 rawAim)
+        {
+            var (coneDegrees, blend, range) = AimAssistSettings(GameSettings.AimAssist);
+            if (blend <= 0f || range <= 0f)
+            {
+                return rawAim;
+            }
+
+            var playerPosition = (Vector2)_playerObject.transform.position;
+            var hasTarget = false;
+            var nearestDistance = float.MaxValue;
+            var targetDirection = rawAim;
+
+            if (_zombieActive && _zombieActor != null)
+            {
+                ConsiderAimAssistTarget(
+                    (Vector2)_zombieActor.GameObject.transform.position,
+                    playerPosition,
+                    rawAim,
+                    coneDegrees,
+                    range,
+                    ref hasTarget,
+                    ref nearestDistance,
+                    ref targetDirection);
+            }
+
+            var boss = _run?.Boss;
+            if (_run != null && _run.BossActive && boss != null && boss.Health > 0f && _bossObject != null)
+            {
+                ConsiderAimAssistTarget(
+                    (Vector2)_bossObject.transform.position,
+                    playerPosition,
+                    rawAim,
+                    coneDegrees,
+                    range,
+                    ref hasTarget,
+                    ref nearestDistance,
+                    ref targetDirection);
+            }
+
+            if (!hasTarget)
+            {
+                return rawAim;
+            }
+
+            var blended = Vector2.Lerp(rawAim, targetDirection, blend);
+            return blended.sqrMagnitude > 0.0001f ? blended.normalized : rawAim;
+        }
+
+        private static void ConsiderAimAssistTarget(
+            Vector2 targetPosition,
+            Vector2 playerPosition,
+            Vector2 rawAim,
+            float coneDegrees,
+            float range,
+            ref bool hasTarget,
+            ref float nearestDistance,
+            ref Vector2 targetDirection)
+        {
+            var delta = targetPosition - playerPosition;
+            var distance = delta.magnitude;
+            if (distance <= 0.0001f || distance > range)
+            {
+                return;
+            }
+
+            var direction = delta / distance;
+            if (Vector2.Angle(rawAim, direction) > coneDegrees)
+            {
+                return;
+            }
+
+            if (distance >= nearestDistance)
+            {
+                return;
+            }
+
+            nearestDistance = distance;
+            targetDirection = direction;
+            hasTarget = true;
+        }
+
+        private static (float ConeDegrees, float Blend, float Range) AimAssistSettings(AimAssistLevel level)
+        {
+            return level switch
+            {
+                AimAssistLevel.Low => (6f, 0.35f, 10f),
+                AimAssistLevel.High => (12f, 0.65f, 12f),
+                _ => (0f, 0f, 0f)
+            };
+        }
+
+        private void SetFireButtonHeld(bool held)
+        {
+            _fireButtonHeld = held;
         }
 
         private void Fire()
@@ -959,6 +1263,11 @@ namespace JabaSurvivol.Gameplay
             _bossAttackCooldown = definition.SlamIntervalSeconds;
             _bossEnraged = false;
             _bossTelegraphRing.SetActive(false);
+            if (_bossTelegraphOutline != null)
+            {
+                _bossTelegraphOutline.SetActive(false);
+            }
+
             _ui.ShowBoss(Localization.Get("boss.name"));
             _ui.UpdateBoss(definition.MaxHealth, definition.MaxHealth, false);
             _audio?.Play(GameAudioCue.BossSpawn);
@@ -995,11 +1304,18 @@ namespace JabaSurvivol.Gameplay
                 _bossTelegraphRing.transform.localScale = Vector3.one * ringScale;
                 var ringColor = new Color(1f, 0.25f, 0.2f, 0.35f + (0.55f * progress));
                 _bossTelegraphRenderer.color = ringColor;
+                UpdateTelegraphOutline(bossPosition, ringScale, progress);
 
                 if (_bossTelegraphRemaining <= 0f)
                 {
                     _bossTelegraphRing.SetActive(false);
+                    if (_bossTelegraphOutline != null)
+                    {
+                        _bossTelegraphOutline.SetActive(false);
+                    }
+
                     _audio?.Play(GameAudioCue.BossSlam);
+                    HapticFeedback.BossSlam();
                     if (CombatMath.CirclesOverlap(
                             bossPosition.x,
                             bossPosition.y,
@@ -1026,6 +1342,10 @@ namespace JabaSurvivol.Gameplay
                     _bossTelegraphRing.transform.localScale = Vector3.one * (definition.SlamRadius * 2f * 0.35f);
                     _bossTelegraphRenderer.color = new Color(1f, 0.25f, 0.2f, 0.35f);
                     _bossTelegraphRing.SetActive(true);
+                    UpdateTelegraphOutline(
+                        bossPosition,
+                        definition.SlamRadius * 2f * 0.35f,
+                        0f);
                     _audio?.Play(GameAudioCue.BossTelegraph);
                 }
                 else
@@ -1079,6 +1399,30 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
+        /// <summary>
+        /// Adds a high-contrast outer ring as a non-color cue when the
+        /// colorblind-safe telegraph setting is enabled. Timing, radius, and
+        /// damage are unchanged.
+        /// </summary>
+        private void UpdateTelegraphOutline(Vector2 bossPosition, float ringScale, float progress)
+        {
+            if (_bossTelegraphOutline == null || _bossTelegraphOutlineRenderer == null)
+            {
+                return;
+            }
+
+            if (!GameSettings.ColorblindSafeTelegraphs)
+            {
+                _bossTelegraphOutline.SetActive(false);
+                return;
+            }
+
+            _bossTelegraphOutline.transform.position = bossPosition;
+            _bossTelegraphOutline.transform.localScale = Vector3.one * (ringScale * 1.12f);
+            _bossTelegraphOutlineRenderer.color = new Color(1f, 1f, 1f, 0.75f + (0.25f * progress));
+            _bossTelegraphOutline.SetActive(true);
+        }
+
         private void OnBulletHitBoss(float damage)
         {
             if (!_run.BossActive)
@@ -1115,6 +1459,11 @@ namespace JabaSurvivol.Gameplay
             if (_bossTelegraphRing != null)
             {
                 _bossTelegraphRing.SetActive(false);
+            }
+
+            if (_bossTelegraphOutline != null)
+            {
+                _bossTelegraphOutline.SetActive(false);
             }
 
             _bossTelegraphRemaining = 0f;
@@ -1209,6 +1558,7 @@ namespace JabaSurvivol.Gameplay
             _roundRewardOptions = null;
             _spreadSequence = 0;
             _levelUpRemaining = 0f;
+            _fireButtonHeld = false;
             _lastBerserkerActive = false;
             _lastGhostActive = false;
             _state = GameSessionState.Playing;
@@ -1232,6 +1582,11 @@ namespace JabaSurvivol.Gameplay
             _bossObject.SetActive(false);
             _bossVisual?.ResetVisual();
             _bossTelegraphRing.SetActive(false);
+            if (_bossTelegraphOutline != null)
+            {
+                _bossTelegraphOutline.SetActive(false);
+            }
+
             _bossTelegraphRemaining = 0f;
             _bossAttackCooldown = 0f;
             _bossEnraged = false;
@@ -1272,6 +1627,7 @@ namespace JabaSurvivol.Gameplay
             }
 
             _state = GameSessionState.Paused;
+            _fireButtonHeld = false;
             _audio.SetSuspended(true);
             _ui.ShowPaused(true);
             SyncAudioUi();
@@ -1293,11 +1649,24 @@ namespace JabaSurvivol.Gameplay
             SyncAudioUi();
         }
 
+        private void AdjustEffectsVolume(float volume)
+        {
+            _audio.SetEffectsVolume(volume);
+            SyncAudioUi();
+        }
+
+        private void ResetSettings()
+        {
+            GameSettings.ResetToDefaults();
+            _ui?.RefreshSettingsValues();
+        }
+
         private void SyncAudioUi()
         {
             _ui?.SetAudio(
                 _audio.IsMuted,
-                _audio.MasterVolume);
+                _audio.MasterVolume,
+                _audio.EffectsVolume);
         }
 
         private void HandleLocaleSelected(string locale)
@@ -1325,6 +1694,7 @@ namespace JabaSurvivol.Gameplay
                 _telemetryService != null && _telemetryService.OptedIn);
             _ui.SetRoundModifier(_run != null && _run.RoundModel.Definition.IsElite);
             _ui.InvalidateHudCache();
+            _ui.ApplyControlLayout();
 
             if (_run != null)
             {
@@ -1419,9 +1789,38 @@ namespace JabaSurvivol.Gameplay
                 _bossTelegraphRing.SetActive(false);
             }
 
+            if (_bossTelegraphOutline != null)
+            {
+                _bossTelegraphOutline.SetActive(false);
+            }
+
             _audio.SetSuspended(false);
             _audio.StopAll();
             _ui.ShowMainMenu(_profile);
+        }
+
+        private void HandlePauseMenuRequest()
+        {
+            if (_state != GameSessionState.Paused || _run == null || _run.IsGameOver)
+            {
+                ReturnToMenu();
+                return;
+            }
+
+            _ui.ShowConfirmation(
+                Localization.Get("confirm.leave.title"),
+                Localization.Get("confirm.leave.body"),
+                Localization.Get("confirm.leave.confirm"),
+                ReturnToMenu,
+                KeepRunPaused);
+        }
+
+        private void KeepRunPaused()
+        {
+            if (_state == GameSessionState.Paused)
+            {
+                _ui.ShowPaused(true);
+            }
         }
 
         /// <summary>
@@ -1596,6 +1995,28 @@ namespace JabaSurvivol.Gameplay
         }
 
         private void HandleRespecSkills()
+        {
+            if (!CanRespecSkillsNow())
+            {
+                _ui.SetCharacterSheetStatus(Localization.Get("character.respec.blocked"));
+                return;
+            }
+
+            var refunded = _profile.GetSpentSkillPoints();
+            if (refunded <= 0)
+            {
+                _ui.SetCharacterSheetStatus(Localization.Get("character.respec.empty"));
+                return;
+            }
+
+            _ui.ShowConfirmation(
+                Localization.Get("confirm.respec.title"),
+                Localization.Format("confirm.respec.body", refunded),
+                Localization.Get("confirm.respec.confirm"),
+                ConfirmRespecSkills);
+        }
+
+        private void ConfirmRespecSkills()
         {
             var refunded = RespecSkills();
             if (refunded > 0)
@@ -1956,6 +2377,7 @@ namespace JabaSurvivol.Gameplay
             }
 
             _audio?.Play(GameAudioCue.Hit);
+            HapticFeedback.PlayerDamage();
 
             if (_run.DamagePlayer(amount))
             {
@@ -2924,6 +3346,7 @@ namespace JabaSurvivol.Gameplay
             _roundRewardOptions = RoundRewardModel.GenerateOptions(_run.Round, _run.Seed);
             _roundClearPending = true;
             _audio?.Play(GameAudioCue.RoundClear);
+            HapticFeedback.RoundClear();
             _ui.ShowRoundEnd(
                 reward.Round,
                 _run.Kills,
@@ -3039,6 +3462,11 @@ namespace JabaSurvivol.Gameplay
             if (_bossTelegraphRing != null)
             {
                 _bossTelegraphRing.SetActive(false);
+            }
+
+            if (_bossTelegraphOutline != null)
+            {
+                _bossTelegraphOutline.SetActive(false);
             }
 
             _ui.HideBoss();
@@ -3186,6 +3614,14 @@ namespace JabaSurvivol.Gameplay
             _bossTelegraphRenderer.color = new Color(1f, 0.25f, 0.2f, 0.4f);
             _bossTelegraphRenderer.sortingOrder = 12;
             _bossTelegraphRing.SetActive(false);
+
+            _bossTelegraphOutline = new GameObject("Boss Telegraph Outline");
+            _bossTelegraphOutline.transform.SetParent(_worldRoot, false);
+            _bossTelegraphOutlineRenderer = _bossTelegraphOutline.AddComponent<SpriteRenderer>();
+            _bossTelegraphOutlineRenderer.sprite = SpriteFactory.Ring;
+            _bossTelegraphOutlineRenderer.color = new Color(1f, 1f, 1f, 0.9f);
+            _bossTelegraphOutlineRenderer.sortingOrder = 13;
+            _bossTelegraphOutline.SetActive(false);
 
             _turretObject = new GameObject("Turret");
             _turretObject.transform.SetParent(_worldRoot, false);

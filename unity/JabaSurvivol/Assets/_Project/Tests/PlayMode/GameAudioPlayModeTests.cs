@@ -20,6 +20,8 @@ namespace JabaSurvivol.Tests.PlayMode
         public void SetUp()
         {
             DeleteAudioPreferences();
+            GameSettings.ClearPreferencesForTests();
+            GameSettings.MarkHelpSeen();
 
             _directory = Path.Combine(Path.GetTempPath(), "jabasurvivol-audio", Guid.NewGuid().ToString("N"));
             GameBootstrap.SavePathOverride = Path.Combine(_directory, ProfileStore.FileName);
@@ -29,6 +31,7 @@ namespace JabaSurvivol.Tests.PlayMode
         public void TearDown()
         {
             GameBootstrap.SavePathOverride = null;
+            GameSettings.ClearPreferencesForTests();
 
             if (_bootstrap != null)
             {
@@ -185,7 +188,7 @@ namespace JabaSurvivol.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator Pause_menu_sound_label_toggles_between_on_and_off()
+        public IEnumerator Settings_panel_sound_label_toggles_between_on_and_off()
         {
             _bootstrap = CreateBootstrap();
             yield return null;
@@ -195,51 +198,55 @@ namespace JabaSurvivol.Tests.PlayMode
             session.PauseGame();
             yield return null;
 
-            Assert.That(session.SoundLabelForTests, Is.EqualTo("SOUND: ON"));
-
-            session.SoundButtonForTests.onClick.Invoke();
+            session.SettingsButtonPauseForTests.onClick.Invoke();
             yield return null;
-            Assert.That(session.AudioPanelVisibleForTests, Is.True);
+            Assert.That(session.SettingsPanelVisibleForTests, Is.True);
+            Assert.That(session.SettingsMuteLabelForTests, Is.EqualTo("ON"));
 
-            session.AudioMuteButtonForTests.onClick.Invoke();
-            Assert.That(session.SoundLabelForTests, Is.EqualTo("SOUND: OFF"));
+            session.SettingsMuteButtonForTests.onClick.Invoke();
+            Assert.That(session.SettingsMuteLabelForTests, Is.EqualTo("OFF"));
             Assert.That(session.AudioForTests.IsMuted, Is.True);
 
-            session.AudioMuteButtonForTests.onClick.Invoke();
-            Assert.That(session.SoundLabelForTests, Is.EqualTo("SOUND: ON"));
+            session.SettingsMuteButtonForTests.onClick.Invoke();
+            Assert.That(session.SettingsMuteLabelForTests, Is.EqualTo("ON"));
             Assert.That(session.AudioForTests.IsMuted, Is.False);
         }
 
         [UnityTest]
-        public IEnumerator Main_menu_audio_panel_toggles_mute_and_volume()
+        public IEnumerator Settings_panel_toggles_mute_and_volume()
         {
             _bootstrap = CreateBootstrap();
             yield return null;
 
             var session = _bootstrap.Session;
             session.ResetAudioHistoryForTests();
-            session.AudioButtonMainForTests.onClick.Invoke();
+            session.SettingsButtonMainForTests.onClick.Invoke();
             yield return null;
 
-            Assert.That(session.AudioPanelVisibleForTests, Is.True);
+            Assert.That(session.SettingsPanelVisibleForTests, Is.True);
             Assert.That(ContainsRecentCue(session, GameAudioCue.UiOpen), Is.True);
-            Assert.That(session.SoundLabelForTests, Is.EqualTo("SOUND: ON"));
-            Assert.That(session.AudioMasterLabelForTests, Is.EqualTo("100%"));
+            Assert.That(session.SettingsMuteLabelForTests, Is.EqualTo("ON"));
+            Assert.That(session.SettingsMasterLabelForTests, Is.EqualTo("100%"));
+            Assert.That(session.SettingsEffectsLabelForTests, Is.EqualTo("80%"));
 
-            session.AudioMuteButtonForTests.onClick.Invoke();
+            session.SettingsMuteButtonForTests.onClick.Invoke();
             Assert.That(session.AudioForTests.IsMuted, Is.True);
-            Assert.That(session.SoundLabelForTests, Is.EqualTo("SOUND: OFF"));
+            Assert.That(session.SettingsMuteLabelForTests, Is.EqualTo("OFF"));
 
-            session.AudioMuteButtonForTests.onClick.Invoke();
+            session.SettingsMuteButtonForTests.onClick.Invoke();
             Assert.That(session.AudioForTests.IsMuted, Is.False);
 
-            session.AudioMasterMinusButtonForTests.onClick.Invoke();
+            session.SettingsMasterMinusButtonForTests.onClick.Invoke();
             Assert.That(session.AudioForTests.MasterVolume, Is.EqualTo(0.9f).Within(0.001f));
-            Assert.That(session.AudioMasterLabelForTests, Is.EqualTo("90%"));
+            Assert.That(session.SettingsMasterLabelForTests, Is.EqualTo("90%"));
+
+            session.SettingsEffectsMinusButtonForTests.onClick.Invoke();
+            Assert.That(session.AudioForTests.EffectsVolume, Is.EqualTo(0.7f).Within(0.001f));
+            Assert.That(session.SettingsEffectsLabelForTests, Is.EqualTo("70%"));
 
             session.ResetAudioHistoryForTests();
-            session.AudioCloseButtonForTests.onClick.Invoke();
-            Assert.That(session.AudioPanelVisibleForTests, Is.False);
+            session.SettingsCloseButtonForTests.onClick.Invoke();
+            Assert.That(session.SettingsPanelVisibleForTests, Is.False);
             Assert.That(ContainsRecentCue(session, GameAudioCue.UiClose), Is.True);
         }
 
@@ -601,7 +608,7 @@ namespace JabaSurvivol.Tests.PlayMode
 
             var session = _bootstrap.Session;
             session.ResetAudioHistoryForTests();
-            session.LanguageButtonForTests.onClick.Invoke();
+            session.SettingsButtonMainForTests.onClick.Invoke();
 
             Assert.That(ContainsRecentCue(session, GameAudioCue.UiClick), Is.True);
         }

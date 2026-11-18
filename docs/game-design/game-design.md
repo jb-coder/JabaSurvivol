@@ -37,6 +37,8 @@ JabaSurvivol is a 2D top-down, round-based zombie survival game for Android phon
 - Buttons: reload, weapon switch, active skill, pause.
 - Options: auto-fire, aim assist, left-handed layout, joystick size and opacity.
 - Safe-area support for phones and tablets.
+- Defaults, ranges, and accessibility intent are defined in
+  [`touch-controls-and-accessibility.md`](touch-controls-and-accessibility.md).
 
 ## Rounds
 

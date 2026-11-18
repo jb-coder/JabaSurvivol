@@ -12,6 +12,8 @@ public sealed class PlayModeTestBootstrap
         PlayerPrefs.DeleteKey(Localization.LocalePreferenceKey);
         PlayerPrefs.Save();
         Localization.SetLocale("en");
+        GameSettings.ClearPreferencesForTests();
+        GameSettings.MarkHelpSeen();
     }
 
     [OneTimeTearDown]
@@ -21,5 +23,6 @@ public sealed class PlayModeTestBootstrap
         PlayerPrefs.DeleteKey(Localization.LocalePreferenceKey);
         PlayerPrefs.Save();
         Localization.ReloadForTests();
+        GameSettings.ClearPreferencesForTests();
     }
 }

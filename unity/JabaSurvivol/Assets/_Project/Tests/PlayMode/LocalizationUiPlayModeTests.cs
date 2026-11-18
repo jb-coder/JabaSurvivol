@@ -22,12 +22,15 @@ namespace JabaSurvivol.Tests.PlayMode
             _path = Path.Combine(_directory, ProfileStore.FileName);
             GameBootstrap.SavePathOverride = _path;
             Localization.SetLocale("en");
+            GameSettings.ClearPreferencesForTests();
+            GameSettings.MarkHelpSeen();
         }
 
         [TearDown]
         public void TearDown()
         {
             Localization.SetLocale("en");
+            GameSettings.ClearPreferencesForTests();
             GameBootstrap.SavePathOverride = null;
 
             if (_bootstrap != null)
@@ -43,7 +46,7 @@ namespace JabaSurvivol.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator Language_selector_updates_main_menu_labels()
+        public IEnumerator Settings_language_selector_updates_main_menu_labels()
         {
             _bootstrap = CreateBootstrap();
             yield return null;
@@ -52,17 +55,17 @@ namespace JabaSurvivol.Tests.PlayMode
 
             Assert.That(session.MainMenuStartLabelForTests, Is.EqualTo("START RUN"));
 
-            session.LanguageButtonForTests.onClick.Invoke();
+            session.SettingsButtonMainForTests.onClick.Invoke();
             yield return null;
-            Assert.That(session.LanguagePanelVisibleForTests, Is.True);
+            Assert.That(session.SettingsPanelVisibleForTests, Is.True);
 
-            session.LanguageSpanishButtonForTests.onClick.Invoke();
+            session.SettingsLanguageSpanishButtonForTests.onClick.Invoke();
             yield return null;
 
-            Assert.That(session.LanguagePanelVisibleForTests, Is.False);
             Assert.That(Localization.CurrentLocale, Is.EqualTo("es"));
             Assert.That(session.MainMenuStartLabelForTests, Is.Not.EqualTo("START RUN"));
             Assert.That(session.MainMenuSubtitleForTests, Is.Not.EqualTo("SURVIVE THE NIGHT. KEEP EVERYTHING."));
+            Assert.That(session.SettingsLanguageCurrentLabelForTests, Is.EqualTo("Español"));
             Assert.That(session.Profile, Is.SameAs(profile));
         }
 
@@ -80,17 +83,40 @@ namespace JabaSurvivol.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator Pseudo_locale_audio_panel_has_no_text_overflow()
+        public IEnumerator Pseudo_locale_settings_panel_has_no_text_overflow()
         {
             Localization.UsePseudoLocaleForTests();
             _bootstrap = CreateBootstrap();
             yield return null;
             _bootstrap.Session.UseDesignLayoutForTests();
-            _bootstrap.Session.AudioButtonMainForTests.onClick.Invoke();
+            _bootstrap.Session.SettingsButtonMainForTests.onClick.Invoke();
             yield return null;
 
-            Assert.That(_bootstrap.Session.AudioPanelVisibleForTests, Is.True);
-            AssertNoOverflow(_bootstrap.Session, "audio panel");
+            Assert.That(_bootstrap.Session.SettingsPanelVisibleForTests, Is.True);
+            AssertNoOverflow(_bootstrap.Session, "settings panel");
+        }
+
+        [UnityTest]
+        public IEnumerator Settings_panel_has_no_text_overflow_in_english_spanish_and_pseudo_locale()
+        {
+            Localization.SetLocale("en");
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+            session.UseDesignLayoutForTests();
+            session.SettingsButtonMainForTests.onClick.Invoke();
+            yield return null;
+
+            AssertNoOverflow(session, "settings panel en");
+
+            session.SettingsLanguageSpanishButtonForTests.onClick.Invoke();
+            yield return null;
+            Assert.That(Localization.CurrentLocale, Is.EqualTo("es"));
+            AssertNoOverflow(session, "settings panel es");
+
+            Localization.UsePseudoLocaleForTests();
+            yield return null;
+            AssertNoOverflow(session, "settings panel pseudo");
         }
 
         [UnityTest]
@@ -139,7 +165,7 @@ namespace JabaSurvivol.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator Language_selector_updates_pause_and_hud_without_resetting_the_run()
+        public IEnumerator Settings_language_selector_updates_pause_and_hud_without_resetting_the_run()
         {
             _bootstrap = CreateBootstrap();
             yield return null;
@@ -152,11 +178,11 @@ namespace JabaSurvivol.Tests.PlayMode
             session.PauseGame();
             yield return null;
 
-            session.PauseLanguageButtonForTests.onClick.Invoke();
+            session.SettingsButtonPauseForTests.onClick.Invoke();
             yield return null;
-            Assert.That(session.LanguagePanelVisibleForTests, Is.True);
+            Assert.That(session.SettingsPanelVisibleForTests, Is.True);
 
-            session.LanguageSpanishButtonForTests.onClick.Invoke();
+            session.SettingsLanguageSpanishButtonForTests.onClick.Invoke();
             yield return null;
 
             Assert.That(session.PauseTitleForTests, Is.Not.EqualTo("PAUSED"));
@@ -177,9 +203,11 @@ namespace JabaSurvivol.Tests.PlayMode
             yield return null;
             var session = _bootstrap.Session;
 
-            session.LanguageButtonForTests.onClick.Invoke();
+            session.SettingsButtonMainForTests.onClick.Invoke();
             yield return null;
-            session.LanguageSpanishButtonForTests.onClick.Invoke();
+            session.SettingsLanguageSpanishButtonForTests.onClick.Invoke();
+            yield return null;
+            session.SettingsCloseButtonForTests.onClick.Invoke();
             yield return null;
 
             session.StartRun();
@@ -198,9 +226,9 @@ namespace JabaSurvivol.Tests.PlayMode
             yield return null;
             var session = _bootstrap.Session;
 
-            session.LanguageButtonForTests.onClick.Invoke();
+            session.SettingsButtonMainForTests.onClick.Invoke();
             yield return null;
-            session.LanguageSpanishButtonForTests.onClick.Invoke();
+            session.SettingsLanguageSpanishButtonForTests.onClick.Invoke();
             yield return null;
             Assert.That(Localization.CurrentLocale, Is.EqualTo("es"));
 
@@ -222,14 +250,12 @@ namespace JabaSurvivol.Tests.PlayMode
             yield return null;
             var session = _bootstrap.Session;
 
-            session.LanguageButtonForTests.onClick.Invoke();
+            session.SettingsButtonMainForTests.onClick.Invoke();
             yield return null;
-            session.LanguageSpanishButtonForTests.onClick.Invoke();
+            session.SettingsLanguageSpanishButtonForTests.onClick.Invoke();
             yield return null;
 
-            session.LanguageButtonForTests.onClick.Invoke();
-            yield return null;
-            session.LanguageSystemButtonForTests.onClick.Invoke();
+            session.SettingsLanguageSystemButtonForTests.onClick.Invoke();
             yield return null;
 
             Assert.That(
@@ -243,18 +269,18 @@ namespace JabaSurvivol.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator Language_selector_close_does_not_change_the_locale()
+        public IEnumerator Settings_close_does_not_change_the_locale()
         {
             _bootstrap = CreateBootstrap();
             yield return null;
             var session = _bootstrap.Session;
 
-            session.LanguageButtonForTests.onClick.Invoke();
+            session.SettingsButtonMainForTests.onClick.Invoke();
             yield return null;
-            session.LanguageCloseButtonForTests.onClick.Invoke();
+            session.SettingsCloseButtonForTests.onClick.Invoke();
             yield return null;
 
-            Assert.That(session.LanguagePanelVisibleForTests, Is.False);
+            Assert.That(session.SettingsPanelVisibleForTests, Is.False);
             Assert.That(Localization.CurrentLocale, Is.EqualTo("en"));
         }
 

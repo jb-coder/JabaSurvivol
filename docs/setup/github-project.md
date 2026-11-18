@@ -42,8 +42,12 @@
 | v0.4.0 Content and Boss | 2027-01-04 |
 | v0.5.0 Backend and Cloud | 2027-01-18 |
 | v0.5.1 Polish and Local Beta | 2026-12-14 |
+| v0.5.2 Beta Follow-ups | 2026-12-14 |
 | v0.6.0 Localization | 2027-02-01 |
 | v0.7.0 Art and Visual Polish | 2027-04-12 |
+| v0.7.1 Audio Review and Fixes | 2026-11-27 |
+| v0.8.0 Top-Down Art and Arena Upgrade | 2026-12-18 |
+| v0.9.0 Touch, Settings and Accessibility | 2026-12-17 |
 | v1.0.0 Release and Donations | 2027-05-03 |
 
 ## Bootstrap
