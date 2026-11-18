@@ -191,23 +191,99 @@ namespace JabaSurvivol.Gameplay
             _ui?.ShowRoundEnd(1, 0, 0, 0, options);
         }
 
-        public string SoundLabelForTests => _ui?.SoundLabelForTests ?? string.Empty;
+        public bool SettingsPanelVisibleForTests => _ui?.SettingsPanelVisible ?? false;
 
+        public UnityEngine.UI.Button SettingsButtonMainForTests => _ui?.SettingsButtonMainForTests;
 
+        public UnityEngine.UI.Button SettingsButtonPauseForTests => _ui?.SettingsButtonPauseForTests;
 
-        public bool LanguagePanelVisibleForTests => _ui?.LanguagePanelVisible ?? false;
+        public UnityEngine.UI.Button SettingsCloseButtonForTests => _ui?.SettingsCloseButtonForTests;
 
-        public UnityEngine.UI.Button LanguageButtonForTests => _ui?.LanguageButtonForTests;
+        public UnityEngine.UI.Button SettingsResetButtonForTests => _ui?.SettingsResetButtonForTests;
 
-        public UnityEngine.UI.Button PauseLanguageButtonForTests => _ui?.PauseLanguageButtonForTests;
+        public UnityEngine.UI.Button SettingsMuteButtonForTests => _ui?.SettingsMuteButtonForTests;
 
-        public UnityEngine.UI.Button LanguageSystemButtonForTests => _ui?.LanguageSystemButtonForTests;
+        public UnityEngine.UI.Button SettingsMasterMinusButtonForTests =>
+            _ui?.SettingsMasterMinusButtonForTests;
 
-        public UnityEngine.UI.Button LanguageEnglishButtonForTests => _ui?.LanguageEnglishButtonForTests;
+        public UnityEngine.UI.Button SettingsMasterPlusButtonForTests =>
+            _ui?.SettingsMasterPlusButtonForTests;
 
-        public UnityEngine.UI.Button LanguageSpanishButtonForTests => _ui?.LanguageSpanishButtonForTests;
+        public UnityEngine.UI.Button SettingsEffectsMinusButtonForTests =>
+            _ui?.SettingsEffectsMinusButtonForTests;
 
-        public UnityEngine.UI.Button LanguageCloseButtonForTests => _ui?.LanguageCloseButtonForTests;
+        public UnityEngine.UI.Button SettingsEffectsPlusButtonForTests =>
+            _ui?.SettingsEffectsPlusButtonForTests;
+
+        public UnityEngine.UI.Button SettingsLanguageSystemButtonForTests =>
+            _ui?.SettingsLanguageSystemButtonForTests;
+
+        public UnityEngine.UI.Button SettingsLanguageEnglishButtonForTests =>
+            _ui?.SettingsLanguageEnglishButtonForTests;
+
+        public UnityEngine.UI.Button SettingsLanguageSpanishButtonForTests =>
+            _ui?.SettingsLanguageSpanishButtonForTests;
+
+        public UnityEngine.UI.Button SettingsLeftHandedButtonForTests =>
+            _ui?.SettingsLeftHandedButtonForTests;
+
+        public UnityEngine.UI.Button SettingsJoystickSizeMinusButtonForTests =>
+            _ui?.SettingsJoystickSizeMinusButtonForTests;
+
+        public UnityEngine.UI.Button SettingsJoystickSizePlusButtonForTests =>
+            _ui?.SettingsJoystickSizePlusButtonForTests;
+
+        public UnityEngine.UI.Button SettingsJoystickOpacityMinusButtonForTests =>
+            _ui?.SettingsJoystickOpacityMinusButtonForTests;
+
+        public UnityEngine.UI.Button SettingsJoystickOpacityPlusButtonForTests =>
+            _ui?.SettingsJoystickOpacityPlusButtonForTests;
+
+        public UnityEngine.UI.Button SettingsAimAssistButtonForTests =>
+            _ui?.SettingsAimAssistButtonForTests;
+
+        public UnityEngine.UI.Button SettingsAutoFireButtonForTests =>
+            _ui?.SettingsAutoFireButtonForTests;
+
+        public UnityEngine.UI.Button SettingsReducedMotionButtonForTests =>
+            _ui?.SettingsReducedMotionButtonForTests;
+
+        public UnityEngine.UI.Button SettingsHapticsButtonForTests =>
+            _ui?.SettingsHapticsButtonForTests;
+
+        public UnityEngine.UI.Button SettingsColorblindButtonForTests =>
+            _ui?.SettingsColorblindButtonForTests;
+
+        public string SettingsMuteLabelForTests => _ui?.SettingsMuteLabelForTests ?? string.Empty;
+
+        public string SettingsMasterLabelForTests => _ui?.SettingsMasterLabelForTests ?? string.Empty;
+
+        public string SettingsEffectsLabelForTests => _ui?.SettingsEffectsLabelForTests ?? string.Empty;
+
+        public string SettingsLanguageCurrentLabelForTests =>
+            _ui?.SettingsLanguageCurrentLabelForTests ?? string.Empty;
+
+        public string SettingsLeftHandedLabelForTests =>
+            _ui?.SettingsLeftHandedLabelForTests ?? string.Empty;
+
+        public string SettingsJoystickSizeLabelForTests =>
+            _ui?.SettingsJoystickSizeLabelForTests ?? string.Empty;
+
+        public string SettingsJoystickOpacityLabelForTests =>
+            _ui?.SettingsJoystickOpacityLabelForTests ?? string.Empty;
+
+        public string SettingsAimAssistLabelForTests =>
+            _ui?.SettingsAimAssistLabelForTests ?? string.Empty;
+
+        public string SettingsAutoFireLabelForTests => _ui?.SettingsAutoFireLabelForTests ?? string.Empty;
+
+        public string SettingsReducedMotionLabelForTests =>
+            _ui?.SettingsReducedMotionLabelForTests ?? string.Empty;
+
+        public string SettingsHapticsLabelForTests => _ui?.SettingsHapticsLabelForTests ?? string.Empty;
+
+        public string SettingsColorblindLabelForTests =>
+            _ui?.SettingsColorblindLabelForTests ?? string.Empty;
 
         public string MainMenuStartLabelForTests => _ui?.MainMenuStartLabelForTests ?? string.Empty;
 
@@ -233,24 +309,6 @@ namespace JabaSurvivol.Gameplay
         public string[] TextOverflowsForTests => _ui?.TextOverflowsForTests() ?? System.Array.Empty<string>();
 
         public void UseDesignLayoutForTests() => _ui?.UseDesignLayoutForTests();
-
-        public UnityEngine.UI.Button SoundButtonForTests => _ui?.SoundButtonForTests;
-
-        public bool AudioPanelVisibleForTests => _ui?.AudioPanelVisible ?? false;
-
-        public UnityEngine.UI.Button AudioButtonMainForTests => _ui?.AudioButtonMainForTests;
-
-        public UnityEngine.UI.Button AudioButtonPauseForTests => _ui?.AudioButtonPauseForTests;
-
-        public UnityEngine.UI.Button AudioMuteButtonForTests => _ui?.AudioMuteButtonForTests;
-
-        public UnityEngine.UI.Button AudioMasterMinusButtonForTests => _ui?.AudioMasterMinusButtonForTests;
-
-        public UnityEngine.UI.Button AudioMasterPlusButtonForTests => _ui?.AudioMasterPlusButtonForTests;
-
-        public UnityEngine.UI.Button AudioCloseButtonForTests => _ui?.AudioCloseButtonForTests;
-
-        public string AudioMasterLabelForTests => _ui?.AudioMasterLabelForTests ?? string.Empty;
 
         public void SetApplicationPausedForTests(bool paused) => OnApplicationPause(paused);
 
@@ -416,6 +474,7 @@ namespace JabaSurvivol.Gameplay
                 ResumeGame,
                 ToggleSound,
                 AdjustMasterVolume,
+                AdjustEffectsVolume,
                 () => ReloadWeapon(),
                 () => SwitchWeapon(),
                 () => ActivateActiveSkill(),
@@ -443,6 +502,7 @@ namespace JabaSurvivol.Gameplay
                 ShowLeaderboard,
                 ToggleTelemetry,
                 HandleLocaleSelected,
+                ResetSettings,
                 HideLeaderboard);
 
             UiFactory.PlayUiCue = cue => _audio.Play(cue);
@@ -1293,11 +1353,24 @@ namespace JabaSurvivol.Gameplay
             SyncAudioUi();
         }
 
+        private void AdjustEffectsVolume(float volume)
+        {
+            _audio.SetEffectsVolume(volume);
+            SyncAudioUi();
+        }
+
+        private void ResetSettings()
+        {
+            GameSettings.ResetToDefaults();
+            _ui?.RefreshSettingsValues();
+        }
+
         private void SyncAudioUi()
         {
             _ui?.SetAudio(
                 _audio.IsMuted,
-                _audio.MasterVolume);
+                _audio.MasterVolume,
+                _audio.EffectsVolume);
         }
 
         private void HandleLocaleSelected(string locale)

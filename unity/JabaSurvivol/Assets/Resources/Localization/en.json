@@ -785,6 +785,110 @@
     {
       "key": "account.error.validation",
       "value": "CHECK YOUR USERNAME AND PASSWORD"
+    },
+    {
+      "key": "settings.open",
+      "value": "SETTINGS"
+    },
+    {
+      "key": "settings.title",
+      "value": "SETTINGS"
+    },
+    {
+      "key": "settings.close",
+      "value": "CLOSE"
+    },
+    {
+      "key": "settings.reset",
+      "value": "RESET TO DEFAULTS"
+    },
+    {
+      "key": "settings.audio.title",
+      "value": "AUDIO"
+    },
+    {
+      "key": "settings.audio.mute",
+      "value": "SOUND"
+    },
+    {
+      "key": "settings.audio.master",
+      "value": "MASTER VOLUME"
+    },
+    {
+      "key": "settings.audio.effects",
+      "value": "EFFECTS VOLUME"
+    },
+    {
+      "key": "settings.language.current",
+      "value": "CURRENT LANGUAGE"
+    },
+    {
+      "key": "settings.controls.title",
+      "value": "CONTROLS"
+    },
+    {
+      "key": "settings.controls.leftHanded",
+      "value": "LEFT-HANDED LAYOUT"
+    },
+    {
+      "key": "settings.controls.joystickSize",
+      "value": "JOYSTICK SIZE"
+    },
+    {
+      "key": "settings.controls.joystickOpacity",
+      "value": "JOYSTICK OPACITY"
+    },
+    {
+      "key": "settings.controls.aimAssist",
+      "value": "AIM ASSIST"
+    },
+    {
+      "key": "settings.controls.autoFire",
+      "value": "AUTO-FIRE"
+    },
+    {
+      "key": "settings.accessibility.title",
+      "value": "ACCESSIBILITY"
+    },
+    {
+      "key": "settings.accessibility.reducedMotion",
+      "value": "REDUCED MOTION"
+    },
+    {
+      "key": "settings.accessibility.haptics",
+      "value": "HAPTICS"
+    },
+    {
+      "key": "settings.accessibility.colorblind",
+      "value": "COLORBLIND-SAFE TELEGRAPHS"
+    },
+    {
+      "key": "settings.value.on",
+      "value": "ON"
+    },
+    {
+      "key": "settings.value.off",
+      "value": "OFF"
+    },
+    {
+      "key": "settings.value.percent",
+      "value": "{0}%"
+    },
+    {
+      "key": "settings.value.size",
+      "value": "{0}x"
+    },
+    {
+      "key": "settings.aim.off",
+      "value": "OFF"
+    },
+    {
+      "key": "settings.aim.low",
+      "value": "LOW"
+    },
+    {
+      "key": "settings.aim.high",
+      "value": "HIGH"
     }
   ]
 }
