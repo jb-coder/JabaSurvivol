@@ -61,6 +61,8 @@ This slice applies the settings that #211 persisted and displayed:
 - `docs/playtests/evidence/v090-settings-phone-left-handed-autofire.png`
 - `docs/playtests/evidence/v090-settings-phone-left-handed-hud-en.png`
 - `docs/playtests/evidence/v090-settings-phone-left-handed-hud-es.png`
+- `docs/playtests/evidence/v090-settings-tablet-left-handed-hud-en.png`
+- `docs/playtests/evidence/v090-settings-tablet-left-handed-hud-es.png`
 
 ## Known limitations
 
@@ -70,5 +72,5 @@ This slice applies the settings that #211 persisted and displayed:
   provide a perceptible vibration result.
 - Aim assist is covered by automated tests and the settings UI, not by a
   visual capture.
-- The Spanish settings and HUD strings require the pending human review in
+- The Spanish settings and HUD strings are approved in
   `docs/playtests/evidence/localization-review-es.txt`.
