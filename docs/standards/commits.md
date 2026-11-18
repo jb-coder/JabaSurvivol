@@ -44,6 +44,12 @@ docs(adr): record autonomous review workflow
 chore(ci): cache the Unity Library folder
 ```
 
+## Merge commits
+
+Merge commits are not authored as Conventional Commits. They may use the
+generated `Merge ...` subject or a `merge: <summary>` subject when a branch is
+synchronized with `develop`.
+
 ## Rules
 
 - Use the imperative mood.
