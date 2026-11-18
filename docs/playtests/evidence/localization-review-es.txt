@@ -13,7 +13,7 @@
 - Placeholder coverage: 231/231, no mismatches
 - Glossary version: `docs/localization/glossary.md`
 - Translation method: Human-reviewed
-- Screens reviewed: Settings, HUD, and confirmation dialog strings in English and Spanish; confirmation layout covered by PlayMode tests
+- Screens reviewed: Settings, HUD, and confirmation dialogs on phone and tablet in English and Spanish
 - Unresolved items: none for the approved v0.9.0 confirmation slice
 - Approval: Approved by repository owner (`jb-coder`) on 2026-11-18 as part of the v0.9.0 review
 
@@ -78,6 +78,10 @@ Evidence:
 - `docs/playtests/evidence/v090-settings-phone-left-handed-hud-en.png`
 - `docs/playtests/evidence/v090-settings-phone-left-handed-hud-es.png`
 - Automated confirmation coverage: `unity/JabaSurvivol/Assets/_Project/Tests/PlayMode/ConfirmationPlayModeTests.cs`
+- `docs/playtests/evidence/v090-confirmation-phone-en.png`
+- `docs/playtests/evidence/v090-confirmation-phone-es.png`
+- `docs/playtests/evidence/v090-confirmation-tablet-en.png`
+- `docs/playtests/evidence/v090-confirmation-tablet-es.png`
 
 ## Required review scope
 
