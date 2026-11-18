@@ -6,14 +6,14 @@
 - Review owner: repository owner (`jb-coder`)
 - Named human reviewer: repository owner (`jb-coder`)
 - Review date: 2026-11-18
-- Reviewed commit or APK: `JabaSurvivol-214-emulator.apk` SHA-256 `2810C6C5C9D23D39957A451516B0D53C0181F39FD982748B2DEFBB7D39AF6D7F`
+- Reviewed commit or APK: `JabaSurvivol-214-emulator.apk` SHA-256 `5D8AA08EC218E97A726784A33447892D8283C507D23AC1DD4B24C1DA62463E99`
 - Locale file: `unity/JabaSurvivol/Assets/Resources/Localization/es.json`
 - Source table: `unity/JabaSurvivol/Assets/Resources/Localization/en.json`
 - Key coverage: 231/231
 - Placeholder coverage: 231/231, no mismatches
 - Glossary version: `docs/localization/glossary.md`
 - Translation method: Human-reviewed
-- Screens reviewed: Settings, HUD, and the leave-run confirmation dialog on phone and tablet in English and Spanish; the respec dialog uses the same shared confirmation panel
+- Screens reviewed: Settings, HUD, and the leave-run and respec confirmation dialogs on phone and tablet in English and Spanish
 - Unresolved items: none for the approved v0.9.0 confirmation slice
 - Approval: Approved by repository owner (`jb-coder`) on 2026-11-18 as part of the v0.9.0 review
 
@@ -63,7 +63,7 @@ Changed screens:
 - Settings panel audio, language, controls, and accessibility sections on
   phone and tablet.
 - HUD left-handed controls hint and manual fire button on phone.
-- Leave-run confirmation dialog. The respec dialog uses the same shared confirmation panel; its strings are covered by the PlayMode tests.
+- Leave-run and respec confirmation dialogs.
 
 Evidence:
 
@@ -82,6 +82,10 @@ Evidence:
 - `docs/playtests/evidence/v090-confirmation-phone-es.png`
 - `docs/playtests/evidence/v090-confirmation-tablet-en.png`
 - `docs/playtests/evidence/v090-confirmation-tablet-es.png`
+- `docs/playtests/evidence/v090-confirmation-respec-phone-en.png`
+- `docs/playtests/evidence/v090-confirmation-respec-phone-es.png`
+- `docs/playtests/evidence/v090-confirmation-respec-tablet-en.png`
+- `docs/playtests/evidence/v090-confirmation-respec-tablet-es.png`
 
 ## Required review scope
 
