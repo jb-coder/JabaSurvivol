@@ -320,6 +320,7 @@ Unity setup instructions, scene details, and Android build steps live in [`docs/
 | **v0.7.1 Audio Review and Fixes** | Shipped | Audio defect audit, pooled routing, mute and volume controls, lifecycle suspension, core combat and UI cues, and Android evidence |
 | **v0.8.0 Top-Down Art and Arena Upgrade** | Shipped | Top-down actors, layered neon arena, extended arena with camera follow, and Android visual evidence |
 | **v0.8.1 Color-Safe Post-Processing** | Shipped | Restored bloom and vignette with a custom full-screen pass and a low-end fallback |
+| **v0.9.0 Touch, Settings and Accessibility** | Release candidate | Unified settings, left-handed layout, joystick sizing, aim assist, manual fire, haptics, reduced motion, colorblind telegraphs, confirmations, and first-run help |
 | **v1.0.0 Release and Donations** | Planned | Release readiness and an optional donation link with no in-game rewards |
 
 ## Principles
