@@ -19,6 +19,16 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _buildLabel;
         private readonly GameObject _hud;
         private readonly GameObject _pausePanel;
+        private readonly Button _pauseMenuButton;
+        private readonly GameObject _confirmationPanel;
+        private readonly Text _confirmationTitle;
+        private readonly Text _confirmationBody;
+        private readonly Button _confirmationConfirmButton;
+        private readonly Text _confirmationConfirmLabel;
+        private readonly Button _confirmationCancelButton;
+        private readonly Text _confirmationCancelLabel;
+        private System.Action _confirmationConfirmAction;
+        private System.Action _confirmationCancelAction;
         private readonly GameObject _settingsPanel;
         private readonly Button _settingsButtonMain;
         private readonly Button _settingsButtonPause;
@@ -203,6 +213,7 @@ namespace JabaSurvivol.Gameplay
             System.Action onStart,
             System.Action onRestart,
             System.Action onMenu,
+            System.Action onPauseMenu,
             System.Action onPause,
             System.Action onResume,
             System.Action onToggleSound,
@@ -286,11 +297,12 @@ namespace JabaSurvivol.Gameplay
             _bossHealthFill = FindImage(_hud, "Boss Health Fill");
             _pausePanel = BuildPausePanel(
                 onResume,
-                onMenu,
+                onPauseMenu,
                 onArmory,
                 onCharacterSheet,
                 ShowSettingsPanel,
-                out _settingsButtonPause);
+                out _settingsButtonPause,
+                out _pauseMenuButton);
             _settingsPanel = BuildSettingsPanel(
                 onToggleSound,
                 onMasterVolumeChanged,
@@ -397,6 +409,13 @@ namespace JabaSurvivol.Gameplay
                 out _leaderboardStatusText,
                 out _leaderboardText,
                 out _leaderboardViewport);
+            _confirmationPanel = BuildConfirmationPanel(
+                out _confirmationTitle,
+                out _confirmationBody,
+                out _confirmationConfirmButton,
+                out _confirmationConfirmLabel,
+                out _confirmationCancelButton,
+                out _confirmationCancelLabel);
 
             _selectActiveButtons = new Button[3];
             _selectActiveLabels = new Text[3];
@@ -438,6 +457,7 @@ namespace JabaSurvivol.Gameplay
             _onFireHeld?.Invoke(false);
             _pausePanel.SetActive(false);
             CloseSettingsPanelSilently();
+            HideConfirmation();
             _gameOverPanel.SetActive(false);
             HideVictory();
             HideBoss();
@@ -459,6 +479,7 @@ namespace JabaSurvivol.Gameplay
             _hud.SetActive(true);
             _pausePanel.SetActive(false);
             CloseSettingsPanelSilently();
+            HideConfirmation();
             _gameOverPanel.SetActive(false);
             HideVictory();
             HideBoss();
@@ -880,10 +901,79 @@ namespace JabaSurvivol.Gameplay
             if (!visible)
             {
                 CloseSettingsPanelSilently();
+                HideConfirmation();
             }
         }
 
         public bool SettingsPanelVisible => _settingsPanel != null && _settingsPanel.activeSelf;
+
+        public bool ConfirmationVisible =>
+            _confirmationPanel != null && _confirmationPanel.activeSelf;
+
+        /// <summary>
+        /// Shows the reusable full-screen confirmation modal. The cancel
+        /// button receives the default focus so accidental confirms are less
+        /// likely on touch devices.
+        /// </summary>
+        public void ShowConfirmation(
+            string title,
+            string body,
+            string confirmLabel,
+            System.Action onConfirm,
+            System.Action onCancel = null)
+        {
+            if (_confirmationPanel == null)
+            {
+                onConfirm?.Invoke();
+                return;
+            }
+
+            _confirmationTitle.text = title ?? string.Empty;
+            _confirmationBody.text = body ?? string.Empty;
+            _confirmationConfirmLabel.text = confirmLabel ?? string.Empty;
+            _confirmationCancelLabel.text = Localization.Get("confirm.cancel");
+            _confirmationConfirmAction = onConfirm;
+            _confirmationCancelAction = onCancel;
+            _confirmationPanel.SetActive(true);
+
+            if (EventSystem.current != null)
+            {
+                EventSystem.current.SetSelectedGameObject(_confirmationCancelButton.gameObject);
+            }
+
+            UiFactory.PlayUiCue?.Invoke(GameAudioCue.UiOpen);
+        }
+
+        public void HideConfirmation()
+        {
+            if (_confirmationPanel == null || !_confirmationPanel.activeSelf)
+            {
+                return;
+            }
+
+            _confirmationPanel.SetActive(false);
+            _confirmationConfirmAction = null;
+            _confirmationCancelAction = null;
+            if (EventSystem.current != null)
+            {
+                EventSystem.current.SetSelectedGameObject(null);
+            }
+        }
+
+        private void ConfirmConfirmation()
+        {
+            var action = _confirmationConfirmAction;
+            HideConfirmation();
+            action?.Invoke();
+        }
+
+        private void CancelConfirmation()
+        {
+            var action = _confirmationCancelAction;
+            HideConfirmation();
+            UiFactory.PlayUiCue?.Invoke(GameAudioCue.UiClose);
+            action?.Invoke();
+        }
 
         public void ShowSettingsPanel()
         {
@@ -986,6 +1076,28 @@ namespace JabaSurvivol.Gameplay
 
         public string SettingsColorblindLabelForTests =>
             _settingsColorblindLabel?.text ?? string.Empty;
+
+        public bool ConfirmationVisibleForTests => ConfirmationVisible;
+
+        public string ConfirmationTitleForTests => _confirmationTitle?.text ?? string.Empty;
+
+        public string ConfirmationBodyForTests => _confirmationBody?.text ?? string.Empty;
+
+        public string ConfirmationConfirmLabelForTests =>
+            _confirmationConfirmLabel?.text ?? string.Empty;
+
+        public string ConfirmationCancelLabelForTests =>
+            _confirmationCancelLabel?.text ?? string.Empty;
+
+        public Button ConfirmationConfirmButtonForTests => _confirmationConfirmButton;
+
+        public Button ConfirmationCancelButtonForTests => _confirmationCancelButton;
+
+        public Button CharacterRespecButtonForTests => _characterRespecButton;
+
+        public Button PauseMenuButtonForTests => _pauseMenuButton;
+
+        public bool PausePanelVisibleForTests => _pausePanel != null && _pausePanel.activeSelf;
 
         public Button FireButtonForTests => _fireButton;
 
@@ -1386,6 +1498,14 @@ namespace JabaSurvivol.Gameplay
         /// </summary>
         public void UseDesignLayoutForTests()
         {
+            UseDesignLayoutForTests(new Vector2(1920f, 1080f));
+        }
+
+        /// <summary>
+        /// Test hook that lays the UI out against a specific design resolution.
+        /// </summary>
+        public void UseDesignLayoutForTests(Vector2 designSize)
+        {
             var canvas = _safeArea.GetComponentInParent<Canvas>();
             if (canvas == null)
             {
@@ -1405,7 +1525,7 @@ namespace JabaSurvivol.Gameplay
 
             canvas.renderMode = RenderMode.WorldSpace;
             var canvasRect = canvas.GetComponent<RectTransform>();
-            canvasRect.sizeDelta = new Vector2(1920f, 1080f);
+            canvasRect.sizeDelta = designSize;
             _safeArea.anchorMin = Vector2.zero;
             _safeArea.anchorMax = Vector2.one;
             _safeArea.offsetMin = Vector2.zero;
@@ -1442,6 +1562,7 @@ namespace JabaSurvivol.Gameplay
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
             CloseSettingsPanelSilently();
+            HideConfirmation();
             _gameOverPanel.SetActive(true);
             HideVictory();
             HideBoss();
@@ -1457,6 +1578,7 @@ namespace JabaSurvivol.Gameplay
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
             CloseSettingsPanelSilently();
+            HideConfirmation();
             _gameOverPanel.SetActive(false);
             HideBoss();
             HideRoundEnd();
@@ -1537,6 +1659,7 @@ namespace JabaSurvivol.Gameplay
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
             CloseSettingsPanelSilently();
+            HideConfirmation();
             _gameOverPanel.SetActive(false);
             HideVictory();
             HideRoundEnd();
@@ -1580,6 +1703,7 @@ namespace JabaSurvivol.Gameplay
         public void ShowAccount()
         {
             CloseSettingsPanelSilently();
+            HideConfirmation();
             _accountPanel.SetActive(true);
             _accountStatusText.text = string.Empty;
         }
@@ -1629,6 +1753,7 @@ namespace JabaSurvivol.Gameplay
         public void ShowLeaderboard()
         {
             CloseSettingsPanelSilently();
+            HideConfirmation();
             _leaderboardPanel.SetActive(true);
         }
 
@@ -1766,6 +1891,8 @@ namespace JabaSurvivol.Gameplay
             {
                 _characterSheet.SetActive(false);
             }
+
+            HideConfirmation();
         }
 
         public void RefreshCharacterSheet(Profile profile, bool canAllocate, bool canRespec, WeaponStats weapon, ArmorStats armor)
@@ -2480,6 +2607,82 @@ namespace JabaSurvivol.Gameplay
 
             return root;
         }
+
+        private GameObject BuildConfirmationPanel(
+            out Text title,
+            out Text body,
+            out Button confirmButton,
+            out Text confirmLabel,
+            out Button cancelButton,
+            out Text cancelLabel)
+        {
+            var panel = UiFactory.CreatePanel(
+                _safeArea,
+                "Confirmation Panel",
+                new Color(0.006f, 0.01f, 0.018f, 0.98f));
+            var root = panel.gameObject;
+            root.SetActive(false);
+
+            title = UiFactory.CreateText(
+                root.transform,
+                "Title",
+                string.Empty,
+                52,
+                TextAnchor.MiddleCenter,
+                new Color(1f, 0.78f, 0.35f));
+            title.fontStyle = FontStyle.Bold;
+            UiFactory.Place(
+                title.rectTransform,
+                new Vector2(0.5f, 0.74f),
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                new Vector2(1100f, 90f));
+
+            body = UiFactory.CreateText(
+                root.transform,
+                "Body",
+                string.Empty,
+                22,
+                TextAnchor.MiddleCenter,
+                new Color(0.84f, 0.88f, 0.95f));
+            UiFactory.Place(
+                body.rectTransform,
+                new Vector2(0.5f, 0.54f),
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                new Vector2(1200f, 180f));
+
+            cancelButton = UiFactory.CreateButton(
+                root.transform,
+                "Cancel",
+                Localization.Get("confirm.cancel"),
+                28,
+                CancelConfirmation);
+            UiFactory.Place(
+                cancelButton.GetComponent<RectTransform>(),
+                new Vector2(0.5f, 0.28f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(-220f, 0f),
+                new Vector2(380f, 84f));
+            cancelLabel = cancelButton.GetComponentInChildren<Text>();
+
+            confirmButton = UiFactory.CreateButton(
+                root.transform,
+                "Confirm",
+                string.Empty,
+                28,
+                ConfirmConfirmation);
+            UiFactory.Place(
+                confirmButton.GetComponent<RectTransform>(),
+                new Vector2(0.5f, 0.28f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(220f, 0f),
+                new Vector2(380f, 84f));
+            confirmLabel = confirmButton.GetComponentInChildren<Text>();
+
+            return root;
+        }
+
         private GameObject BuildAccountPanel(
             System.Action<string, string> onRegister,
             System.Action<string, string> onLogin,
@@ -2820,7 +3023,8 @@ namespace JabaSurvivol.Gameplay
             System.Action onArmory,
             System.Action onCharacterSheet,
             System.Action onSettings,
-            out Button settingsButton)
+            out Button settingsButton,
+            out Button menuButton)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Pause Panel", new Color(0.01f, 0.02f, 0.03f, 0.9f));
             var root = panel.gameObject;
@@ -2840,6 +3044,7 @@ namespace JabaSurvivol.Gameplay
 
             var menu = UiFactory.CreateButton(root.transform, "Menu", Localization.Get("pause.menu"), 28, onMenu);
             UiFactory.Place(menu.GetComponent<RectTransform>(), new Vector2(0.5f, 0.22f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 74f));
+            menuButton = menu;
 
             settingsButton = UiFactory.CreateButton(
                 root.transform,
@@ -4069,6 +4274,8 @@ namespace JabaSurvivol.Gameplay
             BindLocalized(FindText(_cloudConflictPanel, "Title"), "cloud.conflict.title");
             BindLocalizedButton(_cloudConflictPanel, "Use Cloud", "cloud.useCloud");
             BindLocalizedButton(_cloudConflictPanel, "Keep Local", "cloud.keepLocal");
+
+            BindLocalizedButton(_confirmationPanel, "Cancel", "confirm.cancel");
 
             BindLocalized(FindText(_leaderboardPanel, "Title"), "leaderboard.title");
             BindLocalizedButton(_leaderboardPanel, "Close", "account.close");

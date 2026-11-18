@@ -288,6 +288,33 @@ namespace JabaSurvivol.Gameplay
         public string SettingsColorblindLabelForTests =>
             _ui?.SettingsColorblindLabelForTests ?? string.Empty;
 
+        public bool ConfirmationVisibleForTests => _ui?.ConfirmationVisibleForTests ?? false;
+
+        public string ConfirmationTitleForTests =>
+            _ui?.ConfirmationTitleForTests ?? string.Empty;
+
+        public string ConfirmationBodyForTests => _ui?.ConfirmationBodyForTests ?? string.Empty;
+
+        public string ConfirmationConfirmLabelForTests =>
+            _ui?.ConfirmationConfirmLabelForTests ?? string.Empty;
+
+        public string ConfirmationCancelLabelForTests =>
+            _ui?.ConfirmationCancelLabelForTests ?? string.Empty;
+
+        public UnityEngine.UI.Button ConfirmationConfirmButtonForTests =>
+            _ui?.ConfirmationConfirmButtonForTests;
+
+        public UnityEngine.UI.Button ConfirmationCancelButtonForTests =>
+            _ui?.ConfirmationCancelButtonForTests;
+
+        public UnityEngine.UI.Button CharacterRespecButtonForTests =>
+            _ui?.CharacterRespecButtonForTests;
+
+        public UnityEngine.UI.Button PauseMenuButtonForTests =>
+            _ui?.PauseMenuButtonForTests;
+
+        public bool PausePanelVisibleForTests => _ui?.PausePanelVisibleForTests ?? false;
+
         public string MainMenuStartLabelForTests => _ui?.MainMenuStartLabelForTests ?? string.Empty;
 
         public string MainMenuSubtitleForTests => _ui?.MainMenuSubtitleForTests ?? string.Empty;
@@ -312,6 +339,9 @@ namespace JabaSurvivol.Gameplay
         public string[] TextOverflowsForTests => _ui?.TextOverflowsForTests() ?? System.Array.Empty<string>();
 
         public void UseDesignLayoutForTests() => _ui?.UseDesignLayoutForTests();
+
+        public void UseDesignLayoutForTests(Vector2 designSize) =>
+            _ui?.UseDesignLayoutForTests(designSize);
 
         public void SetApplicationPausedForTests(bool paused) => OnApplicationPause(paused);
 
@@ -541,6 +571,7 @@ namespace JabaSurvivol.Gameplay
                 StartRun,
                 RestartRun,
                 ReturnToMenu,
+                HandlePauseMenuRequest,
                 PauseGame,
                 ResumeGame,
                 ToggleSound,
@@ -631,6 +662,12 @@ namespace JabaSurvivol.Gameplay
 
             var playerPosition = (Vector2)_playerObject.transform.position;
             var frame = _input.Read(playerPosition);
+
+            if (_ui.ConfirmationVisible)
+            {
+                _ui.SetSticks(default, default);
+                return;
+            }
 
             if (_ui.CharacterSheetVisible)
             {
@@ -1735,6 +1772,30 @@ namespace JabaSurvivol.Gameplay
             _ui.ShowMainMenu(_profile);
         }
 
+        private void HandlePauseMenuRequest()
+        {
+            if (_state != GameSessionState.Paused || _run == null || _run.IsGameOver)
+            {
+                ReturnToMenu();
+                return;
+            }
+
+            _ui.ShowConfirmation(
+                Localization.Get("confirm.leave.title"),
+                Localization.Get("confirm.leave.body"),
+                Localization.Get("confirm.leave.confirm"),
+                ReturnToMenu,
+                KeepRunPaused);
+        }
+
+        private void KeepRunPaused()
+        {
+            if (_state == GameSessionState.Paused)
+            {
+                _ui.ShowPaused(true);
+            }
+        }
+
         /// <summary>
         /// Opens the armory from the main menu or the pause menu.
         /// </summary>
@@ -1907,6 +1968,28 @@ namespace JabaSurvivol.Gameplay
         }
 
         private void HandleRespecSkills()
+        {
+            if (!CanRespecSkillsNow())
+            {
+                _ui.SetCharacterSheetStatus(Localization.Get("character.respec.blocked"));
+                return;
+            }
+
+            var refunded = _profile.GetSpentSkillPoints();
+            if (refunded <= 0)
+            {
+                _ui.SetCharacterSheetStatus(Localization.Get("character.respec.empty"));
+                return;
+            }
+
+            _ui.ShowConfirmation(
+                Localization.Get("confirm.respec.title"),
+                Localization.Format("confirm.respec.body", refunded),
+                Localization.Get("confirm.respec.confirm"),
+                ConfirmRespecSkills);
+        }
+
+        private void ConfirmRespecSkills()
         {
             var refunded = RespecSkills();
             if (refunded > 0)

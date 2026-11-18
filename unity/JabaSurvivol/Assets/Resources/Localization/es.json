@@ -331,6 +331,34 @@
       "value": "SONIDO: DESACTIVADO"
     },
     {
+      "key": "confirm.respec.title",
+      "value": "¿REASIGNAR HABILIDADES?"
+    },
+    {
+      "key": "confirm.respec.body",
+      "value": "¿DEVOLVER {0} PUNTOS DE HABILIDAD ASIGNADOS? SE RESTABLECEN TODOS LOS RANGOS."
+    },
+    {
+      "key": "confirm.respec.confirm",
+      "value": "REASIGNAR"
+    },
+    {
+      "key": "confirm.leave.title",
+      "value": "¿ABANDONAR ESTA PARTIDA?"
+    },
+    {
+      "key": "confirm.leave.body",
+      "value": "LA PARTIDA ACTUAL TERMINA. SE CONSERVA TODO EL PROGRESO PERSISTENTE."
+    },
+    {
+      "key": "confirm.leave.confirm",
+      "value": "ABANDONAR PARTIDA"
+    },
+    {
+      "key": "confirm.cancel",
+      "value": "CANCELAR"
+    },
+    {
       "key": "armory.title",
       "value": "ARMERÍA"
     },
