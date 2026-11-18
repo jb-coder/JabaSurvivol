@@ -14,7 +14,7 @@
 - Unity PlayMode: 151 passed, 0 failed.
 - Android production APK: `JabaSurvivol-211.apk`, 35,971,203 bytes, SHA-256 `F547A1B2C19295ABC92CA0632DA69D5C4D7F846BEA60EC707042F4F1706D579C`.
 - Android emulator APK: `JabaSurvivol-211-emulator.apk`, 104,620,543 bytes, SHA-256 `86C011FB1F619A5C012FCBF945248CB8BD208E0763A3A5F4026E4D7AD0AEA8D5`.
-- The feature branch keeps the current version `0.8.1`; the v0.9.0 version bump is release preparation work.
+- This slice was verified before the final version bump. The v0.9.0 release uses version `0.9.0` with version code `12`.
 
 ## Android evidence
 
@@ -45,5 +45,5 @@
 - The control and accessibility values are persisted and displayed in this
   slice. Left-handed layout, aim assist, reduced motion, haptics, and
   colorblind-safe telegraphs are wired in #212, #213, and #216.
-- The Spanish strings for the settings panel require the normal human review
-  record before release.
+- The Spanish v0.9.0 strings are approved in
+  `docs/playtests/evidence/localization-review-es.txt`.

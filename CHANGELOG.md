@@ -4,6 +4,42 @@ All notable changes to this project are documented in this file.
 
 The format is based on Keep a Changelog and the project follows Semantic Versioning.
 
+## [0.9.0] - 2026-11-18
+
+### Added
+
+- Unified settings panel for audio, language, controls, and accessibility.
+- Device-local settings for left-handed layout, joystick size and opacity, aim assist, auto-fire, reduced motion, haptics, and colorblind-safe telegraphs.
+- Left-handed HUD layout that mirrors the sticks and action buttons and updates the controls hint.
+- Manual fire control when auto-fire is disabled.
+- Optional aim assist with documented Low and High cones and ranges.
+- Android haptics for player damage, boss slam, and round clear.
+- Colorblind-safe boss telegraph outline.
+- Confirmation dialogs for respec and for leaving an active run.
+- First-run help panel with the core loop, controls, rewards, armory, and persistent-progression promise.
+- EditMode and PlayMode coverage for settings persistence, layout, input, haptics, reduced motion, telegraphs, confirmations, and first-run help.
+
+### Changed
+
+- The main menu and pause menu expose one settings entry point instead of separate audio and language buttons.
+- Effects volume is available in the settings panel.
+- The HUD mirrors controls and action buttons in left-handed mode.
+- Android and core package version bumped to `0.9.0` with version code `12`.
+
+### Fixed
+
+- The active-skill button no longer overlaps the largest joystick size.
+- Touches on the manual fire button no longer seed the aim stick.
+- The controls hint reflects the active left-handed setting.
+- The Android manifest keeps the Unity launch activity and adds the vibration permission.
+
+### Known issues
+
+- Android evidence is emulator-only. Physical phone and tablet profiling remains in #99.
+- The Spanish settings, HUD, confirmation, and help strings are approved in `docs/playtests/evidence/localization-review-es.txt`.
+- Unity hosted CI remains disabled until #27 is provisioned.
+- Final authored audio and store listing art remain in v1.0.0.
+
 ## [0.8.1] - 2026-11-16
 
 ### Added
