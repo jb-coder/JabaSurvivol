@@ -24,6 +24,7 @@ namespace JabaSurvivol.Tests.PlayMode
             GameBootstrap.SavePathOverride = Path.Combine(_directory, ProfileStore.FileName);
             Localization.SetLocale("en");
             GameSettings.ClearPreferencesForTests();
+            GameSettings.MarkHelpSeen();
         }
 
         [TearDown]

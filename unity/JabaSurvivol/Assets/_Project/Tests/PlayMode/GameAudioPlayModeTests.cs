@@ -21,6 +21,7 @@ namespace JabaSurvivol.Tests.PlayMode
         {
             DeleteAudioPreferences();
             GameSettings.ClearPreferencesForTests();
+            GameSettings.MarkHelpSeen();
 
             _directory = Path.Combine(Path.GetTempPath(), "jabasurvivol-audio", Guid.NewGuid().ToString("N"));
             GameBootstrap.SavePathOverride = Path.Combine(_directory, ProfileStore.FileName);

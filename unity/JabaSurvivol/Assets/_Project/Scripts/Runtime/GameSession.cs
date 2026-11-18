@@ -288,6 +288,22 @@ namespace JabaSurvivol.Gameplay
         public string SettingsColorblindLabelForTests =>
             _ui?.SettingsColorblindLabelForTests ?? string.Empty;
 
+        public bool HelpVisibleForTests => _ui?.HelpVisible ?? false;
+
+        public UnityEngine.UI.Button HelpButtonMainForTests => _ui?.HelpButtonMainForTests;
+
+        public UnityEngine.UI.Button HelpButtonSettingsForTests => _ui?.HelpButtonSettingsForTests;
+
+        public UnityEngine.UI.Button HelpCloseButtonForTests => _ui?.HelpCloseButtonForTests;
+
+        public string HelpTitleForTests => _ui?.HelpTitleForTests ?? string.Empty;
+
+        public string HelpBodyForTests => _ui?.HelpBodyForTests ?? string.Empty;
+
+        public void ShowHelpForTests() => _ui?.ShowHelp();
+
+        public void DismissHelpForTests() => _ui?.HideHelp();
+
         public bool ConfirmationVisibleForTests => _ui?.ConfirmationVisibleForTests ?? false;
 
         public string ConfirmationTitleForTests =>
@@ -638,6 +654,11 @@ namespace JabaSurvivol.Gameplay
 
             _state = GameSessionState.MainMenu;
             _ui.ShowMainMenu(_profile);
+            if (!GameSettings.HelpSeen)
+            {
+                _ui.ShowHelp();
+            }
+
             _playerObject.SetActive(false);
             _zombieActors.ReturnAll();
         }
@@ -662,6 +683,12 @@ namespace JabaSurvivol.Gameplay
 
             var playerPosition = (Vector2)_playerObject.transform.position;
             var frame = _input.Read(playerPosition);
+
+            if (_ui.HelpVisible)
+            {
+                _ui.SetSticks(default, default);
+                return;
+            }
 
             if (_ui.ConfirmationVisible)
             {
