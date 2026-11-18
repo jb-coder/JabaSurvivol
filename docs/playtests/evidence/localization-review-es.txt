@@ -6,7 +6,7 @@
 - Review owner: repository owner (`jb-coder`)
 - Named human reviewer: repository owner (`jb-coder`)
 - Review date: 2026-11-18
-- Reviewed commit or APK: release candidate APK `JabaSurvivol-0.9.0-rc.apk` SHA-256 `0912D74397EC55078E1A8FA2C713F59F42B2380623B2BD211CDC91F46C926B19`
+- Reviewed commit or APK: `JabaSurvivol-215-emulator.apk` SHA-256 `0F3EEBCE3729505929ED7B28FC910BED9C48D9B506B70F9B1243625BD3843D50`
 - Locale file: `unity/JabaSurvivol/Assets/Resources/Localization/es.json`
 - Source table: `unity/JabaSurvivol/Assets/Resources/Localization/en.json`
 - Key coverage: 235/235
@@ -82,6 +82,20 @@ Evidence:
 - `docs/playtests/evidence/v090-settings-phone-left-handed-autofire.png`
 - `docs/playtests/evidence/v090-settings-phone-left-handed-hud-en.png`
 - `docs/playtests/evidence/v090-settings-phone-left-handed-hud-es.png`
+- `docs/playtests/evidence/v090-settings-tablet-left-handed-hud-en.png`
+- `docs/playtests/evidence/v090-settings-tablet-left-handed-hud-es.png`
+- `docs/playtests/evidence/v090-confirmation-phone-en.png`
+- `docs/playtests/evidence/v090-confirmation-phone-es.png`
+- `docs/playtests/evidence/v090-confirmation-tablet-en.png`
+- `docs/playtests/evidence/v090-confirmation-tablet-es.png`
+- `docs/playtests/evidence/v090-confirmation-respec-phone-en.png`
+- `docs/playtests/evidence/v090-confirmation-respec-phone-es.png`
+- `docs/playtests/evidence/v090-confirmation-respec-tablet-en.png`
+- `docs/playtests/evidence/v090-confirmation-respec-tablet-es.png`
+- `docs/playtests/evidence/v090-help-phone-en.png`
+- `docs/playtests/evidence/v090-help-phone-es.png`
+- `docs/playtests/evidence/v090-help-tablet-en.png`
+- `docs/playtests/evidence/v090-help-tablet-es.png`
 
 ## Required review scope
 
