@@ -331,6 +331,34 @@
       "value": "SOUND: OFF"
     },
     {
+      "key": "confirm.respec.title",
+      "value": "RESPEC SKILLS?"
+    },
+    {
+      "key": "confirm.respec.body",
+      "value": "REFUND {0} ALLOCATED SKILL POINTS? THIS RESETS EVERY SKILL RANK."
+    },
+    {
+      "key": "confirm.respec.confirm",
+      "value": "RESPEC"
+    },
+    {
+      "key": "confirm.leave.title",
+      "value": "LEAVE THIS RUN?"
+    },
+    {
+      "key": "confirm.leave.body",
+      "value": "THE CURRENT RUN ENDS. ALL PERSISTENT PROGRESSION IS KEPT."
+    },
+    {
+      "key": "confirm.leave.confirm",
+      "value": "LEAVE RUN"
+    },
+    {
+      "key": "confirm.cancel",
+      "value": "CANCEL"
+    },
+    {
       "key": "armory.title",
       "value": "ARMORY"
     },
