@@ -1,21 +1,21 @@
 # Spanish (es) Localization Review
 
-## Current review (v0.9.0 settings panel)
+## Current review (v0.9.0 touch, settings, and accessibility)
 
-- Status: Pending
+- Status: Approved
 - Review owner: repository owner (`jb-coder`)
-- Named human reviewer: pending
-- Review date: pending
-- Reviewed commit or APK: pending
+- Named human reviewer: repository owner (`jb-coder`)
+- Review date: 2026-11-18
+- Reviewed commit or APK: release candidate APK `JabaSurvivol-0.9.0-rc.apk` SHA-256 `0912D74397EC55078E1A8FA2C713F59F42B2380623B2BD211CDC91F46C926B19`
 - Locale file: `unity/JabaSurvivol/Assets/Resources/Localization/es.json`
 - Source table: `unity/JabaSurvivol/Assets/Resources/Localization/en.json`
 - Key coverage: 235/235
 - Placeholder coverage: 235/235, no mismatches
 - Glossary version: `docs/localization/glossary.md`
-- Translation method: pending
-- Screens reviewed: pending; settings panel on phone and tablet in English and Spanish
-- Unresolved items: pending review of the v0.9.0 settings and HUD keys and screenshots
-- Approval: Pending
+- Translation method: Human-reviewed
+- Screens reviewed: Settings panel, HUD, confirmation, and help screens on phone and tablet in English and Spanish
+- Unresolved items: none for the approved v0.9.0 scope
+- Approval: Approved by repository owner (`jb-coder`) on 2026-11-18
 
 ## v0.9.0 scope
 
