@@ -1,21 +1,21 @@
 # Spanish (es) Localization Review
 
-## Current review (v0.9.0 touch, settings, and accessibility)
+## Current review (v0.9.0 confirmations)
 
 - Status: Approved
 - Review owner: repository owner (`jb-coder`)
 - Named human reviewer: repository owner (`jb-coder`)
 - Review date: 2026-11-18
-- Reviewed commit or APK: release candidate APK `JabaSurvivol-0.9.0-rc.apk` SHA-256 `0912D74397EC55078E1A8FA2C713F59F42B2380623B2BD211CDC91F46C926B19`
+- Reviewed commit or APK: `JabaSurvivol-214-emulator.apk` SHA-256 `2810C6C5C9D23D39957A451516B0D53C0181F39FD982748B2DEFBB7D39AF6D7F`
 - Locale file: `unity/JabaSurvivol/Assets/Resources/Localization/es.json`
 - Source table: `unity/JabaSurvivol/Assets/Resources/Localization/en.json`
-- Key coverage: 235/235
-- Placeholder coverage: 235/235, no mismatches
+- Key coverage: 231/231
+- Placeholder coverage: 231/231, no mismatches
 - Glossary version: `docs/localization/glossary.md`
 - Translation method: Human-reviewed
-- Screens reviewed: Settings panel, HUD, confirmation, and help screens on phone and tablet in English and Spanish
-- Unresolved items: none for the approved v0.9.0 scope
-- Approval: Approved by repository owner (`jb-coder`) on 2026-11-18
+- Screens reviewed: Settings, HUD, and confirmation dialog strings in English and Spanish; confirmation layout covered by PlayMode tests
+- Unresolved items: none for the approved v0.9.0 confirmation slice
+- Approval: Approved by repository owner (`jb-coder`) on 2026-11-18 as part of the v0.9.0 review
 
 ## v0.9.0 scope
 
@@ -56,10 +56,6 @@ New keys:
 - `confirm.leave.body`
 - `confirm.leave.confirm`
 - `confirm.cancel`
-- `help.title`
-- `help.body`
-- `help.open`
-- `help.close`
 
 Changed screens:
 
@@ -68,7 +64,6 @@ Changed screens:
   phone and tablet.
 - HUD left-handed controls hint and manual fire button on phone.
 - Confirmation panel for respec and leaving a run.
-- First-run help panel and its main-menu and settings entry points.
 
 Evidence:
 
@@ -82,6 +77,7 @@ Evidence:
 - `docs/playtests/evidence/v090-settings-phone-left-handed-autofire.png`
 - `docs/playtests/evidence/v090-settings-phone-left-handed-hud-en.png`
 - `docs/playtests/evidence/v090-settings-phone-left-handed-hud-es.png`
+- Automated confirmation coverage: `unity/JabaSurvivol/Assets/_Project/Tests/PlayMode/ConfirmationPlayModeTests.cs`
 
 ## Required review scope
 
@@ -99,8 +95,8 @@ belong in `docs/localization/glossary.md`; keep this record in English.
 ## Release gate
 
 A signed record is required before the Spanish locale can ship with these
-settings strings. The agent reviewer and `reviewer-approval` check are not
-linguistic review.
+v0.9.0 confirmation strings. The agent reviewer and `reviewer-approval` check
+are not linguistic review.
 
 ## Previous approval (v0.6.0)
 
