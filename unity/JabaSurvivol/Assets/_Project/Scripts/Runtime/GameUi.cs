@@ -27,6 +27,12 @@ namespace JabaSurvivol.Gameplay
         private readonly Text _confirmationConfirmLabel;
         private readonly Button _confirmationCancelButton;
         private readonly Text _confirmationCancelLabel;
+        private readonly GameObject _helpPanel;
+        private readonly Text _helpTitle;
+        private readonly Text _helpBody;
+        private readonly Button _helpCloseButton;
+        private readonly Button _helpButtonMain;
+        private readonly Button _helpButtonSettings;
         private System.Action _confirmationConfirmAction;
         private System.Action _confirmationCancelAction;
         private readonly GameObject _settingsPanel;
@@ -269,11 +275,13 @@ namespace JabaSurvivol.Gameplay
                 onLeaderboard,
                 onTelemetryToggle,
                 ShowSettingsPanel,
+                ShowHelp,
                 out _mainMenuAccountState,
                 out _telemetryButton,
                 out _telemetryLabel,
                 out _buildLabel,
-                out _settingsButtonMain);
+                out _settingsButtonMain,
+                out _helpButtonMain);
             _hud = BuildHud(onPause, onReload, onSwitchWeapon, onActiveSkill, onFireHeld, out _healthText, out _armorText, out _healthFill, out _roundText, out _enemiesText, out _killsText, out _suppliesText, out _levelText, out _moveBase, out _moveKnob, out _aimBase, out _aimKnob, out _moveBaseImage, out _aimBaseImage, out _moveKnobImage, out _aimKnobImage);
             _reloadButton = FindGameObject(_hud, "Reload Button")?.GetComponent<Button>();
             _switchWeaponButton = FindGameObject(_hud, "Switch Weapon")?.GetComponent<Button>();
@@ -338,7 +346,8 @@ namespace JabaSurvivol.Gameplay
                 out _settingsColorblindButton,
                 out _settingsColorblindLabel,
                 out _settingsResetButton,
-                out _settingsCloseButton);
+                out _settingsCloseButton,
+                out _helpButtonSettings);
             _gameOverPanel = BuildGameOverPanel(onRestart, onMenu, out _gameOverSummary);
             _victoryPanel = BuildVictoryPanel(onRestart, onMenu, onLeaderboard, out _victorySummary);
             _roundEndPanel = BuildRoundEndPanel(
@@ -416,6 +425,10 @@ namespace JabaSurvivol.Gameplay
                 out _confirmationConfirmLabel,
                 out _confirmationCancelButton,
                 out _confirmationCancelLabel);
+            _helpPanel = BuildHelpPanel(
+                out _helpTitle,
+                out _helpBody,
+                out _helpCloseButton);
 
             _selectActiveButtons = new Button[3];
             _selectActiveLabels = new Text[3];
@@ -452,6 +465,7 @@ namespace JabaSurvivol.Gameplay
 
         public void ShowMainMenu(Profile profile)
         {
+            HideHelpSilently();
             _mainMenu.SetActive(true);
             _hud.SetActive(false);
             _onFireHeld?.Invoke(false);
@@ -475,6 +489,7 @@ namespace JabaSurvivol.Gameplay
 
         public void ShowHud()
         {
+            HideHelpSilently();
             _mainMenu.SetActive(false);
             _hud.SetActive(true);
             _pausePanel.SetActive(false);
@@ -897,6 +912,11 @@ namespace JabaSurvivol.Gameplay
 
         public void ShowPaused(bool visible)
         {
+            if (visible)
+            {
+                HideHelpSilently();
+            }
+
             _pausePanel.SetActive(visible);
             if (!visible)
             {
@@ -975,8 +995,61 @@ namespace JabaSurvivol.Gameplay
             action?.Invoke();
         }
 
+        /// <summary>
+        /// Shows the modal first-run help panel above the current menu. Closing
+        /// it reveals whichever panel was underneath: main menu, pause menu, or
+        /// settings.
+        /// </summary>
+        public void ShowHelp()
+        {
+            if (_helpPanel == null)
+            {
+                return;
+            }
+
+            _helpPanel.transform.SetAsLastSibling();
+            _helpPanel.SetActive(true);
+            if (EventSystem.current != null)
+            {
+                EventSystem.current.SetSelectedGameObject(_helpCloseButton.gameObject);
+            }
+
+            UiFactory.PlayUiCue?.Invoke(GameAudioCue.UiOpen);
+        }
+
+        /// <summary>
+        /// Dismisses the help panel and records the device-local seen flag.
+        /// </summary>
+        public void HideHelp()
+        {
+            if (_helpPanel == null || !_helpPanel.activeSelf)
+            {
+                return;
+            }
+
+            _helpPanel.SetActive(false);
+            GameSettings.MarkHelpSeen();
+            if (EventSystem.current != null)
+            {
+                EventSystem.current.SetSelectedGameObject(null);
+            }
+
+            UiFactory.PlayUiCue?.Invoke(GameAudioCue.UiClose);
+        }
+
+        private void HideHelpSilently()
+        {
+            if (_helpPanel != null)
+            {
+                _helpPanel.SetActive(false);
+            }
+        }
+
+        public bool HelpVisible => _helpPanel != null && _helpPanel.activeSelf;
+
         public void ShowSettingsPanel()
         {
+            HideHelpSilently();
             RefreshSettingsValues();
             if (_settingsPanel != null)
             {
@@ -1008,6 +1081,16 @@ namespace JabaSurvivol.Gameplay
         public Button SettingsButtonMainForTests => _settingsButtonMain;
 
         public Button SettingsButtonPauseForTests => _settingsButtonPause;
+
+        public Button HelpButtonMainForTests => _helpButtonMain;
+
+        public Button HelpButtonSettingsForTests => _helpButtonSettings;
+
+        public Button HelpCloseButtonForTests => _helpCloseButton;
+
+        public string HelpTitleForTests => _helpTitle?.text ?? string.Empty;
+
+        public string HelpBodyForTests => _helpBody?.text ?? string.Empty;
 
         public Button SettingsCloseButtonForTests => _settingsCloseButton;
 
@@ -1558,6 +1641,7 @@ namespace JabaSurvivol.Gameplay
 
         public void ShowGameOver(int round, int kills, int suppliesEarned)
         {
+            HideHelpSilently();
             _mainMenu.SetActive(false);
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
@@ -1574,6 +1658,7 @@ namespace JabaSurvivol.Gameplay
 
         public void ShowVictory(int round, int kills, int suppliesEarned, int xpEarned)
         {
+            HideHelpSilently();
             _mainMenu.SetActive(false);
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
@@ -1655,6 +1740,7 @@ namespace JabaSurvivol.Gameplay
 
         public void ShowArmory(Profile profile, WeaponId displayWeapon)
         {
+            HideHelpSilently();
             _mainMenu.SetActive(false);
             _hud.SetActive(false);
             _pausePanel.SetActive(false);
@@ -1690,6 +1776,7 @@ namespace JabaSurvivol.Gameplay
 
         public void ShowCharacterSheet(Profile profile, bool canAllocate, bool canRespec, WeaponStats weapon, ArmorStats armor)
         {
+            HideHelpSilently();
             CloseSettingsPanelSilently();
             _characterSheetTablet = IsTabletLayout();
             _characterSheet.SetActive(true);
@@ -1702,6 +1789,7 @@ namespace JabaSurvivol.Gameplay
 
         public void ShowAccount()
         {
+            HideHelpSilently();
             CloseSettingsPanelSilently();
             HideConfirmation();
             _accountPanel.SetActive(true);
@@ -1752,6 +1840,7 @@ namespace JabaSurvivol.Gameplay
 
         public void ShowLeaderboard()
         {
+            HideHelpSilently();
             CloseSettingsPanelSilently();
             HideConfirmation();
             _leaderboardPanel.SetActive(true);
@@ -2483,11 +2572,13 @@ namespace JabaSurvivol.Gameplay
             System.Action onLeaderboard,
             System.Action onTelemetryToggle,
             System.Action onSettings,
+            System.Action onHelp,
             out Text accountStateText,
             out Button telemetryButton,
             out Text telemetryLabel,
             out Text buildLabel,
-            out Button settingsButton)
+            out Button settingsButton,
+            out Button helpButton)
         {
             var panel = UiFactory.CreatePanel(_safeArea, "Main Menu", new Color(0.012f, 0.018f, 0.03f, 0.98f));
             var root = panel.gameObject;
@@ -2514,11 +2605,14 @@ namespace JabaSurvivol.Gameplay
             var character = UiFactory.CreateButton(root.transform, "Skills", Localization.Get("character.open"), 32, onCharacterSheet);
             UiFactory.Place(character.GetComponent<RectTransform>(), new Vector2(0.5f, 0.22f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 76f));
 
-            var leaderboard = UiFactory.CreateButton(root.transform, "Leaderboard", Localization.Get("leaderboard.open"), 28, onLeaderboard);
-            UiFactory.Place(leaderboard.GetComponent<RectTransform>(), new Vector2(0.5f, 0.13f), new Vector2(0.5f, 0.5f), new Vector2(-190f, 0f), new Vector2(340f, 76f));
+            var leaderboard = UiFactory.CreateButton(root.transform, "Leaderboard", Localization.Get("leaderboard.open"), 26, onLeaderboard);
+            UiFactory.Place(leaderboard.GetComponent<RectTransform>(), new Vector2(0.5f, 0.13f), new Vector2(0.5f, 0.5f), new Vector2(-330f, 0f), new Vector2(300f, 76f));
 
-            var account = UiFactory.CreateButton(root.transform, "Account", Localization.Get("account.open"), 28, onAccount);
-            UiFactory.Place(account.GetComponent<RectTransform>(), new Vector2(0.5f, 0.13f), new Vector2(0.5f, 0.5f), new Vector2(190f, 0f), new Vector2(340f, 76f));
+            helpButton = UiFactory.CreateButton(root.transform, "How To Play", Localization.Get("help.open"), 24, onHelp);
+            UiFactory.Place(helpButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.13f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300f, 76f));
+
+            var account = UiFactory.CreateButton(root.transform, "Account", Localization.Get("account.open"), 26, onAccount);
+            UiFactory.Place(account.GetComponent<RectTransform>(), new Vector2(0.5f, 0.13f), new Vector2(0.5f, 0.5f), new Vector2(330f, 0f), new Vector2(300f, 76f));
 
             telemetryButton = UiFactory.CreateButton(
                 root.transform,
@@ -2679,6 +2773,63 @@ namespace JabaSurvivol.Gameplay
                 new Vector2(220f, 0f),
                 new Vector2(380f, 84f));
             confirmLabel = confirmButton.GetComponentInChildren<Text>();
+
+            return root;
+        }
+
+        private GameObject BuildHelpPanel(
+            out Text title,
+            out Text body,
+            out Button closeButton)
+        {
+            var panel = UiFactory.CreatePanel(
+                _safeArea,
+                "Help Panel",
+                new Color(0.006f, 0.01f, 0.018f, 0.99f));
+            var root = panel.gameObject;
+            root.SetActive(false);
+
+            title = UiFactory.CreateText(
+                root.transform,
+                "Title",
+                Localization.Get("help.title"),
+                56,
+                TextAnchor.MiddleCenter,
+                new Color(0.4f, 0.95f, 1f));
+            title.fontStyle = FontStyle.Bold;
+            UiFactory.Place(
+                title.rectTransform,
+                new Vector2(0.5f, 0.9f),
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                new Vector2(1200f, 72f));
+
+            body = UiFactory.CreateText(
+                root.transform,
+                "Body",
+                Localization.Get("help.body"),
+                20,
+                TextAnchor.MiddleCenter,
+                new Color(0.84f, 0.89f, 0.96f));
+            UiFactory.Place(
+                body.rectTransform,
+                new Vector2(0.5f, 0.51f),
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                new Vector2(1260f, 470f));
+
+            closeButton = UiFactory.CreateButton(
+                root.transform,
+                "Close",
+                Localization.Get("help.close"),
+                28,
+                HideHelp);
+            UiFactory.Place(
+                closeButton.GetComponent<RectTransform>(),
+                new Vector2(0.5f, 0f),
+                new Vector2(0.5f, 0f),
+                new Vector2(0f, 36f),
+                new Vector2(360f, 76f));
 
             return root;
         }
@@ -3092,7 +3243,8 @@ namespace JabaSurvivol.Gameplay
             out Button colorblindButton,
             out Text colorblindLabel,
             out Button resetButton,
-            out Button closeButton)
+            out Button closeButton,
+            out Button helpButton)
         {
             var panel = UiFactory.CreatePanel(
                 _safeArea,
@@ -3299,7 +3451,15 @@ namespace JabaSurvivol.Gameplay
                 Localization.Get("settings.reset"),
                 24,
                 ResetSettings);
-            UiFactory.Place(resetButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-190f, 26f), new Vector2(380f, 64f));
+            UiFactory.Place(resetButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-380f, 26f), new Vector2(360f, 64f));
+
+            helpButton = UiFactory.CreateButton(
+                root.transform,
+                "How To Play",
+                Localization.Get("help.open"),
+                24,
+                ShowHelp);
+            UiFactory.Place(helpButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 26f), new Vector2(320f, 64f));
 
             closeButton = UiFactory.CreateButton(
                 root.transform,
@@ -3307,7 +3467,7 @@ namespace JabaSurvivol.Gameplay
                 Localization.Get("settings.close"),
                 24,
                 HideSettingsPanel);
-            UiFactory.Place(closeButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(190f, 26f), new Vector2(240f, 64f));
+            UiFactory.Place(closeButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(380f, 26f), new Vector2(360f, 64f));
 
             return root;
         }
@@ -4209,6 +4369,7 @@ namespace JabaSurvivol.Gameplay
             BindLocalizedButton(_mainMenu, "Leaderboard", "leaderboard.open");
             BindLocalizedButton(_mainMenu, "Account", "account.open");
             BindLocalizedButton(_mainMenu, "Settings", "settings.open");
+            BindLocalizedButton(_mainMenu, "How To Play", "help.open");
 
             BindLocalized(FindText(_pausePanel, "Title"), "pause.title");
             BindLocalizedButton(_pausePanel, "Resume", "pause.resume");
@@ -4299,7 +4460,12 @@ namespace JabaSurvivol.Gameplay
             BindLocalized(FindText(_settingsPanel, "Colorblind Label"), "settings.accessibility.colorblind");
             BindLocalizedButton(_settingsPanel, "System Language", "settings.language.system");
             BindLocalizedButton(_settingsPanel, "Reset", "settings.reset");
+            BindLocalizedButton(_settingsPanel, "How To Play", "help.open");
             BindLocalizedButton(_settingsPanel, "Close", "settings.close");
+
+            BindLocalized(FindText(_helpPanel, "Title"), "help.title");
+            BindLocalized(FindText(_helpPanel, "Body"), "help.body");
+            BindLocalizedButton(_helpPanel, "Close", "help.close");
         }
 
         private static void BindLocalized(Text text, string key)

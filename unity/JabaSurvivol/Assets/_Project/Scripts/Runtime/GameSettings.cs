@@ -33,6 +33,7 @@ namespace JabaSurvivol.Gameplay
         public const string ReducedMotionKey = "settings.reducedMotion";
         public const string HapticsKey = "settings.haptics";
         public const string ColorblindSafeTelegraphsKey = "settings.colorblindSafeTelegraphs";
+        public const string HelpSeenKey = "help.seen";
 
         public const bool DefaultLeftHanded = false;
         public const float DefaultJoystickSize = 1f;
@@ -59,6 +60,7 @@ namespace JabaSurvivol.Gameplay
         private static bool _reducedMotion;
         private static bool _haptics;
         private static bool _colorblindSafeTelegraphs;
+        private static bool _helpSeen;
 
         /// <summary>
         /// True when the touch controls are mirrored for left-handed play.
@@ -156,6 +158,19 @@ namespace JabaSurvivol.Gameplay
             }
         }
 
+        /// <summary>
+        /// True after the first-run help panel has been dismissed. Stored only
+        /// on the device so it never enters the profile or cloud save.
+        /// </summary>
+        public static bool HelpSeen
+        {
+            get
+            {
+                EnsureLoaded();
+                return _helpSeen;
+            }
+        }
+
         public static void SetLeftHanded(bool value)
         {
             EnsureLoaded();
@@ -245,6 +260,18 @@ namespace JabaSurvivol.Gameplay
         }
 
         /// <summary>
+        /// Records that the first-run help panel was dismissed.
+        /// </summary>
+        public static void MarkHelpSeen()
+        {
+            EnsureLoaded();
+            _helpSeen = true;
+            PlayerPrefs.SetInt(HelpSeenKey, 1);
+            PlayerPrefs.Save();
+            NotifyChanged();
+        }
+
+        /// <summary>
         /// Writes every current value to <see cref="PlayerPrefs"/>.
         /// </summary>
         public static void Save()
@@ -303,6 +330,7 @@ namespace JabaSurvivol.Gameplay
             PlayerPrefs.DeleteKey(ReducedMotionKey);
             PlayerPrefs.DeleteKey(HapticsKey);
             PlayerPrefs.DeleteKey(ColorblindSafeTelegraphsKey);
+            PlayerPrefs.DeleteKey(HelpSeenKey);
             PlayerPrefs.Save();
             Load();
         }
@@ -337,6 +365,7 @@ namespace JabaSurvivol.Gameplay
             _colorblindSafeTelegraphs = PlayerPrefs.GetInt(
                 ColorblindSafeTelegraphsKey,
                 DefaultColorblindSafeTelegraphs ? 1 : 0) != 0;
+            _helpSeen = PlayerPrefs.GetInt(HelpSeenKey, 0) != 0;
 
             var rawSize = PlayerPrefs.GetFloat(JoystickSizeKey, DefaultJoystickSize);
             _joystickSize = ClampJoystickSize(rawSize);

@@ -925,6 +925,22 @@
     {
       "key": "settings.aim.high",
       "value": "ALTA"
+    },
+    {
+      "key": "help.title",
+      "value": "CÓMO JUGAR"
+    },
+    {
+      "key": "help.body",
+      "value": "PALANCA DE MOVER: MOVER\nPALANCA DE APUNTAR: APUNTAR Y DISPARAR\nDISPARO MANUAL: MANTÉN PULSADO\nRECARGAR/CAMBIAR: TOCA LOS BOTONES\nHABILIDAD ACTIVA: TOCA EL BOTÓN\nRECOMPENSAS: ELIGE 1 DE 3\nARMERÍA: GASTA SUMINISTROS\nEN MEJORAS PERMANENTES\n\nLA MUERTE CONSERVA SUMINISTROS,\nXP, NIVELES, PUNTOS DE HABILIDAD,\nHABILIDADES, ARMAS,\nMEJORAS Y ARMADURA."
+    },
+    {
+      "key": "help.open",
+      "value": "CÓMO JUGAR"
+    },
+    {
+      "key": "help.close",
+      "value": "ENTENDIDO"
     }
   ]
 }

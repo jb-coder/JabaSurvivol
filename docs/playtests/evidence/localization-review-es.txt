@@ -9,8 +9,8 @@
 - Reviewed commit or APK: pending
 - Locale file: `unity/JabaSurvivol/Assets/Resources/Localization/es.json`
 - Source table: `unity/JabaSurvivol/Assets/Resources/Localization/en.json`
-- Key coverage: 224/224
-- Placeholder coverage: 224/224, no mismatches
+- Key coverage: 235/235
+- Placeholder coverage: 235/235, no mismatches
 - Glossary version: `docs/localization/glossary.md`
 - Translation method: pending
 - Screens reviewed: pending; settings panel on phone and tablet in English and Spanish
@@ -49,6 +49,17 @@ New keys:
 - `settings.aim.high`
 - `menu.controls.leftHanded`
 - `hud.fire`
+- `confirm.respec.title`
+- `confirm.respec.body`
+- `confirm.respec.confirm`
+- `confirm.leave.title`
+- `confirm.leave.body`
+- `confirm.leave.confirm`
+- `confirm.cancel`
+- `help.title`
+- `help.body`
+- `help.open`
+- `help.close`
 
 Changed screens:
 
@@ -56,6 +67,8 @@ Changed screens:
 - Settings panel audio, language, controls, and accessibility sections on
   phone and tablet.
 - HUD left-handed controls hint and manual fire button on phone.
+- Confirmation panel for respec and leaving a run.
+- First-run help panel and its main-menu and settings entry points.
 
 Evidence:
 

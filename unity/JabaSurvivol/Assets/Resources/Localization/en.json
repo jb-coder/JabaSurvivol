@@ -925,6 +925,22 @@
     {
       "key": "settings.aim.high",
       "value": "HIGH"
+    },
+    {
+      "key": "help.title",
+      "value": "HOW TO PLAY"
+    },
+    {
+      "key": "help.body",
+      "value": "MOVE STICK: MOVE\nAIM STICK: AIM AND FIRE\nMANUAL FIRE: HOLD FIRE\nRELOAD/SWITCH: TOUCH BUTTONS\nACTIVE SKILL: TOUCH BUTTON\nROUND REWARDS: PICK 1 OF 3\nARMORY: SPEND SUPPLIES ON\nPERMANENT UPGRADES\n\nDEATH KEEPS SUPPLIES, XP,\nLEVELS, SKILL POINTS,\nSKILLS, WEAPONS,\nUPGRADES, ARMOR."
+    },
+    {
+      "key": "help.open",
+      "value": "HOW TO PLAY"
+    },
+    {
+      "key": "help.close",
+      "value": "GOT IT"
     }
   ]
 }

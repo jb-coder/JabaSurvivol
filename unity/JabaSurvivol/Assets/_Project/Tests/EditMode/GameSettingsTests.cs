@@ -29,6 +29,36 @@ namespace JabaSurvivol.Tests.EditMode
             Assert.That(GameSettings.ReducedMotion, Is.False);
             Assert.That(GameSettings.Haptics, Is.False);
             Assert.That(GameSettings.ColorblindSafeTelegraphs, Is.False);
+            Assert.That(GameSettings.HelpSeen, Is.False);
+        }
+
+        [Test]
+        public void Help_seen_is_device_local_and_clears_for_tests()
+        {
+            Assert.That(GameSettings.HelpSeen, Is.False);
+
+            GameSettings.MarkHelpSeen();
+
+            Assert.That(GameSettings.HelpSeen, Is.True);
+            Assert.That(PlayerPrefs.GetInt(GameSettings.HelpSeenKey), Is.EqualTo(1));
+
+            GameSettings.ReloadForTests();
+            Assert.That(GameSettings.HelpSeen, Is.True);
+
+            GameSettings.ClearPreferencesForTests();
+            Assert.That(GameSettings.HelpSeen, Is.False);
+            Assert.That(PlayerPrefs.GetInt(GameSettings.HelpSeenKey, 0), Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Resetting_settings_does_not_clear_help_seen()
+        {
+            GameSettings.MarkHelpSeen();
+
+            GameSettings.ResetToDefaults();
+
+            Assert.That(GameSettings.HelpSeen, Is.True);
+            Assert.That(PlayerPrefs.GetInt(GameSettings.HelpSeenKey), Is.EqualTo(1));
         }
 
         [Test]

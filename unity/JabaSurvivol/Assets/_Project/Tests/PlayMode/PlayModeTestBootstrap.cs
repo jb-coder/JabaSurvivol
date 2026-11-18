@@ -13,6 +13,7 @@ public sealed class PlayModeTestBootstrap
         PlayerPrefs.Save();
         Localization.SetLocale("en");
         GameSettings.ClearPreferencesForTests();
+        GameSettings.MarkHelpSeen();
     }
 
     [OneTimeTearDown]
