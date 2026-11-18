@@ -4,15 +4,7 @@ mode: subagent
 model: opencode-go/deepseek-v4.1-flash
 permission:
   edit: allow
-  bash:
-    "*": ask
-    "git *": allow
-    "gh *": allow
-    "dotnet *": allow
-    "Unity *": allow
-    "adb *": allow
-    "pwsh *": allow
-    "powershell *": allow
+  bash: allow
   task: allow
   question: deny
 ---
