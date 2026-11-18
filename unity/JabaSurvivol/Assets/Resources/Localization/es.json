@@ -27,6 +27,10 @@
       "value": "PALANCA IZQ. MOVER    PALANCA DCHA. APUNTAR Y DISPARAR"
     },
     {
+      "key": "menu.controls.leftHanded",
+      "value": "PALANCA DCHA. MOVER    PALANCA IZQ. APUNTAR Y DISPARAR"
+    },
+    {
       "key": "menu.build",
       "value": "v{0} · {1}"
     },
@@ -257,6 +261,10 @@
     {
       "key": "hud.switch",
       "value": "CAMBIAR"
+    },
+    {
+      "key": "hud.fire",
+      "value": "DISPARAR"
     },
     {
       "key": "hud.ammo",

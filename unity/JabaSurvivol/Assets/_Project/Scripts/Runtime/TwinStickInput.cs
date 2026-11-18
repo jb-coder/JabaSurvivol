@@ -23,10 +23,21 @@ namespace JabaSurvivol.Gameplay
         private Vector2 _moveCurrent;
         private Vector2 _aimOrigin;
         private Vector2 _aimCurrent;
+        private System.Func<Vector2, bool> _ignoreTouch;
 
         public void Initialize(Camera camera)
         {
             _camera = camera;
+        }
+
+        /// <summary>
+        /// Optional filter for screen points that belong to UI controls. Touches
+        /// that start on a filtered control do not seed the movement or aim
+        /// sticks.
+        /// </summary>
+        public void SetTouchFilter(System.Func<Vector2, bool> ignoreTouch)
+        {
+            _ignoreTouch = ignoreTouch;
         }
 
         private void OnEnable()
@@ -58,7 +69,9 @@ namespace JabaSurvivol.Gameplay
 
         private void ReadTouchSticks(ref InputFrame frame)
         {
-            var radius = Mathf.Max(32f, Mathf.Min(Screen.width, Screen.height) * TouchRadiusFactor);
+            var radius = Mathf.Max(
+                32f,
+                Mathf.Min(Screen.width, Screen.height) * TouchRadiusFactor * GameSettings.JoystickSize);
 
             if (_moveFinger >= 0)
             {
@@ -76,7 +89,10 @@ namespace JabaSurvivol.Gameplay
                 if (CombatMath.TryNormalizeStick(delta.x, delta.y, GameBalance.AimStickDeadZone, out var nx, out var ny))
                 {
                     frame.Aim = new Vector2(nx, ny);
-                    frame.FireHeld = true;
+                    if (GameSettings.AutoFire)
+                    {
+                        frame.FireHeld = true;
+                    }
                 }
             }
         }
@@ -150,7 +166,14 @@ namespace JabaSurvivol.Gameplay
 
                 if (touch.phase == TouchPhase.Began)
                 {
-                    if (_moveFinger < 0 && touch.screenPosition.x < Screen.width * 0.5f)
+                    if (_ignoreTouch != null && _ignoreTouch(touch.screenPosition))
+                    {
+                        continue;
+                    }
+
+                    var moveOnLeft = !GameSettings.LeftHanded;
+                    var beganLeft = touch.screenPosition.x < Screen.width * 0.5f;
+                    if (_moveFinger < 0 && beganLeft == moveOnLeft)
                     {
                         _moveFinger = finger;
                         _moveOrigin = touch.screenPosition;

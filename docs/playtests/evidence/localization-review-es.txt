@@ -1,20 +1,20 @@
 # Spanish (es) Localization Review
 
-## Current review (v0.9.0 settings panel)
+## Current review (v0.9.0 settings and HUD)
 
 - Status: Approved
 - Review owner: repository owner (`jb-coder`)
 - Named human reviewer: repository owner (`jb-coder`)
 - Review date: 2026-11-18
-- Reviewed commit or APK: `JabaSurvivol-211.apk` SHA-256 `F547A1B2C19295ABC92CA0632DA69D5C4D7F846BEA60EC707042F4F1706D579C`
+- Reviewed commit or APK: `JabaSurvivol-212-216.apk` SHA-256 `5B72BBFA0930E310DFC745EDA7B70E8995F4BE95F0D3D7B57407D14E3528C842`
 - Locale file: `unity/JabaSurvivol/Assets/Resources/Localization/es.json`
 - Source table: `unity/JabaSurvivol/Assets/Resources/Localization/en.json`
-- Key coverage: 222/222
-- Placeholder coverage: 222/222, no mismatches
+- Key coverage: 224/224
+- Placeholder coverage: 224/224, no mismatches
 - Glossary version: `docs/localization/glossary.md`
 - Translation method: Human-reviewed
-- Screens reviewed: Settings panel on phone and tablet in English and Spanish; main menu Settings entry
-- Unresolved items: none for the approved v0.9.0 settings slice
+- Screens reviewed: Settings panel and left-handed HUD on phone and tablet in English and Spanish
+- Unresolved items: none for the approved v0.9.0 settings and HUD slice
 - Approval: Approved by repository owner (`jb-coder`) on 2026-11-18 as part of the v0.9.0 review
 
 ## v0.9.0 scope
@@ -47,12 +47,15 @@ New keys:
 - `settings.aim.off`
 - `settings.aim.low`
 - `settings.aim.high`
+- `menu.controls.leftHanded`
+- `hud.fire`
 
 Changed screens:
 
 - Main menu Settings entry.
 - Settings panel audio, language, controls, and accessibility sections on
   phone and tablet.
+- HUD left-handed controls hint and manual fire button on phone.
 
 Evidence:
 
@@ -63,6 +66,11 @@ Evidence:
 - `docs/playtests/evidence/v090-settings-tablet-main-es.png`
 - `docs/playtests/evidence/v090-settings-tablet-en.png`
 - `docs/playtests/evidence/v090-settings-tablet-es.png`
+- `docs/playtests/evidence/v090-settings-phone-left-handed-autofire.png`
+- `docs/playtests/evidence/v090-settings-phone-left-handed-hud-en.png`
+- `docs/playtests/evidence/v090-settings-phone-left-handed-hud-es.png`
+- `docs/playtests/evidence/v090-settings-tablet-left-handed-hud-en.png`
+- `docs/playtests/evidence/v090-settings-tablet-left-handed-hud-es.png`
 
 ## Required review scope
 
@@ -80,8 +88,8 @@ belong in `docs/localization/glossary.md`; keep this record in English.
 ## Release gate
 
 A signed record is required before the Spanish locale can ship with these
-settings strings. The agent reviewer and `reviewer-approval` check are not
-linguistic review.
+settings and HUD strings. The agent reviewer and `reviewer-approval` check are
+not linguistic review.
 
 ## Previous approval (v0.6.0)
 

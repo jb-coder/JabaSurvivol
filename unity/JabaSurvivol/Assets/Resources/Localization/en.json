@@ -27,6 +27,10 @@
       "value": "LEFT STICK MOVE    RIGHT STICK AIM & FIRE"
     },
     {
+      "key": "menu.controls.leftHanded",
+      "value": "RIGHT STICK MOVE    LEFT STICK AIM & FIRE"
+    },
+    {
       "key": "menu.build",
       "value": "v{0} · {1}"
     },
@@ -257,6 +261,10 @@
     {
       "key": "hud.switch",
       "value": "SWITCH"
+    },
+    {
+      "key": "hud.fire",
+      "value": "FIRE"
     },
     {
       "key": "hud.ammo",
