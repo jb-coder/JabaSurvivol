@@ -13,7 +13,7 @@
 - Placeholder coverage: 231/231, no mismatches
 - Glossary version: `docs/localization/glossary.md`
 - Translation method: Human-reviewed
-- Screens reviewed: Settings, HUD, and confirmation dialogs on phone and tablet in English and Spanish
+- Screens reviewed: Settings, HUD, and the leave-run confirmation dialog on phone and tablet in English and Spanish; the respec dialog uses the same shared confirmation panel
 - Unresolved items: none for the approved v0.9.0 confirmation slice
 - Approval: Approved by repository owner (`jb-coder`) on 2026-11-18 as part of the v0.9.0 review
 
@@ -63,7 +63,7 @@ Changed screens:
 - Settings panel audio, language, controls, and accessibility sections on
   phone and tablet.
 - HUD left-handed controls hint and manual fire button on phone.
-- Confirmation panel for respec and leaving a run.
+- Leave-run confirmation dialog. The respec dialog uses the same shared confirmation panel; its strings are covered by the PlayMode tests.
 
 Evidence:
 
