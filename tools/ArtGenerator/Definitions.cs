@@ -13,7 +13,7 @@ internal static partial class Definitions
     {
         var definitions = new List<SpriteDefinition>();
 
-        AddCharacter(definitions, "player", Palette.Player, PlayerShape);
+        AddCharacter(definitions, "player", Palette.Player, PlayerShape, usePlayerArt: true);
         AddCharacter(definitions, "zombie_walker", Palette.Walker, WalkerShape);
         AddCharacter(definitions, "zombie_runner", Palette.Runner, RunnerShape);
         AddCharacter(definitions, "zombie_brute", Palette.Brute, BruteShape);
@@ -32,17 +32,17 @@ internal static partial class Definitions
     }
 
     private static readonly CharacterShape PlayerShape = new(
-        TorsoWidth: 112f,
-        TorsoHeight: 154f,
+        TorsoWidth: 122f,
+        TorsoHeight: 164f,
         TorsoOffsetY: 4f,
-        HeadRadius: 38f,
+        HeadRadius: 40f,
         HeadOffsetX: 34f,
         HeadOffsetY: 0f,
-        ArmLength: 92f,
-        ArmThickness: 22f,
-        LegWidth: 28f,
+        ArmLength: 110f,
+        ArmThickness: 28f,
+        LegWidth: 34f,
         LegLength: 176f,
-        ShoulderWidth: 152f,
+        ShoulderWidth: 166f,
         Ragged: false,
         Horns: false,
         Core: false);
@@ -116,24 +116,25 @@ internal static partial class Definitions
         string key,
         CharacterPalette palette,
         CharacterShape shape,
-        int size = CharacterSize)
+        int size = CharacterSize,
+        bool usePlayerArt = false)
     {
         var category = "character";
         definitions.Add(new SpriteDefinition(
             $"Characters/{key}_shadow.png", size, size, 0.5f, 0.5f, category,
-            canvas => DrawCharacterPart(canvas, size, palette, shape, CharacterPart.Shadow)));
+            canvas => DrawCharacterPart(canvas, size, palette, shape, CharacterPart.Shadow, usePlayerArt)));
         definitions.Add(new SpriteDefinition(
             $"Characters/{key}_leg.png", size, size, 0.85f, 0.5f, category,
-            canvas => DrawCharacterPart(canvas, size, palette, shape, CharacterPart.Leg)));
+            canvas => DrawCharacterPart(canvas, size, palette, shape, CharacterPart.Leg, usePlayerArt)));
         definitions.Add(new SpriteDefinition(
             $"Characters/{key}_torso.png", size, size, 0.5f, 0.5f, category,
-            canvas => DrawCharacterPart(canvas, size, palette, shape, CharacterPart.Torso)));
+            canvas => DrawCharacterPart(canvas, size, palette, shape, CharacterPart.Torso, usePlayerArt)));
         definitions.Add(new SpriteDefinition(
             $"Characters/{key}_head.png", size, size, 0.5f, 0.5f, category,
-            canvas => DrawCharacterPart(canvas, size, palette, shape, CharacterPart.Head)));
+            canvas => DrawCharacterPart(canvas, size, palette, shape, CharacterPart.Head, usePlayerArt)));
         definitions.Add(new SpriteDefinition(
             $"Characters/{key}_arm.png", size, size, 0.2f, 0.5f, category,
-            canvas => DrawCharacterPart(canvas, size, palette, shape, CharacterPart.Arm)));
+            canvas => DrawCharacterPart(canvas, size, palette, shape, CharacterPart.Arm, usePlayerArt)));
 
         if (shape.Horns)
         {
@@ -148,10 +149,17 @@ internal static partial class Definitions
         int size,
         CharacterPalette palette,
         CharacterShape shape,
-        CharacterPart part)
+        CharacterPart part,
+        bool usePlayerArt = false)
     {
         var scale = size / 256f;
         var center = size / 2f;
+
+        if (usePlayerArt)
+        {
+            DrawPlayerPart(canvas, center, scale, palette, shape, part);
+            return;
+        }
 
         switch (part)
         {

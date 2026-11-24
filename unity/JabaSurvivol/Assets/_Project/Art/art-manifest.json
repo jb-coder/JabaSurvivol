@@ -88,7 +88,7 @@
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "9bdd97099952a673521897480a97119b881eb54eb2223be19aff69c36913bd9d"
+      "sha256": "d3401b32afba0e5ac208f02254fd23542ee94fb0a892f07ec7c734dab7b029ee"
     },
     {
       "path": "Characters/player_head.png",
@@ -99,7 +99,7 @@
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "fef9bd8246ee226fd4f92235f51d884265425210762218575443f9b480536619"
+      "sha256": "f9b1242340805d17414fb72ba5812a4aa5370cf978ae9bcc50d1877647b22de9"
     },
     {
       "path": "Characters/player_leg.png",
@@ -110,7 +110,7 @@
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "98f82ea1a9c780acaac1a4397676de7c88a8e985a34503190327cf4dcad0d13d"
+      "sha256": "7a7dc62fd98cefd98143d2682ce4b83878583e0140c553c001f6153dc6183b54"
     },
     {
       "path": "Characters/player_shadow.png",
@@ -121,7 +121,7 @@
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "ad57a40cc178dd5f8ecd71788c4f9285c508c1fcc454203a35c196a48496baa2"
+      "sha256": "c42e0ac8fca76efd5a1d66f0a4e9efd34c435f382166cccca8c77cf4c41a67af"
     },
     {
       "path": "Characters/player_torso.png",
@@ -132,7 +132,7 @@
       "pivotY": 0.5,
       "category": "character",
       "paletteVersion": "2026-11-13.1",
-      "sha256": "52c3578b309a3681b83f9c2b0fe818d0c74789c8844b15c03b3a60f1a1abf802"
+      "sha256": "67a0d7d4e0abdad8136462d8e4da50a0a110faf57c3e88eba76ec766ad45f316"
     },
     {
       "path": "Characters/turret_barrel.png",
