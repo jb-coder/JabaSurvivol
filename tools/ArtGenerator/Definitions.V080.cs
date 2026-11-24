@@ -494,6 +494,475 @@ internal static partial class Definitions
         canvas.DrawOval(centerX, centerY, radius, radius, paint);
     }
 
+    private static void DrawPlayerPart(
+        SKCanvas canvas,
+        float center,
+        float scale,
+        CharacterPalette palette,
+        CharacterShape shape,
+        CharacterPart part)
+    {
+        switch (part)
+        {
+            case CharacterPart.Shadow:
+                Draw.SoftShadow(
+                    canvas,
+                    center + (4f * scale),
+                    center + (18f * scale),
+                    96f * scale,
+                    48f * scale);
+                break;
+            case CharacterPart.Leg:
+                DrawPlayerLeg(canvas, center, scale, palette, shape);
+                break;
+            case CharacterPart.Torso:
+                DrawPlayerTorso(canvas, center, scale, palette, shape);
+                break;
+            case CharacterPart.Head:
+                DrawPlayerHead(canvas, center, scale, palette, shape);
+                break;
+            case CharacterPart.Arm:
+                DrawPlayerArm(canvas, center, scale, palette, shape);
+                break;
+        }
+    }
+
+    private static void DrawPlayerTorso(
+        SKCanvas canvas,
+        float center,
+        float scale,
+        CharacterPalette palette,
+        CharacterShape shape)
+    {
+        var depth = shape.TorsoWidth * scale;
+        var width = shape.TorsoHeight * scale;
+        var left = center - (depth / 2f);
+        var right = center + (depth / 2f);
+        var top = center - (width / 2f) + (shape.TorsoOffsetY * scale);
+        var bottom = center + (width / 2f) + (shape.TorsoOffsetY * scale);
+        var outline = 5f * scale;
+
+        Draw.RoundedRect(
+            canvas,
+            left - (8f * scale),
+            top + (38f * scale),
+            left + (34f * scale),
+            bottom - (38f * scale),
+            12f * scale,
+            palette.Plate,
+            Palette.Outline,
+            outline);
+
+        Draw.Polygon(
+            canvas,
+            new[]
+            {
+                new SKPoint(left + (12f * scale), top + (8f * scale)),
+                new SKPoint(center - (18f * scale), top),
+                new SKPoint(right - (22f * scale), top + (10f * scale)),
+                new SKPoint(right, center - (42f * scale)),
+                new SKPoint(right + (4f * scale), center),
+                new SKPoint(right, center + (42f * scale)),
+                new SKPoint(right - (22f * scale), bottom - (10f * scale)),
+                new SKPoint(center - (18f * scale), bottom),
+                new SKPoint(left + (12f * scale), bottom - (8f * scale)),
+                new SKPoint(left - (4f * scale), center + (50f * scale)),
+                new SKPoint(left - (4f * scale), center - (50f * scale))
+            },
+            palette.Body,
+            Palette.Outline,
+            outline);
+
+        for (var side = -1; side <= 1; side += 2)
+        {
+            Draw.Polygon(
+                canvas,
+                new[]
+                {
+                    new SKPoint(left + (10f * scale), center + (side * 78f * scale)),
+                    new SKPoint(center - (14f * scale), center + (side * 86f * scale)),
+                    new SKPoint(center + (22f * scale), center + (side * 78f * scale)),
+                    new SKPoint(center + (34f * scale), center + (side * 54f * scale)),
+                    new SKPoint(center + (18f * scale), center + (side * 32f * scale)),
+                    new SKPoint(left + (14f * scale), center + (side * 36f * scale)),
+                    new SKPoint(left, center + (side * 56f * scale))
+                },
+                palette.Plate,
+                Palette.Outline,
+                outline);
+            Draw.Polygon(
+                canvas,
+                new[]
+                {
+                    new SKPoint(left + (20f * scale), center + (side * 68f * scale)),
+                    new SKPoint(center - (10f * scale), center + (side * 76f * scale)),
+                    new SKPoint(center + (12f * scale), center + (side * 69f * scale)),
+                    new SKPoint(center + (19f * scale), center + (side * 57f * scale)),
+                    new SKPoint(left + (22f * scale), center + (side * 51f * scale))
+                },
+                palette.Accent,
+                Palette.Outline,
+                3f * scale);
+        }
+
+        Draw.Polygon(
+            canvas,
+            new[]
+            {
+                new SKPoint(center - (20f * scale), center - (50f * scale)),
+                new SKPoint(right - (26f * scale), center - (38f * scale)),
+                new SKPoint(right + (2f * scale), center),
+                new SKPoint(right - (26f * scale), center + (38f * scale)),
+                new SKPoint(center - (20f * scale), center + (50f * scale)),
+                new SKPoint(center - (36f * scale), center + (28f * scale)),
+                new SKPoint(center - (36f * scale), center - (28f * scale))
+            },
+            Palette.Steel,
+            Palette.Outline,
+            outline);
+
+        Draw.Polygon(
+            canvas,
+            new[]
+            {
+                new SKPoint(center - (24f * scale), center - (10f * scale)),
+                new SKPoint(center + (18f * scale), center - (10f * scale)),
+                new SKPoint(center + (40f * scale), center),
+                new SKPoint(center + (18f * scale), center + (10f * scale)),
+                new SKPoint(center - (24f * scale), center + (10f * scale)),
+                new SKPoint(center - (10f * scale), center)
+            },
+            palette.Accent,
+            Palette.Outline,
+            3f * scale);
+
+        using var rim = Draw.Stroke(Palette.Ice.WithAlpha(230), 3f * scale);
+        canvas.DrawLine(
+            left + (18f * scale),
+            center - (72f * scale),
+            center - (12f * scale),
+            center - (80f * scale),
+            rim);
+        canvas.DrawLine(
+            center - (8f * scale),
+            center - (79f * scale),
+            center + (18f * scale),
+            center - (73f * scale),
+            rim);
+        canvas.DrawLine(
+            center - (14f * scale),
+            center - (44f * scale),
+            right - (28f * scale),
+            center - (33f * scale),
+            rim);
+
+        using var visorCore = Draw.Stroke(Palette.Ice, 3f * scale);
+        canvas.DrawLine(
+            center - (10f * scale),
+            center,
+            center + (20f * scale),
+            center,
+            visorCore);
+        Draw.Rivet(canvas, left + (18f * scale), center - (22f * scale), Palette.Steel);
+        Draw.Rivet(canvas, left + (18f * scale), center + (22f * scale), Palette.Steel);
+    }
+
+    private static void DrawPlayerHead(
+        SKCanvas canvas,
+        float center,
+        float scale,
+        CharacterPalette palette,
+        CharacterShape shape)
+    {
+        var radius = shape.HeadRadius * scale;
+        var outline = 5f * scale;
+
+        Draw.Polygon(
+            canvas,
+            new[]
+            {
+                new SKPoint(center - (radius * 1.05f), center - (radius * 0.55f)),
+                new SKPoint(center - (radius * 0.45f), center - radius),
+                new SKPoint(center + (radius * 0.45f), center - (radius * 0.90f)),
+                new SKPoint(center + (radius * 0.95f), center - (radius * 0.45f)),
+                new SKPoint(center + (radius * 1.10f), center),
+                new SKPoint(center + (radius * 0.95f), center + (radius * 0.45f)),
+                new SKPoint(center + (radius * 0.45f), center + (radius * 0.90f)),
+                new SKPoint(center - (radius * 0.45f), center + radius),
+                new SKPoint(center - (radius * 1.05f), center + (radius * 0.55f)),
+                new SKPoint(center - (radius * 1.15f), center)
+            },
+            palette.Body,
+            Palette.Outline,
+            outline);
+
+        Draw.Polygon(
+            canvas,
+            new[]
+            {
+                new SKPoint(center - (radius * 0.70f), center - (radius * 0.45f)),
+                new SKPoint(center - (radius * 0.20f), center - (radius * 0.72f)),
+                new SKPoint(center + (radius * 0.30f), center - (radius * 0.60f)),
+                new SKPoint(center + (radius * 0.18f), center + (radius * 0.60f)),
+                new SKPoint(center - (radius * 0.20f), center + (radius * 0.72f)),
+                new SKPoint(center - (radius * 0.70f), center + (radius * 0.45f))
+            },
+            palette.Plate,
+            Palette.Outline,
+            3f * scale);
+
+        Draw.Polygon(
+            canvas,
+            new[]
+            {
+                new SKPoint(center + (radius * 0.05f), center - (radius * 0.62f)),
+                new SKPoint(center + (radius * 0.76f), center - (radius * 0.46f)),
+                new SKPoint(center + (radius * 1.08f), center - (radius * 0.16f)),
+                new SKPoint(center + (radius * 1.08f), center + (radius * 0.16f)),
+                new SKPoint(center + (radius * 0.76f), center + (radius * 0.46f)),
+                new SKPoint(center + (radius * 0.05f), center + (radius * 0.62f))
+            },
+            palette.Accent,
+            Palette.Outline,
+            outline);
+        Draw.Polygon(
+            canvas,
+            new[]
+            {
+                new SKPoint(center + (radius * 0.24f), center - (radius * 0.39f)),
+                new SKPoint(center + (radius * 0.72f), center - (radius * 0.28f)),
+                new SKPoint(center + (radius * 0.88f), center - (radius * 0.12f)),
+                new SKPoint(center + (radius * 0.30f), center - (radius * 0.13f))
+            },
+            palette.Visor);
+
+        using var rim = Draw.Stroke(Palette.Ice.WithAlpha(230), 3f * scale);
+        canvas.DrawLine(
+            center - (radius * 0.82f),
+            center - (radius * 0.52f),
+            center - (radius * 0.38f),
+            center - (radius * 0.88f),
+            rim);
+        canvas.DrawLine(
+            center - (radius * 0.32f),
+            center - (radius * 0.88f),
+            center + (radius * 0.26f),
+            center - (radius * 0.79f),
+            rim);
+        canvas.DrawLine(
+            center + (radius * 0.28f),
+            center - (radius * 0.37f),
+            center + (radius * 0.67f),
+            center - (radius * 0.27f),
+            rim);
+    }
+
+    private static void DrawPlayerArm(
+        SKCanvas canvas,
+        float center,
+        float scale,
+        CharacterPalette palette,
+        CharacterShape shape)
+    {
+        var length = shape.ArmLength * scale;
+        var thickness = shape.ArmThickness * scale;
+        var left = center - (78f * scale);
+        var right = left + length;
+        var elbowX = left + (length * 0.46f);
+        var outline = 5f * scale;
+
+        Draw.RoundedRect(
+            canvas,
+            left,
+            center - (thickness / 2f),
+            elbowX + (8f * scale),
+            center + (thickness / 2f),
+            thickness * 0.42f,
+            palette.Body,
+            Palette.Outline,
+            outline);
+        Draw.Polygon(
+            canvas,
+            new[]
+            {
+                new SKPoint(elbowX - (4f * scale), center - (thickness * 0.54f)),
+                new SKPoint(right - (20f * scale), center - (thickness * 0.46f)),
+                new SKPoint(right - (8f * scale), center - (thickness * 0.22f)),
+                new SKPoint(right - (8f * scale), center + (thickness * 0.22f)),
+                new SKPoint(right - (20f * scale), center + (thickness * 0.46f)),
+                new SKPoint(elbowX - (4f * scale), center + (thickness * 0.54f))
+            },
+            palette.Plate,
+            Palette.Outline,
+            outline);
+        Draw.Ellipse(
+            canvas,
+            elbowX,
+            center,
+            thickness * 0.48f,
+            thickness * 0.52f,
+            Palette.Steel,
+            Palette.Outline,
+            4f * scale);
+        Draw.Ellipse(
+            canvas,
+            left + (5f * scale),
+            center,
+            thickness * 0.78f,
+            thickness * 0.84f,
+            palette.Plate,
+            Palette.Outline,
+            outline);
+        Draw.RoundedRect(
+            canvas,
+            right - (24f * scale),
+            center - (thickness * 0.50f),
+            right + (4f * scale),
+            center + (thickness * 0.50f),
+            8f * scale,
+            palette.Body,
+            Palette.Outline,
+            outline);
+        Draw.Ellipse(
+            canvas,
+            right + (7f * scale),
+            center,
+            thickness * 0.42f,
+            thickness * 0.38f,
+            Palette.Steel,
+            Palette.Outline,
+            4f * scale);
+
+        Draw.GlowLine(
+            canvas,
+            left + (4f * scale),
+            center - (thickness * 0.46f),
+            left + (4f * scale),
+            center + (thickness * 0.46f),
+            palette.Accent,
+            4f * scale,
+            65);
+        Draw.GlowLine(
+            canvas,
+            elbowX + (16f * scale),
+            center,
+            right - (28f * scale),
+            center,
+            palette.Accent,
+            4f * scale,
+            65);
+        using var rim = Draw.Stroke(Palette.Ice.WithAlpha(220), 3f * scale);
+        canvas.DrawLine(
+            elbowX + (8f * scale),
+            center - (thickness * 0.40f),
+            right - (24f * scale),
+            center - (thickness * 0.34f),
+            rim);
+    }
+
+    private static void DrawPlayerLeg(
+        SKCanvas canvas,
+        float center,
+        float scale,
+        CharacterPalette palette,
+        CharacterShape shape)
+    {
+        var length = shape.LegLength * scale;
+        var thickness = shape.LegWidth * scale;
+        var hipX = center + (90f * scale);
+        var footX = hipX - length;
+        var kneeX = footX + (length * 0.58f);
+        var top = center - (thickness / 2f);
+        var bottom = center + (thickness / 2f);
+        var outline = 5f * scale;
+
+        Draw.RoundedRect(
+            canvas,
+            footX + (12f * scale),
+            top,
+            hipX,
+            bottom,
+            thickness * 0.42f,
+            palette.Body,
+            Palette.Outline,
+            outline);
+        Draw.RoundedRect(
+            canvas,
+            kneeX - (4f * scale),
+            top - (2f * scale),
+            hipX - (4f * scale),
+            bottom + (2f * scale),
+            thickness * 0.34f,
+            palette.Plate,
+            Palette.Outline,
+            outline);
+        Draw.Polygon(
+            canvas,
+            new[]
+            {
+                new SKPoint(footX - (10f * scale), center - (thickness * 0.66f)),
+                new SKPoint(footX + (34f * scale), center - (thickness * 0.62f)),
+                new SKPoint(footX + (48f * scale), center - (thickness * 0.34f)),
+                new SKPoint(footX + (48f * scale), center + (thickness * 0.34f)),
+                new SKPoint(footX + (34f * scale), center + (thickness * 0.62f)),
+                new SKPoint(footX - (10f * scale), center + (thickness * 0.66f))
+            },
+            palette.Plate,
+            Palette.Outline,
+            outline);
+        Draw.RoundedRect(
+            canvas,
+            footX - (7f * scale),
+            center - (thickness * 0.50f),
+            footX + (15f * scale),
+            center + (thickness * 0.50f),
+            7f * scale,
+            Palette.Steel,
+            Palette.Outline,
+            4f * scale);
+        Draw.Ellipse(
+            canvas,
+            kneeX,
+            center,
+            thickness * 0.56f,
+            thickness * 0.66f,
+            palette.Plate,
+            Palette.Outline,
+            outline);
+
+        Draw.GlowLine(
+            canvas,
+            footX + (22f * scale),
+            center,
+            kneeX - (18f * scale),
+            center,
+            palette.Accent,
+            4f * scale,
+            60);
+        Draw.GlowLine(
+            canvas,
+            kneeX + (18f * scale),
+            center,
+            hipX - (20f * scale),
+            center,
+            palette.Accent,
+            4f * scale,
+            60);
+        using var rim = Draw.Stroke(Palette.Ice.WithAlpha(220), 3f * scale);
+        canvas.DrawLine(
+            footX + (4f * scale),
+            center - (thickness * 0.52f),
+            footX + (32f * scale),
+            center - (thickness * 0.50f),
+            rim);
+        canvas.DrawLine(
+            kneeX + (8f * scale),
+            top - (1f * scale),
+            hipX - (18f * scale),
+            top - (1f * scale),
+            rim);
+    }
+
     private static void DrawTopDownLeg(
         SKCanvas canvas,
         float center,

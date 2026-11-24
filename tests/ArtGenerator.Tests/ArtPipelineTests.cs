@@ -134,6 +134,26 @@ public sealed class ArtPipelineTests
         Assert.True(visible > 0);
     }
 
+    [Theory]
+    [InlineData("Characters/player_shadow.png", 0.5f, 0.5f)]
+    [InlineData("Characters/player_leg.png", 0.85f, 0.5f)]
+    [InlineData("Characters/player_torso.png", 0.5f, 0.5f)]
+    [InlineData("Characters/player_head.png", 0.5f, 0.5f)]
+    [InlineData("Characters/player_arm.png", 0.2f, 0.5f)]
+    public void Player_parts_keep_the_modular_rig_contract(
+        string path,
+        float expectedPivotX,
+        float expectedPivotY)
+    {
+        var asset = ReadManifest().Assets.Single(item => item.Path == path);
+
+        Assert.Equal(256, asset.Width);
+        Assert.Equal(256, asset.Height);
+        Assert.Equal(expectedPivotX, asset.PivotX, 3);
+        Assert.Equal(expectedPivotY, asset.PivotY, 3);
+        Assert.Equal("character", asset.Category);
+    }
+
     private static ArtManifest ReadManifest()
     {
         return System.Text.Json.JsonSerializer.Deserialize<ArtManifest>(
