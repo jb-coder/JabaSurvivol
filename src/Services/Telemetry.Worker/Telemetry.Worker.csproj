@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Npgsql" />
     <ProjectReference Include="..\..\Game.Core\JabaSurvivol.Core.csproj" />
     <ProjectReference Include="..\..\Shared\Contracts\JabaSurvivol.Contracts.csproj" />
     <ProjectReference Include="..\Game.Data\JabaSurvivol.Game.Data.csproj" />
