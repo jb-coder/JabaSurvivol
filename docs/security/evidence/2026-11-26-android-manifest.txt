@@ -1,0 +1,76 @@
+# Android release manifest evidence
+
+- Date: 2026-11-26
+- Issue: #240
+- Source: tracked manifest and generated release merged manifest from the local
+  Unity Android IL2CPP Gradle output.
+- Note: the generated merged manifest is build output and is not committed.
+
+## Tracked manifest
+
+`unity/JabaSurvivol/Assets/Plugins/Android/AndroidManifest.xml`:
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          android:installLocation="preferExternal">
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.VIBRATE" />
+  <application android:localeConfig="@xml/locales_config">
+    <activity android:name="com.unity3d.player.UnityPlayerActivity"
+              android:exported="true"
+              android:theme="@style/UnityThemeSelector">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+      <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
+    </activity>
+  </application>
+</manifest>
+```
+
+## Release merged manifest excerpt
+
+`unity/JabaSurvivol/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml`:
+
+```xml
+<uses-sdk android:minSdkVersion="26" />
+
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.VIBRATE" />
+
+<application
+    android:appCategory="game"
+    android:enableOnBackInvokedCallback="false"
+    android:extractNativeLibs="true" >
+    <activity
+        android:name="com.unity3d.player.UnityPlayerActivity"
+        android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale|layoutDirection|density"
+        android:enabled="true"
+        android:exported="true"
+        android:hardwareAccelerated="false"
+        android:launchMode="singleTask"
+        android:resizeableActivity="false"
+        android:screenOrientation="landscape"
+        android:theme="@style/UnityThemeSelector" >
+        <intent-filter>
+            <category android:name="android.intent.category.LAUNCHER" />
+            <action android:name="android.intent.action.MAIN" />
+        </intent-filter>
+        <meta-data
+            android:name="unityplayer.UnityActivity"
+            android:value="true" />
+    </activity>
+</application>
+```
+
+## Findings
+
+- Permissions are limited to network access and haptics.
+- The only exported component is the launcher activity. It must be exported to
+  receive the `MAIN`/`LAUNCHER` intent.
+- No service, receiver, content provider, or additional exported activity is
+  present.
+- No cleartext-traffic override, network security config override, or
+  debuggable flag is present.
+- The locale configuration exposes English and Spanish only, matching ADR-0009.
