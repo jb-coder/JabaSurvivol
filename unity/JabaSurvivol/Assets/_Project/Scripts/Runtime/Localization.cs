@@ -293,7 +293,10 @@ namespace JabaSurvivol.Gameplay
             _initialized = true;
             _fallbackEntries = LoadLocaleEntries(DefaultLocale) ??
                                new Dictionary<string, string>(StringComparer.Ordinal);
-            _preference = PlayerPrefs.GetString(LocalePreferenceKey, SystemLocaleValue);
+            var storedPreference = PlayerPrefs.GetString(LocalePreferenceKey, SystemLocaleValue);
+            _preference = storedPreference == "en" || storedPreference == "es"
+                ? storedPreference
+                : SystemLocaleValue;
             var locale = ResolveLocale(
                 _preference,
                 Application.systemLanguage,

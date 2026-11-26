@@ -418,5 +418,17 @@ namespace JabaSurvivol.Tests.EditMode
             Assert.That(PlayerPrefs.GetString(Localization.LocalePreferenceKey), Is.EqualTo("en"));
             Assert.That(fired, Is.False);
         }
+
+        [Test]
+        public void Invalid_stored_preference_falls_back_to_the_system_locale()
+        {
+            PlayerPrefs.SetString(Localization.LocalePreferenceKey, "fr");
+            PlayerPrefs.Save();
+            Localization.ReloadForTests();
+
+            Localization.RefreshSystemLocaleForTests(SystemLanguage.Spanish, "es-ES");
+
+            Assert.That(Localization.CurrentLocale, Is.EqualTo("es"));
+        }
     }
 }
