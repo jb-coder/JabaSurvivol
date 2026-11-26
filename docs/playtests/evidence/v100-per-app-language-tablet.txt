@@ -1,0 +1,50 @@
+# Android per-app language smoke test - tablet
+
+- Date: 2026-11-26
+- AVD: `jaba_survivol_tablet_api35` (Pixel Tablet profile)
+- Model reported by the image: `sdk_gphone64_x86_64`
+- Android API: 35
+- Resolution: 2560x1600
+- Density: 320 dpi
+- APK: `artifacts/android/JabaSurvivol-emulator.apk`
+- APK size: 104727082 bytes
+- APK SHA-256: `78675CFB00C8EF0B9C57D993A647DBCE921127E6E5D5DD1CDA95B6C39E7B8FDD`
+- Package: `com.jabasurvivol.game`
+- Version: `0.9.0` (version code 12)
+- Native code: `arm64-v8a`, `x86_64`
+
+## Commands and observations
+
+```text
+adb -s emulator-5556 shell cmd locale get-app-locales com.jabasurvivol.game
+Locales for com.jabasurvivol.game for user 0 are []
+
+adb -s emulator-5556 shell cmd locale set-app-locales com.jabasurvivol.game --locales es
+adb -s emulator-5556 shell cmd locale get-app-locales com.jabasurvivol.game
+Locales for com.jabasurvivol.game for user 0 are [es]
+
+adb -s emulator-5556 shell cmd locale set-app-locales com.jabasurvivol.game --locales en
+adb -s emulator-5556 shell cmd locale get-app-locales com.jabasurvivol.game
+Locales for com.jabasurvivol.game for user 0 are [en]
+```
+
+## Screenshots
+
+- `docs/playtests/evidence/v100-per-app-language-tablet-es-help.png`
+- `docs/playtests/evidence/v100-per-app-language-tablet-es.png`
+- `docs/playtests/evidence/v100-per-app-language-tablet-en.png`
+
+The Spanish screenshots show accented characters (`CÓMO JUGAR`, `ARMERÍA`,
+`CLASIFICACIÓN`, `SESIÓN`) in the tablet layout.
+
+## Logcat
+
+```text
+adb -s emulator-5556 logcat -d -v brief | Select-String "FATAL EXCEPTION|E/AndroidRuntime|E/Unity"
+```
+
+Result: 0 matching lines.
+
+## Scope
+
+This is emulator evidence. Physical-device testing was not performed.
