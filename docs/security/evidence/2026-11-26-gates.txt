@@ -1,0 +1,105 @@
+# v1.0.0 security audit gate evidence
+
+- Date: 2026-11-26
+- Issue: #240
+- Branch: `chore/240-v100-security-audit`
+- Baseline commit: `0e3f807` (`develop`)
+- SDK: .NET SDK `10.0.401`
+- Environment: Windows, `DOTNET_CLI_UI_LANGUAGE=en` for the audit commands
+
+## Commands and results
+
+### Restore
+
+```text
+dotnet restore JabaSurvivol.slnx
+Determining projects to restore...
+All projects are up-to-date for restore.
+Exit code: 0
+```
+
+### Release build
+
+```text
+dotnet build JabaSurvivol.slnx -c Release --no-restore
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+Exit code: 0
+```
+
+### Tests
+
+```text
+dotnet test JabaSurvivol.slnx -c Release --no-build --no-restore
+Passed! - Failed: 0, Passed:   1, Skipped: 0, Total:   1 - JabaSurvivol.SmokeTests
+Passed! - Failed: 0, Passed:   1, Skipped: 0, Total:   1 - JabaSurvivol.ArchitectureTests
+Passed! - Failed: 0, Passed: 173, Skipped: 0, Total: 173 - JabaSurvivol.Core.Tests
+Passed! - Failed: 0, Passed:  11, Skipped: 0, Total:  11 - JabaSurvivol.ArtGenerator.Tests
+Passed! - Failed: 0, Passed:  86, Skipped: 0, Total:  86 - JabaSurvivol.IntegrationTests
+Total: 272 passed, 0 failed, 0 skipped.
+Exit code: 0
+```
+
+### Formatting
+
+```text
+dotnet format JabaSurvivol.slnx --verify-no-changes --no-restore
+Exit code: 0
+```
+
+The command reports a localized workspace-loading warning with no formatting
+change. The CI formatting gate uses the same command.
+
+### Dependency audit
+
+```text
+dotnet list JabaSurvivol.slnx package --vulnerable --include-transitive
+All 17 projects report no vulnerable packages.
+Exit code: 0
+```
+
+Full output: `2026-11-26-dependency-audit.txt`.
+
+### Secret scan
+
+Commands and file-only results: `2026-11-26-secret-scan.txt`.
+
+- Tracked secret-like files: `.env.example` and `deploy/secrets/README.md` only.
+- Private key markers: none.
+- JWT-like literals: none.
+- Known token prefixes: none.
+- Hardcoded signing keys: none.
+- Open GitHub secret scanning alerts: 0.
+
+### GitHub advisory APIs
+
+```text
+secret-scanning/alerts?state=open  -> 0
+dependabot/alerts?state=open       -> 0
+code-scanning/alerts?state=open    -> 0
+```
+
+## Unity and Android evidence
+
+The Unity editor is not run by this audit. Android release configuration is
+verified from tracked source and the generated release merged manifest:
+
+- `Assets/Plugins/Android/AndroidManifest.xml` declares only `INTERNET` and
+  `VIBRATE` permissions.
+- The release merged manifest contains exactly one exported component:
+  `com.unity3d.player.UnityPlayerActivity`, with the `MAIN`/`LAUNCHER` filter.
+  There are no services, receivers, or providers.
+- No `android:debuggable`, `android:usesCleartextTraffic`, or network security
+  config override is present.
+- `ProjectSetup` sets IL2CPP, ARM64, minimum API 26, target API 36, and
+  `InsecureHttpOption.NotAllowed`.
+- `BuildScript.BuildAndroid` sets `EditorUserBuildSettings.development = false`.
+  The separate emulator build is the only development build and enables
+  x86_64 plus development-only insecure HTTP for loopback/emulator hosts.
+- `GameBootstrap` development scenarios are compiled under
+  `#if DEVELOPMENT_BUILD` and are absent from the production build.
+- OpenAPI is mapped only when `app.Environment.IsDevelopment()`. The production
+  ConfigMap sets `ASPNETCORE_ENVIRONMENT=Production`.
+
+Excerpt: `2026-11-26-android-manifest.txt`.

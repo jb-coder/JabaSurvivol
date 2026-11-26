@@ -1,0 +1,52 @@
+# Dependency audit evidence
+
+- Date: 2026-11-26
+- Issue: #240
+- Branch: chore/240-v100-security-audit
+- Command: `dotnet list JabaSurvivol.slnx package --vulnerable --include-transitive`
+- Environment: Windows, .NET SDK 10, `DOTNET_CLI_UI_LANGUAGE=en`
+- Result: exit code 0
+
+```text
+Determining projects to restore...
+All projects are up-to-date for restore.
+
+The following sources were used:
+  https://api.nuget.org/v3/index.json
+
+The given project `AppHost` has no vulnerable packages given the current sources.
+The given project `ServiceDefaults` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.Core` has no vulnerable packages given the current sources.
+The given project `Bff` has no vulnerable packages given the current sources.
+The given project `Game.Api` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.Game.Data` has no vulnerable packages given the current sources.
+The given project `Identity.Api` has no vulnerable packages given the current sources.
+The given project `Telemetry.Worker` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.Contracts` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.Security` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.ArchitectureTests` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.ArtGenerator.Tests` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.Core.Tests` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.IntegrationTests` has no vulnerable packages given the current sources.
+The given project `JabaSurvivol.SmokeTests` has no vulnerable packages given the current sources.
+The given project `ArtGenerator` has no vulnerable packages given the current sources.
+The given project `BalanceSimulation` has no vulnerable packages given the current sources.
+```
+
+## GitHub advisory state
+
+- Open Dependabot alerts: 0.
+- Open code scanning alerts (CodeQL): 0.
+- Open secret scanning alerts: 0.
+
+## Container and supply-chain controls
+
+- `container-ci` builds all four service images for `linux/arm64` and scans them
+  with `aquasecurity/trivy-action` pinned to commit
+  `ed142fd0673e97e23eac54620cfb913e5ce36c25` (`v0.36.0`), `exit-code: 1`,
+  `ignore-unfixed: true`, severity `CRITICAL,HIGH`.
+- Dependabot watches NuGet and GitHub Actions weekly on `develop`.
+- `security.yml` runs CodeQL and a non-blocking NuGet audit on pull requests,
+  pushes, and a weekly schedule.
+- Gap: the release workflow does not publish an SBOM or artifact attestation.
+  This is recorded as a P2 follow-up and does not block the audit.
