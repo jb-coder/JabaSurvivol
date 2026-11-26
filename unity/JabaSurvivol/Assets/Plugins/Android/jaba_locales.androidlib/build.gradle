@@ -1,0 +1,10 @@
+apply plugin: 'com.android.library'
+
+android {
+    namespace "com.jabasurvivol.locales"
+    compileSdk getProperty("unity.compileSdkVersion") as int
+
+    defaultConfig {
+        minSdk getProperty("unity.minSdkVersion") as int
+    }
+}

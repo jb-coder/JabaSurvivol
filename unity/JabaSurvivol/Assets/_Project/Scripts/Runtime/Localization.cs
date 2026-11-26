@@ -39,6 +39,7 @@ namespace JabaSurvivol.Gameplay
         private static Dictionary<string, string> _entries;
         private static Dictionary<string, string> _fallbackEntries;
         private static string _currentLocale;
+        private static string _preference;
         private static bool _initialized;
 
         public static event Action LocaleChanged;
@@ -103,7 +104,7 @@ namespace JabaSurvivol.Gameplay
                 return "en";
             }
 
-            return NormalizeCulture(cultureName) == "es" ? "es" : "en";
+            return IsSpanishCulture(cultureName) ? "es" : "en";
         }
 
         public static void SetLocale(string locale)
@@ -120,6 +121,7 @@ namespace JabaSurvivol.Gameplay
                 throw new ArgumentOutOfRangeException(nameof(locale));
             }
 
+            _preference = locale;
             PlayerPrefs.SetString(LocalePreferenceKey, locale);
             PlayerPrefs.Save();
             ApplyLocale(locale, raiseEvent: true);
@@ -128,6 +130,7 @@ namespace JabaSurvivol.Gameplay
         public static void UseSystemLocale()
         {
             EnsureInitialized();
+            _preference = SystemLocaleValue;
             PlayerPrefs.SetString(LocalePreferenceKey, SystemLocaleValue);
             PlayerPrefs.Save();
             ApplyLocale(
@@ -135,6 +138,30 @@ namespace JabaSurvivol.Gameplay
                     Application.systemLanguage,
                     CultureInfo.CurrentUICulture.TwoLetterISOLanguageName),
                 raiseEvent: true);
+        }
+
+        /// <summary>
+        /// Reapplies the resolved system locale after the device or Android
+        /// per-app language changes. Explicit English or Spanish overrides are
+        /// kept until the user selects the system option again. Safe to call on
+        /// every resume and non-Android platform.
+        /// </summary>
+        public static void RefreshSystemLocale()
+        {
+            EnsureInitialized();
+            RefreshSystemLocale(
+                Application.systemLanguage,
+                CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
+        }
+
+        /// <summary>
+        /// Test hook that drives <see cref="RefreshSystemLocale"/> with an
+        /// explicit language so tests do not depend on the host OS locale.
+        /// </summary>
+        public static void RefreshSystemLocaleForTests(SystemLanguage language, string cultureName)
+        {
+            EnsureInitialized();
+            RefreshSystemLocale(language, cultureName);
         }
 
         /// <summary>
@@ -266,12 +293,31 @@ namespace JabaSurvivol.Gameplay
             _initialized = true;
             _fallbackEntries = LoadLocaleEntries(DefaultLocale) ??
                                new Dictionary<string, string>(StringComparer.Ordinal);
-            var preference = PlayerPrefs.GetString(LocalePreferenceKey, SystemLocaleValue);
+            var storedPreference = PlayerPrefs.GetString(LocalePreferenceKey, SystemLocaleValue);
+            _preference = storedPreference == "en" || storedPreference == "es"
+                ? storedPreference
+                : SystemLocaleValue;
             var locale = ResolveLocale(
-                preference,
+                _preference,
                 Application.systemLanguage,
                 CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
             ApplyLocale(locale, raiseEvent: false);
+        }
+
+        private static void RefreshSystemLocale(SystemLanguage language, string cultureName)
+        {
+            if (_preference != SystemLocaleValue)
+            {
+                return;
+            }
+
+            var locale = MapSystemLanguage(language, cultureName);
+            if (locale == _currentLocale)
+            {
+                return;
+            }
+
+            ApplyLocale(locale, raiseEvent: true);
         }
 
         private static void ApplyLocale(string locale, bool raiseEvent)
@@ -430,18 +476,27 @@ namespace JabaSurvivol.Gameplay
             return false;
         }
 
-        private static string NormalizeCulture(string cultureName)
+        /// <summary>
+        /// Checks the "es" culture prefix without allocating a substring, so the
+        /// resume refresh stays allocation-free.
+        /// </summary>
+        private static bool IsSpanishCulture(string cultureName)
         {
-            if (string.IsNullOrWhiteSpace(cultureName))
+            if (string.IsNullOrEmpty(cultureName) || cultureName.Length < 2)
             {
-                return string.Empty;
+                return false;
             }
 
-            var separator = cultureName.IndexOfAny(new[] { '-', '_' });
-            var language = separator >= 0
-                ? cultureName.Substring(0, separator)
-                : cultureName;
-            return language.ToLowerInvariant();
+            var first = cultureName[0];
+            var second = cultureName[1];
+            if ((first != 'e' && first != 'E') || (second != 's' && second != 'S'))
+            {
+                return false;
+            }
+
+            return cultureName.Length == 2 ||
+                   cultureName[2] == '-' ||
+                   cultureName[2] == '_';
         }
 
         private static void LogMissing(string key, bool bothTables)

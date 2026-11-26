@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using JabaSurvivol.Gameplay;
 using NUnit.Framework;
 using UnityEngine;
@@ -13,6 +14,16 @@ namespace JabaSurvivol.Tests.EditMode
 {
     public sealed class LocalizationTests
     {
+        // Spanish needs these accented letters and inverted punctuation marks.
+        // Checking the exact runtime UI font guards against a font swap that
+        // silently renders question marks or empty boxes for Spanish text.
+        private static readonly char[] SpanishGlyphs =
+        {
+            'á', 'é', 'í', 'ó', 'ú', 'ñ', 'ü', '¿', '¡'
+        };
+
+        private const string AndroidNamespace = "http://schemas.android.com/apk/res/android";
+
         [SetUp]
         public void SetUp()
         {
@@ -290,6 +301,134 @@ namespace JabaSurvivol.Tests.EditMode
             }
 
             Assert.That(fired, Is.True);
+        }
+
+        [Test]
+        public void Android_locale_config_declares_exactly_the_supported_locales()
+        {
+            // Unity 6.3 rejects resources under Assets/Plugins/Android/res, so
+            // the locale table ships in the supported Android Library plug-in.
+            var path = Path.Combine(
+                Application.dataPath,
+                "Plugins",
+                "Android",
+                "jaba_locales.androidlib",
+                "src",
+                "main",
+                "res",
+                "xml",
+                "locales_config.xml");
+            Assert.That(File.Exists(path), Is.True, path);
+
+            var document = XDocument.Load(path);
+            XNamespace android = AndroidNamespace;
+            var declared = document.Root?
+                .Elements("locale")
+                .Select(element => element.Attribute(android + "name")?.Value)
+                .Where(value => !string.IsNullOrEmpty(value))
+                .ToArray();
+
+            Assert.That(declared, Is.Not.Null);
+            Assert.That(declared, Is.EquivalentTo(Localization.SupportedLocales));
+            Assert.That(declared.Length, Is.EqualTo(Localization.SupportedLocales.Count));
+        }
+
+        [Test]
+        public void Android_manifest_links_the_locale_config()
+        {
+            var path = Path.Combine(
+                Application.dataPath,
+                "Plugins",
+                "Android",
+                "AndroidManifest.xml");
+            Assert.That(File.Exists(path), Is.True, path);
+
+            var document = XDocument.Load(path);
+            XNamespace android = AndroidNamespace;
+            var application = document.Root?.Element("application");
+
+            Assert.That(application, Is.Not.Null);
+            Assert.That(
+                application.Attribute(android + "localeConfig")?.Value,
+                Is.EqualTo("@xml/locales_config"));
+        }
+
+        [Test]
+        public void Runtime_ui_font_covers_spanish_glyphs()
+        {
+            var font = UiFactory.GetFontForTests();
+            Assert.That(font, Is.Not.Null);
+
+            foreach (var glyph in SpanishGlyphs)
+            {
+                Assert.That(
+                    font.HasCharacter(glyph),
+                    Is.True,
+                    $"Runtime UI font '{font.name}' is missing '{glyph}'.");
+            }
+        }
+
+        [Test]
+        public void System_refresh_reapplies_a_changed_system_locale_and_raises_the_event_once()
+        {
+            Localization.UseSystemLocale();
+            Localization.RefreshSystemLocaleForTests(SystemLanguage.English, "en-US");
+            Assert.That(Localization.CurrentLocale, Is.EqualTo("en"));
+
+            var fired = 0;
+            Action handler = () => fired++;
+            Localization.LocaleChanged += handler;
+
+            try
+            {
+                Localization.RefreshSystemLocaleForTests(SystemLanguage.Spanish, "es-ES");
+
+                Assert.That(Localization.CurrentLocale, Is.EqualTo("es"));
+                Assert.That(fired, Is.EqualTo(1));
+
+                Localization.RefreshSystemLocaleForTests(SystemLanguage.Spanish, "es-ES");
+
+                Assert.That(Localization.CurrentLocale, Is.EqualTo("es"));
+                Assert.That(fired, Is.EqualTo(1));
+            }
+            finally
+            {
+                Localization.LocaleChanged -= handler;
+            }
+        }
+
+        [Test]
+        public void Explicit_override_ignores_a_changed_system_locale()
+        {
+            Localization.SetLocale("en");
+            var fired = false;
+            Action handler = () => fired = true;
+            Localization.LocaleChanged += handler;
+
+            try
+            {
+                Localization.RefreshSystemLocaleForTests(SystemLanguage.Spanish, "es-ES");
+            }
+            finally
+            {
+                Localization.LocaleChanged -= handler;
+            }
+
+            Assert.That(Localization.CurrentLocale, Is.EqualTo("en"));
+            Assert.That(PlayerPrefs.GetString(Localization.LocalePreferenceKey), Is.EqualTo("en"));
+            Assert.That(fired, Is.False);
+        }
+
+        [Test]
+        public void Invalid_stored_preference_falls_back_to_the_system_locale()
+        {
+            PlayerPrefs.SetString(Localization.LocalePreferenceKey, "fr");
+            PlayerPrefs.Save();
+            Localization.ReloadForTests();
+
+            Localization.RefreshSystemLocaleForTests(SystemLanguage.Spanish, "es-ES");
+
+            Assert.That(Localization.CurrentLocale, Is.EqualTo("es"));
         }
     }
 }

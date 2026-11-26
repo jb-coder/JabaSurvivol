@@ -16,6 +16,35 @@
 - The Spanish table was merged in #147 before this workflow existed. It is now
   covered by the signed review record and may ship with v0.6.0.
 
+## Android per-app language
+
+- Android 13+ exposes a per-app language setting. The Android manifest declares
+  `android:localeConfig="@xml/locales_config"`, and `locales_config.xml` lists
+  exactly the supported locales (`en`, `es`).
+- The locale table ships in the `jaba_locales.androidlib` Android Library
+  plug-in because Unity 6.3 removed support for the legacy
+  `Assets/Plugins/Android/res` folder.
+- An explicit in-game choice (`en` or `es`) always wins and is persisted. The
+  `system` choice follows `Application.systemLanguage`, including per-app
+  language changes made in Android Settings.
+- When the preference is `system`, the game re-resolves the locale on focus and
+  resume, then raises `LocaleChanged` only when the resolved locale differs. The
+  refresh path is allocation-free and runs on every platform.
+- Changing the OS language never overwrites an explicit override. The player
+  must select `system` again to follow the device.
+
+## Font coverage and fallback
+
+- The runtime UI uses Unity's built-in `LegacyRuntime.ttf`. Spanish glyph
+  coverage (`á`, `é`, `í`, `ó`, `ú`, `ñ`, `ü`, `¿`, `¡`) is enforced by an
+  EditMode test against that same font.
+- Every new locale must pass the same glyph test plus the committed phone and
+  tablet layout matrix before release. A missing glyph blocks the locale.
+- For future non-Latin locales, add dynamic OS font fallback where Unity
+  supports it, or bundle a fallback font that covers the locale. The chosen
+  approach must be documented with the locale ADR and covered by both the glyph
+  test and layout screenshots.
+
 ## Source of truth
 
 - `unity/JabaSurvivol/Assets/Resources/Localization/en.json` is the source of

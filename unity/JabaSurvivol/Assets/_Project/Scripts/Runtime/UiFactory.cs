@@ -211,6 +211,15 @@ namespace JabaSurvivol.Gameplay
             rect.sizeDelta = size;
         }
 
+        /// <summary>
+        /// Returns the font used by runtime UI text so tests can verify glyph
+        /// coverage. It is not exposed in the settings UI.
+        /// </summary>
+        public static Font GetFontForTests()
+        {
+            return GetFont();
+        }
+
         private static Font GetFont()
         {
             if (_font != null)
