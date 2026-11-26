@@ -12,6 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
     <ProjectReference Include="..\..\Game.Core\JabaSurvivol.Core.csproj" />
     <ProjectReference Include="..\..\Shared\Contracts\JabaSurvivol.Contracts.csproj" />
     <ProjectReference Include="..\Game.Data\JabaSurvivol.Game.Data.csproj" />
