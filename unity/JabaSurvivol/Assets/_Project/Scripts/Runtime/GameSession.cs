@@ -363,6 +363,9 @@ namespace JabaSurvivol.Gameplay
 
         public void SetApplicationFocusedForTests(bool focused) => OnApplicationFocus(focused);
 
+        public void RefreshSystemLocaleForTests(SystemLanguage language, string cultureName) =>
+            Localization.RefreshSystemLocaleForTests(language, cultureName);
+
         public void ResetAudioHistoryForTests() => _audio?.ResetHistoryForTests();
 
         public float LastBulletDamageForTests { get; private set; }
@@ -3248,9 +3251,13 @@ namespace JabaSurvivol.Gameplay
                 _audio?.SetSuspended(true);
                 SaveNow();
             }
-            else if (_state != GameSessionState.Paused)
+            else
             {
-                _audio?.SetSuspended(false);
+                Localization.RefreshSystemLocale();
+                if (_state != GameSessionState.Paused)
+                {
+                    _audio?.SetSuspended(false);
+                }
             }
         }
 
@@ -3262,6 +3269,7 @@ namespace JabaSurvivol.Gameplay
                 return;
             }
 
+            Localization.RefreshSystemLocale();
             if (_state != GameSessionState.Paused)
             {
                 _audio?.SetSuspended(false);

@@ -269,6 +269,27 @@ namespace JabaSurvivol.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator System_locale_refresh_updates_visible_labels()
+        {
+            Localization.UseSystemLocale();
+            Localization.RefreshSystemLocaleForTests(SystemLanguage.English, "en-US");
+            _bootstrap = CreateBootstrap();
+            yield return null;
+            var session = _bootstrap.Session;
+
+            Assert.That(Localization.CurrentLocale, Is.EqualTo("en"));
+            Assert.That(session.MainMenuStartLabelForTests, Is.EqualTo("START RUN"));
+
+            session.RefreshSystemLocaleForTests(SystemLanguage.Spanish, "es-ES");
+            yield return null;
+
+            Assert.That(Localization.CurrentLocale, Is.EqualTo("es"));
+            Assert.That(session.MainMenuStartLabelForTests, Is.Not.EqualTo("START RUN"));
+            Assert.That(_bootstrap.Session.MainMenuSubtitleForTests,
+                Is.Not.EqualTo("SURVIVE THE NIGHT. KEEP EVERYTHING."));
+        }
+
+        [UnityTest]
         public IEnumerator Settings_close_does_not_change_the_locale()
         {
             _bootstrap = CreateBootstrap();
