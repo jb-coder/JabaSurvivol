@@ -8,24 +8,24 @@ var database = builder.AddPostgres("postgres")
 var jwtSigningKey = builder.Configuration["Jwt:SigningKey"]
     ?? Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 
-var identityApi = builder.AddProject<Projects.Identity_Api>("identity-api")
+var identityApi = builder.AddDotnetProject("identity-api", "../Services/Identity.Api/Identity.Api.csproj")
     .WithReference(database)
     .WaitFor(database)
     .WithEnvironment("Jwt__SigningKey", jwtSigningKey)
     .WithHttpEndpoint(name: "http");
 
-var gameApi = builder.AddProject<Projects.Game_Api>("game-api")
+var gameApi = builder.AddDotnetProject("game-api", "../Services/Game.Api/Game.Api.csproj")
     .WithReference(database)
     .WaitFor(database)
     .WithEnvironment("Jwt__SigningKey", jwtSigningKey)
     .WithHttpEndpoint(name: "http");
 
-var telemetryWorker = builder.AddProject<Projects.Telemetry_Worker>("telemetry-worker")
+var telemetryWorker = builder.AddDotnetProject("telemetry-worker", "../Services/Telemetry.Worker/Telemetry.Worker.csproj")
     .WithReference(database)
     .WaitFor(database)
     .WithEnvironment("Jwt__SigningKey", jwtSigningKey);
 
-builder.AddProject<Projects.Bff>("bff")
+builder.AddDotnetProject("bff", "../Gateway/Bff/Bff.csproj")
     .WithReference(identityApi)
     .WithReference(gameApi)
     .WithReference(telemetryWorker)
