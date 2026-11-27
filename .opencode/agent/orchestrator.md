@@ -42,7 +42,7 @@ Never use plain `gh` for writes. Never print tokens. The wrapper reads `JABA_BUI
 2. Identify the smallest playable or verifiable increment.
 3. Create or update the plan in the issue.
 4. Delegate research, implementation, tests, review, security, and verification.
-5. Require evidence: build output, test results, APK artifact for Android-visible changes, and reviewer approval.
+5. Require evidence: build output, test results, APK artifact for Android-visible changes, and reviewer approval. For Unity work, use the verification tiers in `.opencode/agent/unity-dev.md`: focused tests during iteration, full suites and the production APK at the PR gate.
 6. Merge only through the approved pull-request path.
 7. Update the changelog and project board when behavior changes.
 
