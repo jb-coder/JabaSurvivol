@@ -95,6 +95,54 @@ New-Item -ItemType Directory -Force "$repoRoot/artifacts/unity" | Out-Null
 
 Unity test runs exit with code 0 when every test passes.
 
+## Fast local loop
+
+Full Unity runs are expensive. Use the smallest scope that can fail during
+iteration, then run the full gates before a pull request.
+
+Focused EditMode fixture:
+
+```powershell
+$repoRoot = (Resolve-Path ".").Path
+$unity = "C:\dev\personal\Unity\Hub\Editor\6000.3.28f1\Editor\Unity.exe"
+New-Item -ItemType Directory -Force "$repoRoot/artifacts/unity" | Out-Null
+
+& $unity -batchmode -projectPath unity/JabaSurvivol `
+  -runTests -testPlatform editmode `
+  -testFilter "JabaSurvivol.Tests.EditMode.ProfileStoreTests" `
+  -testResults "$repoRoot/artifacts/unity/editmode-filtered.xml" `
+  -logFile "$repoRoot/artifacts/unity/editmode-filtered.log"
+```
+
+Focused PlayMode fixture:
+
+```powershell
+& $unity -batchmode -projectPath unity/JabaSurvivol `
+  -runTests -testPlatform playmode `
+  -testFilter "JabaSurvivol.Tests.PlayMode.WalkingSkeletonPlayModeTests" `
+  -testResults "$repoRoot/artifacts/unity/playmode-filtered.xml" `
+  -logFile "$repoRoot/artifacts/unity/playmode-filtered.log"
+```
+
+Run the full suites before the PR by removing `-testFilter` from each command.
+
+`-nographics` is safe for pure data fixtures. Do not use it for UI, rendering,
+or screenshot tests.
+
+Rules:
+
+- Keep `Library`, `Library/Bee`, `Library/Il2cppBuildCache`, and the Gradle
+  caches between runs. Do not clean them during normal iteration.
+- Keep the project on one path. Switching project paths invalidates caches.
+- Do not recursively scan `Library`, `Temp`, `Logs`, `Builds`, `UserSettings`,
+  `obj`, or `bin`.
+- Iterate in Editor PlayMode. Build a development emulator APK only for
+  Android-visible changes. Build the production ARM64 APK at the PR or release
+  gate.
+- Record the filter, result file, duration, and emulator or device label.
+- If a fixture takes more than 60 seconds, put it in the slow set and run it
+  only in the full gate.
+
 ## Android build
 
 Build the production ARM64 APK:
