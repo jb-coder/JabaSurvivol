@@ -16,7 +16,9 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.15" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.14" />
     <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.23.0" />
-    <PackageVersion Include="Npgsql" Version="11.0.0" />
+    <!-- Keep Npgsql aligned with Npgsql.EntityFrameworkCore.PostgreSQL 10.0.4.
+         The 11.x EF Core provider targets net11.0 and EF Core 11, which is out of scope. -->
+    <PackageVersion Include="Npgsql" Version="10.0.4" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.4" />
     <PackageVersion Include="System.Text.Json" Version="11.0.0" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.17.0" />
