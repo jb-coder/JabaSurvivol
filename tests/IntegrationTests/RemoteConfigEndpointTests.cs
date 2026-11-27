@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using JabaSurvivol.Contracts;
+using Microsoft.Extensions.Options;
 
 namespace JabaSurvivol.IntegrationTests;
 
@@ -87,19 +88,20 @@ public sealed class RemoteConfigEndpointTests(PostgresFixture fixture) : IAsyncL
     [InlineData("Infinity")]
     public async Task Invalid_sample_rate_prevents_startup(string sampleRate)
     {
-        Environment.SetEnvironmentVariable("RemoteConfig__TelemetrySampleRate", sampleRate);
-        try
-        {
-            var connectionString = await fixture.CreateDatabaseAsync("game_config_invalid_rate");
-            using var factory = new GameApiFactory(connectionString).ApplyEnvironment();
+        using var scope = await ScopedEnvironmentVariables.ApplyAsync(
+            ("RemoteConfig__TelemetrySampleRate", sampleRate));
 
-            var exception = Assert.ThrowsAny<Exception>(() => factory.CreateClient());
-            Assert.Contains("RemoteConfig:TelemetrySampleRate", exception.ToString(), StringComparison.Ordinal);
-        }
-        finally
+        var connectionString = await fixture.CreateDatabaseAsync("game_config_invalid_rate");
+        using var factory = new GameApiFactory(connectionString).ApplyEnvironment();
+
+        var exception = Assert.Throws<OptionsValidationException>(() =>
         {
-            Environment.SetEnvironmentVariable("RemoteConfig__TelemetrySampleRate", null);
-        }
+            using var client = factory.CreateClient();
+        });
+
+        Assert.Contains(
+            exception.Failures,
+            failure => failure.Contains("RemoteConfig:TelemetrySampleRate", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -110,39 +112,35 @@ public sealed class RemoteConfigEndpointTests(PostgresFixture fixture) : IAsyncL
         var firstEtag = first.Headers.ETag?.Tag;
         Assert.NotNull(firstEtag);
 
-        Environment.SetEnvironmentVariable("RemoteConfig__MaintenanceMode", "true");
-        try
-        {
-            var connectionString = await fixture.CreateDatabaseAsync("game_config_etag");
-            using var factory = new GameApiFactory(connectionString).ApplyEnvironment();
-            using var other = factory.CreateClient();
-            var second = await other.GetAsync(ApiRoutes.GameConfig);
+        using var scope = await ScopedEnvironmentVariables.ApplyAsync(
+            ("RemoteConfig__MaintenanceMode", "true"));
 
-            Assert.Equal(HttpStatusCode.OK, second.StatusCode);
-            Assert.NotNull(second.Headers.ETag);
-            Assert.NotEqual(firstEtag, second.Headers.ETag.Tag);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("RemoteConfig__MaintenanceMode", null);
-        }
+        var connectionString = await fixture.CreateDatabaseAsync("game_config_etag");
+        using var factory = new GameApiFactory(connectionString).ApplyEnvironment();
+        using var other = factory.CreateClient();
+        var second = await other.GetAsync(ApiRoutes.GameConfig);
+
+        Assert.Equal(HttpStatusCode.OK, second.StatusCode);
+        Assert.NotNull(second.Headers.ETag);
+        Assert.NotEqual(firstEtag, second.Headers.ETag.Tag);
     }
 
     [Fact]
     public async Task Invalid_minimum_version_prevents_startup()
     {
-        Environment.SetEnvironmentVariable("RemoteConfig__MinimumClientVersion", "invalid");
-        try
-        {
-            var connectionString = await fixture.CreateDatabaseAsync("game_config_invalid_version");
-            using var factory = new GameApiFactory(connectionString).ApplyEnvironment();
+        using var scope = await ScopedEnvironmentVariables.ApplyAsync(
+            ("RemoteConfig__MinimumClientVersion", "invalid"));
 
-            var exception = Assert.ThrowsAny<Exception>(() => factory.CreateClient());
-            Assert.Contains("RemoteConfig:MinimumClientVersion", exception.ToString(), StringComparison.Ordinal);
-        }
-        finally
+        var connectionString = await fixture.CreateDatabaseAsync("game_config_invalid_version");
+        using var factory = new GameApiFactory(connectionString).ApplyEnvironment();
+
+        var exception = Assert.Throws<OptionsValidationException>(() =>
         {
-            Environment.SetEnvironmentVariable("RemoteConfig__MinimumClientVersion", null);
-        }
+            using var client = factory.CreateClient();
+        });
+
+        Assert.Contains(
+            exception.Failures,
+            failure => failure.Contains("RemoteConfig:MinimumClientVersion", StringComparison.Ordinal));
     }
 }
